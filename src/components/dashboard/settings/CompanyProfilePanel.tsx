@@ -118,41 +118,26 @@ export default function CompanyProfilePanel({
       return;
     }
 
-    const { data: newShop, error: insertShopError } = await supabase
-      .from("shops")
-      .insert({
-        shop_name: shopName,
-        slug: slugify(shopName),
-        logo_url: logoUrl || null,
-        address: address || null,
-        currency,
-      })
-      .select()
-      .single();
-
-    if (insertShopError || !newShop) {
-      setSaving(false);
-      setError(insertShopError?.message ?? "Failed to create shop.");
-      return;
-    }
-
-    const { error: insertStaffError } = await supabase
-      .from("staff_members")
-      .insert({
-        shop_id: newShop.id,
-        auth_user_id: user.id,
-        full_name:
+    const { data: newShop, error: rpcError } = await supabase.rpc(
+      "create_shop_and_owner",
+      {
+        p_shop_name: shopName,
+        p_slug: slugify(shopName),
+        p_logo_url: logoUrl || null,
+        p_address: address || null,
+        p_currency: currency,
+        p_owner_full_name:
           (user.user_metadata?.full_name as string | undefined) ??
           user.email ??
           "Owner",
-        email: user.email ?? "",
-        role: "OWNER",
-      });
+        p_owner_email: user.email ?? "",
+      }
+    );
 
     setSaving(false);
 
-    if (insertStaffError) {
-      setError(insertStaffError.message);
+    if (rpcError || !newShop) {
+      setError(rpcError?.message ?? "Failed to create shop.");
       return;
     }
 
