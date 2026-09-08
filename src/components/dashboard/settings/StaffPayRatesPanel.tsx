@@ -98,7 +98,15 @@ function StaffRow({ member }: { member: StaffMember }) {
   );
 }
 
-export default function StaffPayRatesPanel({ shop }: { shop: Shop | null }) {
+export default function StaffPayRatesPanel({
+  shop,
+  showContinue = false,
+  onContinue,
+}: {
+  shop: Shop | null;
+  showContinue?: boolean;
+  onContinue?: () => void;
+}) {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,6 +144,16 @@ export default function StaffPayRatesPanel({ shop }: { shop: Shop | null }) {
       {staff.map((member) => (
         <StaffRow key={member.id} member={member} />
       ))}
+
+      {showContinue && (
+        <button
+          type="button"
+          onClick={onContinue}
+          className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+        >
+          Continue →
+        </button>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
 import CompanyProfilePanel from "@/components/dashboard/settings/CompanyProfilePanel";
@@ -20,10 +21,14 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+const ONBOARDING_ORDER: TabId[] = ["profile", "geofence", "staff", "watermark"];
+
 export default function SettingsPage() {
+  const router = useRouter();
   const { checked } = useRequireAuth();
   const { loading, shop, staffMember, isOwner, refresh } = useShop();
   const [activeTab, setActiveTab] = useState<TabId>("profile");
+  const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
 
   if (!checked || loading) {
     return (
@@ -50,6 +55,30 @@ export default function SettingsPage() {
     );
   }
 
+  function handleProfileSaved(created: boolean) {
+    refresh();
+    if (created) {
+      setOnboardingStep(1);
+      setActiveTab(ONBOARDING_ORDER[1]);
+    }
+  }
+
+  function handleOnboardingContinue() {
+    if (onboardingStep === null) return;
+    const next = onboardingStep + 1;
+
+    if (next >= ONBOARDING_ORDER.length) {
+      setOnboardingStep(null);
+      router.push("/dashboard");
+      return;
+    }
+
+    setOnboardingStep(next);
+    setActiveTab(ONBOARDING_ORDER[next]);
+  }
+
+  const isOnboarding = onboardingStep !== null;
+
   return (
     <main className="min-h-screen bg-brand-slate">
       <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8">
@@ -59,8 +88,9 @@ export default function SettingsPage() {
               Business Settings
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Configure your shop profile, geofencing, staff pay, and
-              branding.
+              {isOnboarding
+                ? `Step ${onboardingStep! + 1} of ${ONBOARDING_ORDER.length}: complete your business info so ShopPulse can enforce and calculate accurately.`
+                : "Configure your shop profile, geofencing, staff pay, and branding."}
             </p>
           </div>
           <Link
@@ -70,6 +100,21 @@ export default function SettingsPage() {
             ← Dashboard
           </Link>
         </div>
+
+        {isOnboarding && (
+          <div className="mt-6 flex gap-1.5">
+            {ONBOARDING_ORDER.map((id, index) => (
+              <div
+                key={id}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  index <= onboardingStep!
+                    ? "bg-brand-emerald"
+                    : "bg-slate-700"
+                }`}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr]">
           <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
@@ -91,14 +136,31 @@ export default function SettingsPage() {
 
           <div className="rounded-2xl border border-slate-700 bg-brand-slate-light/30 p-6 sm:p-8">
             {activeTab === "profile" && (
-              <CompanyProfilePanel shop={shop} onSaved={refresh} />
+              <CompanyProfilePanel shop={shop} onSaved={handleProfileSaved} />
             )}
             {activeTab === "geofence" && (
-              <GeofencePanel shop={shop} onSaved={refresh} />
+              <GeofencePanel
+                shop={shop}
+                onSaved={refresh}
+                showContinue={isOnboarding}
+                onContinue={handleOnboardingContinue}
+              />
             )}
-            {activeTab === "staff" && <StaffPayRatesPanel shop={shop} />}
+            {activeTab === "staff" && (
+              <StaffPayRatesPanel
+                shop={shop}
+                showContinue={isOnboarding}
+                onContinue={handleOnboardingContinue}
+              />
+            )}
             {activeTab === "watermark" && (
-              <WatermarkPanel shop={shop} onSaved={refresh} />
+              <WatermarkPanel
+                shop={shop}
+                onSaved={refresh}
+                showContinue={isOnboarding}
+                continueLabel="Finish Setup"
+                onContinue={handleOnboardingContinue}
+              />
             )}
             {activeTab === "whitelabel" && (
               <WhiteLabelPanel shop={shop} onSaved={refresh} />

@@ -7,9 +7,13 @@ import type { Shop } from "@/lib/supabase/types";
 export default function GeofencePanel({
   shop,
   onSaved,
+  showContinue = false,
+  onContinue,
 }: {
   shop: Shop | null;
   onSaved: () => void;
+  showContinue?: boolean;
+  onContinue?: () => void;
 }) {
   const [radius, setRadius] = useState(shop?.geofence_radius_meters ?? 150);
   const [graceMinutes, setGraceMinutes] = useState(
@@ -54,6 +58,10 @@ export default function GeofencePanel({
 
     setSuccess(true);
     onSaved();
+
+    if (showContinue) {
+      onContinue?.();
+    }
   }
 
   return (
@@ -132,7 +140,7 @@ export default function GeofencePanel({
         disabled={saving}
         className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {saving ? "Saving..." : "Save Changes"}
+        {saving ? "Saving..." : showContinue ? "Save & Continue →" : "Save Changes"}
       </button>
     </form>
   );

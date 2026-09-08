@@ -14,7 +14,7 @@ export default function CompanyProfilePanel({
   onSaved,
 }: {
   shop: Shop | null;
-  onSaved: () => void;
+  onSaved: (created: boolean) => void;
 }) {
   const [shopName, setShopName] = useState(shop?.shop_name ?? "");
   const [logoUrl, setLogoUrl] = useState(shop?.logo_url ?? "");
@@ -104,7 +104,7 @@ export default function CompanyProfilePanel({
         return;
       }
       setSuccess(true);
-      onSaved();
+      onSaved(false);
       return;
     }
 
@@ -157,7 +157,7 @@ export default function CompanyProfilePanel({
     }
 
     setSuccess(true);
-    onSaved();
+    onSaved(true);
   }
 
   return (

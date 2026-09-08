@@ -7,9 +7,15 @@ import type { Shop } from "@/lib/supabase/types";
 export default function WatermarkPanel({
   shop,
   onSaved,
+  showContinue = false,
+  continueLabel = "Continue →",
+  onContinue,
 }: {
   shop: Shop | null;
   onSaved: () => void;
+  showContinue?: boolean;
+  continueLabel?: string;
+  onContinue?: () => void;
 }) {
   const [showLogo, setShowLogo] = useState(shop?.watermark_show_logo ?? true);
   const [showTimestamp, setShowTimestamp] = useState(
@@ -52,6 +58,10 @@ export default function WatermarkPanel({
 
     setSuccess(true);
     onSaved();
+
+    if (showContinue) {
+      onContinue?.();
+    }
   }
 
   return (
@@ -107,7 +117,7 @@ export default function WatermarkPanel({
           disabled={saving}
           className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {saving ? "Saving..." : "Save Changes"}
+          {saving ? "Saving..." : showContinue ? `Save & ${continueLabel}` : "Save Changes"}
         </button>
       </form>
 
