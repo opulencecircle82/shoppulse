@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { ImageUp, Loader2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
 import type { Currency, Shop } from "@/lib/supabase/types";
 
 const CURRENCIES: Currency[] = ["USD", "AUD", "GBP", "EUR"];
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
 export default function CompanyProfilePanel({
   shop,
@@ -21,6 +23,63 @@ export default function CompanyProfilePanel({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+
+  async function uploadLogo(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please upload an image file.");
+      return;
+    }
+    if (file.size > MAX_LOGO_BYTES) {
+      setUploadError("Logo must be under 2MB.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const ownerKey = shop?.id ?? user?.id ?? "temp";
+    const extension = file.name.split(".").pop() ?? "png";
+    const path = `${ownerKey}/${Date.now()}.${extension}`;
+
+    const { error: uploadErr } = await supabase.storage
+      .from("shop-logos")
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadErr) {
+      setUploading(false);
+      setUploadError(uploadErr.message);
+      return;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("shop-logos").getPublicUrl(path);
+
+    setLogoUrl(publicUrl);
+    setUploading(false);
+  }
+
+  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) uploadLogo(file);
+    event.target.value = "";
+  }
+
+  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragActive(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) uploadLogo(file);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -125,15 +184,76 @@ export default function CompanyProfilePanel({
 
       <div>
         <label className="block text-sm font-medium text-slate-300">
-          Business Logo URL
+          Business Logo
         </label>
         <input
-          type="url"
-          value={logoUrl}
-          onChange={(e) => setLogoUrl(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
-          placeholder="https://example.com/logo.png"
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileInputChange}
+          className="hidden"
         />
+
+        {logoUrl ? (
+          <div className="mt-1.5 flex items-center gap-4 rounded-lg border border-slate-600 bg-brand-slate p-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={logoUrl}
+              alt="Business logo"
+              className="h-16 w-16 rounded-lg object-cover"
+            />
+            <div className="flex-1">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-sm font-medium text-brand-emerald hover:text-emerald-400"
+              >
+                Replace logo
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLogoUrl("")}
+              className="text-slate-400 hover:text-red-400"
+              aria-label="Remove logo"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+            className={`mt-1.5 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${
+              dragActive
+                ? "border-brand-emerald bg-brand-emerald/5"
+                : "border-slate-600 bg-brand-slate hover:border-slate-500"
+            }`}
+          >
+            {uploading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-brand-emerald" />
+            ) : (
+              <ImageUp className="h-6 w-6 text-slate-500" />
+            )}
+            <p className="mt-2 text-sm text-slate-400">
+              {uploading
+                ? "Uploading..."
+                : "Drag & drop your logo, or click to browse"}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              PNG or JPG, up to 2MB
+            </p>
+          </div>
+        )}
+
+        {uploadError && (
+          <p className="mt-2 text-sm text-red-400">{uploadError}</p>
+        )}
       </div>
 
       <div>
