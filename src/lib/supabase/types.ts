@@ -41,6 +41,7 @@ export type StaffMember = {
   is_active: boolean;
   role: StaffRole;
   created_at: string;
+  location_token: string;
 };
 
 export type JobStatus =

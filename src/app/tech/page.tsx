@@ -7,6 +7,7 @@ import { fetchCurrentStaffContext, type StaffContext } from "@/lib/tech/staffCon
 import { fetchAssignedJobs } from "@/lib/tech/jobActions";
 import { pickTodayTask } from "@/lib/tech/todayTask";
 import { startWatchingLocation } from "@/lib/tech/liveLocation";
+import { notifyNativeSignedIn, notifyNativeSignedOut } from "@/lib/tech/nativeBridge";
 import TechLoginScreen from "@/components/tech/TechLoginScreen";
 import TechHomeScreen from "@/components/tech/TechHomeScreen";
 import TechJobScreen from "@/components/tech/TechJobScreen";
@@ -51,7 +52,11 @@ export default function TechAppPage() {
   useEffect(() => {
     if (!staffContext) return;
     const stop = startWatchingLocation(staffContext);
-    return stop;
+    notifyNativeSignedIn(staffContext.locationToken);
+    return () => {
+      stop();
+      notifyNativeSignedOut();
+    };
   }, [staffContext]);
 
   if (screen === "loading") {
