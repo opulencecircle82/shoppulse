@@ -73,6 +73,7 @@ export type JobTicket = {
   total_labor_cost: number;
   total_invoice_amount: number;
   dispute_notes: string | null;
+  client_viewed_at: string | null;
   created_at: string;
 };
 

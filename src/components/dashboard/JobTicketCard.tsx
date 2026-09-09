@@ -18,6 +18,7 @@ export default function JobTicketCard({
   onOpenProofDrawer?: (ticket: JobTicket) => void;
 }) {
   const [updating, setUpdating] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
 
   async function updateTicket(fields: Partial<JobTicket>) {
@@ -32,6 +33,13 @@ export default function JobTicketCard({
       assigned_staff_id: staffId || null,
       status: staffId ? "SCHEDULED" : "UNASSIGNED",
     });
+  }
+
+  function copyClientLink() {
+    const link = `${window.location.origin}/client/${ticket.id}`;
+    navigator.clipboard.writeText(link);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   }
 
   return (
@@ -57,6 +65,12 @@ export default function JobTicketCard({
           </span>
         )}
       </div>
+
+      <p className="mt-1.5 text-[10px] text-slate-400">
+        {ticket.client_viewed_at
+          ? `Client viewed ${new Date(ticket.client_viewed_at).toLocaleDateString()}`
+          : "Not yet viewed by client"}
+      </p>
 
       {ticket.status === "UNASSIGNED" ? (
         <select
@@ -116,6 +130,16 @@ export default function JobTicketCard({
             className="rounded-full border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
           >
             {ticket.total_invoice_amount > 0 ? "Edit Invoice" : "Generate Invoice"}
+          </button>
+        )}
+
+        {ticket.status !== "UNASSIGNED" && (
+          <button
+            type="button"
+            onClick={copyClientLink}
+            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
+          >
+            {linkCopied ? "Link copied!" : "Copy Client Link"}
           </button>
         )}
       </div>
