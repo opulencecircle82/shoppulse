@@ -29,13 +29,13 @@ const FEATURES = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="bg-white py-24">
+    <section id="features" className="bg-brand-navy py-24">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-50 px-3 py-1 text-xs font-medium text-brand-orange">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange">
             Features
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Everything you need to enforce proof-of-work
           </h2>
         </div>
@@ -44,15 +44,15 @@ export default function FeaturesSection() {
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="rounded-3xl border border-slate-200 bg-white p-8 shadow-md shadow-slate-900/5 transition-all hover:border-brand-orange/40 hover:shadow-xl hover:shadow-orange-500/10"
+              className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-md shadow-black/20 transition-all hover:border-brand-orange/40 hover:shadow-xl hover:shadow-orange-500/10"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-orange-50 text-brand-orange">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-orange-500/15 text-brand-orange">
                 <feature.icon className="h-5 w-5" />
               </span>
-              <h3 className="mt-5 text-lg font-semibold text-slate-900">
+              <h3 className="mt-5 text-lg font-semibold text-white">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
                 {feature.description}
               </p>
             </div>
