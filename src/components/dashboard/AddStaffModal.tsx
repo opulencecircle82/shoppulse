@@ -9,11 +9,13 @@ const FREE_TECH_SEATS = 1;
 export default function AddStaffModal({
   shopId,
   staff,
+  defaultHourlyRate,
   onClose,
   onCreated,
 }: {
   shopId: string;
   staff: StaffMember[];
+  defaultHourlyRate: number;
   onClose: () => void;
   onCreated: () => void;
 }) {
@@ -23,7 +25,7 @@ export default function AddStaffModal({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [hourlyRate, setHourlyRate] = useState(20);
+  const [hourlyRate, setHourlyRate] = useState(defaultHourlyRate);
   const [acknowledgedPaidSeat, setAcknowledgedPaidSeat] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

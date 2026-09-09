@@ -22,6 +22,9 @@ export type Shop = {
   watermark_show_timestamp: boolean;
   watermark_show_gps: boolean;
   white_label_domain: string | null;
+  mandatory_live_camera: boolean;
+  default_hourly_rate: number;
+  default_overtime_multiplier: number;
 };
 
 export type StaffMember = {

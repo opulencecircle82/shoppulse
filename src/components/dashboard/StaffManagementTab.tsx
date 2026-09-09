@@ -11,11 +11,13 @@ export default function StaffManagementTab({
   shopId,
   staff,
   loading,
+  defaultHourlyRate,
   onChanged,
 }: {
   shopId: string;
   staff: StaffMember[];
   loading: boolean;
+  defaultHourlyRate: number;
   onChanged: () => void;
 }) {
   const [showAddStaff, setShowAddStaff] = useState(false);
@@ -127,6 +129,7 @@ export default function StaffManagementTab({
         <AddStaffModal
           shopId={shopId}
           staff={staff}
+          defaultHourlyRate={defaultHourlyRate}
           onClose={() => setShowAddStaff(false)}
           onCreated={onChanged}
         />

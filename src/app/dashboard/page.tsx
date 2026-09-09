@@ -17,7 +17,7 @@ import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
 import ProofDisputeGateTab from "@/components/dashboard/ProofDisputeGateTab";
 import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import LocalAdManager from "@/components/dashboard/LocalAdManager";
-import BusinessSettingsModal from "@/components/dashboard/BusinessSettingsModal";
+import SetupCustomizePanel from "@/components/dashboard/SetupCustomizePanel";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const [setupOpenMobile, setSetupOpenMobile] = useState(false);
 
   if (!checked || shopLoading) {
     return (
@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-brand-slate">
-      <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+      <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white">{shop.shop_name}</h1>
@@ -105,10 +105,10 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setShowSettings(true)}
-              className="rounded-full border border-slate-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-brand-sky hover:text-brand-sky"
+              onClick={() => setSetupOpenMobile(true)}
+              className="rounded-full border border-slate-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-brand-sky hover:text-brand-sky lg:hidden"
             >
-              Business Settings
+              Setup &amp; Customize
             </button>
             <button
               type="button"
@@ -120,86 +120,99 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6">
-          <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
-        </div>
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="min-w-0">
+            <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
 
-        <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? "bg-brand-emerald/15 text-brand-emerald"
-                  : "text-slate-400 hover:bg-brand-slate-light/40 hover:text-white"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {activeTab === "board" && (
-          <div className="mt-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-                Job Tickets
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowNewTicket(true)}
-                className="rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
-              >
-                + New Job Ticket
-              </button>
+            <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? "bg-brand-emerald/15 text-brand-emerald"
+                      : "text-slate-400 hover:bg-brand-slate-light/40 hover:text-white"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            {(ticketsLoading || staffLoading) && (
-              <p className="text-sm text-slate-400">Loading job board...</p>
+            {activeTab === "board" && (
+              <div className="mt-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                    Job Tickets
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewTicket(true)}
+                    className="rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+                  >
+                    + New Job Ticket
+                  </button>
+                </div>
+
+                {(ticketsLoading || staffLoading) && (
+                  <p className="text-sm text-slate-400">Loading job board...</p>
+                )}
+
+                {!ticketsLoading && !staffLoading && (
+                  <KanbanBoard
+                    tickets={tickets}
+                    staff={staff}
+                    onChanged={refreshTickets}
+                    onOpenInvoice={setInvoiceTicket}
+                    onOpenProofDrawer={setProofTicket}
+                  />
+                )}
+              </div>
             )}
 
-            {!ticketsLoading && !staffLoading && (
-              <KanbanBoard
-                tickets={tickets}
-                staff={staff}
-                onChanged={refreshTickets}
-                onOpenInvoice={setInvoiceTicket}
-                onOpenProofDrawer={setProofTicket}
-              />
+            {activeTab === "map" && (
+              <div className="mt-6">
+                <LiveFieldMap shop={shop} />
+              </div>
+            )}
+
+            {activeTab === "proof" && (
+              <div className="mt-6">
+                <ProofDisputeGateTab
+                  tickets={tickets}
+                  onOpenProofDrawer={setProofTicket}
+                />
+              </div>
+            )}
+
+            {activeTab === "staff" && (
+              <div className="mt-6">
+                <StaffManagementTab
+                  shopId={shop.id}
+                  staff={staff}
+                  loading={staffLoading}
+                  defaultHourlyRate={shop.default_hourly_rate}
+                  onChanged={refreshStaff}
+                />
+              </div>
+            )}
+
+            {activeTab === "ads" && (
+              <div className="mt-6">
+                <LocalAdManager shopId={shop.id} />
+              </div>
             )}
           </div>
-        )}
 
-        {activeTab === "map" && (
-          <div className="mt-6">
-            <LiveFieldMap shop={shop} />
-          </div>
-        )}
-
-        {activeTab === "proof" && (
-          <div className="mt-6">
-            <ProofDisputeGateTab tickets={tickets} onOpenProofDrawer={setProofTicket} />
-          </div>
-        )}
-
-        {activeTab === "staff" && (
-          <div className="mt-6">
-            <StaffManagementTab
-              shopId={shop.id}
-              staff={staff}
-              loading={staffLoading}
-              onChanged={refreshStaff}
-            />
-          </div>
-        )}
-
-        {activeTab === "ads" && (
-          <div className="mt-6">
-            <LocalAdManager shopId={shop.id} />
-          </div>
-        )}
+          <SetupCustomizePanel
+            shop={shop}
+            onSaved={refreshShop}
+            isMobileOpen={setupOpenMobile}
+            onCloseMobile={() => setSetupOpenMobile(false)}
+          />
+        </div>
       </div>
 
       {showNewTicket && (
@@ -228,14 +241,6 @@ export default function DashboardPage() {
           onClose={() => setProofTicket(null)}
           onChanged={refreshTickets}
           onApproved={(ticket) => setInvoiceTicket(ticket)}
-        />
-      )}
-
-      {showSettings && (
-        <BusinessSettingsModal
-          shop={shop}
-          onClose={() => setShowSettings(false)}
-          onSaved={refreshShop}
         />
       )}
     </main>
