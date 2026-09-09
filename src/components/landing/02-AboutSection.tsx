@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Camera, TriangleAlert } from "lucide-react";
 
 export default function AboutSection() {
@@ -16,6 +17,17 @@ export default function AboutSection() {
             cleaning, HVAC, plumbing, landscaping, and mobile auto — to
             eliminate profit leaks, time theft, and customer chargebacks.
           </p>
+        </div>
+
+        <div className="relative mx-auto mt-12 aspect-[16/9] max-w-4xl overflow-hidden rounded-3xl shadow-xl shadow-slate-900/10">
+          <Image
+            src="/images/hero-visual.jpg"
+            alt="Field technicians reviewing a job on ShopPulse from the job site"
+            fill
+            sizes="(min-width: 1024px) 896px, 100vw"
+            className="object-cover"
+            priority={false}
+          />
         </div>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2">
