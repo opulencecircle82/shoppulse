@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
@@ -13,11 +13,22 @@ import MetricsBar from "@/components/dashboard/MetricsBar";
 import KanbanBoard from "@/components/dashboard/KanbanBoard";
 import NewJobTicketModal from "@/components/dashboard/NewJobTicketModal";
 import InvoiceGeneratorModal from "@/components/dashboard/InvoiceGeneratorModal";
-import DisputeModal from "@/components/dashboard/DisputeModal";
+import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
+import ProofDisputeGateTab from "@/components/dashboard/ProofDisputeGateTab";
+import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import LocalAdManager from "@/components/dashboard/LocalAdManager";
+import BusinessSettingsModal from "@/components/dashboard/BusinessSettingsModal";
+
+const LiveFieldMap = dynamic(
+  () => import("@/components/dashboard/LiveFieldMap"),
+  { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
+);
 
 const TABS = [
   { id: "board", label: "Job Board" },
+  { id: "map", label: "Live Field Map" },
+  { id: "proof", label: "Proof & Dispute Gate" },
+  { id: "staff", label: "Staff Management" },
   { id: "ads", label: "Local Ad Network" },
 ] as const;
 
@@ -26,15 +37,17 @@ type TabId = (typeof TABS)[number]["id"];
 export default function DashboardPage() {
   const router = useRouter();
   const { checked } = useRequireAuth();
-  const { loading: shopLoading, shop } = useShop();
+  const { loading: shopLoading, shop, refresh: refreshShop } = useShop();
   const { tickets, loading: ticketsLoading, refresh: refreshTickets } =
     useJobTickets(shop?.id);
-  const { staff, loading: staffLoading } = useStaffMembers(shop?.id);
+  const { staff, loading: staffLoading, refresh: refreshStaff } =
+    useStaffMembers(shop?.id);
 
   const [activeTab, setActiveTab] = useState<TabId>("board");
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
-  const [disputeTicket, setDisputeTicket] = useState<JobTicket | null>(null);
+  const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   if (!checked || shopLoading) {
     return (
@@ -63,12 +76,12 @@ export default function DashboardPage() {
           and the local ad network.
         </p>
         <div className="mt-8 flex items-center gap-4">
-          <Link
+          <a
             href="/dashboard/settings"
             className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
           >
             Business Settings
-          </Link>
+          </a>
           <button
             type="button"
             onClick={handleSignOut}
@@ -90,12 +103,13 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm text-slate-400">Owner Command Center</p>
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/settings"
+            <button
+              type="button"
+              onClick={() => setShowSettings(true)}
               className="rounded-full border border-slate-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-brand-sky hover:text-brand-sky"
             >
               Business Settings
-            </Link>
+            </button>
             <button
               type="button"
               onClick={handleSignOut}
@@ -106,13 +120,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-2">
+        <div className="mt-6">
+          <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
+        </div>
+
+        <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? "bg-brand-emerald/15 text-brand-emerald"
                   : "text-slate-400 hover:bg-brand-slate-light/40 hover:text-white"
@@ -125,8 +143,6 @@ export default function DashboardPage() {
 
         {activeTab === "board" && (
           <div className="mt-6 space-y-6">
-            <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
-
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                 Job Tickets
@@ -150,9 +166,32 @@ export default function DashboardPage() {
                 staff={staff}
                 onChanged={refreshTickets}
                 onOpenInvoice={setInvoiceTicket}
-                onOpenDispute={setDisputeTicket}
+                onOpenProofDrawer={setProofTicket}
               />
             )}
+          </div>
+        )}
+
+        {activeTab === "map" && (
+          <div className="mt-6">
+            <LiveFieldMap shop={shop} />
+          </div>
+        )}
+
+        {activeTab === "proof" && (
+          <div className="mt-6">
+            <ProofDisputeGateTab tickets={tickets} onOpenProofDrawer={setProofTicket} />
+          </div>
+        )}
+
+        {activeTab === "staff" && (
+          <div className="mt-6">
+            <StaffManagementTab
+              shopId={shop.id}
+              staff={staff}
+              loading={staffLoading}
+              onChanged={refreshStaff}
+            />
           </div>
         )}
 
@@ -182,11 +221,21 @@ export default function DashboardPage() {
         />
       )}
 
-      {disputeTicket && (
-        <DisputeModal
-          ticket={disputeTicket}
-          onClose={() => setDisputeTicket(null)}
-          onSaved={refreshTickets}
+      {proofTicket && (
+        <ProofDisputeDrawer
+          ticket={proofTicket}
+          shop={shop}
+          onClose={() => setProofTicket(null)}
+          onChanged={refreshTickets}
+          onApproved={(ticket) => setInvoiceTicket(ticket)}
+        />
+      )}
+
+      {showSettings && (
+        <BusinessSettingsModal
+          shop={shop}
+          onClose={() => setShowSettings(false)}
+          onSaved={refreshShop}
         />
       )}
     </main>

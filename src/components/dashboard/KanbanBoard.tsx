@@ -17,20 +17,20 @@ export default function KanbanBoard({
   staff,
   onChanged,
   onOpenInvoice,
-  onOpenDispute,
+  onOpenProofDrawer,
 }: {
   tickets: JobTicket[];
   staff: StaffMember[];
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
-  onOpenDispute: (ticket: JobTicket) => void;
+  onOpenProofDrawer: (ticket: JobTicket) => void;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 overflow-x-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="flex w-full gap-4 overflow-x-auto pb-6">
       {COLUMNS.map((column) => {
         const columnTickets = tickets.filter((t) => t.status === column.status);
         return (
-          <div key={column.status} className="min-w-[240px]">
+          <div key={column.status} className="w-[280px] min-w-[280px] shrink-0">
             <div className="flex items-center justify-between px-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 {column.label}
@@ -53,7 +53,11 @@ export default function KanbanBoard({
                   staff={staff}
                   onChanged={onChanged}
                   onOpenInvoice={onOpenInvoice}
-                  onOpenDispute={onOpenDispute}
+                  onOpenProofDrawer={
+                    ticket.status === "COMPLETED" || ticket.status === "DISPUTED"
+                      ? onOpenProofDrawer
+                      : undefined
+                  }
                 />
               ))}
             </div>
