@@ -105,7 +105,7 @@ export default function LaborLeakCounter() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-center text-sm font-semibold text-brand-emerald"
+              className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm font-semibold text-red-500"
             >
               ShopPulse Enforces Live Camera + GPS Proof — Eliminating these 4
               leaks automatically.
