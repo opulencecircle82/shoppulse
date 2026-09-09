@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, Popup, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/lib/supabase/client";
@@ -115,6 +115,9 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
         {pins.map((pin) => (
           <Fragment key={pin.id}>
             <Marker position={[pin.lat, pin.lng]}>
+              <Tooltip permanent direction="top" offset={[0, -38]}>
+                {pin.client_name || "Unnamed job"}
+              </Tooltip>
               <Popup>
                 <p className="font-semibold">{pin.client_name}</p>
                 <p className="text-xs">{pin.service_address}</p>
