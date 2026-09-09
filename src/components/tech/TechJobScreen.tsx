@@ -183,10 +183,21 @@ export default function TechJobScreen({
             )}
 
             {position && (
-              <p className="mt-3 text-center text-xs font-semibold text-brand-emerald">
-                GPS Tagged: {position.coords.latitude.toFixed(4)},{" "}
-                {position.coords.longitude.toFixed(4)}
-              </p>
+              <div className="mt-3 text-center">
+                <p className="text-xs font-semibold text-brand-emerald">
+                  GPS Tagged: {position.coords.latitude.toFixed(4)},{" "}
+                  {position.coords.longitude.toFixed(4)} (±
+                  {Math.round(position.coords.accuracy)}m)
+                </p>
+                {position.coords.accuracy > 100 && (
+                  <p className="mt-1 text-xs text-amber-400">
+                    Low GPS accuracy — this looks like a WiFi/network estimate,
+                    not a real GPS fix. In your phone&apos;s Settings, set
+                    Location mode to &quot;High accuracy&quot; (uses GPS, not
+                    just WiFi), then retake the photo outdoors if possible.
+                  </p>
+                )}
+              </div>
             )}
 
             {error && (
