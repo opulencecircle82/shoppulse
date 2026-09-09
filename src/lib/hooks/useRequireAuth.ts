@@ -13,12 +13,15 @@ export function useRequireAuth() {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    // getSession() reads the already-verified session locally (no network
+    // round trip); real-time invalidation (sign-out, revoked token) is
+    // still caught by the onAuthStateChange listener below.
+    supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      if (!data.user) {
+      if (!data.session?.user) {
         router.replace("/login");
       } else {
-        setUser(data.user);
+        setUser(data.session.user);
       }
       setChecked(true);
     });

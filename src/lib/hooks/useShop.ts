@@ -14,9 +14,17 @@ export function useShop() {
     setLoading(true);
     setError(null);
 
+    // getSession() reads the already-verified session from local
+    // storage/memory (no network round trip), unlike getUser() which
+    // re-checks the token against the Auth server every call. Combined
+    // with embedding shops(*) in the staff_members query below, this
+    // cuts the dashboard's initial load from 3 sequential round trips
+    // down to 1.
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const user = session?.user;
 
     if (!user) {
       setShop(null);
@@ -27,7 +35,7 @@ export function useShop() {
 
     const { data: staffRow, error: staffError } = await supabase
       .from("staff_members")
-      .select("*")
+      .select("*, shops(*)")
       .eq("auth_user_id", user.id)
       .maybeSingle();
 
@@ -44,21 +52,12 @@ export function useShop() {
       return;
     }
 
-    setStaffMember(staffRow as StaffMember);
+    const { shops: shopRow, ...staffFields } = staffRow as StaffMember & {
+      shops: Shop | null;
+    };
 
-    const { data: shopRow, error: shopError } = await supabase
-      .from("shops")
-      .select("*")
-      .eq("id", staffRow.shop_id)
-      .maybeSingle();
-
-    if (shopError) {
-      setError(shopError.message);
-      setLoading(false);
-      return;
-    }
-
-    setShop(shopRow as Shop | null);
+    setStaffMember(staffFields as StaffMember);
+    setShop(shopRow);
     setLoading(false);
   }, []);
 
