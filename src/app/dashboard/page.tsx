@@ -18,21 +18,15 @@ import ProofDisputeGateTab from "@/components/dashboard/ProofDisputeGateTab";
 import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import LocalAdManager from "@/components/dashboard/LocalAdManager";
 import SetupCustomizePanel from "@/components/dashboard/SetupCustomizePanel";
+import DashboardSidebarNav, {
+  DASHBOARD_TABS,
+  type DashboardTabId,
+} from "@/components/dashboard/DashboardSidebarNav";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
   { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
 );
-
-const TABS = [
-  { id: "board", label: "Job Board" },
-  { id: "map", label: "Live Field Map" },
-  { id: "proof", label: "Proof & Dispute Gate" },
-  { id: "staff", label: "Staff Management" },
-  { id: "ads", label: "Local Ad Network" },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -43,7 +37,7 @@ export default function DashboardPage() {
   const { staff, loading: staffLoading, refresh: refreshStaff } =
     useStaffMembers(shop?.id);
 
-  const [activeTab, setActiveTab] = useState<TabId>("board");
+  const [activeTab, setActiveTab] = useState<DashboardTabId>("board");
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
@@ -120,12 +114,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
-          <div className="min-w-0">
+        <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+          <DashboardSidebarNav activeTab={activeTab} onSelectTab={setActiveTab} />
+
+          <div className="min-w-0 flex-1">
             <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
 
-            <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
-              {TABS.map((tab) => (
+            <div className="mt-6 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+              {DASHBOARD_TABS.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
@@ -206,12 +202,14 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <SetupCustomizePanel
-            shop={shop}
-            onSaved={refreshShop}
-            isMobileOpen={setupOpenMobile}
-            onCloseMobile={() => setSetupOpenMobile(false)}
-          />
+          <div className="lg:w-80 lg:shrink-0">
+            <SetupCustomizePanel
+              shop={shop}
+              onSaved={refreshShop}
+              isMobileOpen={setupOpenMobile}
+              onCloseMobile={() => setSetupOpenMobile(false)}
+            />
+          </div>
         </div>
       </div>
 
