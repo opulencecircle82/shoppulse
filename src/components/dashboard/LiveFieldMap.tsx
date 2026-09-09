@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -53,17 +53,30 @@ const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
 // mount — it does not reactively recenter when they change afterward. Pins
 // load asynchronously, so without this, the map would stay stuck on
 // DEFAULT_CENTER even after a technician's first real GPS check-in loads.
+//
+// This only fires ONCE, the moment real data first arrives — not on every
+// subsequent poll (staff_live_locations refreshes every 15s). Recentering
+// on every poll would reset an owner's manual zoom/pan mid-look, which is
+// exactly the "bakit nare-reset ang zoom ko" bug this guards against.
 function MapRecenter({
   center,
   zoom,
+  hasAnyPoint,
 }: {
   center: [number, number];
   zoom: number;
+  hasAnyPoint: boolean;
 }) {
   const map = useMap();
+  const hasRecenteredRef = useRef(false);
+
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center, zoom]);
+    if (hasAnyPoint && !hasRecenteredRef.current) {
+      hasRecenteredRef.current = true;
+      map.setView(center, zoom);
+    }
+  }, [map, center, zoom, hasAnyPoint]);
+
   return null;
 }
 
@@ -186,7 +199,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
         zoom={hasAnyPoint ? 12 : 4}
         style={{ height: "480px", width: "100%" }}
       >
-        <MapRecenter center={center} zoom={hasAnyPoint ? 12 : 4} />
+        <MapRecenter center={center} zoom={hasAnyPoint ? 12 : 4} hasAnyPoint={hasAnyPoint} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
