@@ -109,7 +109,7 @@ export default function PricingSection() {
             {ADD_ONS.map((addon) => (
               <div
                 key={addon.name}
-                className="rounded-xl border border-slate-700 bg-brand-slate-light/30 p-6"
+                className="rounded-2xl bg-brand-slate-light/40 p-6 shadow-md shadow-black/20"
               >
                 <h3 className="text-sm font-semibold text-white">{addon.name}</h3>
                 <p className="mt-2 text-lg font-bold text-brand-emerald">

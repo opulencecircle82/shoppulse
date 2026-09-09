@@ -297,7 +297,7 @@ export default function CustomizeMobileAppTab({
         client verification portal.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-700 bg-brand-slate-light/30 p-4">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
         <div>
           <p className="text-sm font-semibold text-white">
             Technician App (Android)
@@ -329,7 +329,7 @@ export default function CustomizeMobileAppTab({
                 type="color"
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value)}
-                className="h-9 w-12 cursor-pointer rounded border border-slate-600 bg-transparent"
+                className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
               <span className="text-xs text-slate-400">{primaryColor}</span>
             </div>
@@ -343,7 +343,7 @@ export default function CustomizeMobileAppTab({
                 type="color"
                 value={accentColor}
                 onChange={(e) => setAccentColor(e.target.value)}
-                className="h-9 w-12 cursor-pointer rounded border border-slate-600 bg-transparent"
+                className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
               <span className="text-xs text-slate-400">{accentColor}</span>
             </div>
@@ -357,7 +357,7 @@ export default function CustomizeMobileAppTab({
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           >
             {FONT_OPTIONS.map((font) => (
               <option key={font} value={font}>

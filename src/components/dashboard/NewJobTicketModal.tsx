@@ -60,7 +60,7 @@ export default function NewJobTicketModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-2xl border border-slate-700 bg-brand-slate p-6 shadow-2xl"
+        className="w-full max-w-lg rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold text-white">New Job Ticket</h3>
@@ -85,7 +85,7 @@ export default function NewJobTicketModal({
                 required
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
             <div>
@@ -97,7 +97,7 @@ export default function NewJobTicketModal({
                 required
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function NewJobTicketModal({
               type="tel"
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 
@@ -123,7 +123,7 @@ export default function NewJobTicketModal({
               required
               value={serviceAddress}
               onChange={(e) => setServiceAddress(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 
@@ -138,7 +138,7 @@ export default function NewJobTicketModal({
                 placeholder="Deep Cleaning, HVAC repair..."
                 value={serviceType}
                 onChange={(e) => setServiceType(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
             <div>
@@ -151,7 +151,7 @@ export default function NewJobTicketModal({
                 step={0.5}
                 value={estimatedHours}
                 onChange={(e) => setEstimatedHours(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function NewJobTicketModal({
             <select
               value={assignedStaffId}
               onChange={(e) => setAssignedStaffId(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             >
               <option value="">Unassigned</option>
               {staff.map((member) => (

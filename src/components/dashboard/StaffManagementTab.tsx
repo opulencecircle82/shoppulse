@@ -35,7 +35,7 @@ export default function StaffManagementTab({
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="rounded-xl border border-slate-700 bg-brand-slate-light/30 px-5 py-3">
+        <div className="rounded-2xl bg-brand-slate-light/40 px-5 py-3 shadow-md shadow-black/20">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
             Seat Usage
           </p>
@@ -68,7 +68,7 @@ export default function StaffManagementTab({
       )}
 
       {!loading && nonOwnerStaff.length > 0 && (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-700">
+        <div className="mt-6 overflow-x-auto rounded-2xl shadow-md shadow-black/20">
           <table className="w-full text-left text-sm">
             <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-400">
               <tr>

@@ -44,7 +44,7 @@ export default function FeaturesSection() {
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="rounded-2xl border border-slate-700 bg-brand-slate p-8 transition-colors hover:border-brand-emerald/40"
+              className="rounded-3xl bg-brand-slate p-8 shadow-xl shadow-black/30 transition-shadow hover:shadow-2xl hover:shadow-brand-emerald/10"
             >
               <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-emerald/15 text-brand-emerald">
                 <feature.icon className="h-5 w-5" />

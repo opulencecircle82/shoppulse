@@ -124,7 +124,7 @@ export default function SetupCustomizePanel({
       )}
 
       <aside
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm transform overflow-y-auto border-l border-slate-700 bg-brand-slate p-6 shadow-2xl transition-transform duration-200 lg:static lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:transform-none lg:overflow-visible lg:rounded-2xl lg:border lg:shadow-none ${
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm transform overflow-y-auto bg-brand-slate p-6 shadow-2xl shadow-black/40 transition-transform duration-200 lg:static lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:transform-none lg:overflow-visible lg:rounded-3xl lg:shadow-xl lg:shadow-black/30 ${
           isMobileOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -160,7 +160,7 @@ export default function SetupCustomizePanel({
                   required
                   value={shopName}
                   onChange={(e) => setShopName(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
                 />
               </div>
 
@@ -176,7 +176,7 @@ export default function SetupCustomizePanel({
                   className="hidden"
                 />
                 {logoUrl ? (
-                  <div className="mt-1.5 flex items-center gap-3 rounded-lg border border-slate-600 bg-brand-slate-light/40 p-3">
+                  <div className="mt-1.5 flex items-center gap-3 rounded-xl bg-brand-slate-light/40 p-3 shadow-sm shadow-black/20">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={logoUrl}
@@ -203,7 +203,7 @@ export default function SetupCustomizePanel({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="mt-1.5 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-600 bg-brand-slate-light/40 px-4 py-3 text-xs text-slate-400 hover:border-slate-500"
+                    className="mt-1.5 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-600/60 bg-brand-slate-light/40 px-4 py-3 text-xs text-slate-400 hover:border-slate-500"
                   >
                     {uploading ? (
                       <Loader2 className="h-4 w-4 animate-spin text-brand-emerald" />
@@ -227,7 +227,7 @@ export default function SetupCustomizePanel({
                     type="color"
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="h-9 w-12 cursor-pointer rounded border border-slate-600 bg-transparent"
+                    className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-emerald focus:outline-none"
                   />
                   <span className="text-xs text-slate-400">{primaryColor}</span>
                 </div>
@@ -240,7 +240,7 @@ export default function SetupCustomizePanel({
               Mobile Proof &amp; Anti-Fraud
             </p>
             <div className="mt-3 space-y-2">
-              <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate-light/30 px-3 py-2.5">
+              <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2.5 shadow-sm shadow-black/20">
                 <div>
                   <span className="text-sm text-slate-300">
                     Mandatory Live Camera
@@ -260,7 +260,7 @@ export default function SetupCustomizePanel({
               <p className="pt-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
                 Watermark Customizer
               </p>
-              <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate-light/30 px-3 py-2">
+              <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 shadow-sm shadow-black/20">
                 <span className="text-sm text-slate-300">Company Logo</span>
                 <input
                   type="checkbox"
@@ -269,7 +269,7 @@ export default function SetupCustomizePanel({
                   className="h-4 w-4 accent-brand-emerald"
                 />
               </label>
-              <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate-light/30 px-3 py-2">
+              <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 shadow-sm shadow-black/20">
                 <span className="text-sm text-slate-300">Live Timestamp</span>
                 <input
                   type="checkbox"
@@ -278,7 +278,7 @@ export default function SetupCustomizePanel({
                   className="h-4 w-4 accent-brand-emerald"
                 />
               </label>
-              <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate-light/30 px-3 py-2">
+              <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 shadow-sm shadow-black/20">
                 <span className="text-sm text-slate-300">Exact GPS Coordinates</span>
                 <input
                   type="checkbox"
@@ -305,10 +305,10 @@ export default function SetupCustomizePanel({
                       key={preset}
                       type="button"
                       onClick={() => setRadius(preset)}
-                      className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                      className={`rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors ${
                         radius === preset
                           ? "bg-brand-emerald text-brand-slate"
-                          : "border border-slate-600 text-slate-400 hover:text-white"
+                          : "bg-brand-slate-light/40 text-slate-400 shadow-sm shadow-black/20 hover:text-white"
                       }`}
                     >
                       {preset}m
@@ -324,7 +324,7 @@ export default function SetupCustomizePanel({
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as Currency)}
-                  className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -345,7 +345,7 @@ export default function SetupCustomizePanel({
                     step={0.5}
                     value={defaultHourlyRate}
                     onChange={(e) => setDefaultHourlyRate(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                    className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
                   />
                 </div>
                 <div>
@@ -360,7 +360,7 @@ export default function SetupCustomizePanel({
                     onChange={(e) =>
                       setDefaultOvertimeMultiplier(Number(e.target.value))
                     }
-                    className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                    className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
                   />
                 </div>
               </div>

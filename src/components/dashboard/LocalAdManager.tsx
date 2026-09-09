@@ -88,7 +88,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
     <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 rounded-2xl border border-slate-700 bg-brand-slate-light/30 p-6"
+        className="space-y-4 rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30"
       >
         <h3 className="text-sm font-semibold text-white">
           Create Local Ad Unit
@@ -104,7 +104,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             placeholder="Plumbing, Electrical..."
             value={businessCategory}
             onChange={(e) => setBusinessCategory(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
 
@@ -117,7 +117,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             required
             value={adHeadline}
             onChange={(e) => setAdHeadline(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
 
@@ -130,7 +130,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             rows={2}
             value={adBody}
             onChange={(e) => setAdBody(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             placeholder="94103, 94107"
             value={targetZipCodes}
             onChange={(e) => setTargetZipCodes(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
 
@@ -156,7 +156,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
               type="text"
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
           <div>
@@ -168,7 +168,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
               required
               value={clickUrl}
               onChange={(e) => setClickUrl(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
         </div>
@@ -200,7 +200,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
           {ads.map((ad) => (
             <div
               key={ad.id}
-              className="rounded-xl border border-slate-700 bg-brand-slate-light/30 p-4"
+              className="rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>

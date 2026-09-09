@@ -162,7 +162,7 @@ export default function CompanyProfilePanel({
           required
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           placeholder="Apex Property Services"
         />
       </div>
@@ -180,7 +180,7 @@ export default function CompanyProfilePanel({
         />
 
         {logoUrl ? (
-          <div className="mt-1.5 flex items-center gap-4 rounded-lg border border-slate-600 bg-brand-slate p-4">
+          <div className="mt-1.5 flex items-center gap-4 rounded-xl bg-brand-slate p-4 shadow-sm shadow-black/20">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
@@ -214,10 +214,10 @@ export default function CompanyProfilePanel({
             }}
             onDragLeave={() => setDragActive(false)}
             onDrop={handleDrop}
-            className={`mt-1.5 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${
+            className={`mt-1.5 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
               dragActive
                 ? "border-brand-emerald bg-brand-emerald/5"
-                : "border-slate-600 bg-brand-slate hover:border-slate-500"
+                : "border-slate-600/60 bg-brand-slate hover:border-slate-500"
             }`}
           >
             {uploading ? (
@@ -249,7 +249,7 @@ export default function CompanyProfilePanel({
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           placeholder="123 Main St, San Francisco, CA"
         />
       </div>
@@ -261,7 +261,7 @@ export default function CompanyProfilePanel({
         <select
           value={currency}
           onChange={(e) => setCurrency(e.target.value as Currency)}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
         >
           {CURRENCIES.map((c) => (
             <option key={c} value={c}>

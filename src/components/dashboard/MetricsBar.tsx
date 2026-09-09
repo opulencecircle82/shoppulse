@@ -65,7 +65,7 @@ export default function MetricsBar({
       {cards.map((card) => (
         <div
           key={card.label}
-          className="rounded-xl border border-slate-700 bg-brand-slate-light/30 p-5"
+          className="rounded-2xl bg-brand-slate-light/40 p-5 shadow-md shadow-black/20"
         >
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
             {card.label}

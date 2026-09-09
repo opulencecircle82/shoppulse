@@ -62,7 +62,7 @@ export default function AddStaffModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-2xl border border-slate-700 bg-brand-slate p-6 shadow-2xl"
+        className="w-full max-w-md rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold text-white">Add Staff</h3>
@@ -114,7 +114,7 @@ export default function AddStaffModal({
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 
@@ -128,7 +128,7 @@ export default function AddStaffModal({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
             <div>
@@ -139,7 +139,7 @@ export default function AddStaffModal({
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function AddStaffModal({
               required
               value={hourlyRate}
               onChange={(e) => setHourlyRate(Number(e.target.value))}
-              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 

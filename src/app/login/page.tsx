@@ -4,7 +4,7 @@ import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-slate px-6 py-16">
-      <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-brand-slate-light/40 p-8 shadow-2xl">
+      <div className="w-full max-w-md rounded-3xl bg-brand-slate-light/50 p-8 shadow-2xl shadow-black/40">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-emerald text-brand-slate font-bold">
             SP

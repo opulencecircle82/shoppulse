@@ -100,7 +100,7 @@ export default function GeofencePanel({
           max={120}
           value={graceMinutes}
           onChange={(e) => setGraceMinutes(Number(e.target.value))}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
         />
         <p className="mt-1 text-xs text-slate-500">
           Allowed buffer before an early checkout is flagged as unverified.
@@ -117,7 +117,7 @@ export default function GeofencePanel({
           max={120}
           value={lunchMinutes}
           onChange={(e) => setLunchMinutes(Number(e.target.value))}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
         />
         <p className="mt-1 text-xs text-slate-500">
           Automatically deducted from actual hours on every job ticket.

@@ -31,7 +31,7 @@ function StaffRow({ member }: { member: StaffMember }) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-700 bg-brand-slate p-5">
+    <div className="rounded-2xl bg-brand-slate p-5 shadow-md shadow-black/20">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-white">
@@ -63,7 +63,7 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.5}
             value={hourlyRate}
             onChange={(e) => setHourlyRate(Number(e.target.value))}
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
         <div>
@@ -76,7 +76,7 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.1}
             value={overtimeMultiplier}
             onChange={(e) => setOvertimeMultiplier(Number(e.target.value))}
-            className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
       </div>

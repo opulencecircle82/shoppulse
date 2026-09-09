@@ -37,8 +37,8 @@ export default function JobTicketCard({
   return (
     <div
       onClick={() => onOpenProofDrawer?.(ticket)}
-      className={`rounded-xl border border-slate-700 bg-brand-slate-light/30 p-4 ${
-        onOpenProofDrawer ? "cursor-pointer transition-colors hover:border-brand-sky/40" : ""
+      className={`rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20 ${
+        onOpenProofDrawer ? "cursor-pointer transition-shadow hover:shadow-lg hover:shadow-brand-sky/10" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -64,7 +64,7 @@ export default function JobTicketCard({
           onChange={(e) => handleAssign(e.target.value)}
           onClick={(e) => e.stopPropagation()}
           disabled={updating}
-          className="mt-3 w-full rounded-lg border border-slate-600 bg-brand-slate px-2.5 py-1.5 text-xs text-white focus:border-brand-emerald focus:outline-none"
+          className="mt-3 w-full rounded-xl bg-brand-slate/60 px-2.5 py-1.5 text-xs text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
         >
           <option value="">Assign technician...</option>
           {staff.map((member) => (

@@ -83,7 +83,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
     pins.length > 0 ? [pins[0].lat, pins[0].lng] : DEFAULT_CENTER;
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-700">
+    <div className="relative overflow-hidden rounded-2xl shadow-md shadow-black/20">
       <MapContainer
         center={center}
         zoom={pins.length > 0 ? 12 : 4}
@@ -113,7 +113,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
 
       {!loading && pins.length === 0 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-          <div className="pointer-events-auto rounded-lg border border-slate-700 bg-brand-slate/90 px-4 py-2.5 text-center text-xs text-slate-300 shadow-lg backdrop-blur">
+          <div className="pointer-events-auto rounded-xl bg-brand-slate/90 px-4 py-2.5 text-center text-xs text-slate-300 shadow-lg shadow-black/30 backdrop-blur">
             No GPS check-ins yet — pins appear here once technicians clock in
             via the ShopPulse mobile app.
           </div>

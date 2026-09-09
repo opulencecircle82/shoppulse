@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-slate px-6">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-700 bg-brand-slate-light/40 p-8 shadow-2xl">
+      <div className="w-full max-w-sm rounded-3xl bg-brand-slate-light/50 p-8 shadow-2xl shadow-black/40">
         <h1 className="text-lg font-semibold text-white">Admin Access</h1>
         <p className="mt-1 text-sm text-slate-400">
           Restricted to authorized ShopPulse administrators.
@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-brand-slate/60 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 
@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-brand-slate/60 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 

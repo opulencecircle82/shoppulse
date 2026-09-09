@@ -31,7 +31,7 @@ export default function ProofDisputeGateTab({
             key={ticket.id}
             type="button"
             onClick={() => onOpenProofDrawer(ticket)}
-            className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-700 bg-brand-slate-light/30 p-4 text-left transition-colors hover:border-brand-sky/40"
+            className="flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl bg-brand-slate-light/40 p-4 text-left shadow-md shadow-black/20 transition-shadow hover:shadow-lg hover:shadow-brand-sky/10"
           >
             <div>
               <div className="flex items-center gap-2">

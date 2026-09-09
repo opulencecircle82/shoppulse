@@ -28,7 +28,7 @@ export default function WhiteLabelPanel({
 
   if (!shop.has_marketing_tier) {
     return (
-      <div className="rounded-xl border border-slate-700 bg-brand-slate p-8 text-center">
+      <div className="rounded-2xl bg-brand-slate p-8 text-center shadow-md shadow-black/20">
         <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-700/50 text-slate-400">
           <Lock className="h-5 w-5" />
         </span>
@@ -81,7 +81,7 @@ export default function WhiteLabelPanel({
           type="text"
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           placeholder="book.apexpropertyservices.com"
         />
       </div>

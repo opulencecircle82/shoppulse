@@ -21,7 +21,7 @@ function ProofPhoto({
       <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
         {label}
       </p>
-      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-lg border border-slate-700 bg-brand-slate-light/30">
+      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-brand-slate-light/30 shadow-sm shadow-black/20">
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={label} className="h-full w-full object-cover" />
@@ -116,7 +116,7 @@ export default function ProofDisputeDrawer({
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-slate-700 bg-brand-slate p-6 shadow-2xl"
+        className="flex h-full w-full max-w-md flex-col overflow-y-auto bg-brand-slate p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
           <div>
@@ -166,7 +166,7 @@ export default function ProofDisputeDrawer({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="What did the client say was wrong with this job?"
-            className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-brand-slate-light/40 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
           />
         </div>
 

@@ -149,7 +149,7 @@ export default function AdminDashboardClient({
         {showPasswordForm && (
           <form
             onSubmit={handleChangePassword}
-            className="mt-6 max-w-sm space-y-4 rounded-2xl border border-slate-700 bg-brand-slate-light/30 p-6"
+            className="mt-6 max-w-sm space-y-4 rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30"
           >
             <div>
               <label className="block text-sm font-medium text-slate-300">
@@ -160,7 +160,7 @@ export default function AdminDashboardClient({
                 required
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1.5 w-full rounded-xl bg-brand-slate/60 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function AdminDashboardClient({
                 minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1.5 w-full rounded-lg border border-slate-600 bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:border-brand-emerald focus:outline-none"
+                className="mt-1.5 w-full rounded-xl bg-brand-slate/60 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
               />
             </div>
             {passwordError && (
@@ -206,7 +206,7 @@ export default function AdminDashboardClient({
               placeholder="Search shop name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full max-w-xs rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3.5 py-2 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+              className="w-full max-w-xs rounded-xl bg-brand-slate-light/50 px-3.5 py-2 text-sm text-white placeholder:text-slate-500 shadow-sm shadow-black/20 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
             />
           </div>
 
@@ -225,7 +225,7 @@ export default function AdminDashboardClient({
           )}
 
           {!loading && filteredShops.length > 0 && (
-            <div className="mt-4 overflow-x-auto rounded-xl border border-slate-700">
+            <div className="mt-4 overflow-x-auto rounded-2xl shadow-md shadow-black/20">
               <table className="w-full text-left text-sm">
                 <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-400">
                   <tr>
@@ -324,7 +324,7 @@ export default function AdminDashboardClient({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl border border-slate-700 bg-brand-slate p-6 shadow-2xl"
+            className="w-full max-w-lg rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
           >
             <div className="flex items-start justify-between">
               <div>
@@ -382,7 +382,7 @@ export default function AdminDashboardClient({
                 {viewingShop.staff_members.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate-light/30 px-3 py-2 text-sm"
+                    className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 text-sm shadow-sm shadow-black/20"
                   >
                     <div>
                       <p className="text-white">{member.full_name}</p>

@@ -42,7 +42,7 @@ export default function KanbanBoard({
 
             <div className="mt-2 space-y-3">
               {columnTickets.length === 0 && (
-                <div className="rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
+                <div className="rounded-2xl border border-dashed border-slate-700/60 p-4 text-center text-xs text-slate-500">
                   No jobs
                 </div>
               )}

@@ -67,7 +67,7 @@ export default function WatermarkPanel({
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate px-4 py-3">
+        <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
           <span className="text-sm text-slate-300">
             Overlay company logo
           </span>
@@ -79,7 +79,7 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate px-4 py-3">
+        <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
           <span className="text-sm text-slate-300">Overlay timestamp</span>
           <input
             type="checkbox"
@@ -89,7 +89,7 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-lg border border-slate-700 bg-brand-slate px-4 py-3">
+        <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
           <span className="text-sm text-slate-300">
             Overlay GPS coordinates
           </span>
@@ -125,7 +125,7 @@ export default function WatermarkPanel({
         <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-400">
           Live Preview
         </p>
-        <div className="relative aspect-video overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-br from-slate-700 to-slate-900">
+        <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-md shadow-black/20">
           {showLogo && (
             <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-black/50 px-2 py-1 backdrop-blur">
               <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-emerald text-[8px] font-bold text-brand-slate">

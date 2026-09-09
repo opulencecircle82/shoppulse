@@ -134,7 +134,7 @@ export default function SettingsPage() {
             ))}
           </nav>
 
-          <div className="rounded-2xl border border-slate-700 bg-brand-slate-light/30 p-6 sm:p-8">
+          <div className="rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30 sm:p-8">
             {activeTab === "profile" && (
               <CompanyProfilePanel shop={shop} onSaved={handleProfileSaved} />
             )}
