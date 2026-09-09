@@ -32,6 +32,7 @@ export type StaffMember = {
   id: string;
   shop_id: string;
   auth_user_id: string | null;
+  username: string | null;
   full_name: string;
   email: string;
   phone: string | null;

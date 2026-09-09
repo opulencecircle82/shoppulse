@@ -7,13 +7,11 @@ import type { StaffMember } from "@/lib/supabase/types";
 const FREE_TECH_SEATS = 1;
 
 export default function AddStaffModal({
-  shopId,
   staff,
   defaultHourlyRate,
   onClose,
   onCreated,
 }: {
-  shopId: string;
   staff: StaffMember[];
   defaultHourlyRate: number;
   onClose: () => void;
@@ -22,9 +20,11 @@ export default function AddStaffModal({
   const seatsUsed = staff.filter((s) => s.role !== "OWNER").length;
   const isPaidSeat = seatsUsed >= FREE_TECH_SEATS;
 
+  const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [hourlyRate, setHourlyRate] = useState(defaultHourlyRate);
   const [acknowledgedPaidSeat, setAcknowledgedPaidSeat] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -35,19 +35,37 @@ export default function AddStaffModal({
     setSaving(true);
     setError(null);
 
-    const { error: insertError } = await supabase.from("staff_members").insert({
-      shop_id: shopId,
-      full_name: fullName,
-      email,
-      phone: phone || null,
-      hourly_rate: hourlyRate,
-      role: "TECHNICIAN",
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      setSaving(false);
+      setError("Your session expired. Please log in again.");
+      return;
+    }
+
+    const response = await fetch("/api/staff/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        username,
+        fullName,
+        email,
+        phone,
+        password,
+        hourlyRate,
+      }),
     });
 
+    const result = await response.json();
     setSaving(false);
 
-    if (insertError) {
-      setError(insertError.message);
+    if (!response.ok) {
+      setError(result.error ?? "Failed to add staff.");
       return;
     }
 
@@ -116,6 +134,36 @@ export default function AddStaffModal({
               onChange={(e) => setFullName(e.target.value)}
               className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-500">
+                Username
+              </label>
+              <input
+                type="text"
+                required
+                autoCapitalize="none"
+                autoCorrect="off"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.trim())}
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-500">
+                Mobile App Password
+              </label>
+              <input
+                type="text"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

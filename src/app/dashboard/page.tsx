@@ -187,7 +187,6 @@ export default function DashboardPage() {
             {activeTab === "staff" && (
               <div className="mt-6">
                 <StaffManagementTab
-                  shopId={shop.id}
                   staff={staff}
                   loading={staffLoading}
                   defaultHourlyRate={shop.default_hourly_rate}

@@ -8,13 +8,11 @@ import AddStaffModal from "./AddStaffModal";
 const FREE_TECH_SEATS = 1;
 
 export default function StaffManagementTab({
-  shopId,
   staff,
   loading,
   defaultHourlyRate,
   onChanged,
 }: {
-  shopId: string;
   staff: StaffMember[];
   loading: boolean;
   defaultHourlyRate: number;
@@ -73,6 +71,7 @@ export default function StaffManagementTab({
             <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
+                <th className="px-4 py-3 font-medium">Mobile App Login</th>
                 <th className="px-4 py-3 font-medium">Contact</th>
                 <th className="px-4 py-3 font-medium">Role</th>
                 <th className="px-4 py-3 font-medium">Hourly Rate</th>
@@ -85,6 +84,11 @@ export default function StaffManagementTab({
                 <tr key={member.id} className="hover:bg-brand-slate-light/20">
                   <td className="px-4 py-3 font-medium text-slate-900">
                     {member.full_name}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {member.username ?? (
+                      <span className="text-slate-400">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
                     <div>{member.email}</div>
@@ -127,7 +131,6 @@ export default function StaffManagementTab({
 
       {showAddStaff && (
         <AddStaffModal
-          shopId={shopId}
           staff={staff}
           defaultHourlyRate={defaultHourlyRate}
           onClose={() => setShowAddStaff(false)}
