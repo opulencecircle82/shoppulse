@@ -59,14 +59,14 @@ export default function PricingSection() {
           </h2>
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+        <div className="mt-8 flex justify-center px-4">
+          <div className="flex flex-wrap justify-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
             {CURRENCIES.map((c) => (
               <button
                 key={c.code}
                 type="button"
                 onClick={() => setCurrency(c.code)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
                   currency === c.code
                     ? "bg-brand-blue text-white"
                     : "text-slate-400 hover:text-white"

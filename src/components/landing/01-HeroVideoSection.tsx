@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import LaborLeakCounter from "./LaborLeakCounter";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
@@ -13,6 +15,8 @@ const NAV_LINKS = [
 ];
 
 export default function HeroVideoSection() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <section className="relative overflow-hidden bg-brand-navy">
       <CurvedLinesBackground />
@@ -50,7 +54,7 @@ export default function HeroVideoSection() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-3 md:flex">
           <Link
             href="/login"
             className="text-sm font-medium text-white transition-colors hover:text-slate-200"
@@ -64,7 +68,48 @@ export default function HeroVideoSection() {
             Get Started Free
           </Link>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-white md:hidden"
+        >
+          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </nav>
+
+      {menuOpen && (
+        <div className="relative z-10 mx-6 mb-2 flex flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 p-4 md:hidden">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              {link.label}
+            </a>
+          ))}
+          <div className="mt-2 flex flex-col gap-2 border-t border-white/10 pt-3">
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-lg px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-white/10"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-full bg-brand-orange px-5 py-2.5 text-center text-sm font-bold text-white"
+            >
+              Get Started Free
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 pb-24 pt-12 text-center lg:px-8 lg:pt-16">
         <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
