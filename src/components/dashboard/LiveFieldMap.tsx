@@ -18,6 +18,7 @@ L.Icon.Default.mergeOptions({
 type MapPin = {
   id: string;
   client_name: string;
+  staff_name: string | null;
   status: string;
   service_address: string;
   lat: number;
@@ -61,6 +62,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
       const rows = (data ?? []) as {
         id: string;
         client_name: string;
+        staff_name: string | null;
         status: string;
         service_address: string;
         start_lat: number | null;
@@ -79,6 +81,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
           return {
             id: row.id,
             client_name: row.client_name,
+            staff_name: row.staff_name,
             status: row.status,
             service_address: row.service_address,
             lat,
@@ -117,9 +120,13 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
             <Marker position={[pin.lat, pin.lng]}>
               <Tooltip permanent direction="top" offset={[0, -38]}>
                 {pin.client_name || "Unnamed job"}
+                {pin.staff_name ? ` — ${pin.staff_name}` : ""}
               </Tooltip>
               <Popup>
                 <p className="font-semibold">{pin.client_name}</p>
+                {pin.staff_name && (
+                  <p className="text-xs text-slate-600">Tech: {pin.staff_name}</p>
+                )}
                 <p className="text-xs">{pin.service_address}</p>
                 <p className="text-xs">{pin.status}</p>
               </Popup>
