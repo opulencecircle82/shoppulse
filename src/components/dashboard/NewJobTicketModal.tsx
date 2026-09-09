@@ -1,0 +1,194 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { supabase } from "@/lib/supabase/client";
+import type { StaffMember } from "@/lib/supabase/types";
+
+export default function NewJobTicketModal({
+  shopId,
+  staff,
+  onClose,
+  onCreated,
+}: {
+  shopId: string;
+  staff: StaffMember[];
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [serviceAddress, setServiceAddress] = useState("");
+  const [serviceType, setServiceType] = useState("");
+  const [assignedStaffId, setAssignedStaffId] = useState("");
+  const [estimatedHours, setEstimatedHours] = useState(1);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+
+    const { error: insertError } = await supabase.from("job_tickets").insert({
+      shop_id: shopId,
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: clientPhone || null,
+      service_address: serviceAddress,
+      service_type: serviceType,
+      assigned_staff_id: assignedStaffId || null,
+      status: assignedStaffId ? "SCHEDULED" : "UNASSIGNED",
+      estimated_hours: estimatedHours,
+    });
+
+    setSaving(false);
+
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+
+    onCreated();
+    onClose();
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-2xl border border-slate-700 bg-brand-slate p-6 shadow-2xl"
+      >
+        <div className="flex items-start justify-between">
+          <h3 className="text-lg font-semibold text-white">New Job Ticket</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-white"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-400">
+                Client Name
+              </label>
+              <input
+                type="text"
+                required
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-400">
+                Client Email
+              </label>
+              <input
+                type="email"
+                required
+                value={clientEmail}
+                onChange={(e) => setClientEmail(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-400">
+              Client Phone
+            </label>
+            <input
+              type="tel"
+              value={clientPhone}
+              onChange={(e) => setClientPhone(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-400">
+              Service Address
+            </label>
+            <input
+              type="text"
+              required
+              value={serviceAddress}
+              onChange={(e) => setServiceAddress(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-400">
+                Service Type
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Deep Cleaning, HVAC repair..."
+                value={serviceType}
+                onChange={(e) => setServiceType(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-brand-emerald focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-400">
+                Estimated Hours
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={0.5}
+                value={estimatedHours}
+                onChange={(e) => setEstimatedHours(Number(e.target.value))}
+                className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-400">
+              Assign Technician
+            </label>
+            <select
+              value={assignedStaffId}
+              onChange={(e) => setAssignedStaffId(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-600 bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:border-brand-emerald focus:outline-none"
+            >
+              <option value="">Unassigned</option>
+              {staff.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.full_name} ({member.role})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? "Creating..." : "Create Job Ticket"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

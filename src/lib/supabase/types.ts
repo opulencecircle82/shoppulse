@@ -37,3 +37,45 @@ export type StaffMember = {
   role: StaffRole;
   created_at: string;
 };
+
+export type JobStatus =
+  | "UNASSIGNED"
+  | "SCHEDULED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "DISPUTED"
+  | "APPROVED";
+
+export type JobTicket = {
+  id: string;
+  shop_id: string;
+  assigned_staff_id: string | null;
+  client_name: string;
+  client_email: string;
+  client_phone: string | null;
+  service_address: string;
+  service_type: string;
+  status: JobStatus;
+  start_photo_url: string | null;
+  end_photo_url: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  estimated_hours: number;
+  actual_hours: number;
+  total_labor_cost: number;
+  total_invoice_amount: number;
+  dispute_notes: string | null;
+  created_at: string;
+};
+
+export type LocalNetworkAd = {
+  id: string;
+  shop_id: string;
+  business_category: string;
+  ad_headline: string;
+  ad_body: string;
+  target_zip_codes: string[] | null;
+  promo_code: string | null;
+  click_url: string;
+  is_active: boolean;
+};
