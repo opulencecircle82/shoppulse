@@ -19,7 +19,8 @@ export default function StaffManagementTab({
   onChanged: () => void;
 }) {
   const [showAddStaff, setShowAddStaff] = useState(false);
-  const seatsUsed = staff.filter((s) => s.role !== "OWNER").length;
+  const nonOwnerStaff = staff.filter((s) => s.role !== "OWNER");
+  const seatsUsed = nonOwnerStaff.length;
 
   async function toggleActive(member: StaffMember) {
     await supabase
@@ -57,7 +58,14 @@ export default function StaffManagementTab({
 
       {loading && <p className="mt-6 text-sm text-slate-400">Loading staff...</p>}
 
-      {!loading && (
+      {!loading && nonOwnerStaff.length === 0 && (
+        <p className="mt-6 text-sm text-slate-400">
+          No staff added yet. Use &quot;+ Add Staff&quot; to bring on your
+          first technician.
+        </p>
+      )}
+
+      {!loading && nonOwnerStaff.length > 0 && (
         <div className="mt-6 overflow-x-auto rounded-xl border border-slate-700">
           <table className="w-full text-left text-sm">
             <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-400">
@@ -71,7 +79,7 @@ export default function StaffManagementTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {staff.map((member) => (
+              {nonOwnerStaff.map((member) => (
                 <tr key={member.id} className="hover:bg-brand-slate-light/20">
                   <td className="px-4 py-3 font-medium text-white">
                     {member.full_name}
