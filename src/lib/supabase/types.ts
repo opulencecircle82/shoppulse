@@ -25,6 +25,7 @@ export type Shop = {
   mandatory_live_camera: boolean;
   default_hourly_rate: number;
   default_overtime_multiplier: number;
+  mobile_app_font_family: string;
 };
 
 export type StaffMember = {

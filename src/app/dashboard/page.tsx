@@ -17,6 +17,7 @@ import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
 import ProofDisputeGateTab from "@/components/dashboard/ProofDisputeGateTab";
 import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import LocalAdManager from "@/components/dashboard/LocalAdManager";
+import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
 import SetupCustomizePanel from "@/components/dashboard/SetupCustomizePanel";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
@@ -198,6 +199,12 @@ export default function DashboardPage() {
             {activeTab === "ads" && (
               <div className="mt-6">
                 <LocalAdManager shopId={shop.id} />
+              </div>
+            )}
+
+            {activeTab === "mobile" && (
+              <div className="mt-6">
+                <CustomizeMobileAppTab shop={shop} onSaved={refreshShop} />
               </div>
             )}
           </div>

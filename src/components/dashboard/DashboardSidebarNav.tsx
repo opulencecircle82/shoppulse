@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Users,
   Megaphone,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,6 +16,7 @@ export const DASHBOARD_TABS = [
   { id: "proof", label: "Proof & Dispute Gate", icon: ShieldCheck },
   { id: "staff", label: "Staff Management", icon: Users },
   { id: "ads", label: "Local Ad Network", icon: Megaphone },
+  { id: "mobile", label: "Customize Mobile App", icon: Smartphone },
 ] as const;
 
 export type DashboardTabId = (typeof DASHBOARD_TABS)[number]["id"];
