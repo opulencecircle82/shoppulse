@@ -75,6 +75,15 @@ export type JobTicket = {
   created_at: string;
 };
 
+export type StaffLiveLocation = {
+  staff_id: string;
+  shop_id: string;
+  lat: number;
+  lng: number;
+  accuracy: number | null;
+  updated_at: string;
+};
+
 export type LocalNetworkAd = {
   id: string;
   shop_id: string;

@@ -15,6 +15,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+const LIVE_DOT_ICON = L.divIcon({
+  className: "",
+  html: '<span style="display:block;width:16px;height:16px;border-radius:9999px;background:#F97316;border:3px solid white;box-shadow:0 0 0 2px rgba(249,115,22,0.4)"></span>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+// Live positions older than this are treated as stale (app closed/
+// backgrounded) and hidden, rather than showing a "live" dot that's
+// actually long gone.
+const LIVE_STALE_MS = 3 * 60 * 1000;
+const LIVE_POLL_MS = 15000;
+
 type MapPin = {
   id: string;
   client_name: string;
@@ -23,6 +36,15 @@ type MapPin = {
   service_address: string;
   lat: number;
   lng: number;
+};
+
+type LivePin = {
+  staffId: string;
+  staffName: string;
+  lat: number;
+  lng: number;
+  accuracy: number | null;
+  updatedAt: string;
 };
 
 const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
@@ -47,6 +69,7 @@ function MapRecenter({
 
 export default function LiveFieldMap({ shop }: { shop: Shop }) {
   const [pins, setPins] = useState<MapPin[]>([]);
+  const [livePins, setLivePins] = useState<LivePin[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -100,17 +123,70 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
     };
   }, [shop.id]);
 
-  const center: [number, number] =
-    pins.length > 0 ? [pins[0].lat, pins[0].lng] : DEFAULT_CENTER;
+  useEffect(() => {
+    let active = true;
+
+    async function fetchLive() {
+      const { data } = await supabase
+        .from("staff_live_locations")
+        .select("staff_id, lat, lng, accuracy, updated_at, staff_members(full_name)")
+        .eq("shop_id", shop.id);
+
+      if (!active) return;
+
+      const rows = (data ?? []) as unknown as {
+        staff_id: string;
+        lat: number;
+        lng: number;
+        accuracy: number | null;
+        updated_at: string;
+        staff_members: { full_name: string }[] | { full_name: string } | null;
+      }[];
+
+      const fresh = rows.filter(
+        (row) => Date.now() - new Date(row.updated_at).getTime() < LIVE_STALE_MS
+      );
+
+      setLivePins(
+        fresh.map((row) => {
+          const staffRow = Array.isArray(row.staff_members)
+            ? row.staff_members[0]
+            : row.staff_members;
+          return {
+            staffId: row.staff_id,
+            staffName: staffRow?.full_name ?? "Technician",
+            lat: row.lat,
+            lng: row.lng,
+            accuracy: row.accuracy,
+            updatedAt: row.updated_at,
+          };
+        })
+      );
+    }
+
+    fetchLive();
+    const interval = setInterval(fetchLive, LIVE_POLL_MS);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [shop.id]);
+
+  const firstPoint = pins[0] ?? livePins[0];
+  const hasAnyPoint = pins.length > 0 || livePins.length > 0;
+  const center: [number, number] = firstPoint
+    ? [firstPoint.lat, firstPoint.lng]
+    : DEFAULT_CENTER;
 
   return (
     <div className="relative overflow-hidden rounded-2xl shadow-md shadow-black/20">
       <MapContainer
         center={center}
-        zoom={pins.length > 0 ? 12 : 4}
+        zoom={hasAnyPoint ? 12 : 4}
         style={{ height: "480px", width: "100%" }}
       >
-        <MapRecenter center={center} zoom={pins.length > 0 ? 12 : 4} />
+        <MapRecenter center={center} zoom={hasAnyPoint ? 12 : 4} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -138,18 +214,40 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
             />
           </Fragment>
         ))}
+
+        {livePins.map((live) => (
+          <Marker key={live.staffId} position={[live.lat, live.lng]} icon={LIVE_DOT_ICON}>
+            <Tooltip permanent direction="right" offset={[10, 0]}>
+              🟠 {live.staffName} (live)
+            </Tooltip>
+            <Popup>
+              <p className="font-semibold">{live.staffName}</p>
+              <p className="text-xs text-slate-600">
+                Live position — app currently open
+              </p>
+              {live.accuracy !== null && (
+                <p className="text-xs text-slate-500">
+                  Accuracy: ±{Math.round(live.accuracy)}m
+                </p>
+              )}
+              <p className="text-xs text-slate-400">
+                Updated {new Date(live.updatedAt).toLocaleTimeString()}
+              </p>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
 
-      {!loading && pins.length === 0 && (
+      {!loading && !hasAnyPoint && (
         <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-slate-900/20">
           <div className="pointer-events-auto mx-6 max-w-sm rounded-2xl bg-white px-6 py-5 text-center shadow-2xl shadow-black/40">
             <p className="text-sm font-semibold text-slate-900">
               No staff pins yet
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
-              A pin appears here only after a technician actually clocks in or
-              out on a job from the mobile app (live camera + GPS capture) —
-              not just from changing a job&apos;s status in the dashboard.
+              A pin appears here once a technician clocks in/out on a job
+              (live camera + GPS capture), or an orange live dot shows while
+              they have the mobile app open.
             </p>
           </div>
         </div>

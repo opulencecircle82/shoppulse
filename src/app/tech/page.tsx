@@ -6,6 +6,7 @@ import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { fetchCurrentStaffContext, type StaffContext } from "@/lib/tech/staffContext";
 import { fetchAssignedJobs } from "@/lib/tech/jobActions";
 import { pickTodayTask } from "@/lib/tech/todayTask";
+import { startWatchingLocation } from "@/lib/tech/liveLocation";
 import TechLoginScreen from "@/components/tech/TechLoginScreen";
 import TechHomeScreen from "@/components/tech/TechHomeScreen";
 import TechJobScreen from "@/components/tech/TechJobScreen";
@@ -46,6 +47,12 @@ export default function TechAppPage() {
     }, 0);
     return () => clearTimeout(id);
   }, [resolveSession]);
+
+  useEffect(() => {
+    if (!staffContext) return;
+    const stop = startWatchingLocation(staffContext);
+    return stop;
+  }, [staffContext]);
 
   if (screen === "loading") {
     return (
