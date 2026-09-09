@@ -81,7 +81,10 @@ export default function HeroVideoSection() {
 
         {/* GIANT CENTER STAGE ANIMATION CARD */}
         <div className="relative mx-auto mt-12 max-w-3xl">
-          <div className="relative overflow-hidden rounded-3xl bg-blue-50 p-8 shadow-2xl shadow-black/40 sm:p-12">
+          <div
+            className="relative overflow-hidden rounded-3xl border-2 border-[#38BDF8] p-8 shadow-2xl shadow-black/40 sm:p-12"
+            style={{ backgroundColor: "#BAE6FD" }}
+          >
             <div
               className="pointer-events-none absolute inset-0 opacity-40"
               style={{
@@ -118,7 +121,7 @@ export default function HeroVideoSection() {
                 THE CLOCK IS TICKING
                 <span className="text-brand-orange">...</span>
               </motion.h2>
-              <p className="mt-3 text-base text-slate-600 sm:text-lg">
+              <p className="mt-3 text-base text-slate-800 sm:text-lg">
                 How much money have you lost today?
               </p>
 
