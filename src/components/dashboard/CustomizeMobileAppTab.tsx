@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { Camera, MapPin } from "lucide-react";
+import { Camera, MapPin, Smartphone } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
 
@@ -14,6 +14,13 @@ const FONT_OPTIONS = [
   "Lato",
   "Open Sans",
 ] as const;
+
+// Always resolves to the most recently published GitHub release's APK —
+// one shared app for every shop, themed at runtime per-shop after login.
+// Publishing a new release (new features, bug fixes) updates this link
+// automatically; no per-shop rebuild needed.
+const APP_DOWNLOAD_URL =
+  "https://github.com/opulencecircle82/shoppulse-mobile/releases/latest/download/app-release.apk";
 
 export default function CustomizeMobileAppTab({
   shop,
@@ -77,6 +84,27 @@ export default function CustomizeMobileAppTab({
       <p className="mt-1 text-sm text-slate-500">
         Theme applied to the ShopPulse technician app (Flutter).
       </p>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-700 bg-brand-slate-light/30 p-4">
+        <div>
+          <p className="text-sm font-semibold text-white">
+            Technician App (Android)
+          </p>
+          <p className="mt-0.5 text-xs text-slate-400">
+            One shared app for every shop &mdash; it reads your saved theme
+            below the moment a technician logs in. New app features and
+            fixes ship as updates to this same link, no separate build per
+            shop.
+          </p>
+        </div>
+        <a
+          href={APP_DOWNLOAD_URL}
+          className="flex shrink-0 items-center gap-2 rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+        >
+          <Smartphone className="h-4 w-4" />
+          Download App
+        </a>
+      </div>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_280px]">
         <form onSubmit={handleSubmit} className="space-y-5">
