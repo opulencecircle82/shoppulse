@@ -81,12 +81,12 @@ export default function HeroVideoSection() {
 
         {/* GIANT CENTER STAGE ANIMATION CARD */}
         <div className="relative mx-auto mt-12 max-w-3xl">
-          <div className="relative overflow-hidden rounded-3xl bg-white p-8 shadow-2xl shadow-black/40 sm:p-12">
+          <div className="relative overflow-hidden rounded-3xl bg-orange-50 p-8 shadow-2xl shadow-black/40 sm:p-12">
             <div
-              className="pointer-events-none absolute inset-0 opacity-30"
+              className="pointer-events-none absolute inset-0 opacity-50"
               style={{
                 background:
-                  "radial-gradient(circle at 50% 0%, rgba(249,115,22,0.12), transparent 60%)",
+                  "radial-gradient(circle at 50% 0%, rgba(249,115,22,0.2), transparent 60%)",
               }}
               aria-hidden
             />
