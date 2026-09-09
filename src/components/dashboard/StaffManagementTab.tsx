@@ -19,6 +19,8 @@ export default function StaffManagementTab({
   onChanged: () => void;
 }) {
   const [showAddStaff, setShowAddStaff] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const nonOwnerStaff = staff.filter((s) => s.role !== "OWNER");
   const seatsUsed = nonOwnerStaff.length;
 
@@ -27,6 +29,41 @@ export default function StaffManagementTab({
       .from("staff_members")
       .update({ is_active: !member.is_active })
       .eq("id", member.id);
+    onChanged();
+  }
+
+  async function deleteStaff(member: StaffMember) {
+    const confirmed = window.confirm(
+      `Remove ${member.full_name}? This deletes their mobile app login and can't be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(member.id);
+    setDeleteError(null);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      setDeletingId(null);
+      setDeleteError("Your session expired. Please log in again.");
+      return;
+    }
+
+    const response = await fetch(`/api/staff/${member.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+
+    setDeletingId(null);
+
+    if (!response.ok) {
+      const result = await response.json();
+      setDeleteError(result.error ?? "Failed to remove staff.");
+      return;
+    }
+
     onChanged();
   }
 
@@ -55,6 +92,12 @@ export default function StaffManagementTab({
           + Add Staff
         </button>
       </div>
+
+      {deleteError && (
+        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-500">
+          {deleteError}
+        </p>
+      )}
 
       {loading && <p className="mt-6 text-sm text-slate-500">Loading staff...</p>}
 
@@ -113,13 +156,23 @@ export default function StaffManagementTab({
                   </td>
                   <td className="px-4 py-3 text-right">
                     {member.role !== "OWNER" && (
-                      <button
-                        type="button"
-                        onClick={() => toggleActive(member)}
-                        className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
-                      >
-                        {member.is_active ? "Deactivate" : "Activate"}
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleActive(member)}
+                          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+                        >
+                          {member.is_active ? "Deactivate" : "Activate"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteStaff(member)}
+                          disabled={deletingId === member.id}
+                          className="rounded-full border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {deletingId === member.id ? "Removing..." : "Delete"}
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
