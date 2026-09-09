@@ -195,11 +195,11 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
           <Fragment key={pin.id}>
             <Marker position={[pin.lat, pin.lng]}>
               <Tooltip permanent direction="top" offset={[0, -38]}>
-                {pin.client_name || "Unnamed job"}
-                {pin.staff_name ? ` — ${pin.staff_name}` : ""}
+                Client: {pin.client_name || "Unnamed"}
+                {pin.staff_name ? ` · Tech: ${pin.staff_name}` : ""}
               </Tooltip>
               <Popup>
-                <p className="font-semibold">{pin.client_name}</p>
+                <p className="font-semibold">Client: {pin.client_name}</p>
                 {pin.staff_name && (
                   <p className="text-xs text-slate-600">Tech: {pin.staff_name}</p>
                 )}
@@ -218,10 +218,10 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
         {livePins.map((live) => (
           <Marker key={live.staffId} position={[live.lat, live.lng]} icon={LIVE_DOT_ICON}>
             <Tooltip permanent direction="right" offset={[10, 0]}>
-              🟠 {live.staffName} (live)
+              🟠 Tech: {live.staffName} (live)
             </Tooltip>
             <Popup>
-              <p className="font-semibold">{live.staffName}</p>
+              <p className="font-semibold">Tech: {live.staffName}</p>
               <p className="text-xs text-slate-600">
                 Live position — app currently open
               </p>
