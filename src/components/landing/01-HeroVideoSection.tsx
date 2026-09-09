@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import LaborLeakCounter from "./LaborLeakCounter";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
@@ -15,6 +16,17 @@ export default function HeroVideoSection() {
   return (
     <section className="relative overflow-hidden bg-brand-navy">
       <CurvedLinesBackground />
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] w-full opacity-20 sm:h-[42rem] lg:h-[48rem]">
+        <Image
+          src="/images/hero-visual-cutout.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-contain object-top"
+          priority
+        />
+      </div>
 
       <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
         <div className="flex items-center gap-2">

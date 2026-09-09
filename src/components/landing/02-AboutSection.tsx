@@ -1,46 +1,21 @@
-import Image from "next/image";
 import { Camera, TriangleAlert } from "lucide-react";
-import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
 export default function AboutSection() {
   return (
     <section id="about" className="bg-brand-slate py-24">
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl">
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 20%, rgba(37,99,235,0.12), transparent 65%)",
-            }}
-            aria-hidden
-          />
-          <CurvedLinesBackground className="opacity-50" />
-
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] w-full opacity-25 sm:h-[38rem] lg:h-[44rem]">
-            <Image
-              src="/images/hero-visual-cutout.png"
-              alt="Field technicians reviewing a job on ShopPulse from the job site"
-              fill
-              sizes="(min-width: 1024px) 1024px, 100vw"
-              className="object-contain object-top"
-              priority={false}
-            />
-          </div>
-
-          <div className="relative mx-auto max-w-2xl px-6 pb-16 pt-20 text-center sm:pt-24">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-sky/10 px-3 py-1 text-xs font-medium text-brand-blue">
-              About ShopPulse
-            </span>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Built for the businesses that live in the field
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-slate-600">
-              ShopPulse is built specifically for field service owners —
-              cleaning, HVAC, plumbing, landscaping, and mobile auto — to
-              eliminate profit leaks, time theft, and customer chargebacks.
-            </p>
-          </div>
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-sky/10 px-3 py-1 text-xs font-medium text-brand-blue">
+            About ShopPulse
+          </span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Built for the businesses that live in the field
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-slate-600">
+            ShopPulse is built specifically for field service owners —
+            cleaning, HVAC, plumbing, landscaping, and mobile auto — to
+            eliminate profit leaks, time theft, and customer chargebacks.
+          </p>
         </div>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2">
