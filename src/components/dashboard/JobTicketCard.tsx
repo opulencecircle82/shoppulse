@@ -96,25 +96,17 @@ export default function JobTicketCard({
         onClick={(e) => e.stopPropagation()}
       >
         {ticket.status === "SCHEDULED" && (
-          <button
-            type="button"
-            disabled={updating}
-            onClick={() => updateTicket({ status: "IN_PROGRESS", started_at: new Date().toISOString() })}
-            className="rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
-            Start Job
-          </button>
+          <p className="text-xs text-slate-500">
+            Waiting for {assignedStaff?.full_name ?? "the technician"} to
+            start this job from the mobile app.
+          </p>
         )}
 
         {ticket.status === "IN_PROGRESS" && (
-          <button
-            type="button"
-            disabled={updating}
-            onClick={() => updateTicket({ status: "COMPLETED", completed_at: new Date().toISOString() })}
-            className="rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
-            Mark Completed
-          </button>
+          <p className="text-xs text-slate-500">
+            In progress — waiting for {assignedStaff?.full_name ?? "the technician"}{" "}
+            to submit completion proof from the mobile app.
+          </p>
         )}
 
         {ticket.status === "APPROVED" && (
