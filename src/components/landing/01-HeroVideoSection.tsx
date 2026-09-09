@@ -92,10 +92,10 @@ export default function HeroVideoSection() {
             />
 
             <div className="relative">
-              <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/40 bg-orange-50 px-3 py-1 text-xs font-semibold text-brand-orange">
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-3 py-1 text-xs font-bold text-brand-navy">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-orange opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-orange" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-navy opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-navy" />
                 </span>
                 🚨 ACTIVE LABOR LEAK ALERT
               </span>
