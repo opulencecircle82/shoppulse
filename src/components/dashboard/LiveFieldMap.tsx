@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/lib/supabase/client";
@@ -25,6 +25,24 @@ type MapPin = {
 };
 
 const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
+
+// react-leaflet's MapContainer only applies `center`/`zoom` on the initial
+// mount — it does not reactively recenter when they change afterward. Pins
+// load asynchronously, so without this, the map would stay stuck on
+// DEFAULT_CENTER even after a technician's first real GPS check-in loads.
+function MapRecenter({
+  center,
+  zoom,
+}: {
+  center: [number, number];
+  zoom: number;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [map, center, zoom]);
+  return null;
+}
 
 export default function LiveFieldMap({ shop }: { shop: Shop }) {
   const [pins, setPins] = useState<MapPin[]>([]);
@@ -89,6 +107,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
         zoom={pins.length > 0 ? 12 : 4}
         style={{ height: "480px", width: "100%" }}
       >
+        <MapRecenter center={center} zoom={pins.length > 0 ? 12 : 4} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -112,10 +131,16 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
       </MapContainer>
 
       {!loading && pins.length === 0 && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-          <div className="pointer-events-auto rounded-xl bg-brand-slate/90 px-4 py-2.5 text-center text-xs text-slate-600 shadow-lg shadow-black/30 backdrop-blur">
-            No GPS check-ins yet — pins appear here once technicians clock in
-            via the ShopPulse mobile app.
+        <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-slate-900/20">
+          <div className="pointer-events-auto mx-6 max-w-sm rounded-2xl bg-white px-6 py-5 text-center shadow-2xl shadow-black/40">
+            <p className="text-sm font-semibold text-slate-900">
+              No staff pins yet
+            </p>
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+              A pin appears here only after a technician actually clocks in or
+              out on a job from the mobile app (live camera + GPS capture) —
+              not just from changing a job&apos;s status in the dashboard.
+            </p>
           </div>
         </div>
       )}
