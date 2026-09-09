@@ -29,6 +29,10 @@ export default function AddStaffModal({
   const [acknowledgedPaidSeat, setAcknowledgedPaidSeat] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createdLogin, setCreatedLogin] = useState<{
+    username: string;
+    password: string;
+  } | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,7 +74,7 @@ export default function AddStaffModal({
     }
 
     onCreated();
-    onClose();
+    setCreatedLogin({ username, password });
   }
 
   return (
@@ -83,7 +87,9 @@ export default function AddStaffModal({
         className="w-full max-w-md rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">Add Staff</h3>
+          <h3 className="text-lg font-semibold text-slate-900">
+            {createdLogin ? "Staff Added" : "Add Staff"}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -94,16 +100,60 @@ export default function AddStaffModal({
           </button>
         </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-brand-slate-light/40 px-4 py-2.5">
-          <span className="text-xs text-slate-500">Free Tech Seats</span>
-          <span
-            className={`text-xs font-semibold ${
-              isPaidSeat ? "text-amber-400" : "text-brand-emerald"
-            }`}
-          >
-            {Math.min(seatsUsed, FREE_TECH_SEATS)}/{FREE_TECH_SEATS} Free Tech Seat Used
-          </span>
-        </div>
+        {createdLogin ? (
+          <div className="mt-4">
+            <p className="text-sm text-slate-600">
+              Give these to the technician — this password won&apos;t be
+              shown again, so copy it now.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <div className="rounded-xl bg-brand-slate-light/60 px-4 py-3">
+                <p className="text-xs font-medium text-slate-500">Username</p>
+                <p className="mt-0.5 font-mono text-sm text-slate-900">
+                  {createdLogin.username}
+                </p>
+              </div>
+              <div className="rounded-xl bg-brand-slate-light/60 px-4 py-3">
+                <p className="text-xs font-medium text-slate-500">Password</p>
+                <p className="mt-0.5 font-mono text-sm text-slate-900">
+                  {createdLogin.password}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  `Username: ${createdLogin.username}\nPassword: ${createdLogin.password}`
+                )
+              }
+              className="mt-4 w-full rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+            >
+              Copy to Clipboard
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-3 w-full rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mt-4 flex items-center justify-between rounded-lg bg-brand-slate-light/40 px-4 py-2.5">
+              <span className="text-xs text-slate-500">Free Tech Seats</span>
+              <span
+                className={`text-xs font-semibold ${
+                  isPaidSeat ? "text-amber-400" : "text-brand-emerald"
+                }`}
+              >
+                {Math.min(seatsUsed, FREE_TECH_SEATS)}/{FREE_TECH_SEATS} Free Tech Seat Used
+              </span>
+            </div>
 
         {isPaidSeat && (
           <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
@@ -221,6 +271,8 @@ export default function AddStaffModal({
             {saving ? "Adding..." : "Add Staff"}
           </button>
         </form>
+          </>
+        )}
       </div>
     </div>
   );
