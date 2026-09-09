@@ -26,7 +26,7 @@ import DashboardSidebarNav, {
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
-  { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
+  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
 );
 
 export default function DashboardPage() {
@@ -47,7 +47,7 @@ export default function DashboardPage() {
   if (!checked || shopLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-brand-slate">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-emerald border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
   }
@@ -60,27 +60,27 @@ export default function DashboardPage() {
   if (!shop) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-brand-slate px-6 text-center">
-        <span className="rounded-full bg-brand-emerald/15 px-3 py-1 text-xs font-semibold text-brand-emerald">
+        <span className="rounded-full bg-brand-blue/15 px-3 py-1 text-xs font-semibold text-brand-blue">
           You&apos;re in
         </span>
-        <h1 className="mt-4 text-3xl font-bold text-white">
+        <h1 className="mt-4 text-3xl font-bold text-slate-900">
           Set up your shop to get started
         </h1>
-        <p className="mt-2 max-w-md text-sm text-slate-400">
+        <p className="mt-2 max-w-md text-sm text-slate-500">
           Complete your business profile to unlock the job board, invoicing,
           and the local ad network.
         </p>
         <div className="mt-8 flex items-center gap-4">
           <a
             href="/dashboard/settings"
-            className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+            className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
           >
             Business Settings
           </a>
           <button
             type="button"
             onClick={handleSignOut}
-            className="rounded-full border border-slate-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-brand-sky hover:text-brand-sky"
+            className="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
           >
             Sign Out
           </button>
@@ -94,21 +94,21 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">{shop.shop_name}</h1>
-            <p className="mt-1 text-sm text-slate-400">Owner Command Center</p>
+            <h1 className="text-2xl font-bold text-slate-900">{shop.shop_name}</h1>
+            <p className="mt-1 text-sm text-slate-500">Owner Command Center</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSetupOpenMobile(true)}
-              className="rounded-full border border-slate-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-brand-sky hover:text-brand-sky lg:hidden"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue lg:hidden"
             >
               Setup &amp; Customize
             </button>
             <button
               type="button"
               onClick={handleSignOut}
-              className="rounded-full border border-slate-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-red-400 hover:text-red-400"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:border-red-400 hover:text-red-400"
             >
               Sign Out
             </button>
@@ -129,8 +129,8 @@ export default function DashboardPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === tab.id
-                      ? "bg-brand-emerald/15 text-brand-emerald"
-                      : "text-slate-400 hover:bg-brand-slate-light/40 hover:text-white"
+                      ? "bg-brand-blue/15 text-brand-blue"
+                      : "text-slate-500 hover:bg-brand-slate-light/40 hover:text-slate-900"
                   }`}
                 >
                   {tab.label}
@@ -141,20 +141,20 @@ export default function DashboardPage() {
             {activeTab === "board" && (
               <div className="mt-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                     Job Tickets
                   </h2>
                   <button
                     type="button"
                     onClick={() => setShowNewTicket(true)}
-                    className="rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+                    className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
                   >
                     + New Job Ticket
                   </button>
                 </div>
 
                 {(ticketsLoading || staffLoading) && (
-                  <p className="text-sm text-slate-400">Loading job board...</p>
+                  <p className="text-sm text-slate-500">Loading job board...</p>
                 )}
 
                 {!ticketsLoading && !staffLoading && (

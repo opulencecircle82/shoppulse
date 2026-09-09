@@ -65,11 +65,11 @@ export default function AddStaffModal({
         className="w-full max-w-md rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-white">Add Staff</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Add Staff</h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-500 hover:text-slate-900"
             aria-label="Close"
           >
             ✕
@@ -77,7 +77,7 @@ export default function AddStaffModal({
         </div>
 
         <div className="mt-4 flex items-center justify-between rounded-lg bg-brand-slate-light/40 px-4 py-2.5">
-          <span className="text-xs text-slate-400">Free Tech Seats</span>
+          <span className="text-xs text-slate-500">Free Tech Seats</span>
           <span
             className={`text-xs font-semibold ${
               isPaidSeat ? "text-amber-400" : "text-brand-emerald"
@@ -106,7 +106,7 @@ export default function AddStaffModal({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Full Name
             </label>
             <input
@@ -114,13 +114,13 @@ export default function AddStaffModal({
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Email
               </label>
               <input
@@ -128,24 +128,24 @@ export default function AddStaffModal({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Phone
               </label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Base Hourly Rate ($/hr)
             </label>
             <input
@@ -155,7 +155,7 @@ export default function AddStaffModal({
               required
               value={hourlyRate}
               onChange={(e) => setHourlyRate(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
@@ -168,7 +168,7 @@ export default function AddStaffModal({
           <button
             type="submit"
             disabled={saving || (isPaidSeat && !acknowledgedPaidSeat)}
-            className="w-full rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Adding..." : "Add Staff"}
           </button>

@@ -38,16 +38,16 @@ export default function JobTicketCard({
     <div
       onClick={() => onOpenProofDrawer?.(ticket)}
       className={`rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20 ${
-        onOpenProofDrawer ? "cursor-pointer transition-shadow hover:shadow-lg hover:shadow-brand-sky/10" : ""
+        onOpenProofDrawer ? "cursor-pointer transition-shadow hover:shadow-lg hover:shadow-brand-blue/10" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">
+          <p className="truncate text-sm font-semibold text-slate-900">
             {ticket.client_name}
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">{ticket.service_type}</p>
-          <p className="mt-1 truncate text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
+          <p className="mt-1 truncate text-xs text-slate-400">
             {ticket.service_address}
           </p>
         </div>
@@ -64,7 +64,7 @@ export default function JobTicketCard({
           onChange={(e) => handleAssign(e.target.value)}
           onClick={(e) => e.stopPropagation()}
           disabled={updating}
-          className="mt-3 w-full rounded-xl bg-brand-slate/60 px-2.5 py-1.5 text-xs text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+          className="mt-3 w-full rounded-xl bg-brand-slate/60 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           <option value="">Assign technician...</option>
           {staff.map((member) => (
@@ -74,8 +74,8 @@ export default function JobTicketCard({
           ))}
         </select>
       ) : (
-        <p className="mt-3 text-xs text-slate-400">
-          Assigned: <span className="text-white">{assignedStaff?.full_name ?? "—"}</span>
+        <p className="mt-3 text-xs text-slate-500">
+          Assigned: <span className="text-slate-900">{assignedStaff?.full_name ?? "—"}</span>
         </p>
       )}
 
@@ -86,7 +86,7 @@ export default function JobTicketCard({
       )}
 
       {(ticket.status === "COMPLETED" || ticket.status === "DISPUTED") && (
-        <p className="mt-3 text-xs font-medium text-brand-sky">
+        <p className="mt-3 text-xs font-medium text-brand-blue">
           Click card to review proof →
         </p>
       )}
@@ -100,7 +100,7 @@ export default function JobTicketCard({
             type="button"
             disabled={updating}
             onClick={() => updateTicket({ status: "IN_PROGRESS", started_at: new Date().toISOString() })}
-            className="rounded-full bg-brand-emerald px-3 py-1.5 text-xs font-semibold text-brand-slate transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             Start Job
           </button>
@@ -111,7 +111,7 @@ export default function JobTicketCard({
             type="button"
             disabled={updating}
             onClick={() => updateTicket({ status: "COMPLETED", completed_at: new Date().toISOString() })}
-            className="rounded-full bg-brand-emerald px-3 py-1.5 text-xs font-semibold text-brand-slate transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             Mark Completed
           </button>
@@ -121,7 +121,7 @@ export default function JobTicketCard({
           <button
             type="button"
             onClick={() => onOpenInvoice(ticket)}
-            className="rounded-full border border-brand-sky/40 px-3 py-1.5 text-xs font-semibold text-brand-sky transition-colors hover:bg-brand-sky/10"
+            className="rounded-full border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
           >
             {ticket.total_invoice_amount > 0 ? "Edit Invoice" : "Generate Invoice"}
           </button>

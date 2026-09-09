@@ -31,7 +31,7 @@ export default function GoogleSignInButton({ label }: { label: string }) {
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-3 rounded-full border border-slate-600 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-3 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
           <path

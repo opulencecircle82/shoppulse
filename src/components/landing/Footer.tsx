@@ -8,9 +8,9 @@ const FOOTER_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-800 bg-brand-slate py-10">
+    <footer className="border-t border-slate-200 bg-brand-slate py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 text-center sm:flex-row sm:justify-between sm:text-left lg:px-8">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           © 2026 ShopPulse. All rights reserved.
         </p>
         <div className="flex items-center gap-6">
@@ -18,7 +18,7 @@ export default function Footer() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-slate-400 transition-colors hover:text-white"
+              className="text-sm text-slate-500 transition-colors hover:text-slate-900"
             >
               {link.label}
             </Link>

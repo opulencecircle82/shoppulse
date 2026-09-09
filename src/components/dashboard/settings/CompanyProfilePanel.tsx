@@ -148,13 +148,13 @@ export default function CompanyProfilePanel({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {!shop && (
-        <p className="rounded-lg border border-brand-sky/30 bg-brand-sky/10 px-4 py-3 text-sm text-brand-sky">
+        <p className="rounded-lg border border-brand-blue/30 bg-brand-sky/10 px-4 py-3 text-sm text-brand-blue">
           Welcome! Set up your shop profile to get started.
         </p>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Business Name
         </label>
         <input
@@ -162,13 +162,13 @@ export default function CompanyProfilePanel({
           required
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           placeholder="Apex Property Services"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Business Logo
         </label>
         <input
@@ -191,7 +191,7 @@ export default function CompanyProfilePanel({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm font-medium text-brand-emerald hover:text-emerald-400"
+                className="text-sm font-medium text-brand-blue hover:text-blue-400"
               >
                 Replace logo
               </button>
@@ -199,7 +199,7 @@ export default function CompanyProfilePanel({
             <button
               type="button"
               onClick={() => setLogoUrl("")}
-              className="text-slate-400 hover:text-red-400"
+              className="text-slate-500 hover:text-red-400"
               aria-label="Remove logo"
             >
               <X className="h-4 w-4" />
@@ -216,21 +216,21 @@ export default function CompanyProfilePanel({
             onDrop={handleDrop}
             className={`mt-1.5 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
               dragActive
-                ? "border-brand-emerald bg-brand-emerald/5"
-                : "border-slate-600/60 bg-brand-slate hover:border-slate-500"
+                ? "border-brand-blue bg-brand-blue/5"
+                : "border-slate-300 bg-brand-slate hover:border-slate-500"
             }`}
           >
             {uploading ? (
-              <Loader2 className="h-6 w-6 animate-spin text-brand-emerald" />
+              <Loader2 className="h-6 w-6 animate-spin text-brand-blue" />
             ) : (
-              <ImageUp className="h-6 w-6 text-slate-500" />
+              <ImageUp className="h-6 w-6 text-slate-400" />
             )}
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-slate-500">
               {uploading
                 ? "Uploading..."
                 : "Drag & drop your logo, or click to browse"}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-400">
               PNG or JPG, up to 2MB
             </p>
           </div>
@@ -242,26 +242,26 @@ export default function CompanyProfilePanel({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Business Address
         </label>
         <input
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           placeholder="123 Main St, San Francisco, CA"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Primary Operating Currency
         </label>
         <select
           value={currency}
           onChange={(e) => setCurrency(e.target.value as Currency)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           {CURRENCIES.map((c) => (
             <option key={c} value={c}>
@@ -285,7 +285,7 @@ export default function CompanyProfilePanel({
       <button
         type="submit"
         disabled={saving}
-        className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {saving ? "Saving..." : shop ? "Save Changes" : "Create Shop"}
       </button>

@@ -90,12 +90,12 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
         onSubmit={handleSubmit}
         className="space-y-4 rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30"
       >
-        <h3 className="text-sm font-semibold text-white">
+        <h3 className="text-sm font-semibold text-slate-900">
           Create Local Ad Unit
         </h3>
 
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Business Category
           </label>
           <input
@@ -104,12 +104,12 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             placeholder="Plumbing, Electrical..."
             value={businessCategory}
             onChange={(e) => setBusinessCategory(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Ad Headline
           </label>
           <input
@@ -117,12 +117,12 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             required
             value={adHeadline}
             onChange={(e) => setAdHeadline(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Ad Body
           </label>
           <textarea
@@ -130,12 +130,12 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             rows={2}
             value={adBody}
             onChange={(e) => setAdBody(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Target Zip Codes (comma-separated)
           </label>
           <input
@@ -143,24 +143,24 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             placeholder="94103, 94107"
             value={targetZipCodes}
             onChange={(e) => setTargetZipCodes(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Promo Code
             </label>
             <input
               type="text"
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Click URL
             </label>
             <input
@@ -168,7 +168,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
               required
               value={clickUrl}
               onChange={(e) => setClickUrl(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
         </div>
@@ -182,19 +182,19 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-full bg-brand-emerald px-6 py-2.5 text-sm font-semibold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "Creating..." : "Create Ad"}
         </button>
       </form>
 
       <div>
-        <h3 className="text-sm font-semibold text-white">
+        <h3 className="text-sm font-semibold text-slate-900">
           Active Ad Units ({ads.length})
         </h3>
-        {loading && <p className="mt-3 text-sm text-slate-400">Loading...</p>}
+        {loading && <p className="mt-3 text-sm text-slate-500">Loading...</p>}
         {!loading && ads.length === 0 && (
-          <p className="mt-3 text-sm text-slate-400">No ads created yet.</p>
+          <p className="mt-3 text-sm text-slate-500">No ads created yet.</p>
         )}
         <div className="mt-3 space-y-3">
           {ads.map((ad) => (
@@ -204,10 +204,10 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-slate-900">
                     {ad.ad_headline}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     {ad.business_category}
                   </p>
                 </div>
@@ -215,15 +215,15 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
                   className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                     ad.is_active
                       ? "bg-brand-emerald/15 text-brand-emerald"
-                      : "bg-slate-700/50 text-slate-400"
+                      : "bg-slate-200 text-slate-500"
                   }`}
                 >
                   {ad.is_active ? "Active" : "Inactive"}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-slate-400">{ad.ad_body}</p>
+              <p className="mt-2 text-xs text-slate-500">{ad.ad_body}</p>
               {ad.target_zip_codes && ad.target_zip_codes.length > 0 && (
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-400">
                   Zips: {ad.target_zip_codes.join(", ")}
                 </p>
               )}
@@ -231,7 +231,7 @@ export default function LocalAdManager({ shopId }: { shopId: string }) {
                 <button
                   type="button"
                   onClick={() => toggleActive(ad)}
-                  className="rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-sky hover:text-brand-sky"
+                  className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
                 >
                   {ad.is_active ? "Deactivate" : "Activate"}
                 </button>

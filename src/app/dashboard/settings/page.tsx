@@ -33,7 +33,7 @@ export default function SettingsPage() {
   if (!checked || loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-brand-slate">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-emerald border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
   }
@@ -41,13 +41,13 @@ export default function SettingsPage() {
   if (staffMember && !isOwner) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-brand-slate px-6 text-center">
-        <h1 className="text-xl font-semibold text-white">Owners only</h1>
-        <p className="mt-2 max-w-sm text-sm text-slate-400">
+        <h1 className="text-xl font-semibold text-slate-900">Owners only</h1>
+        <p className="mt-2 max-w-sm text-sm text-slate-500">
           Business settings can only be changed by the shop owner.
         </p>
         <Link
           href="/dashboard"
-          className="mt-6 text-sm font-medium text-brand-emerald hover:text-emerald-400"
+          className="mt-6 text-sm font-medium text-brand-blue hover:text-blue-400"
         >
           ← Back to dashboard
         </Link>
@@ -84,10 +84,10 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-slate-900">
               Business Settings
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-500">
               {isOnboarding
                 ? `Step ${onboardingStep! + 1} of ${ONBOARDING_ORDER.length}: complete your business info so ShopPulse can enforce and calculate accurately.`
                 : "Configure your shop profile, geofencing, staff pay, and branding."}
@@ -95,7 +95,7 @@ export default function SettingsPage() {
           </div>
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-slate-400 transition-colors hover:text-white"
+            className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
           >
             ← Dashboard
           </Link>
@@ -109,7 +109,7 @@ export default function SettingsPage() {
                 className={`h-1.5 flex-1 rounded-full transition-colors ${
                   index <= onboardingStep!
                     ? "bg-brand-emerald"
-                    : "bg-slate-700"
+                    : "bg-slate-200"
                 }`}
               />
             ))}
@@ -125,8 +125,8 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`whitespace-nowrap rounded-lg px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? "bg-brand-emerald/15 text-brand-emerald"
-                    : "text-slate-400 hover:bg-brand-slate-light/40 hover:text-white"
+                    ? "bg-brand-blue/15 text-brand-blue"
+                    : "text-slate-500 hover:bg-brand-slate-light/40 hover:text-slate-900"
                 }`}
               >
                 {tab.label}

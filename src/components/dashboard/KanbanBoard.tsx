@@ -32,17 +32,17 @@ export default function KanbanBoard({
         return (
           <div key={column.status} className="w-[280px] min-w-[280px] shrink-0">
             <div className="flex items-center justify-between px-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 {column.label}
               </p>
-              <span className="rounded-full bg-slate-700/50 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                 {columnTickets.length}
               </span>
             </div>
 
             <div className="mt-2 space-y-3">
               {columnTickets.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-slate-700/60 p-4 text-center text-xs text-slate-500">
+                <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400">
                   No jobs
                 </div>
               )}

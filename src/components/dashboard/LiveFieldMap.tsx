@@ -113,7 +113,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
 
       {!loading && pins.length === 0 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-          <div className="pointer-events-auto rounded-xl bg-brand-slate/90 px-4 py-2.5 text-center text-xs text-slate-300 shadow-lg shadow-black/30 backdrop-blur">
+          <div className="pointer-events-auto rounded-xl bg-brand-slate/90 px-4 py-2.5 text-center text-xs text-slate-600 shadow-lg shadow-black/30 backdrop-blur">
             No GPS check-ins yet — pins appear here once technicians clock in
             via the ShopPulse mobile app.
           </div>

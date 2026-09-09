@@ -28,7 +28,7 @@ export default function WatermarkPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first to customize photo watermarks.
       </p>
     );
@@ -68,36 +68,36 @@ export default function WatermarkPanel({
     <div className="grid gap-8 lg:grid-cols-2">
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-300">
+          <span className="text-sm text-slate-600">
             Overlay company logo
           </span>
           <input
             type="checkbox"
             checked={showLogo}
             onChange={(e) => setShowLogo(e.target.checked)}
-            className="h-4 w-4 accent-brand-emerald"
+            className="h-4 w-4 accent-brand-blue"
           />
         </label>
 
         <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-300">Overlay timestamp</span>
+          <span className="text-sm text-slate-600">Overlay timestamp</span>
           <input
             type="checkbox"
             checked={showTimestamp}
             onChange={(e) => setShowTimestamp(e.target.checked)}
-            className="h-4 w-4 accent-brand-emerald"
+            className="h-4 w-4 accent-brand-blue"
           />
         </label>
 
         <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-300">
+          <span className="text-sm text-slate-600">
             Overlay GPS coordinates
           </span>
           <input
             type="checkbox"
             checked={showGps}
             onChange={(e) => setShowGps(e.target.checked)}
-            className="h-4 w-4 accent-brand-emerald"
+            className="h-4 w-4 accent-brand-blue"
           />
         </label>
 
@@ -115,34 +115,34 @@ export default function WatermarkPanel({
         <button
           type="submit"
           disabled={saving}
-          className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "Saving..." : showContinue ? `Save & ${continueLabel}` : "Save Changes"}
         </button>
       </form>
 
       <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-400">
+        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-500">
           Live Preview
         </p>
         <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-md shadow-black/20">
           {showLogo && (
             <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-black/50 px-2 py-1 backdrop-blur">
-              <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-emerald text-[8px] font-bold text-brand-slate">
+              <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
                 {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
               </span>
-              <span className="text-[10px] font-semibold text-white">
+              <span className="text-[10px] font-semibold text-slate-900">
                 {shop.shop_name}
               </span>
             </div>
           )}
           {showTimestamp && (
-            <div className="absolute bottom-3 left-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
+            <div className="absolute bottom-3 left-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
               Sep 8, 2026 &middot; 4:12 PM
             </div>
           )}
           {showGps && (
-            <div className="absolute bottom-3 right-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
+            <div className="absolute bottom-3 right-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
               37.7749&deg; N, -122.4194&deg; W
             </div>
           )}

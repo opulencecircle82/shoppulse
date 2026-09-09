@@ -129,30 +129,30 @@ export default function SetupCustomizePanel({
         }`}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-white">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-slate-900">
             Setup &amp; Customize
           </h2>
           <button
             type="button"
             onClick={onCloseMobile}
-            className="text-slate-400 hover:text-white lg:hidden"
+            className="text-slate-500 hover:text-slate-900 lg:hidden"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-400">
           Syncs to the ShopPulse technician mobile app.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-6">
           <section>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-emerald">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
               Branding &amp; Mobile App Theme
             </p>
             <div className="mt-3 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Business Name
                 </label>
                 <input
@@ -160,12 +160,12 @@ export default function SetupCustomizePanel({
                   required
                   value={shopName}
                   onChange={(e) => setShopName(e.target.value)}
-                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Logo
                 </label>
                 <input
@@ -186,14 +186,14 @@ export default function SetupCustomizePanel({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="text-xs font-medium text-brand-emerald hover:text-emerald-400"
+                      className="text-xs font-medium text-brand-blue hover:text-blue-400"
                     >
                       Replace
                     </button>
                     <button
                       type="button"
                       onClick={() => setLogoUrl("")}
-                      className="ml-auto text-slate-400 hover:text-red-400"
+                      className="ml-auto text-slate-500 hover:text-red-400"
                       aria-label="Remove logo"
                     >
                       <X className="h-4 w-4" />
@@ -203,10 +203,10 @@ export default function SetupCustomizePanel({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="mt-1.5 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-600/60 bg-brand-slate-light/40 px-4 py-3 text-xs text-slate-400 hover:border-slate-500"
+                    className="mt-1.5 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-brand-slate-light/40 px-4 py-3 text-xs text-slate-500 hover:border-slate-500"
                   >
                     {uploading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-brand-emerald" />
+                      <Loader2 className="h-4 w-4 animate-spin text-brand-blue" />
                     ) : (
                       <ImageUp className="h-4 w-4" />
                     )}
@@ -219,7 +219,7 @@ export default function SetupCustomizePanel({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Primary Brand Color
                 </label>
                 <div className="mt-1 flex items-center gap-2">
@@ -227,25 +227,25 @@ export default function SetupCustomizePanel({
                     type="color"
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                    className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
-                  <span className="text-xs text-slate-400">{primaryColor}</span>
+                  <span className="text-xs text-slate-500">{primaryColor}</span>
                 </div>
               </div>
             </div>
           </section>
 
           <section>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-emerald">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
               Mobile Proof &amp; Anti-Fraud
             </p>
             <div className="mt-3 space-y-2">
               <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2.5 shadow-sm shadow-black/20">
                 <div>
-                  <span className="text-sm text-slate-300">
+                  <span className="text-sm text-slate-600">
                     Mandatory Live Camera
                   </span>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-400">
                     Disables phone gallery uploads in the tech app
                   </p>
                 </div>
@@ -253,50 +253,50 @@ export default function SetupCustomizePanel({
                   type="checkbox"
                   checked={mandatoryCamera}
                   onChange={(e) => setMandatoryCamera(e.target.checked)}
-                  className="h-4 w-4 shrink-0 accent-brand-emerald"
+                  className="h-4 w-4 shrink-0 accent-brand-blue"
                 />
               </label>
 
-              <p className="pt-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              <p className="pt-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">
                 Watermark Customizer
               </p>
               <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 shadow-sm shadow-black/20">
-                <span className="text-sm text-slate-300">Company Logo</span>
+                <span className="text-sm text-slate-600">Company Logo</span>
                 <input
                   type="checkbox"
                   checked={showLogo}
                   onChange={(e) => setShowLogo(e.target.checked)}
-                  className="h-4 w-4 accent-brand-emerald"
+                  className="h-4 w-4 accent-brand-blue"
                 />
               </label>
               <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 shadow-sm shadow-black/20">
-                <span className="text-sm text-slate-300">Live Timestamp</span>
+                <span className="text-sm text-slate-600">Live Timestamp</span>
                 <input
                   type="checkbox"
                   checked={showTimestamp}
                   onChange={(e) => setShowTimestamp(e.target.checked)}
-                  className="h-4 w-4 accent-brand-emerald"
+                  className="h-4 w-4 accent-brand-blue"
                 />
               </label>
               <label className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 shadow-sm shadow-black/20">
-                <span className="text-sm text-slate-300">Exact GPS Coordinates</span>
+                <span className="text-sm text-slate-600">Exact GPS Coordinates</span>
                 <input
                   type="checkbox"
                   checked={showGps}
                   onChange={(e) => setShowGps(e.target.checked)}
-                  className="h-4 w-4 accent-brand-emerald"
+                  className="h-4 w-4 accent-brand-blue"
                 />
               </label>
             </div>
           </section>
 
           <section>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-emerald">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
               Operational Rules
             </p>
             <div className="mt-3 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Geofence Accuracy
                 </label>
                 <div className="mt-1.5 grid grid-cols-4 gap-1.5">
@@ -307,8 +307,8 @@ export default function SetupCustomizePanel({
                       onClick={() => setRadius(preset)}
                       className={`rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors ${
                         radius === preset
-                          ? "bg-brand-emerald text-brand-slate"
-                          : "bg-brand-slate-light/40 text-slate-400 shadow-sm shadow-black/20 hover:text-white"
+                          ? "bg-brand-blue text-white"
+                          : "bg-brand-slate-light/40 text-slate-500 shadow-sm shadow-black/20 hover:text-slate-900"
                       }`}
                     >
                       {preset}m
@@ -318,13 +318,13 @@ export default function SetupCustomizePanel({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Currency
                 </label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as Currency)}
-                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -336,7 +336,7 @@ export default function SetupCustomizePanel({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400">
+                  <label className="block text-xs font-medium text-slate-500">
                     Default Hourly Rate
                   </label>
                   <input
@@ -345,11 +345,11 @@ export default function SetupCustomizePanel({
                     step={0.5}
                     value={defaultHourlyRate}
                     onChange={(e) => setDefaultHourlyRate(Number(e.target.value))}
-                    className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                    className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400">
+                  <label className="block text-xs font-medium text-slate-500">
                     Overtime Multiplier
                   </label>
                   <input
@@ -360,7 +360,7 @@ export default function SetupCustomizePanel({
                     onChange={(e) =>
                       setDefaultOvertimeMultiplier(Number(e.target.value))
                     }
-                    className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+                    className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                 </div>
               </div>
@@ -381,14 +381,14 @@ export default function SetupCustomizePanel({
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save Setup"}
           </button>
 
           <a
             href="/dashboard/settings"
-            className="block text-center text-xs font-medium text-slate-500 hover:text-brand-sky"
+            className="block text-center text-xs font-medium text-slate-400 hover:text-brand-blue"
           >
             Manage address, staff pay rates & white-label →
           </a>

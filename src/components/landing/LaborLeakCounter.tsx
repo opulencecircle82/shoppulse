@@ -60,10 +60,10 @@ export default function LaborLeakCounter() {
               🚨
             </motion.span>
             <div>
-              <p className="text-base font-medium leading-snug text-slate-200">
+              <p className="text-base font-medium leading-snug text-slate-700">
                 {active.text}
               </p>
-              <span className="mt-1 inline-block rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400">
+              <span className="mt-1 inline-block rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-600">
                 +${active.amount.toFixed(2)} loss
               </span>
             </div>
@@ -71,8 +71,8 @@ export default function LaborLeakCounter() {
         </AnimatePresence>
       </div>
 
-      <div className="mt-6 border-t border-slate-700/60 pt-6 text-center">
-        <p className="text-xs font-medium uppercase tracking-widest text-slate-400">
+      <div className="mt-6 border-t border-slate-200 pt-6 text-center">
+        <p className="text-xs font-medium uppercase tracking-widest text-slate-500">
           Total Lost This Session
         </p>
         <AnimatePresence mode="popLayout">
@@ -82,7 +82,7 @@ export default function LaborLeakCounter() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mt-1 block font-mono text-5xl font-bold tabular-nums text-red-400 sm:text-6xl"
+            className="mt-1 block font-mono text-5xl font-bold tabular-nums text-red-600 sm:text-6xl"
           >
             {formatLoss(total)}
           </motion.span>

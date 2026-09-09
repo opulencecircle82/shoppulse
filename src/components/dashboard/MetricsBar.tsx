@@ -46,7 +46,7 @@ export default function MetricsBar({
     {
       label: "Active Field Staff",
       value: metrics.activeFieldStaff.toString(),
-      accent: "text-brand-sky",
+      accent: "text-brand-blue",
     },
     {
       label: "Pending Job Approvals",
@@ -56,7 +56,7 @@ export default function MetricsBar({
     {
       label: "Total Revenue",
       value: `${currency} ${metrics.totalRevenue.toFixed(2)}`,
-      accent: "text-white",
+      accent: "text-slate-900",
     },
   ];
 
@@ -67,7 +67,7 @@ export default function MetricsBar({
           key={card.label}
           className="rounded-2xl bg-brand-slate-light/40 p-5 shadow-md shadow-black/20"
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             {card.label}
           </p>
           <p className={`mt-2 text-2xl font-bold ${card.accent}`}>

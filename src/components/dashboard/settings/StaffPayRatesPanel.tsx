@@ -34,14 +34,14 @@ function StaffRow({ member }: { member: StaffMember }) {
     <div className="rounded-2xl bg-brand-slate p-5 shadow-md shadow-black/20">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-slate-900">
             {member.full_name}
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             {member.email} &middot; {member.role}
           </p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className="flex items-center gap-2 text-xs text-slate-500">
           <input
             type="checkbox"
             checked={isActive}
@@ -54,7 +54,7 @@ function StaffRow({ member }: { member: StaffMember }) {
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Hourly Rate
           </label>
           <input
@@ -63,11 +63,11 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.5}
             value={hourlyRate}
             onChange={(e) => setHourlyRate(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Overtime Multiplier
           </label>
           <input
@@ -76,7 +76,7 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.1}
             value={overtimeMultiplier}
             onChange={(e) => setOvertimeMultiplier(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
       </div>
@@ -86,7 +86,7 @@ function StaffRow({ member }: { member: StaffMember }) {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="rounded-full bg-brand-emerald px-4 py-2 text-xs font-semibold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save"}
         </button>
@@ -129,14 +129,14 @@ export default function StaffPayRatesPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first to manage staff pay rates.
       </p>
     );
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-400">Loading staff...</p>;
+    return <p className="text-sm text-slate-500">Loading staff...</p>;
   }
 
   return (
@@ -149,7 +149,7 @@ export default function StaffPayRatesPanel({
         <button
           type="button"
           onClick={onContinue}
-          className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+          className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
         >
           Continue →
         </button>

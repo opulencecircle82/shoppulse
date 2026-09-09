@@ -36,7 +36,7 @@ export default function StaffManagementTab({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="rounded-2xl bg-brand-slate-light/40 px-5 py-3 shadow-md shadow-black/20">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Seat Usage
           </p>
           <p
@@ -52,16 +52,16 @@ export default function StaffManagementTab({
         <button
           type="button"
           onClick={() => setShowAddStaff(true)}
-          className="rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+          className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
         >
           + Add Staff
         </button>
       </div>
 
-      {loading && <p className="mt-6 text-sm text-slate-400">Loading staff...</p>}
+      {loading && <p className="mt-6 text-sm text-slate-500">Loading staff...</p>}
 
       {!loading && nonOwnerStaff.length === 0 && (
-        <p className="mt-6 text-sm text-slate-400">
+        <p className="mt-6 text-sm text-slate-500">
           No staff added yet. Use &quot;+ Add Staff&quot; to bring on your
           first technician.
         </p>
@@ -70,7 +70,7 @@ export default function StaffManagementTab({
       {!loading && nonOwnerStaff.length > 0 && (
         <div className="mt-6 overflow-x-auto rounded-2xl shadow-md shadow-black/20">
           <table className="w-full text-left text-sm">
-            <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-400">
+            <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Contact</th>
@@ -80,20 +80,20 @@ export default function StaffManagementTab({
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700">
+            <tbody className="divide-y divide-slate-200">
               {nonOwnerStaff.map((member) => (
                 <tr key={member.id} className="hover:bg-brand-slate-light/20">
-                  <td className="px-4 py-3 font-medium text-white">
+                  <td className="px-4 py-3 font-medium text-slate-900">
                     {member.full_name}
                   </td>
-                  <td className="px-4 py-3 text-slate-300">
+                  <td className="px-4 py-3 text-slate-600">
                     <div>{member.email}</div>
                     {member.phone && (
-                      <div className="text-xs text-slate-500">{member.phone}</div>
+                      <div className="text-xs text-slate-400">{member.phone}</div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-300">{member.role}</td>
-                  <td className="px-4 py-3 text-slate-300">
+                  <td className="px-4 py-3 text-slate-600">{member.role}</td>
+                  <td className="px-4 py-3 text-slate-600">
                     ${member.hourly_rate.toFixed(2)}/hr
                   </td>
                   <td className="px-4 py-3">
@@ -101,7 +101,7 @@ export default function StaffManagementTab({
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                         member.is_active
                           ? "bg-brand-emerald/15 text-brand-emerald"
-                          : "bg-slate-700/50 text-slate-400"
+                          : "bg-slate-200 text-slate-500"
                       }`}
                     >
                       {member.is_active ? "Active" : "Inactive"}
@@ -112,7 +112,7 @@ export default function StaffManagementTab({
                       <button
                         type="button"
                         onClick={() => toggleActive(member)}
-                        className="rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-sky hover:text-brand-sky"
+                        className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
                       >
                         {member.is_active ? "Deactivate" : "Activate"}
                       </button>

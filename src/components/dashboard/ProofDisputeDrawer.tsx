@@ -18,7 +18,7 @@ function ProofPhoto({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
         {label}
       </p>
       <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-brand-slate-light/30 shadow-sm shadow-black/20">
@@ -27,7 +27,7 @@ function ProofPhoto({
           <img src={url} alt={label} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-400">
               No photo yet — appears once submitted via mobile app
             </span>
           </div>
@@ -35,21 +35,21 @@ function ProofPhoto({
 
         {url && shop.watermark_show_logo && (
           <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-md bg-black/50 px-2 py-1 backdrop-blur">
-            <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-emerald text-[8px] font-bold text-brand-slate">
+            <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
               {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
             </span>
-            <span className="text-[10px] font-semibold text-white">
+            <span className="text-[10px] font-semibold text-slate-900">
               {shop.shop_name}
             </span>
           </div>
         )}
         {url && shop.watermark_show_timestamp && (
-          <div className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
+          <div className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
             {timestamp ? new Date(timestamp).toLocaleString() : "—"}
           </div>
         )}
         {url && shop.watermark_show_gps && (
-          <div className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
+          <div className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
             GPS Verified
           </div>
         )}
@@ -120,17 +120,17 @@ export default function ProofDisputeDrawer({
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-slate-900">
               Proof &amp; Dispute Review
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-400">
               {ticket.client_name} &middot; {ticket.service_type}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-500 hover:text-slate-900"
             aria-label="Close"
           >
             ✕
@@ -158,7 +158,7 @@ export default function ProofDisputeDrawer({
         </div>
 
         <div className="mt-5">
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Dispute Notes
           </label>
           <textarea
@@ -166,7 +166,7 @@ export default function ProofDisputeDrawer({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="What did the client say was wrong with this job?"
-            className="mt-1.5 w-full rounded-xl bg-brand-slate-light/40 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-brand-slate-light/40 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
@@ -194,7 +194,7 @@ export default function ProofDisputeDrawer({
             {saving === "reject" ? "Rejecting..." : "Reject Dispute"}
           </button>
           {!notes.trim() && (
-            <p className="text-center text-xs text-slate-500">
+            <p className="text-center text-xs text-slate-400">
               Add dispute notes above to reject this job.
             </p>
           )}

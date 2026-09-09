@@ -20,7 +20,7 @@ export default function WhiteLabelPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first.
       </p>
     );
@@ -29,19 +29,19 @@ export default function WhiteLabelPanel({
   if (!shop.has_marketing_tier) {
     return (
       <div className="rounded-2xl bg-brand-slate p-8 text-center shadow-md shadow-black/20">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-700/50 text-slate-400">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-500">
           <Lock className="h-5 w-5" />
         </span>
-        <h3 className="mt-4 text-base font-semibold text-white">
+        <h3 className="mt-4 text-base font-semibold text-slate-900">
           Marketing Suite Add-on Required
         </h3>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-400">
+        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
           Unlock a whitelabel hosted business site and the Local Ad Network
           placement engine for +$50/month.
         </p>
         <Link
           href="/#pricing"
-          className="mt-5 inline-block rounded-full bg-brand-emerald px-6 py-2.5 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)]"
+          className="mt-5 inline-block rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
         >
           Upgrade to Marketing Suite
         </Link>
@@ -74,14 +74,14 @@ export default function WhiteLabelPanel({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Custom Domain
         </label>
         <input
           type="text"
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-emerald focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           placeholder="book.apexpropertyservices.com"
         />
       </div>
@@ -100,7 +100,7 @@ export default function WhiteLabelPanel({
       <button
         type="submit"
         disabled={saving}
-        className="rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {saving ? "Saving..." : "Save Changes"}
       </button>

@@ -32,10 +32,10 @@ export default function FeaturesSection() {
     <section id="features" className="bg-brand-slate-light/30 py-24">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand-emerald/30 bg-brand-emerald/10 px-3 py-1 text-xs font-medium text-brand-emerald">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue">
             Features
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Everything you need to enforce proof-of-work
           </h2>
         </div>
@@ -44,15 +44,15 @@ export default function FeaturesSection() {
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="rounded-3xl bg-brand-slate p-8 shadow-xl shadow-black/30 transition-shadow hover:shadow-2xl hover:shadow-brand-emerald/10"
+              className="rounded-3xl bg-brand-slate p-8 shadow-xl shadow-black/30 transition-shadow hover:shadow-2xl hover:shadow-brand-blue/10"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-emerald/15 text-brand-emerald">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-blue/15 text-brand-blue">
                 <feature.icon className="h-5 w-5" />
               </span>
-              <h3 className="mt-5 text-lg font-semibold text-white">
+              <h3 className="mt-5 text-lg font-semibold text-slate-900">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+              <p className="mt-2 text-sm leading-relaxed text-slate-500">
                 {feature.description}
               </p>
             </div>

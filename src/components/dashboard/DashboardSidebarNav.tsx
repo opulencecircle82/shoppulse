@@ -30,7 +30,7 @@ export default function DashboardSidebarNav({
 }) {
   return (
     <nav className="hidden w-56 shrink-0 lg:block">
-      <p className="px-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <p className="px-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Menu
       </p>
       <div className="mt-3 space-y-1">
@@ -44,8 +44,8 @@ export default function DashboardSidebarNav({
               onClick={() => onSelectTab(tab.id)}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-brand-emerald/15 text-brand-emerald"
-                  : "text-slate-400 hover:bg-brand-slate-light/40 hover:text-white"
+                  ? "bg-brand-blue/15 text-brand-blue"
+                  : "text-slate-500 hover:bg-brand-slate-light/40 hover:text-slate-900"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />

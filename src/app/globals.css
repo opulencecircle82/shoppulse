@@ -1,12 +1,24 @@
 @import "tailwindcss";
 
+/*
+ * Light theme, blue-primary motif (emerald kept as the secondary /
+ * success color). The brand-slate* token NAMES are unchanged on purpose
+ * so every existing `bg-brand-slate` / `bg-brand-slate-light` reference
+ * across the app repaints for free: brand-slate is now the app's base
+ * light surface (page bg + recessed input fields), brand-slate-light is
+ * the elevated white card/panel tone one step "up" from it — the same
+ * structural relationship the dark theme used, just inverted in
+ * lightness direction.
+ */
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --color-brand-slate: #0f172a;
-  --color-brand-slate-light: #1e293b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --color-brand-slate: #f1f5f9;
+  --color-brand-slate-light: #ffffff;
   --color-brand-emerald: #10b981;
-  --color-brand-sky: #38bdf8;
+  --color-brand-sky: #0ea5e9;
+  --color-brand-blue: #2563eb;
+  --color-brand-blue-dark: #1d4ed8;
 }
 
 @theme inline {
@@ -16,6 +28,8 @@
   --color-brand-slate-light: var(--color-brand-slate-light);
   --color-brand-emerald: var(--color-brand-emerald);
   --color-brand-sky: var(--color-brand-sky);
+  --color-brand-blue: var(--color-brand-blue);
+  --color-brand-blue-dark: var(--color-brand-blue-dark);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

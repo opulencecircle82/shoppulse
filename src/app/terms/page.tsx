@@ -3,14 +3,14 @@ import Link from "next/link";
 export default function TermsPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-brand-slate px-6 text-center">
-      <h1 className="text-3xl font-bold text-white">Terms of Service</h1>
-      <p className="mt-2 max-w-md text-sm text-slate-400">
+      <h1 className="text-3xl font-bold text-slate-900">Terms of Service</h1>
+      <p className="mt-2 max-w-md text-sm text-slate-500">
         Our terms of service are being finalized and will be published here
         shortly.
       </p>
       <Link
         href="/"
-        className="mt-6 text-sm font-medium text-brand-emerald hover:text-emerald-400"
+        className="mt-6 text-sm font-medium text-brand-blue hover:text-blue-400"
       >
         ← Back to home
       </Link>
