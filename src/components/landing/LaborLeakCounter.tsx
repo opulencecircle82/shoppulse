@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { MapPin } from "lucide-react";
 
 const SCENARIOS = [
   { text: "Tech clocked in 2 miles away from job site", amount: 35 },
@@ -54,10 +55,10 @@ export default function LaborLeakCounter() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="mt-0.5 shrink-0 text-lg sm:mt-0"
+              className="mt-0.5 shrink-0 text-brand-orange sm:mt-0"
               aria-hidden
             >
-              🚨
+              <MapPin className="h-5 w-5" />
             </motion.span>
             <div>
               <p className="text-base font-medium leading-snug text-slate-700">
@@ -82,7 +83,7 @@ export default function LaborLeakCounter() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="mt-1 block font-mono text-5xl font-bold tabular-nums text-red-600 sm:text-6xl"
+            className="mt-1 block font-mono text-5xl font-bold tabular-nums text-brand-orange sm:text-6xl"
           >
             {formatLoss(total)}
           </motion.span>

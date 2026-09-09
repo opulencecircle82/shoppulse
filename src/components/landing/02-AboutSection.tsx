@@ -5,6 +5,17 @@ export default function AboutSection() {
   return (
     <section id="about" className="bg-brand-slate py-24">
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
+        <div className="relative mx-auto -mt-4 h-64 w-full max-w-lg sm:h-80">
+          <Image
+            src="/images/hero-visual-cutout.png"
+            alt="Field technicians reviewing a job on ShopPulse from the job site"
+            fill
+            sizes="(min-width: 1024px) 512px, 90vw"
+            className="object-contain object-bottom"
+            priority={false}
+          />
+        </div>
+
         <div className="mx-auto max-w-2xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-sky/10 px-3 py-1 text-xs font-medium text-brand-blue">
             About ShopPulse
@@ -17,17 +28,6 @@ export default function AboutSection() {
             cleaning, HVAC, plumbing, landscaping, and mobile auto — to
             eliminate profit leaks, time theft, and customer chargebacks.
           </p>
-        </div>
-
-        <div className="relative mx-auto mt-12 aspect-[16/9] max-w-4xl overflow-hidden rounded-3xl shadow-xl shadow-slate-900/10">
-          <Image
-            src="/images/hero-visual.jpg"
-            alt="Field technicians reviewing a job on ShopPulse from the job site"
-            fill
-            sizes="(min-width: 1024px) 896px, 100vw"
-            className="object-cover"
-            priority={false}
-          />
         </div>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2">
