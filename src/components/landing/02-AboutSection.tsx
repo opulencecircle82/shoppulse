@@ -17,12 +17,12 @@ export default function AboutSection() {
           />
           <CurvedLinesBackground className="opacity-50" />
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-[26rem] w-full max-w-3xl opacity-25 sm:h-[32rem]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] w-full opacity-25 sm:h-[38rem] lg:h-[44rem]">
             <Image
               src="/images/hero-visual-cutout.png"
               alt="Field technicians reviewing a job on ShopPulse from the job site"
               fill
-              sizes="(min-width: 1024px) 768px, 100vw"
+              sizes="(min-width: 1024px) 1024px, 100vw"
               className="object-contain object-top"
               priority={false}
             />
