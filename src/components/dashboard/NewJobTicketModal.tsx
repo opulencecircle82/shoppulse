@@ -4,6 +4,81 @@ import { useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { StaffMember } from "@/lib/supabase/types";
 
+function ChecklistEditor({
+  label,
+  placeholder,
+  items,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  items: string[];
+  onChange: (items: string[]) => void;
+}) {
+  const [draft, setDraft] = useState("");
+
+  function addItem() {
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    onChange([...items, trimmed]);
+    setDraft("");
+  }
+
+  return (
+    <div>
+      <label className="block text-xs font-medium text-slate-500">{label}</label>
+      <p className="mt-0.5 text-xs text-slate-400">
+        Shown to the technician on the mobile app before they can take the
+        proof photo.
+      </p>
+
+      {items.length > 0 && (
+        <ul className="mt-2 space-y-1.5">
+          {items.map((item, index) => (
+            <li
+              key={index}
+              className="flex items-center justify-between gap-2 rounded-lg bg-brand-slate-light/40 px-3 py-1.5 text-sm text-slate-900"
+            >
+              <span>{item}</span>
+              <button
+                type="button"
+                onClick={() => onChange(items.filter((_, i) => i !== index))}
+                className="shrink-0 text-slate-400 hover:text-red-500"
+                aria-label={`Remove ${item}`}
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-2 flex gap-2">
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addItem();
+            }
+          }}
+          className="w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={addItem}
+          className="shrink-0 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function NewJobTicketModal({
   shopId,
   staff,
@@ -22,6 +97,8 @@ export default function NewJobTicketModal({
   const [serviceType, setServiceType] = useState("");
   const [assignedStaffId, setAssignedStaffId] = useState("");
   const [estimatedHours, setEstimatedHours] = useState(1);
+  const [startChecklist, setStartChecklist] = useState<string[]>([]);
+  const [endChecklist, setEndChecklist] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +109,8 @@ export default function NewJobTicketModal({
 
     const { error: insertError } = await supabase.from("job_tickets").insert({
       shop_id: shopId,
+      start_checklist: startChecklist,
+      end_checklist: endChecklist,
       client_name: clientName,
       client_email: clientEmail,
       client_phone: clientPhone || null,
@@ -173,6 +252,20 @@ export default function NewJobTicketModal({
               ))}
             </select>
           </div>
+
+          <ChecklistEditor
+            label="Start Task Checklist"
+            placeholder="e.g. Bring tools"
+            items={startChecklist}
+            onChange={setStartChecklist}
+          />
+
+          <ChecklistEditor
+            label="End Task Checklist"
+            placeholder="e.g. Clean up work area"
+            items={endChecklist}
+            onChange={setEndChecklist}
+          />
 
           {error && (
             <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">

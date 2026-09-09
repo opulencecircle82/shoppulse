@@ -63,6 +63,8 @@ export type JobTicket = {
   status: JobStatus;
   start_photo_url: string | null;
   end_photo_url: string | null;
+  start_checklist: string[];
+  end_checklist: string[];
   started_at: string | null;
   completed_at: string | null;
   estimated_hours: number;
