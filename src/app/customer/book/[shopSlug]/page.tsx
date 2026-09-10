@@ -7,8 +7,10 @@ import {
   fetchShopBySlug,
   submitBooking,
   checkDateAvailability,
+  listPublicShopServices,
   type BookingShop,
   type DateAvailability,
+  type PublicService,
 } from "@/lib/customer/bookings";
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
 import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
@@ -28,6 +30,7 @@ export default function BookJobPage() {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [shop, setShop] = useState<BookingShop | null>(null);
+  const [services, setServices] = useState<PublicService[]>([]);
   const [notFound, setNotFound] = useState(false);
 
   const [serviceType, setServiceType] = useState("");
@@ -56,6 +59,7 @@ export default function BookJobPage() {
     setShop(shopRow);
     setCustomer(current);
     setLoading(false);
+    listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
   }, [shopSlug]);
 
   useEffect(() => {
@@ -174,7 +178,49 @@ export default function BookJobPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-3 rounded-2xl bg-white p-6 shadow-sm shadow-slate-900/5">
+        {shop && (shop.default_hourly_rate > 0 || services.length > 0) && (
+          <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Pricing
+            </p>
+            {shop.default_hourly_rate > 0 && (
+              <p className="mt-1.5 text-sm text-slate-700">
+                Standard Labor Fee:{" "}
+                <span className="font-semibold">
+                  {shop.currency} {shop.default_hourly_rate.toFixed(2)}/hr
+                </span>
+              </p>
+            )}
+            {services.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-start justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-700">{service.name}</p>
+                      {service.description && (
+                        <p className="text-xs text-slate-400">{service.description}</p>
+                      )}
+                    </div>
+                    <p className="shrink-0 text-sm font-semibold text-slate-900">
+                      {shop.currency} {service.price.toFixed(2)}
+                      {service.extra_cost > 0 && (
+                        <span className="text-xs font-normal text-slate-400">
+                          {" "}
+                          +{service.extra_cost.toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-2xl bg-white p-6 shadow-sm shadow-slate-900/5">
           <div>
             <label className="block text-xs font-medium text-slate-500">
               What do you need done?

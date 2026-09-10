@@ -78,9 +78,39 @@ export default function ProofDisputeDrawer({
   async function handleApprove() {
     setSaving("approve");
     setError(null);
+
+    // Approving previously left total_invoice_amount at 0 until the owner
+    // separately filled out and saved the invoice modal that pops up next —
+    // easy to skip past without noticing, leaving staff/customer with no
+    // receipt at all. Now Approve computes a real starting invoice right
+    // away (actual hours from start/end timestamps × the shop's standard
+    // rate, plus any selected products), so there's always something there
+    // even if the owner just closes the modal instead of adjusting it.
+    const actualHours =
+      ticket.started_at && ticket.completed_at
+        ? Math.max(
+            0,
+            (new Date(ticket.completed_at).getTime() -
+              new Date(ticket.started_at).getTime()) /
+              3600000
+          )
+        : ticket.estimated_hours || 0;
+    const laborCost = Math.round(actualHours * shop.default_hourly_rate * 100) / 100;
+    const productsCost = ticket.selected_products.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    const totalInvoiceAmount = laborCost + productsCost;
+
     const { error: updateError } = await supabase
       .from("job_tickets")
-      .update({ status: "APPROVED", dispute_notes: notes || null })
+      .update({
+        status: "APPROVED",
+        dispute_notes: notes || null,
+        actual_hours: actualHours,
+        total_labor_cost: laborCost,
+        total_invoice_amount: totalInvoiceAmount,
+      })
       .eq("id", ticket.id);
     setSaving(null);
 
@@ -90,7 +120,13 @@ export default function ProofDisputeDrawer({
     }
 
     onChanged();
-    onApproved({ ...ticket, status: "APPROVED" });
+    onApproved({
+      ...ticket,
+      status: "APPROVED",
+      actual_hours: actualHours,
+      total_labor_cost: laborCost,
+      total_invoice_amount: totalInvoiceAmount,
+    });
     onClose();
   }
 
