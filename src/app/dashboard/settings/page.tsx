@@ -10,9 +10,11 @@ import GeofencePanel from "@/components/dashboard/settings/GeofencePanel";
 import StaffPayRatesPanel from "@/components/dashboard/settings/StaffPayRatesPanel";
 import WatermarkPanel from "@/components/dashboard/settings/WatermarkPanel";
 import WhiteLabelPanel from "@/components/dashboard/settings/WhiteLabelPanel";
+import WorkingHoursPanel from "@/components/dashboard/settings/WorkingHoursPanel";
 
 const TABS = [
   { id: "profile", label: "Company Profile" },
+  { id: "hours", label: "Working Hours" },
   { id: "geofence", label: "Geofence & Theft Tolerance" },
   { id: "staff", label: "Staff Pay Rates" },
   { id: "watermark", label: "Proof-of-Work Branding" },
@@ -137,6 +139,9 @@ export default function SettingsPage() {
           <div className="rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30 sm:p-8">
             {activeTab === "profile" && (
               <CompanyProfilePanel shop={shop} onSaved={handleProfileSaved} />
+            )}
+            {activeTab === "hours" && (
+              <WorkingHoursPanel shop={shop} onSaved={refresh} />
             )}
             {activeTab === "geofence" && (
               <GeofencePanel

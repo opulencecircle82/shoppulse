@@ -40,17 +40,48 @@ export type PublicShop = {
   logo_url: string | null;
   city: string | null;
   business_category: string | null;
+  business_hours_open: string | null;
+  business_hours_close: string | null;
+  business_days: string[];
 };
 
 /** Powers the "browse services near your city" listing. Only returns
  * shops that opted into the public directory (is_publicly_listed). */
-export async function listPublicShops(city?: string): Promise<PublicShop[]> {
+export async function listPublicShops(params?: {
+  city?: string;
+  category?: string;
+  search?: string;
+}): Promise<PublicShop[]> {
   const { data, error } = await supabase.rpc("list_public_shops", {
-    p_city: city || null,
+    p_city: params?.city || null,
+    p_category: params?.category || null,
+    p_search: params?.search || null,
   });
 
   if (error) throw error;
   return (data ?? []) as PublicShop[];
+}
+
+const DAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+/** Compares against the customer's local device clock — shop and
+ * customer are assumed to share a timezone for a local service business,
+ * so no server-side timezone handling is needed for this. */
+export function isShopOpenNow(shop: PublicShop): boolean {
+  if (!shop.business_hours_open || !shop.business_hours_close) return false;
+
+  const now = new Date();
+  const today = DAY_CODES[now.getDay()];
+  if (!shop.business_days.includes(today)) return false;
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const [openH, openM] = shop.business_hours_open.split(":").map(Number);
+  const [closeH, closeM] = shop.business_hours_close.split(":").map(Number);
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
+
+  return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
 }
 
 export async function submitBooking(params: {

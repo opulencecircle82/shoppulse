@@ -29,6 +29,9 @@ export type Shop = {
   city: string | null;
   business_category: string | null;
   is_publicly_listed: boolean;
+  business_hours_open: string | null;
+  business_hours_close: string | null;
+  business_days: string[];
 };
 
 export type StaffMember = {
