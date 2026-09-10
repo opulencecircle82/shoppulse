@@ -239,6 +239,14 @@ export default function CustomizeMobileAppTab({
   const [previewTarget, setPreviewTarget] = useState<"staff" | "customer">(
     "staff"
   );
+  const [bookingLinkCopied, setBookingLinkCopied] = useState(false);
+
+  function copyBookingLink() {
+    const link = `${window.location.origin}/customer/book/${shop.slug}`;
+    navigator.clipboard.writeText(link);
+    setBookingLinkCopied(true);
+    setTimeout(() => setBookingLinkCopied(false), 2000);
+  }
 
   useEffect(() => {
     const linkId = "mobile-app-font-preview";
@@ -316,6 +324,26 @@ export default function CustomizeMobileAppTab({
           <Smartphone className="h-4 w-4" />
           Download App
         </a>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
+        <div>
+          <p className="text-sm font-semibold text-slate-900">
+            Customer Booking Link
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Share this so customers can create an account, request a job, and
+            track every job they&apos;ve booked with you. Post it on your
+            Facebook page, website, or send it directly.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={copyBookingLink}
+          className="flex shrink-0 items-center gap-2 rounded-full border border-brand-blue/40 px-5 py-2.5 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
+        >
+          {bookingLinkCopied ? "Link copied!" : "Copy Booking Link"}
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
