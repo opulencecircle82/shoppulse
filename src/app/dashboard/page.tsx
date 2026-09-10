@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
@@ -136,6 +137,12 @@ export default function DashboardPage() {
                   {tab.label}
                 </button>
               ))}
+              <Link
+                href="/dashboard/settings"
+                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-brand-slate-light/40 hover:text-slate-900"
+              >
+                Business Settings
+              </Link>
             </div>
 
             {activeTab === "board" && (
