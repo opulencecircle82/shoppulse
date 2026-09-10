@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
 import { signOutCustomer } from "@/lib/customer/customerAuth";
+import CustomerNotificationBell from "./CustomerNotificationBell";
 
 const STATUS_STYLES: Record<string, string> = {
   UNASSIGNED: "bg-slate-100 text-slate-600",
@@ -48,13 +49,16 @@ export default function CustomerHomeScreen({
             <p className="text-lg font-bold text-slate-900">Hi, {customer.fullName}</p>
             <p className="text-xs text-slate-500">Your ShopPulse jobs</p>
           </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="text-sm font-medium text-slate-500 hover:text-slate-900"
-          >
-            Sign Out
-          </button>
+          <div className="flex items-center gap-1">
+            <CustomerNotificationBell customerId={customer.id} />
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="text-sm font-medium text-slate-500 hover:text-slate-900"
+            >
+              Sign Out
+            </button>
+          </div>
         </header>
 
         <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm shadow-slate-900/5">

@@ -2,14 +2,17 @@
 
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
+import TechNotificationBell from "./TechNotificationBell";
 
 export default function TechHomeScreen({
   shop,
+  staffId,
   task,
   onOpenTask,
   onSignedOut,
 }: {
   shop: Shop;
+  staffId: string;
   task: JobTicket | null;
   onOpenTask: (ticket: JobTicket) => void;
   onSignedOut: () => void;
@@ -25,13 +28,16 @@ export default function TechHomeScreen({
     <main className="min-h-screen bg-brand-navy">
       <header className="flex items-center justify-between px-5 py-4">
         <h1 className="text-lg font-bold text-white">{shop.shop_name}</h1>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="text-sm font-medium text-slate-400 hover:text-white"
-        >
-          Sign Out
-        </button>
+        <div className="flex items-center gap-1">
+          <TechNotificationBell staffId={staffId} />
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="text-sm font-medium text-slate-400 hover:text-white"
+          >
+            Sign Out
+          </button>
+        </div>
       </header>
 
       <div className="px-5 pb-10">

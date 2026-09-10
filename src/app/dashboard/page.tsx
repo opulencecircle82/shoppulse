@@ -24,6 +24,7 @@ import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
 } from "@/components/dashboard/DashboardSidebarNav";
+import NotificationBell from "@/components/dashboard/NotificationBell";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
@@ -33,7 +34,7 @@ const LiveFieldMap = dynamic(
 export default function DashboardPage() {
   const router = useRouter();
   const { checked } = useRequireAuth();
-  const { loading: shopLoading, shop, refresh: refreshShop } = useShop();
+  const { loading: shopLoading, shop, staffMember, refresh: refreshShop } = useShop();
   const { tickets, loading: ticketsLoading, refresh: refreshTickets } =
     useJobTickets(shop?.id);
   const { staff, loading: staffLoading, refresh: refreshStaff } =
@@ -99,6 +100,7 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm text-slate-500">Owner Command Center</p>
           </div>
           <div className="flex items-center gap-3">
+            {staffMember && <NotificationBell staffId={staffMember.id} />}
             <button
               type="button"
               onClick={() => setSetupOpenMobile(true)}

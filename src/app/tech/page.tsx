@@ -89,6 +89,7 @@ export default function TechAppPage() {
     return (
       <TechHomeScreen
         shop={shop}
+        staffId={staffContext!.staffId}
         task={task}
         onOpenTask={(ticket) => {
           setSelectedTicket(ticket);
