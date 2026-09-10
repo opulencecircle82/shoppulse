@@ -38,6 +38,7 @@ export type Shop = {
   region: string | null;
   barangay: string | null;
   default_tasks: string[];
+  accepted_payment_methods: string[];
 };
 
 export type StaffMember = {
@@ -92,6 +93,8 @@ export type JobTicket = {
   preferred_date: string | null;
   description: string | null;
   request_photo_url: string | null;
+  selected_products: { product_id: string; name: string; price: number; quantity: number }[];
+  payment_method: string | null;
   created_at: string;
 };
 

@@ -28,11 +28,20 @@ export default function InvoiceGeneratorModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const productsCost = useMemo(
+    () =>
+      ticket.selected_products.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      ),
+    [ticket.selected_products]
+  );
+
   const laborCost = useMemo(
     () => Math.round(actualHours * hourlyRate * 100) / 100,
     [actualHours, hourlyRate]
   );
-  const total = mode === "hourly" ? laborCost : flatAmount;
+  const total = (mode === "hourly" ? laborCost : flatAmount) + productsCost;
 
   async function handleSave() {
     setSaving(true);
@@ -153,6 +162,20 @@ export default function InvoiceGeneratorModal({
               onChange={(e) => setFlatAmount(Number(e.target.value))}
               className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
+          </div>
+        )}
+
+        {ticket.selected_products.length > 0 && (
+          <div className="mt-4 space-y-1 rounded-lg bg-brand-slate-light/40 px-4 py-3">
+            <p className="text-xs font-medium text-slate-500">Products</p>
+            {ticket.selected_products.map((item, index) => (
+              <div key={index} className="flex justify-between text-xs text-slate-600">
+                <span>{item.name}</span>
+                <span>
+                  {currency} {(item.price * item.quantity).toFixed(2)}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 

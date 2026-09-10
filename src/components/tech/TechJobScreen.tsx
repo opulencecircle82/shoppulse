@@ -111,9 +111,49 @@ export default function TechJobScreen({
       )}
 
       {!isActionable ? (
-        <p className="mt-6 text-sm text-slate-400">
-          This job is {ticket.status}. No action needed here.
-        </p>
+        <div className="mt-6">
+          <p className="text-sm text-slate-400">
+            This job is {ticket.status}. No action needed here.
+          </p>
+
+          {ticket.total_invoice_amount > 0 && (
+            <div className="mt-4 rounded-2xl bg-white/5 p-4">
+              <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
+                Receipt — Show to Customer
+              </p>
+              {ticket.selected_products.length > 0 && (
+                <div className="mt-3 space-y-1.5">
+                  {ticket.selected_products.map((item, index) => (
+                    <div key={index} className="flex justify-between text-sm text-slate-300">
+                      <span>
+                        {item.name}
+                        {item.quantity > 1 ? ` ×${item.quantity}` : ""}
+                      </span>
+                      <span>
+                        {shop.currency} {(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+                <span className="text-sm font-medium text-white">Total</span>
+                <span className="text-lg font-bold text-brand-emerald">
+                  {shop.currency} {ticket.total_invoice_amount.toFixed(2)}
+                </span>
+              </div>
+              {ticket.payment_method ? (
+                <p className="mt-2 text-xs text-slate-400">
+                  Customer selected: {ticket.payment_method}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs text-slate-500">
+                  Customer hasn&apos;t chosen a payment method yet.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       ) : (
         <div className="mt-6">
           <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">

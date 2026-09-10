@@ -27,6 +27,9 @@ export type BookingShop = {
   longitude: number | null;
   avg_rating: number | null;
   review_count: number;
+  default_hourly_rate: number;
+  currency: string;
+  accepted_payment_methods: string[];
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the

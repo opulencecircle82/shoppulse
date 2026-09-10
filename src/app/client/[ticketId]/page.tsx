@@ -41,6 +41,11 @@ type ClientTicket = {
   start_lng: number | null;
   end_lat: number | null;
   end_lng: number | null;
+  total_invoice_amount: number | null;
+  currency: string;
+  selected_products: { product_id: string; name: string; price: number; quantity: number }[];
+  payment_method: string | null;
+  accepted_payment_methods: string[];
 };
 
 function ProofPhoto({
@@ -105,6 +110,7 @@ export default function ClientTicketPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewPhotoUrl, setReviewPhotoUrl] = useState<string | null>(null);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [selectingPayment, setSelectingPayment] = useState(false);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -170,6 +176,16 @@ export default function ClientTicketPage() {
     } finally {
       setReviewSubmitting(false);
     }
+  }
+
+  async function handleSelectPayment(method: string) {
+    setSelectingPayment(true);
+    await supabase.rpc("client_select_payment_method", {
+      p_ticket_id: ticketId,
+      p_method: method,
+    });
+    setSelectingPayment(false);
+    await load();
   }
 
   async function handleApprove() {
@@ -358,6 +374,61 @@ export default function ClientTicketPage() {
                   Cancel
                 </button>
               </div>
+            </div>
+          )}
+
+          {ticket.total_invoice_amount !== null && ticket.total_invoice_amount > 0 && (
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Receipt
+              </p>
+              {ticket.selected_products.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {ticket.selected_products.map((item, index) => (
+                    <div key={index} className="flex justify-between text-sm text-slate-600">
+                      <span>
+                        {item.name}
+                        {item.quantity > 1 ? ` ×${item.quantity}` : ""}
+                      </span>
+                      <span>
+                        {ticket.currency} {(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-50 px-3.5 py-2.5">
+                <span className="text-sm font-medium text-slate-700">Total</span>
+                <span className="text-lg font-bold text-brand-emerald">
+                  {ticket.currency} {ticket.total_invoice_amount.toFixed(2)}
+                </span>
+              </div>
+
+              <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Payment Method
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {ticket.accepted_payment_methods.map((method) => (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => handleSelectPayment(method)}
+                    disabled={selectingPayment}
+                    className={`rounded-full px-3.5 py-2 text-xs font-semibold transition-colors disabled:opacity-60 ${
+                      ticket.payment_method === method
+                        ? "bg-brand-blue text-white"
+                        : "border border-slate-300 text-slate-600 hover:border-brand-blue hover:text-brand-blue"
+                    }`}
+                  >
+                    {method}
+                  </button>
+                ))}
+              </div>
+              {ticket.payment_method && (
+                <p className="mt-1.5 text-xs text-slate-400">
+                  You selected {ticket.payment_method}. Pay the technician or shop directly.
+                </p>
+              )}
             </div>
           )}
 

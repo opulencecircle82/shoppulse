@@ -9,8 +9,10 @@ import {
   fetchShopBySlug,
   isShopOpenNow,
   listShopReviews,
+  listPublicShopServices,
   type BookingShop,
   type ShopReview,
+  type PublicService,
 } from "@/lib/customer/bookings";
 
 const ShopLocationMap = dynamic(
@@ -36,6 +38,7 @@ export default function ShopDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [shop, setShop] = useState<BookingShop | null>(null);
   const [reviews, setReviews] = useState<ShopReview[]>([]);
+  const [services, setServices] = useState<PublicService[]>([]);
   const [notFound, setNotFound] = useState(false);
 
   const load = useCallback(async () => {
@@ -48,6 +51,7 @@ export default function ShopDetailsPage() {
     setShop(shopRow);
     setLoading(false);
     listShopReviews(shopRow.id).then(setReviews).catch(() => {});
+    listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
   }, [slug]);
 
   useEffect(() => {
@@ -170,6 +174,51 @@ export default function ShopDetailsPage() {
               </div>
             </div>
           )}
+
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Pricing
+            </p>
+            {shop.default_hourly_rate > 0 && (
+              <p className="mt-1.5 text-sm text-slate-700">
+                Standard Labor Fee:{" "}
+                <span className="font-semibold">
+                  {shop.currency} {shop.default_hourly_rate.toFixed(2)}/hr
+                </span>
+              </p>
+            )}
+            {services.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-start justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-700">{service.name}</p>
+                      {service.description && (
+                        <p className="text-xs text-slate-400">{service.description}</p>
+                      )}
+                    </div>
+                    <p className="shrink-0 text-sm font-semibold text-slate-900">
+                      {shop.currency} {service.price.toFixed(2)}
+                      {service.extra_cost > 0 && (
+                        <span className="text-xs font-normal text-slate-400">
+                          {" "}
+                          +{service.extra_cost.toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {shop.default_hourly_rate === 0 && services.length === 0 && (
+              <p className="mt-1.5 text-sm text-slate-400">
+                Contact the business for pricing.
+              </p>
+            )}
+          </div>
 
           <div className="mt-5 border-t border-slate-100 pt-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
