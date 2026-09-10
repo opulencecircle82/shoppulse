@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
 import type { Currency, Shop } from "@/lib/supabase/types";
 import { COUNTRIES } from "@/lib/location/countries";
+import { SERVICE_CATEGORIES } from "@/lib/location/serviceCategories";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
 
 const LocationPickerMap = dynamic(
@@ -33,6 +34,11 @@ export default function CompanyProfilePanel({
   const [country, setCountry] = useState(shop?.country ?? "Philippines");
   const [region, setRegion] = useState(shop?.region ?? "");
   const [businessCategory, setBusinessCategory] = useState(shop?.business_category ?? "");
+  const [categoryChoice, setCategoryChoice] = useState<string>(() => {
+    const initial = shop?.business_category ?? "";
+    if (!initial) return "";
+    return (SERVICE_CATEGORIES as readonly string[]).includes(initial) ? initial : "Other";
+  });
   const [isPubliclyListed, setIsPubliclyListed] = useState(shop?.is_publicly_listed ?? true);
   const [latitude, setLatitude] = useState<number | null>(shop?.latitude ?? null);
   const [longitude, setLongitude] = useState<number | null>(shop?.longitude ?? null);
@@ -359,21 +365,39 @@ export default function CompanyProfilePanel({
         </select>
       </div>
 
+      <div>
+        <label className="block text-sm font-medium text-slate-600">
+          Business Category
+        </label>
+        <select
+          value={categoryChoice}
+          onChange={(e) => {
+            const value = e.target.value;
+            setCategoryChoice(value);
+            setBusinessCategory(value === "Other" ? "" : value);
+          }}
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+        >
+          <option value="">Select category</option>
+          {SERVICE_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        {categoryChoice === "Other" && (
+          <input
+            type="text"
+            value={businessCategory}
+            onChange={(e) => setBusinessCategory(e.target.value)}
+            placeholder="Specify your category"
+            className="mt-2 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+        )}
+      </div>
+
       {shop && (
         <>
-          <div>
-            <label className="block text-sm font-medium text-slate-600">
-              Business Category
-            </label>
-            <input
-              type="text"
-              value={businessCategory}
-              onChange={(e) => setBusinessCategory(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-              placeholder="Plumbing, Cleaning..."
-            />
-          </div>
-
           <label className="flex items-center gap-2.5 text-sm text-slate-600">
             <input
               type="checkbox"
