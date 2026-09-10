@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
 import { signOutCustomer } from "@/lib/customer/customerAuth";
+import { listNearbyPromotions, type NearbyPromotion } from "@/lib/customer/bookings";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -30,6 +31,20 @@ export default function CustomerHomeScreen({
 }) {
   const router = useRouter();
   const [shopCode, setShopCode] = useState("");
+  const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const id = setTimeout(() => {
+      listNearbyPromotions(customer.city).then((rows) => {
+        if (active) setPromotions(rows);
+      });
+    }, 0);
+    return () => {
+      active = false;
+      clearTimeout(id);
+    };
+  }, [customer.city]);
 
   async function handleSignOut() {
     await signOutCustomer();
@@ -46,6 +61,36 @@ export default function CustomerHomeScreen({
   return (
     <main className="min-h-screen bg-slate-50 px-5 py-6">
       <div className="mx-auto max-w-lg">
+        {promotions.length > 0 && (
+          <div className="-mx-5 mb-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+            {promotions.slice(0, 6).map((promo) => (
+              <Link
+                key={promo.id}
+                href={`/customer/shop/${promo.shop_slug}`}
+                className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm shadow-slate-900/10"
+              >
+                {promo.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={promo.image_url}
+                    alt={promo.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-4 text-center">
+                    <p className="text-sm font-bold text-white">{promo.title}</p>
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 bg-black/40 px-3 py-1.5">
+                  <p className="truncate text-xs font-semibold text-white">
+                    {promo.shop_name}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
         <header className="flex items-center justify-between">
           <div>
             <p className="text-lg font-bold text-slate-900">Hi, {customer.fullName}</p>
