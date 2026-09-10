@@ -17,7 +17,8 @@ import InvoiceGeneratorModal from "@/components/dashboard/InvoiceGeneratorModal"
 import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
 import ProofDisputeGateTab from "@/components/dashboard/ProofDisputeGateTab";
 import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
-import LocalAdManager from "@/components/dashboard/LocalAdManager";
+import ServicesTab from "@/components/dashboard/ServicesTab";
+import PromotionsManager from "@/components/dashboard/PromotionsManager";
 import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
 import SetupCustomizePanel from "@/components/dashboard/SetupCustomizePanel";
 import DashboardSidebarNav, {
@@ -205,9 +206,15 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {activeTab === "services" && (
+              <div className="mt-6">
+                <ServicesTab shopId={shop.id} />
+              </div>
+            )}
+
             {activeTab === "ads" && (
               <div className="mt-6">
-                <LocalAdManager shopId={shop.id} />
+                <PromotionsManager shop={shop} />
               </div>
             )}
 

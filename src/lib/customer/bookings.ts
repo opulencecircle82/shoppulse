@@ -230,3 +230,50 @@ export async function fetchTicketStaffLocation(
   if (error) throw error;
   return data as { lat: number; lng: number; updated_at: string } | null;
 }
+
+export type NearbyPromotion = {
+  id: string;
+  title: string;
+  description: string | null;
+  discount_code: string | null;
+  image_url: string | null;
+  shop_name: string;
+  shop_slug: string;
+  shop_city: string | null;
+};
+
+export async function listNearbyPromotions(city?: string | null): Promise<NearbyPromotion[]> {
+  const { data, error } = await supabase.rpc("list_nearby_promotions", {
+    p_city: city || null,
+  });
+  if (error) throw error;
+  return (data ?? []) as NearbyPromotion[];
+}
+
+export type PublicService = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  extra_cost: number;
+};
+
+export async function listPublicShopServices(shopId: string): Promise<PublicService[]> {
+  const { data, error } = await supabase.rpc("list_shop_services", { p_shop_id: shopId });
+  if (error) throw error;
+  return (data ?? []) as PublicService[];
+}
+
+export type PublicProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  photo_url: string | null;
+};
+
+export async function listPublicShopProducts(shopId: string): Promise<PublicProduct[]> {
+  const { data, error } = await supabase.rpc("list_shop_products", { p_shop_id: shopId });
+  if (error) throw error;
+  return (data ?? []) as PublicProduct[];
+}

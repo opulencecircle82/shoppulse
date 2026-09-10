@@ -1,0 +1,104 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
+import { listNearbyPromotions, type NearbyPromotion } from "@/lib/customer/bookings";
+
+export default function CustomerAdsPage() {
+  const router = useRouter();
+  const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
+  const [city, setCity] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    const customer = await fetchCurrentCustomer();
+    const customerCity = customer?.city ?? null;
+    setCity(customerCity);
+    const rows = await listNearbyPromotions(customerCity);
+    setPromotions(rows);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      load();
+    }, 0);
+    return () => clearTimeout(id);
+  }, [load]);
+
+  return (
+    <main className="min-h-screen bg-slate-50 px-5 py-6">
+      <div className="mx-auto max-w-lg">
+        <header className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-sm font-medium text-slate-500 hover:text-slate-900"
+          >
+            ← Back
+          </button>
+        </header>
+
+        <h1 className="mt-3 text-lg font-bold text-slate-900">Promotions Near You</h1>
+        <p className="mt-1 text-xs text-slate-500">
+          {city
+            ? `Deals from businesses in ${city}.`
+            : "Set your city in your profile to see local deals."}
+        </p>
+
+        <div className="mt-6">
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
+            </div>
+          ) : promotions.length === 0 ? (
+            <div className="rounded-2xl bg-white p-6 text-center shadow-sm shadow-slate-900/5">
+              <p className="text-sm text-slate-500">No promotions near you yet.</p>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {promotions.map((promo) => (
+                <li key={promo.id}>
+                  <Link
+                    href={`/customer/shop/${promo.shop_slug}`}
+                    className="block overflow-hidden rounded-2xl bg-white shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
+                  >
+                    {promo.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={promo.image_url}
+                        alt={promo.title}
+                        className="aspect-[3/2] w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex aspect-[3/2] w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-6 text-center">
+                        <p className="text-lg font-bold text-white">{promo.title}</p>
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <p className="text-sm font-semibold text-slate-900">{promo.title}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {promo.shop_name}
+                        {promo.shop_city ? ` · ${promo.shop_city}` : ""}
+                      </p>
+                      {promo.description && (
+                        <p className="mt-1.5 text-xs text-slate-600">{promo.description}</p>
+                      )}
+                      {promo.discount_code && (
+                        <span className="mt-2 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange">
+                          Code: {promo.discount_code}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}

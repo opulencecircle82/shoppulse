@@ -115,3 +115,34 @@ export type LocalNetworkAd = {
   click_url: string;
   is_active: boolean;
 };
+
+export type ShopService = {
+  id: string;
+  shop_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  extra_cost: number;
+  created_at: string;
+};
+
+export type ShopProduct = {
+  id: string;
+  shop_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  photo_url: string | null;
+  created_at: string;
+};
+
+export type ShopPromotion = {
+  id: string;
+  shop_id: string;
+  title: string;
+  description: string | null;
+  discount_code: string | null;
+  image_url: string | null;
+  is_active: boolean;
+  created_at: string;
+};

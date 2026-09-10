@@ -93,6 +93,17 @@ export default function CustomerHomeScreen({
           </Link>
         </div>
 
+        <Link
+          href="/customer/ads"
+          className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-brand-blue to-slate-900 px-5 py-4 shadow-sm shadow-blue-500/20"
+        >
+          <div>
+            <p className="text-sm font-bold text-white">Promotions Near You</p>
+            <p className="mt-0.5 text-xs text-white/70">See local deals and discount codes</p>
+          </div>
+          <span className="text-white/70">→</span>
+        </Link>
+
         <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
           Your Jobs
         </p>
