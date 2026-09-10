@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { fetchCurrentStaffContext, type StaffContext } from "@/lib/tech/staffContext";
 import { fetchAssignedJobs } from "@/lib/tech/jobActions";
-import { pickTodayTask, pickJobQueue } from "@/lib/tech/todayTask";
+import { pickTodayTask, pickJobQueue, computeTechStats, type TechStats } from "@/lib/tech/todayTask";
 import { startWatchingLocation } from "@/lib/tech/liveLocation";
 import { notifyNativeSignedIn, notifyNativeSignedOut } from "@/lib/tech/nativeBridge";
 import TechLoginScreen from "@/components/tech/TechLoginScreen";
@@ -20,6 +20,8 @@ export default function TechAppPage() {
   const [shop, setShop] = useState<Shop | null>(null);
   const [task, setTask] = useState<JobTicket | null>(null);
   const [queue, setQueue] = useState<JobTicket[]>([]);
+  const [allTickets, setAllTickets] = useState<JobTicket[]>([]);
+  const [stats, setStats] = useState<TechStats>({ completedToday: 0, completedTotal: 0 });
   const [selectedTicket, setSelectedTicket] = useState<JobTicket | null>(null);
 
   const loadHome = useCallback(async (context: StaffContext) => {
@@ -32,6 +34,8 @@ export default function TechAppPage() {
     setShop(shopRow as Shop);
     setTask(activeTask);
     setQueue(pickJobQueue(tickets, activeTask));
+    setAllTickets(tickets);
+    setStats(computeTechStats(tickets));
     setScreen("home");
   }, []);
 
@@ -109,6 +113,7 @@ export default function TechAppPage() {
         staffId={staffContext!.staffId}
         task={task}
         queue={queue}
+        stats={stats}
         onRefresh={() => {
           if (staffContext) loadHome(staffContext);
         }}
@@ -116,11 +121,20 @@ export default function TechAppPage() {
           setSelectedTicket(ticket);
           setScreen("job");
         }}
+        onOpenTicket={(ticketId) => {
+          const ticket = allTickets.find((t) => t.id === ticketId);
+          if (ticket && (ticket.status === "SCHEDULED" || ticket.status === "IN_PROGRESS")) {
+            setSelectedTicket(ticket);
+            setScreen("job");
+          }
+        }}
         onSignedOut={() => {
           setStaffContext(null);
           setShop(null);
           setTask(null);
           setQueue([]);
+          setAllTickets([]);
+          setStats({ completedToday: 0, completedTotal: 0 });
           setScreen("login");
         }}
       />

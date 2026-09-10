@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   fetchCustomerNotifications,
   markAllNotificationsRead,
@@ -11,6 +12,7 @@ import {
 const POLL_MS = 20000;
 
 export default function CustomerNotificationBell({ customerId }: { customerId: string }) {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -87,18 +89,25 @@ export default function CustomerNotificationBell({ customerId }: { customerId: s
           ) : (
             <div className="max-h-80 overflow-y-auto">
               {notifications.map((n) => (
-                <div
+                <button
                   key={n.id}
-                  className={`rounded-xl px-2.5 py-2 text-sm ${
-                    n.readAt ? "text-slate-500" : "text-slate-900"
-                  }`}
+                  type="button"
+                  disabled={!n.jobTicketId}
+                  onClick={() => {
+                    if (!n.jobTicketId) return;
+                    setOpen(false);
+                    router.push(`/client/${n.jobTicketId}`);
+                  }}
+                  className={`block w-full rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+                    n.jobTicketId ? "hover:bg-slate-100" : "cursor-default"
+                  } ${n.readAt ? "text-slate-500" : "text-slate-900"}`}
                 >
                   <p className="font-medium">{n.title}</p>
                   {n.body && <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>}
                   <p className="mt-0.5 text-[10px] text-slate-400">
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           )}

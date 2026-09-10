@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Megaphone } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
@@ -465,7 +465,12 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
 
       {loading && <p className="mt-3 text-sm text-slate-500">Loading...</p>}
       {!loading && promotions.length === 0 && (
-        <p className="mt-3 text-sm text-slate-500">No promotions created yet.</p>
+        <div className="mt-3 rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
+            <Megaphone className="h-5 w-5 text-brand-blue" />
+          </div>
+          <p className="mt-3 text-sm text-slate-500">No promotions created yet.</p>
+        </div>
       )}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {promotions.map((promotion) => (

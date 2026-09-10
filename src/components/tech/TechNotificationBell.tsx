@@ -10,7 +10,13 @@ import {
 
 const POLL_MS = 20000;
 
-export default function TechNotificationBell({ staffId }: { staffId: string }) {
+export default function TechNotificationBell({
+  staffId,
+  onOpenTicket,
+}: {
+  staffId: string;
+  onOpenTicket: (jobTicketId: string) => void;
+}) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -87,18 +93,25 @@ export default function TechNotificationBell({ staffId }: { staffId: string }) {
           ) : (
             <div className="max-h-80 overflow-y-auto">
               {notifications.map((n) => (
-                <div
+                <button
                   key={n.id}
-                  className={`rounded-xl px-2.5 py-2 text-sm ${
-                    n.readAt ? "text-slate-400" : "text-white"
-                  }`}
+                  type="button"
+                  disabled={!n.jobTicketId}
+                  onClick={() => {
+                    if (!n.jobTicketId) return;
+                    setOpen(false);
+                    onOpenTicket(n.jobTicketId);
+                  }}
+                  className={`block w-full rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+                    n.jobTicketId ? "hover:bg-white/10" : "cursor-default"
+                  } ${n.readAt ? "text-slate-400" : "text-white"}`}
                 >
                   <p className="font-medium">{n.title}</p>
                   {n.body && <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>}
                   <p className="mt-0.5 text-[10px] text-slate-600">
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           )}

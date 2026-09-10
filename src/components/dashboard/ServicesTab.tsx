@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ImageUp, Plus, X } from "lucide-react";
+import { ImageUp, Plus, X, Wrench, Package } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { ShopService, ShopProduct } from "@/lib/supabase/types";
 
@@ -166,7 +166,12 @@ function ServicesSection({ shopId }: { shopId: string }) {
       <div className="mt-4 space-y-2">
         {loading && <p className="text-sm text-slate-500">Loading...</p>}
         {!loading && services.length === 0 && (
-          <p className="text-sm text-slate-500">No services added yet.</p>
+          <div className="rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
+              <Wrench className="h-5 w-5 text-brand-blue" />
+            </div>
+            <p className="mt-3 text-sm text-slate-500">No services added yet.</p>
+          </div>
         )}
         {services.map((service) => (
           <div
@@ -383,7 +388,12 @@ function ProductsSection({ shopId }: { shopId: string }) {
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {loading && <p className="text-sm text-slate-500">Loading...</p>}
         {!loading && products.length === 0 && (
-          <p className="col-span-full text-sm text-slate-500">No products added yet.</p>
+          <div className="col-span-full rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
+              <Package className="h-5 w-5 text-brand-blue" />
+            </div>
+            <p className="mt-3 text-sm text-slate-500">No products added yet.</p>
+          </div>
         )}
         {products.map((product) => (
           <div key={product.id} className="relative rounded-2xl bg-brand-slate-light/40 p-3">

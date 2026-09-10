@@ -5,13 +5,21 @@ import { Bell } from "lucide-react";
 import {
   fetchStaffNotifications,
   markAllNotificationsRead,
-  markNotificationRead,
   type AppNotification,
 } from "@/lib/notifications";
+import type { JobTicket } from "@/lib/supabase/types";
 
 const POLL_MS = 20000;
 
-export default function NotificationBell({ staffId }: { staffId: string }) {
+export default function NotificationBell({
+  staffId,
+  tickets,
+  onOpenTicket,
+}: {
+  staffId: string;
+  tickets: JobTicket[];
+  onOpenTicket: (ticket: JobTicket) => void;
+}) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,10 +99,17 @@ export default function NotificationBell({ staffId }: { staffId: string }) {
                 <button
                   key={n.id}
                   type="button"
-                  onClick={() => markNotificationRead(n.id)}
-                  className={`block w-full rounded-xl px-2.5 py-2 text-left text-sm transition-colors hover:bg-brand-slate ${
-                    n.readAt ? "text-slate-500" : "text-slate-900"
-                  }`}
+                  disabled={!n.jobTicketId}
+                  onClick={() => {
+                    if (!n.jobTicketId) return;
+                    const ticket = tickets.find((t) => t.id === n.jobTicketId);
+                    if (!ticket) return;
+                    setOpen(false);
+                    onOpenTicket(ticket);
+                  }}
+                  className={`block w-full rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+                    n.jobTicketId ? "hover:bg-brand-slate" : "cursor-default"
+                  } ${n.readAt ? "text-slate-500" : "text-slate-900"}`}
                 >
                   <p className="font-medium">{n.title}</p>
                   {n.body && <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>}

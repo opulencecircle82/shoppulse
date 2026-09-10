@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, ClipboardList } from "lucide-react";
+import { MapPin, ClipboardList, CheckCircle2, Award } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
+import type { TechStats } from "@/lib/tech/todayTask";
 import TechNotificationBell from "./TechNotificationBell";
 
 function mapsUrl(address: string) {
@@ -15,7 +16,9 @@ export default function TechHomeScreen({
   staffId,
   task,
   queue,
+  stats,
   onOpenTask,
+  onOpenTicket,
   onSignedOut,
   onRefresh,
 }: {
@@ -23,7 +26,9 @@ export default function TechHomeScreen({
   staffId: string;
   task: JobTicket | null;
   queue: JobTicket[];
+  stats: TechStats;
   onOpenTask: (ticket: JobTicket) => void;
+  onOpenTicket: (jobTicketId: string) => void;
   onSignedOut: () => void;
   onRefresh: () => void;
 }) {
@@ -58,7 +63,7 @@ export default function TechHomeScreen({
       <header className="flex items-center justify-between px-5 py-4">
         <h1 className="text-lg font-bold text-white">{shop.shop_name}</h1>
         <div className="flex items-center gap-1">
-          <TechNotificationBell staffId={staffId} />
+          <TechNotificationBell staffId={staffId} onOpenTicket={onOpenTicket} />
           <button
             type="button"
             onClick={handleSignOut}
@@ -70,7 +75,26 @@ export default function TechHomeScreen({
       </header>
 
       <div className="px-5 pb-10">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl bg-white/5 p-4">
+            <div className="flex items-center gap-1.5 text-brand-emerald">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <p className="text-[10px] font-semibold uppercase tracking-wide">Today</p>
+            </div>
+            <p className="mt-1.5 text-2xl font-bold text-white">{stats.completedToday}</p>
+            <p className="text-[11px] text-slate-500">Jobs completed</p>
+          </div>
+          <div className="rounded-2xl bg-white/5 p-4">
+            <div className="flex items-center gap-1.5 text-brand-orange">
+              <Award className="h-3.5 w-3.5" />
+              <p className="text-[10px] font-semibold uppercase tracking-wide">All Time</p>
+            </div>
+            <p className="mt-1.5 text-2xl font-bold text-white">{stats.completedTotal}</p>
+            <p className="text-[11px] text-slate-500">Total completed</p>
+          </div>
+        </div>
+
+        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
           Active Task
         </p>
 

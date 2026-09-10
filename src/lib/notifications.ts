@@ -59,14 +59,6 @@ export async function fetchCustomerNotifications(customerId: string): Promise<Ap
   return (data ?? []).map(mapRow);
 }
 
-export async function markNotificationRead(id: string) {
-  await supabase
-    .from("notifications")
-    .update({ read_at: new Date().toISOString() })
-    .eq("id", id)
-    .is("read_at", null);
-}
-
 export async function markAllNotificationsRead(ids: string[]) {
   if (ids.length === 0) return;
   await supabase

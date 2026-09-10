@@ -101,7 +101,19 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm text-slate-500">Owner Command Center</p>
           </div>
           <div className="flex items-center gap-3">
-            {staffMember && <NotificationBell staffId={staffMember.id} />}
+            {staffMember && (
+              <NotificationBell
+                staffId={staffMember.id}
+                tickets={tickets}
+                onOpenTicket={(ticket) => {
+                  if (ticket.status === "COMPLETED" || ticket.status === "DISPUTED") {
+                    setProofTicket(ticket);
+                  } else {
+                    setActiveTab("board");
+                  }
+                }}
+              />
+            )}
             <button
               type="button"
               onClick={() => setSetupOpenMobile(true)}
