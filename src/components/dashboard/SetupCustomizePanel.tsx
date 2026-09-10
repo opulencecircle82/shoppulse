@@ -124,7 +124,7 @@ export default function SetupCustomizePanel({
       )}
 
       <aside
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm transform overflow-y-auto bg-brand-slate p-6 shadow-2xl shadow-black/40 transition-transform duration-200 lg:static lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:transform-none lg:overflow-visible lg:rounded-3xl lg:shadow-xl lg:shadow-black/30 ${
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm transform overflow-y-auto border-t-4 border-t-brand-orange bg-gradient-to-b from-orange-50/40 via-brand-slate to-brand-slate p-6 shadow-2xl shadow-black/40 transition-transform duration-200 lg:static lg:z-auto lg:w-full lg:max-w-none lg:translate-x-0 lg:transform-none lg:overflow-visible lg:rounded-3xl lg:shadow-xl lg:shadow-black/30 ${
           isMobileOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

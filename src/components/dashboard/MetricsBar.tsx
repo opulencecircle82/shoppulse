@@ -44,6 +44,8 @@ export default function MetricsBar({
       value: `${currency} ${metrics.wastedDollarsSaved.toFixed(2)}`,
       accent: "text-brand-emerald",
       iconBg: "bg-brand-emerald/15",
+      cardBg: "bg-gradient-to-br from-emerald-50 to-white",
+      borderAccent: "border-t-emerald-400",
       icon: PiggyBank,
     },
     {
@@ -51,6 +53,8 @@ export default function MetricsBar({
       value: metrics.activeFieldStaff.toString(),
       accent: "text-brand-blue",
       iconBg: "bg-brand-blue/15",
+      cardBg: "bg-gradient-to-br from-blue-50 to-white",
+      borderAccent: "border-t-brand-blue",
       icon: Users,
     },
     {
@@ -58,13 +62,17 @@ export default function MetricsBar({
       value: metrics.pendingApprovals.toString(),
       accent: "text-amber-500",
       iconBg: "bg-amber-400/15",
+      cardBg: "bg-gradient-to-br from-amber-50 to-white",
+      borderAccent: "border-t-amber-400",
       icon: ClipboardCheck,
     },
     {
       label: "Total Revenue",
       value: `${currency} ${metrics.totalRevenue.toFixed(2)}`,
       accent: "text-slate-900",
-      iconBg: "bg-slate-500/10",
+      iconBg: "bg-brand-orange/15",
+      cardBg: "bg-gradient-to-br from-orange-50 to-white",
+      borderAccent: "border-t-brand-orange",
       icon: TrendingUp,
     },
   ];
@@ -76,7 +84,7 @@ export default function MetricsBar({
         return (
           <div
             key={card.label}
-            className="rounded-2xl bg-brand-slate-light/40 p-5 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
+            className={`rounded-2xl border-t-4 ${card.borderAccent} ${card.cardBg} p-5 shadow-md shadow-black/10 transition-shadow hover:shadow-lg`}
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.iconBg}`}>
               <Icon className={`h-5 w-5 ${card.accent}`} />
