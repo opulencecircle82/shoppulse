@@ -1,10 +1,16 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { ImageUp, Loader2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
 import type { Currency, Shop } from "@/lib/supabase/types";
+
+const BusinessLocationPicker = dynamic(
+  () => import("./BusinessLocationPicker"),
+  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
+);
 
 const CURRENCIES: Currency[] = ["USD", "AUD", "GBP", "EUR"];
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
@@ -23,6 +29,8 @@ export default function CompanyProfilePanel({
   const [city, setCity] = useState(shop?.city ?? "");
   const [businessCategory, setBusinessCategory] = useState(shop?.business_category ?? "");
   const [isPubliclyListed, setIsPubliclyListed] = useState(shop?.is_publicly_listed ?? true);
+  const [latitude, setLatitude] = useState<number | null>(shop?.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(shop?.longitude ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -101,6 +109,8 @@ export default function CompanyProfilePanel({
           city: city || null,
           business_category: businessCategory || null,
           is_publicly_listed: isPubliclyListed,
+          latitude,
+          longitude,
         })
         .eq("id", shop.id);
 
@@ -316,6 +326,15 @@ export default function CompanyProfilePanel({
             List my business in the customer app&apos;s &quot;Find Services
             Near You&quot; directory
           </label>
+
+          <BusinessLocationPicker
+            latitude={latitude}
+            longitude={longitude}
+            onChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+            }}
+          />
         </>
       )}
 

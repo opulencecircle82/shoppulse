@@ -23,6 +23,8 @@ export type BookingShop = {
   business_hours_open: string | null;
   business_hours_close: string | null;
   business_days: string[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the

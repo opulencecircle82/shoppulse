@@ -32,6 +32,8 @@ export type Shop = {
   business_hours_open: string | null;
   business_hours_close: string | null;
   business_days: string[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export type StaffMember = {

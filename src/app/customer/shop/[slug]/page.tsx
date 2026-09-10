@@ -2,8 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { fetchShopBySlug, isShopOpenNow, type BookingShop } from "@/lib/customer/bookings";
+
+const ShopLocationMap = dynamic(
+  () => import("@/components/customer/ShopLocationMap"),
+  { ssr: false, loading: () => <div className="h-[180px] rounded-xl bg-slate-100" /> }
+);
 
 const DAY_LABELS: Record<string, string> = {
   MON: "Mon",
@@ -125,6 +131,17 @@ export default function ShopDetailsPage() {
                       .join(", ")
                   : "No days set"}
               </p>
+            </div>
+          )}
+
+          {shop.latitude !== null && shop.longitude !== null && (
+            <div className="mt-5 border-t border-slate-100 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Location
+              </p>
+              <div className="mt-2">
+                <ShopLocationMap latitude={shop.latitude} longitude={shop.longitude} />
+              </div>
             </div>
           )}
 
