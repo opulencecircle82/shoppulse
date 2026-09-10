@@ -11,9 +11,13 @@ import {
   type DateAvailability,
 } from "@/lib/customer/bookings";
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
+import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
+import PhotoUploadField from "@/components/shared/PhotoUploadField";
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+function customerAddress(customer: Customer): string {
+  return [customer.barangay, customer.city, customer.region]
+    .filter(Boolean)
+    .join(", ");
 }
 
 export default function BookJobPage() {
@@ -27,7 +31,9 @@ export default function BookJobPage() {
   const [notFound, setNotFound] = useState(false);
 
   const [serviceType, setServiceType] = useState("");
-  const [serviceAddress, setServiceAddress] = useState("");
+  const [description, setDescription] = useState("");
+  const [requestPhotoUrl, setRequestPhotoUrl] = useState<string | null>(null);
+  const [manualAddress, setManualAddress] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
   const [availability, setAvailability] = useState<DateAvailability | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -82,6 +88,12 @@ export default function BookJobPage() {
     event.preventDefault();
     if (!customer) return;
 
+    const serviceAddress = customerAddress(customer) || manualAddress;
+    if (!serviceAddress) {
+      setError("Please provide your service address.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -94,6 +106,8 @@ export default function BookJobPage() {
         serviceType,
         serviceAddress,
         preferredDate: preferredDate || null,
+        description,
+        requestPhotoUrl,
       });
       setSubmitted(true);
     } catch (e) {
@@ -144,6 +158,8 @@ export default function BookJobPage() {
     );
   }
 
+  const knownAddress = customerAddress(customer);
+
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10">
       <div className="mx-auto max-w-md">
@@ -175,51 +191,78 @@ export default function BookJobPage() {
 
           <div>
             <label className="block text-xs font-medium text-slate-500">
-              Service Address
+              Describe the issue (optional)
             </label>
-            <input
-              type="text"
-              required
-              value={serviceAddress}
-              onChange={(e) => setServiceAddress(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            <textarea
+              rows={3}
+              placeholder="Explain what's going on so the technician can prepare..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
+          <PhotoUploadField
+            folder="requests"
+            photoUrl={requestPhotoUrl}
+            onChange={setRequestPhotoUrl}
+            label="Photo of the issue (optional)"
+          />
+
           <div>
             <label className="block text-xs font-medium text-slate-500">
-              Preferred Date (optional)
+              Service Address
             </label>
-            <input
-              type="date"
-              min={todayIso()}
-              value={preferredDate}
-              onChange={(e) => setPreferredDate(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            />
-            {checkingAvailability && (
-              <p className="mt-1.5 text-xs text-slate-400">Checking availability...</p>
-            )}
-            {!checkingAvailability && availability && (
-              <p
-                className={`mt-1.5 text-xs ${
-                  !availability.is_business_day
-                    ? "text-red-500"
-                    : availability.active_staff_count > 0 &&
-                        availability.booked_count >= availability.active_staff_count
-                      ? "text-amber-600"
-                      : "text-emerald-600"
-                }`}
-              >
-                {!availability.is_business_day
-                  ? "This business is normally closed on this day."
-                  : availability.active_staff_count > 0 &&
-                      availability.booked_count >= availability.active_staff_count
-                    ? "This day looks fully booked — the business may still fit you in."
-                    : "Looks available on this day."}
+            {knownAddress ? (
+              <p className="mt-1 rounded-xl bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700">
+                {knownAddress}
               </p>
+            ) : (
+              <input
+                type="text"
+                required
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+                placeholder="Where should the technician go?"
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              />
             )}
           </div>
+
+          {shop && (
+            <div>
+              <label className="block text-xs font-medium text-slate-500">
+                Preferred Date (optional)
+              </label>
+              <div className="mt-1">
+                <AvailabilityCalendar
+                  businessDays={shop.business_days}
+                  businessHoursOpen={shop.business_hours_open}
+                  businessHoursClose={shop.business_hours_close}
+                  selectedDate={preferredDate}
+                  onSelect={setPreferredDate}
+                />
+              </div>
+              {checkingAvailability && (
+                <p className="mt-1.5 text-xs text-slate-400">Checking availability...</p>
+              )}
+              {!checkingAvailability && availability && (
+                <p
+                  className={`mt-1.5 text-xs ${
+                    availability.active_staff_count > 0 &&
+                    availability.booked_count >= availability.active_staff_count
+                      ? "text-amber-600"
+                      : "text-emerald-600"
+                  }`}
+                >
+                  {availability.active_staff_count > 0 &&
+                  availability.booked_count >= availability.active_staff_count
+                    ? "This day looks fully booked — the business may still fit you in."
+                    : "Looks available on this day."}
+                </p>
+              )}
+            </div>
+          )}
 
           <p className="text-xs text-slate-400">
             We&apos;ll contact you at {customer.email}

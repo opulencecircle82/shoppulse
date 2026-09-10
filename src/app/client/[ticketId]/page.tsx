@@ -10,6 +10,7 @@ import {
   fetchTicketReview,
   submitShopReview,
 } from "@/lib/customer/bookings";
+import PhotoUploadField from "@/components/shared/PhotoUploadField";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -23,6 +24,8 @@ type ClientTicket = {
   client_name: string;
   service_type: string;
   service_address: string;
+  description: string | null;
+  request_photo_url: string | null;
   status: string;
   start_photo_url: string | null;
   end_photo_url: string | null;
@@ -93,9 +96,14 @@ export default function ClientTicketPage() {
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [submitting, setSubmitting] = useState<"approve" | "dispute" | null>(null);
   const [staffLocation, setStaffLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [review, setReview] = useState<{ rating: number; comment: string | null } | null>(null);
+  const [review, setReview] = useState<{
+    rating: number;
+    comment: string | null;
+    photo_url: string | null;
+  } | null>(null);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
+  const [reviewPhotoUrl, setReviewPhotoUrl] = useState<string | null>(null);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const load = useCallback(async () => {
@@ -152,8 +160,13 @@ export default function ClientTicketPage() {
     if (reviewRating === 0) return;
     setReviewSubmitting(true);
     try {
-      await submitShopReview({ ticketId, rating: reviewRating, comment: reviewComment });
-      setReview({ rating: reviewRating, comment: reviewComment || null });
+      await submitShopReview({
+        ticketId,
+        rating: reviewRating,
+        comment: reviewComment,
+        photoUrl: reviewPhotoUrl,
+      });
+      setReview({ rating: reviewRating, comment: reviewComment || null, photo_url: reviewPhotoUrl });
     } finally {
       setReviewSubmitting(false);
     }
@@ -225,6 +238,25 @@ export default function ClientTicketPage() {
           <h1 className="mt-3 text-xl font-bold text-slate-900">{ticket.service_type}</h1>
           <p className="mt-1 text-sm text-slate-500">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-500">For: {ticket.client_name}</p>
+
+          {(ticket.description || ticket.request_photo_url) && (
+            <div className="mt-4 rounded-xl bg-slate-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Original Request
+              </p>
+              {ticket.description && (
+                <p className="mt-1 text-sm text-slate-600">{ticket.description}</p>
+              )}
+              {ticket.request_photo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={ticket.request_photo_url}
+                  alt="Request photo"
+                  className="mt-2 h-24 w-24 rounded-lg object-cover"
+                />
+              )}
+            </div>
+          )}
 
           {staffLocation && (
             <div className="mt-5">
@@ -351,6 +383,14 @@ export default function ClientTicketPage() {
                   {review.comment && (
                     <p className="mt-1.5 text-sm text-slate-600">{review.comment}</p>
                   )}
+                  {review.photo_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={review.photo_url}
+                      alt="Review photo"
+                      className="mt-2 h-24 w-24 rounded-lg object-cover"
+                    />
+                  )}
                   <p className="mt-1 text-xs text-slate-400">Thanks for your feedback!</p>
                 </div>
               ) : (
@@ -380,6 +420,13 @@ export default function ClientTicketPage() {
                     placeholder="Leave a comment (optional)..."
                     className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
+                  <div className="mt-2">
+                    <PhotoUploadField
+                      folder="reviews"
+                      photoUrl={reviewPhotoUrl}
+                      onChange={setReviewPhotoUrl}
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={handleSubmitReview}

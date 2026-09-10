@@ -120,6 +120,8 @@ export async function submitBooking(params: {
   serviceType: string;
   serviceAddress: string;
   preferredDate?: string | null;
+  description?: string;
+  requestPhotoUrl?: string | null;
 }) {
   const { error } = await supabase.rpc("submit_job_booking", {
     p_shop_slug: params.shopSlug,
@@ -129,9 +131,35 @@ export async function submitBooking(params: {
     p_service_type: params.serviceType,
     p_service_address: params.serviceAddress,
     p_preferred_date: params.preferredDate || null,
+    p_description: params.description || null,
+    p_request_photo_url: params.requestPhotoUrl || null,
   });
 
   if (error) throw new Error(error.message);
+}
+
+/** Reuses the "job-photos" storage bucket (its INSERT policy already
+ * allows any authenticated user, not just staff) rather than a new
+ * bucket, for both the customer's booking-request photo and their
+ * review photo. */
+export async function uploadCustomerPhoto(
+  folder: "requests" | "reviews",
+  file: File
+): Promise<string> {
+  const extension = file.name.split(".").pop() ?? "jpg";
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+
+  const { error } = await supabase.storage
+    .from("job-photos")
+    .upload(path, file, { contentType: file.type });
+
+  if (error) throw error;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("job-photos").getPublicUrl(path);
+
+  return publicUrl;
 }
 
 export type DateAvailability = {
@@ -157,6 +185,7 @@ export async function checkDateAvailability(
 export type ShopReview = {
   rating: number;
   comment: string | null;
+  photo_url: string | null;
   created_at: string;
   client_name: string;
 };
@@ -171,23 +200,25 @@ export async function submitShopReview(params: {
   ticketId: string;
   rating: number;
   comment?: string;
+  photoUrl?: string | null;
 }) {
   const { error } = await supabase.rpc("submit_shop_review", {
     p_ticket_id: params.ticketId,
     p_rating: params.rating,
     p_comment: params.comment || null,
+    p_photo_url: params.photoUrl || null,
   });
   if (error) throw new Error(error.message);
 }
 
 export async function fetchTicketReview(
   ticketId: string
-): Promise<{ rating: number; comment: string | null } | null> {
+): Promise<{ rating: number; comment: string | null; photo_url: string | null } | null> {
   const { data, error } = await supabase
     .rpc("get_ticket_review", { p_ticket_id: ticketId })
     .maybeSingle();
   if (error) throw error;
-  return data as { rating: number; comment: string | null } | null;
+  return data as { rating: number; comment: string | null; photo_url: string | null } | null;
 }
 
 export async function fetchTicketStaffLocation(

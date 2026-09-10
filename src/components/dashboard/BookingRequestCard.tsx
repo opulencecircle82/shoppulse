@@ -58,6 +58,17 @@ export default function BookingRequestCard({
     <div className="rounded-2xl border border-brand-blue/20 bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
       <p className="text-sm font-semibold text-slate-900">{ticket.client_name}</p>
       <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
+      {ticket.description && (
+        <p className="mt-1 text-xs text-slate-500">{ticket.description}</p>
+      )}
+      {ticket.request_photo_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={ticket.request_photo_url}
+          alt="Request photo"
+          className="mt-1.5 h-16 w-16 rounded-lg object-cover"
+        />
+      )}
       <p className="mt-1 text-xs text-slate-400">{ticket.service_address}</p>
       {ticket.preferred_date && (
         <p className="mt-1 text-xs text-slate-500">

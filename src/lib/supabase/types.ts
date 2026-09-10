@@ -90,6 +90,8 @@ export type JobTicket = {
   client_viewed_at: string | null;
   staff_accepted_at: string | null;
   preferred_date: string | null;
+  description: string | null;
+  request_photo_url: string | null;
   created_at: string;
 };
 

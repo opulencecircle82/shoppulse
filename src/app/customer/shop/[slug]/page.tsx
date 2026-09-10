@@ -201,6 +201,14 @@ export default function ShopDetailsPage() {
                     {review.comment && (
                       <p className="mt-1.5 text-xs text-slate-600">{review.comment}</p>
                     )}
+                    {review.photo_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={review.photo_url}
+                        alt="Review photo"
+                        className="mt-1.5 h-16 w-16 rounded-lg object-cover"
+                      />
+                    )}
                     <p className="mt-1 text-[10px] text-slate-400">— {review.client_name}</p>
                   </div>
                 ))}
