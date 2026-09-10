@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Users } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { StaffMember } from "@/lib/supabase/types";
 import AddStaffModal from "./AddStaffModal";
@@ -102,10 +103,15 @@ export default function StaffManagementTab({
       {loading && <p className="mt-6 text-sm text-slate-500">Loading staff...</p>}
 
       {!loading && nonOwnerStaff.length === 0 && (
-        <p className="mt-6 text-sm text-slate-500">
-          No staff added yet. Use &quot;+ Add Staff&quot; to bring on your
-          first technician.
-        </p>
+        <div className="mt-6 rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
+            <Users className="h-5 w-5 text-brand-blue" />
+          </div>
+          <p className="mt-3 text-sm text-slate-500">
+            No staff added yet. Use &quot;+ Add Staff&quot; to bring on your
+            first technician.
+          </p>
+        </div>
       )}
 
       {!loading && nonOwnerStaff.length > 0 && (

@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { SearchX } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   listPublicShops,
@@ -124,8 +125,11 @@ function DiscoverShopsContent() {
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
             </div>
           ) : shops.length === 0 ? (
-            <div className="rounded-2xl bg-white p-6 text-center shadow-sm shadow-slate-900/5">
-              <p className="text-sm text-slate-500">
+            <div className="rounded-2xl bg-white p-8 text-center shadow-sm shadow-slate-900/5">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                <SearchX className="h-5 w-5 text-slate-400" />
+              </div>
+              <p className="mt-3 text-sm text-slate-500">
                 {searched
                   ? "No businesses matched your search."
                   : "No businesses listed yet."}

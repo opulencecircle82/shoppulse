@@ -3,7 +3,17 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Zap, Droplet, Wind, Wrench, Sparkles, Star, Navigation } from "lucide-react";
+import {
+  Search,
+  Zap,
+  Droplet,
+  Wind,
+  Wrench,
+  Sparkles,
+  Star,
+  Navigation,
+  ClipboardList,
+} from "lucide-react";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
 import { signOutCustomer } from "@/lib/customer/customerAuth";
@@ -87,9 +97,11 @@ export default function CustomerHomeScreen({
 
   useEffect(() => {
     if (!activeJob) {
-      setTechnician(null);
-      setTechDistance(null);
-      return;
+      const id = setTimeout(() => {
+        setTechnician(null);
+        setTechDistance(null);
+      }, 0);
+      return () => clearTimeout(id);
     }
     let active = true;
     fetchTicketTechnician(activeJob.id).then((tech) => {
@@ -322,8 +334,11 @@ export default function CustomerHomeScreen({
         </p>
 
         {jobs.length === 0 ? (
-          <div className="mt-3 rounded-2xl bg-white p-6 text-center shadow-sm shadow-slate-900/5">
-            <p className="text-sm text-slate-500">
+          <div className="mt-3 rounded-2xl bg-white p-8 text-center shadow-sm shadow-slate-900/5">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
+              <ClipboardList className="h-5 w-5 text-brand-blue" />
+            </div>
+            <p className="mt-3 text-sm text-slate-500">
               No jobs yet. Use the booking link your service provider shared
               with you, or enter their business code above.
             </p>

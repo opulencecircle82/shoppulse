@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, ClipboardList } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import TechNotificationBell from "./TechNotificationBell";
@@ -76,7 +76,10 @@ export default function TechHomeScreen({
 
         {!task ? (
           <div className="mt-3 rounded-2xl bg-white/5 p-6 text-center">
-            <p className="text-sm text-slate-400">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+              <ClipboardList className="h-5 w-5 text-slate-400" />
+            </div>
+            <p className="mt-3 text-sm text-slate-400">
               No job assigned to you right now. Check back later.
             </p>
           </div>

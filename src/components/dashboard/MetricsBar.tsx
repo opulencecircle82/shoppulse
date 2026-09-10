@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { PiggyBank, Users, ClipboardCheck, TrendingUp } from "lucide-react";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 
 export default function MetricsBar({
@@ -42,39 +43,53 @@ export default function MetricsBar({
       label: "Wasted Dollars Saved",
       value: `${currency} ${metrics.wastedDollarsSaved.toFixed(2)}`,
       accent: "text-brand-emerald",
+      iconBg: "bg-brand-emerald/15",
+      icon: PiggyBank,
     },
     {
       label: "Active Field Staff",
       value: metrics.activeFieldStaff.toString(),
       accent: "text-brand-blue",
+      iconBg: "bg-brand-blue/15",
+      icon: Users,
     },
     {
       label: "Pending Job Approvals",
       value: metrics.pendingApprovals.toString(),
-      accent: "text-amber-400",
+      accent: "text-amber-500",
+      iconBg: "bg-amber-400/15",
+      icon: ClipboardCheck,
     },
     {
       label: "Total Revenue",
       value: `${currency} ${metrics.totalRevenue.toFixed(2)}`,
       accent: "text-slate-900",
+      iconBg: "bg-slate-500/10",
+      icon: TrendingUp,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {cards.map((card) => (
-        <div
-          key={card.label}
-          className="rounded-2xl bg-brand-slate-light/40 p-5 shadow-md shadow-black/20"
-        >
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            {card.label}
-          </p>
-          <p className={`mt-2 text-2xl font-bold ${card.accent}`}>
-            {card.value}
-          </p>
-        </div>
-      ))}
+      {cards.map((card) => {
+        const Icon = card.icon;
+        return (
+          <div
+            key={card.label}
+            className="rounded-2xl bg-brand-slate-light/40 p-5 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
+          >
+            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.iconBg}`}>
+              <Icon className={`h-5 w-5 ${card.accent}`} />
+            </div>
+            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
+              {card.label}
+            </p>
+            <p className={`mt-1 text-2xl font-bold ${card.accent}`}>
+              {card.value}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 }

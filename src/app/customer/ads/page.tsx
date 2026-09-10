@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Megaphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import {
@@ -65,8 +66,11 @@ export default function CustomerAdsPage() {
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
             </div>
           ) : promotions.length === 0 ? (
-            <div className="rounded-2xl bg-white p-6 text-center shadow-sm shadow-slate-900/5">
-              <p className="text-sm text-slate-500">No promotions near you yet.</p>
+            <div className="rounded-2xl bg-white p-8 text-center shadow-sm shadow-slate-900/5">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                <Megaphone className="h-5 w-5 text-slate-400" />
+              </div>
+              <p className="mt-3 text-sm text-slate-500">No promotions near you yet.</p>
             </div>
           ) : (
             <ul className="space-y-3">
