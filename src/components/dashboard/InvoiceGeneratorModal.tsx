@@ -2,40 +2,47 @@
 
 import { useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket, StaffMember } from "@/lib/supabase/types";
+import type { JobTicket } from "@/lib/supabase/types";
 
 export default function InvoiceGeneratorModal({
   ticket,
-  staff,
   currency,
+  defaultHourlyRate,
   onClose,
   onSaved,
 }: {
   ticket: JobTicket;
-  staff: StaffMember[];
   currency: string;
+  defaultHourlyRate: number;
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
+  // Products cost is always added on top of labor/flat below (both here
+  // and in the auto-invoice ProofDisputeDrawer computes on Approve) — so
+  // it has to be subtracted back out of any *existing* total_invoice_amount
+  // before using that as this modal's starting flat-rate figure, or
+  // reopening the modal on an already-approved ticket would double-count
+  // it (labor+products saved once, then products added again here).
+  const productsCost = ticket.selected_products.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   const [mode, setMode] = useState<"hourly" | "flat">("hourly");
   const [actualHours, setActualHours] = useState(
     ticket.actual_hours || ticket.estimated_hours || 0
   );
-  const [hourlyRate, setHourlyRate] = useState(assignedStaff?.hourly_rate ?? 0);
-  const [flatAmount, setFlatAmount] = useState(ticket.total_invoice_amount || 0);
+  // Defaults to the shop's customer-facing standard rate, not the
+  // technician's internal pay rate — those are different numbers (what
+  // the business charges vs. what it pays), and using the pay rate here
+  // would silently undercharge/overcharge relative to what Approve just
+  // auto-computed and saved.
+  const [hourlyRate, setHourlyRate] = useState(defaultHourlyRate);
+  const [flatAmount, setFlatAmount] = useState(
+    Math.max(0, (ticket.total_invoice_amount || 0) - productsCost)
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const productsCost = useMemo(
-    () =>
-      ticket.selected_products.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      ),
-    [ticket.selected_products]
-  );
 
   const laborCost = useMemo(
     () => Math.round(actualHours * hourlyRate * 100) / 100,
