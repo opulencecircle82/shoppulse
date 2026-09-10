@@ -25,6 +25,8 @@ export type BookingShop = {
   business_days: string[];
   latitude: number | null;
   longitude: number | null;
+  avg_rating: number | null;
+  review_count: number;
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the
@@ -50,6 +52,8 @@ export type PublicShop = {
   business_hours_open: string | null;
   business_hours_close: string | null;
   business_days: string[];
+  avg_rating: number | null;
+  review_count: number;
 };
 
 /** Powers the "browse services near your city" listing. Only returns
@@ -115,6 +119,7 @@ export async function submitBooking(params: {
   phone: string;
   serviceType: string;
   serviceAddress: string;
+  preferredDate?: string | null;
 }) {
   const { error } = await supabase.rpc("submit_job_booking", {
     p_shop_slug: params.shopSlug,
@@ -123,7 +128,74 @@ export async function submitBooking(params: {
     p_client_phone: params.phone || null,
     p_service_type: params.serviceType,
     p_service_address: params.serviceAddress,
+    p_preferred_date: params.preferredDate || null,
   });
 
   if (error) throw new Error(error.message);
+}
+
+export type DateAvailability = {
+  is_business_day: boolean;
+  active_staff_count: number;
+  booked_count: number;
+};
+
+/** A soft signal only — the shop can still accept the request even when
+ * this looks fully booked, since it's not a hard capacity reservation. */
+export async function checkDateAvailability(
+  shopSlug: string,
+  date: string
+): Promise<DateAvailability | null> {
+  const { data, error } = await supabase
+    .rpc("check_date_availability", { p_shop_slug: shopSlug, p_date: date })
+    .maybeSingle();
+
+  if (error) throw error;
+  return data as DateAvailability | null;
+}
+
+export type ShopReview = {
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  client_name: string;
+};
+
+export async function listShopReviews(shopId: string): Promise<ShopReview[]> {
+  const { data, error } = await supabase.rpc("list_shop_reviews", { p_shop_id: shopId });
+  if (error) throw error;
+  return (data ?? []) as ShopReview[];
+}
+
+export async function submitShopReview(params: {
+  ticketId: string;
+  rating: number;
+  comment?: string;
+}) {
+  const { error } = await supabase.rpc("submit_shop_review", {
+    p_ticket_id: params.ticketId,
+    p_rating: params.rating,
+    p_comment: params.comment || null,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchTicketReview(
+  ticketId: string
+): Promise<{ rating: number; comment: string | null } | null> {
+  const { data, error } = await supabase
+    .rpc("get_ticket_review", { p_ticket_id: ticketId })
+    .maybeSingle();
+  if (error) throw error;
+  return data as { rating: number; comment: string | null } | null;
+}
+
+export async function fetchTicketStaffLocation(
+  ticketId: string
+): Promise<{ lat: number; lng: number; updated_at: string } | null> {
+  const { data, error } = await supabase
+    .rpc("get_ticket_staff_location", { p_ticket_id: ticketId })
+    .maybeSingle();
+  if (error) throw error;
+  return data as { lat: number; lng: number; updated_at: string } | null;
 }

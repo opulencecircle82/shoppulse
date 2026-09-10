@@ -59,6 +59,11 @@ export default function BookingRequestCard({
       <p className="text-sm font-semibold text-slate-900">{ticket.client_name}</p>
       <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
       <p className="mt-1 text-xs text-slate-400">{ticket.service_address}</p>
+      {ticket.preferred_date && (
+        <p className="mt-1 text-xs text-slate-500">
+          Preferred date: {new Date(ticket.preferred_date).toLocaleDateString()}
+        </p>
+      )}
       {distance && (
         <p className="mt-1 text-xs font-medium text-brand-blue">{distance}</p>
       )}

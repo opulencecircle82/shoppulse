@@ -89,6 +89,7 @@ export type JobTicket = {
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;
+  preferred_date: string | null;
   created_at: string;
 };
 

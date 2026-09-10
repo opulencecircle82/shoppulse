@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
-import { fetchShopBySlug, submitBooking, type BookingShop } from "@/lib/customer/bookings";
+import {
+  fetchShopBySlug,
+  submitBooking,
+  checkDateAvailability,
+  type BookingShop,
+  type DateAvailability,
+} from "@/lib/customer/bookings";
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default function BookJobPage() {
   const params = useParams();
@@ -18,6 +28,9 @@ export default function BookJobPage() {
 
   const [serviceType, setServiceType] = useState("");
   const [serviceAddress, setServiceAddress] = useState("");
+  const [preferredDate, setPreferredDate] = useState("");
+  const [availability, setAvailability] = useState<DateAvailability | null>(null);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +59,25 @@ export default function BookJobPage() {
     return () => clearTimeout(id);
   }, [load]);
 
+  useEffect(() => {
+    if (!preferredDate) return;
+    let active = true;
+    const id = setTimeout(() => {
+      setCheckingAvailability(true);
+      checkDateAvailability(shopSlug, preferredDate)
+        .then((result) => {
+          if (active) setAvailability(result);
+        })
+        .finally(() => {
+          if (active) setCheckingAvailability(false);
+        });
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(id);
+    };
+  }, [shopSlug, preferredDate]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!customer) return;
@@ -61,6 +93,7 @@ export default function BookJobPage() {
         phone: customer.phone ?? "",
         serviceType,
         serviceAddress,
+        preferredDate: preferredDate || null,
       });
       setSubmitted(true);
     } catch (e) {
@@ -151,6 +184,41 @@ export default function BookJobPage() {
               onChange={(e) => setServiceAddress(e.target.value)}
               className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-500">
+              Preferred Date (optional)
+            </label>
+            <input
+              type="date"
+              min={todayIso()}
+              value={preferredDate}
+              onChange={(e) => setPreferredDate(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+            {checkingAvailability && (
+              <p className="mt-1.5 text-xs text-slate-400">Checking availability...</p>
+            )}
+            {!checkingAvailability && availability && (
+              <p
+                className={`mt-1.5 text-xs ${
+                  !availability.is_business_day
+                    ? "text-red-500"
+                    : availability.active_staff_count > 0 &&
+                        availability.booked_count >= availability.active_staff_count
+                      ? "text-amber-600"
+                      : "text-emerald-600"
+                }`}
+              >
+                {!availability.is_business_day
+                  ? "This business is normally closed on this day."
+                  : availability.active_staff_count > 0 &&
+                      availability.booked_count >= availability.active_staff_count
+                    ? "This day looks fully booked — the business may still fit you in."
+                    : "Looks available on this day."}
+              </p>
+            )}
           </div>
 
           <p className="text-xs text-slate-400">

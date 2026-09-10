@@ -2,7 +2,21 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import dynamic from "next/dynamic";
+import { Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import {
+  fetchTicketStaffLocation,
+  fetchTicketReview,
+  submitShopReview,
+} from "@/lib/customer/bookings";
+
+const ShopLocationMap = dynamic(
+  () => import("@/components/customer/ShopLocationMap"),
+  { ssr: false, loading: () => <div className="h-[180px] rounded-xl bg-slate-100" /> }
+);
+
+const LIVE_POLL_MS = 15000;
 
 type ClientTicket = {
   id: string;
@@ -78,6 +92,11 @@ export default function ClientTicketPage() {
   const [disputeNotes, setDisputeNotes] = useState("");
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [submitting, setSubmitting] = useState<"approve" | "dispute" | null>(null);
+  const [staffLocation, setStaffLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [review, setReview] = useState<{ rating: number; comment: string | null } | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -101,6 +120,44 @@ export default function ClientTicketPage() {
     }, 0);
     return () => clearTimeout(id);
   }, [load]);
+
+  useEffect(() => {
+    if (!ticket || (ticket.status !== "SCHEDULED" && ticket.status !== "IN_PROGRESS")) return;
+
+    let active = true;
+    async function poll() {
+      const loc = await fetchTicketStaffLocation(ticketId).catch(() => null);
+      if (active) setStaffLocation(loc ? { lat: loc.lat, lng: loc.lng } : null);
+    }
+    poll();
+    const interval = setInterval(poll, LIVE_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [ticket, ticketId]);
+
+  useEffect(() => {
+    if (!ticket || !["COMPLETED", "APPROVED", "DISPUTED"].includes(ticket.status)) return;
+    let active = true;
+    fetchTicketReview(ticketId).then((existing) => {
+      if (active) setReview(existing);
+    });
+    return () => {
+      active = false;
+    };
+  }, [ticket, ticketId]);
+
+  async function handleSubmitReview() {
+    if (reviewRating === 0) return;
+    setReviewSubmitting(true);
+    try {
+      await submitShopReview({ ticketId, rating: reviewRating, comment: reviewComment });
+      setReview({ rating: reviewRating, comment: reviewComment || null });
+    } finally {
+      setReviewSubmitting(false);
+    }
+  }
 
   async function handleApprove() {
     setSubmitting("approve");
@@ -168,6 +225,19 @@ export default function ClientTicketPage() {
           <h1 className="mt-3 text-xl font-bold text-slate-900">{ticket.service_type}</h1>
           <p className="mt-1 text-sm text-slate-500">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-500">For: {ticket.client_name}</p>
+
+          {staffLocation && (
+            <div className="mt-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                {ticket.status === "IN_PROGRESS"
+                  ? "Your technician is on site"
+                  : "Your technician is on the way"}
+              </p>
+              <div className="mt-2">
+                <ShopLocationMap latitude={staffLocation.lat} longitude={staffLocation.lng} />
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 space-y-4">
             <ProofPhoto
@@ -256,6 +326,70 @@ export default function ClientTicketPage() {
                   Cancel
                 </button>
               </div>
+            </div>
+          )}
+
+          {["COMPLETED", "APPROVED", "DISPUTED"].includes(ticket.status) && (
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Rate this job
+              </p>
+              {review ? (
+                <div className="mt-2">
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-5 w-5 ${
+                          i < review.rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {review.comment && (
+                    <p className="mt-1.5 text-sm text-slate-600">{review.comment}</p>
+                  )}
+                  <p className="mt-1 text-xs text-slate-400">Thanks for your feedback!</p>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setReviewRating(i + 1)}
+                        aria-label={`Rate ${i + 1} stars`}
+                      >
+                        <Star
+                          className={`h-7 w-7 ${
+                            i < reviewRating
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-slate-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Leave a comment (optional)..."
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSubmitReview}
+                    disabled={reviewRating === 0 || reviewSubmitting}
+                    className="mt-2 w-full rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {reviewSubmitting ? "Submitting..." : "Submit Rating"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
