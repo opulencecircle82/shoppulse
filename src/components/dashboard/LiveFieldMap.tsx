@@ -62,10 +62,12 @@ function MapRecenter({
   center,
   zoom,
   hasAnyPoint,
+  recenterSignal,
 }: {
   center: [number, number];
   zoom: number;
   hasAnyPoint: boolean;
+  recenterSignal: number;
 }) {
   const map = useMap();
   const hasRecenteredRef = useRef(false);
@@ -77,13 +79,24 @@ function MapRecenter({
     }
   }, [map, center, zoom, hasAnyPoint]);
 
+  // Manual "Recenter" button — lets the owner snap back to the live pin
+  // after panning away, without fighting the one-time auto-recenter above.
+  useEffect(() => {
+    if (recenterSignal === 0) return;
+    map.setView(center, zoom);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recenterSignal]);
+
   return null;
 }
+
+const CLOSE_ZOOM = 17;
 
 export default function LiveFieldMap({ shop }: { shop: Shop }) {
   const [pins, setPins] = useState<MapPin[]>([]);
   const [livePins, setLivePins] = useState<LivePin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recenterSignal, setRecenterSignal] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -196,13 +209,20 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
     <div className="relative overflow-hidden rounded-2xl shadow-md shadow-black/20">
       <MapContainer
         center={center}
-        zoom={hasAnyPoint ? 12 : 4}
+        zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
+        maxZoom={19}
         style={{ height: "480px", width: "100%" }}
       >
-        <MapRecenter center={center} zoom={hasAnyPoint ? 12 : 4} hasAnyPoint={hasAnyPoint} />
+        <MapRecenter
+          center={center}
+          zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
+          hasAnyPoint={hasAnyPoint}
+          recenterSignal={recenterSignal}
+        />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
         />
         {pins.map((pin) => (
           <Fragment key={pin.id}>
@@ -250,6 +270,16 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
           </Marker>
         ))}
       </MapContainer>
+
+      {hasAnyPoint && (
+        <button
+          type="button"
+          onClick={() => setRecenterSignal((n) => n + 1)}
+          className="absolute right-3 top-3 z-[1000] rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md shadow-black/20 hover:text-brand-blue"
+        >
+          Recenter
+        </button>
+      )}
 
       {!loading && !hasAnyPoint && (
         <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-slate-900/20">

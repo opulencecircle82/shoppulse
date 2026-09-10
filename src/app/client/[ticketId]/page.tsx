@@ -97,9 +97,6 @@ export default function ClientTicketPage() {
   const [ticket, setTicket] = useState<ClientTicket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [disputeNotes, setDisputeNotes] = useState("");
-  const [showDisputeForm, setShowDisputeForm] = useState(false);
-  const [submitting, setSubmitting] = useState<"approve" | "dispute" | null>(null);
   const [staffLocation, setStaffLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [review, setReview] = useState<{
     rating: number;
@@ -188,24 +185,6 @@ export default function ClientTicketPage() {
     await load();
   }
 
-  async function handleApprove() {
-    setSubmitting("approve");
-    await supabase.rpc("client_approve_ticket", { p_ticket_id: ticketId });
-    setSubmitting(null);
-    await load();
-  }
-
-  async function handleDispute() {
-    if (!disputeNotes.trim()) return;
-    setSubmitting("dispute");
-    await supabase.rpc("client_dispute_ticket", {
-      p_ticket_id: ticketId,
-      p_notes: disputeNotes,
-    });
-    setSubmitting(null);
-    await load();
-  }
-
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -221,8 +200,6 @@ export default function ClientTicketPage() {
       </main>
     );
   }
-
-  const canReview = ticket.status === "COMPLETED";
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10">
@@ -311,69 +288,22 @@ export default function ClientTicketPage() {
             </p>
           )}
 
+          {ticket.status === "COMPLETED" && (
+            <p className="mt-6 rounded-lg bg-blue-50 px-4 py-3 text-sm text-brand-blue">
+              Work is done — the business is reviewing it before finalizing.
+            </p>
+          )}
+
           {ticket.status === "APPROVED" && (
             <p className="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              You approved this job. Thank you!
+              This job has been approved.
             </p>
           )}
 
           {ticket.status === "DISPUTED" && (
             <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              <p className="font-semibold">You disputed this job.</p>
+              <p className="font-semibold">This job was marked as disputed.</p>
               {ticket.dispute_notes && <p className="mt-1">{ticket.dispute_notes}</p>}
-            </div>
-          )}
-
-          {canReview && !showDisputeForm && (
-            <div className="mt-6 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={handleApprove}
-                disabled={submitting !== null}
-                className="w-full rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {submitting === "approve" ? "Approving..." : "Approve Job"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowDisputeForm(true)}
-                disabled={submitting !== null}
-                className="w-full rounded-full border border-red-300 px-6 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
-              >
-                Report a Problem
-              </button>
-            </div>
-          )}
-
-          {canReview && showDisputeForm && (
-            <div className="mt-6">
-              <label className="block text-xs font-medium text-slate-500">
-                What went wrong?
-              </label>
-              <textarea
-                rows={3}
-                value={disputeNotes}
-                onChange={(e) => setDisputeNotes(e.target.value)}
-                placeholder="Tell us what happened..."
-                className="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-              />
-              <div className="mt-3 flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={handleDispute}
-                  disabled={submitting !== null || !disputeNotes.trim()}
-                  className="w-full rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting === "dispute" ? "Submitting..." : "Submit Dispute"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowDisputeForm(false)}
-                  className="w-full rounded-full border border-slate-200 px-6 py-3 text-sm font-medium text-slate-600"
-                >
-                  Cancel
-                </button>
-              </div>
             </div>
           )}
 
