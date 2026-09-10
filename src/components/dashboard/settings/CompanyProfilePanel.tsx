@@ -6,6 +6,8 @@ import { ImageUp, Loader2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
 import type { Currency, Shop } from "@/lib/supabase/types";
+import { COUNTRIES } from "@/lib/location/countries";
+import { PHILIPPINES_REGIONS } from "@/lib/location/philippinesRegions";
 
 const BusinessLocationPicker = dynamic(
   () => import("./BusinessLocationPicker"),
@@ -27,6 +29,8 @@ export default function CompanyProfilePanel({
   const [address, setAddress] = useState(shop?.address ?? "");
   const [currency, setCurrency] = useState<Currency>(shop?.currency ?? "USD");
   const [city, setCity] = useState(shop?.city ?? "");
+  const [country, setCountry] = useState(shop?.country ?? "Philippines");
+  const [region, setRegion] = useState(shop?.region ?? "");
   const [businessCategory, setBusinessCategory] = useState(shop?.business_category ?? "");
   const [isPubliclyListed, setIsPubliclyListed] = useState(shop?.is_publicly_listed ?? true);
   const [latitude, setLatitude] = useState<number | null>(shop?.latitude ?? null);
@@ -107,6 +111,8 @@ export default function CompanyProfilePanel({
           address: address || null,
           currency,
           city: city || null,
+          country: country || null,
+          region: region || null,
           business_category: businessCategory || null,
           is_publicly_listed: isPubliclyListed,
           latitude,
@@ -147,6 +153,9 @@ export default function CompanyProfilePanel({
           user.email ??
           "Owner",
         p_owner_email: user.email ?? "",
+        p_country: country || null,
+        p_region: region || null,
+        p_city: city || null,
       }
     );
 
@@ -270,6 +279,68 @@ export default function CompanyProfilePanel({
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-600">
+            Country
+          </label>
+          <select
+            value={country}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setRegion("");
+            }}
+            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          >
+            {COUNTRIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-600">
+            Region
+          </label>
+          {country === "Philippines" ? (
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            >
+              <option value="">Select region</option>
+              {PHILIPPINES_REGIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              placeholder="Region / State / Province"
+              className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-600">
+          Municipality / City
+        </label>
+        <input
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="Kidapawan City"
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+        />
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-slate-600">
           Primary Operating Currency
@@ -289,31 +360,17 @@ export default function CompanyProfilePanel({
 
       {shop && (
         <>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-600">
-                City
-              </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                placeholder="San Francisco"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-600">
-                Business Category
-              </label>
-              <input
-                type="text"
-                value={businessCategory}
-                onChange={(e) => setBusinessCategory(e.target.value)}
-                className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                placeholder="Plumbing, Cleaning..."
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-600">
+              Business Category
+            </label>
+            <input
+              type="text"
+              value={businessCategory}
+              onChange={(e) => setBusinessCategory(e.target.value)}
+              className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              placeholder="Plumbing, Cleaning..."
+            />
           </div>
 
           <label className="flex items-center gap-2.5 text-sm text-slate-600">
