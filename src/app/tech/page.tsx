@@ -59,6 +59,20 @@ export default function TechAppPage() {
     };
   }, [staffContext]);
 
+  // The home screen's task otherwise only refreshes on sign-in, after
+  // submitting a job, or when the technician taps Accept/Decline — so a
+  // newly assigned job just sat in the notification bell without ever
+  // showing up in "Today's Task" until the technician did something else
+  // that happened to reload. Only polls while actually on the home screen,
+  // never mid-job, so it can't disturb an in-progress checklist/photo.
+  useEffect(() => {
+    if (screen !== "home" || !staffContext) return;
+    const interval = setInterval(() => {
+      loadHome(staffContext);
+    }, 20000);
+    return () => clearInterval(interval);
+  }, [screen, staffContext, loadHome]);
+
   if (screen === "loading") {
     return (
       <main className="flex min-h-screen items-center justify-center bg-brand-navy">
