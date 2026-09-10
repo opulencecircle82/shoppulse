@@ -29,14 +29,25 @@ function ClickToPlacePin({
   return null;
 }
 
-export default function BusinessLocationPicker({
+/**
+ * Shared by the owner's business-location picker and the customer
+ * signup's home-location picker — supports both an automatic pin (device
+ * GPS via "Use my current location") and a manual one (tap/drag on the
+ * map), since a typed address alone is unreliable here (many addresses
+ * have no formal street/house number).
+ */
+export default function LocationPickerMap({
   latitude,
   longitude,
   onChange,
+  label = "Pin Your Exact Location",
+  description = "Tap anywhere on the map to drop a pin, or use your current location.",
 }: {
   latitude: number | null;
   longitude: number | null;
   onChange: (lat: number, lng: number) => void;
+  label?: string;
+  description?: string;
 }) {
   const hasPin = latitude !== null && longitude !== null;
   const [locating, setLocating] = useState(false);
@@ -60,7 +71,7 @@ export default function BusinessLocationPicker({
     <div>
       <div className="flex items-center justify-between">
         <label className="block text-sm font-medium text-slate-600">
-          Pin Your Exact Location
+          {label}
         </label>
         <button
           type="button"
@@ -71,10 +82,7 @@ export default function BusinessLocationPicker({
           {locating ? "Locating..." : "Use my current location"}
         </button>
       </div>
-      <p className="mt-1 text-xs text-slate-400">
-        Tap anywhere on the map to drop a pin — useful when your address has
-        no formal street or house number. Customers will see this exact spot.
-      </p>
+      <p className="mt-1 text-xs text-slate-400">{description}</p>
       <div className="mt-2 overflow-hidden rounded-xl shadow-sm shadow-black/20">
         <MapContainer
           center={center}

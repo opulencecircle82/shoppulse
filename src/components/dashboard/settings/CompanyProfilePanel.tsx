@@ -9,8 +9,8 @@ import type { Currency, Shop } from "@/lib/supabase/types";
 import { COUNTRIES } from "@/lib/location/countries";
 import { PHILIPPINES_REGIONS } from "@/lib/location/philippinesRegions";
 
-const BusinessLocationPicker = dynamic(
-  () => import("./BusinessLocationPicker"),
+const LocationPickerMap = dynamic(
+  () => import("@/components/shared/LocationPickerMap"),
   { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
 );
 
@@ -29,6 +29,7 @@ export default function CompanyProfilePanel({
   const [address, setAddress] = useState(shop?.address ?? "");
   const [currency, setCurrency] = useState<Currency>(shop?.currency ?? "USD");
   const [city, setCity] = useState(shop?.city ?? "");
+  const [barangay, setBarangay] = useState(shop?.barangay ?? "");
   const [country, setCountry] = useState(shop?.country ?? "Philippines");
   const [region, setRegion] = useState(shop?.region ?? "");
   const [businessCategory, setBusinessCategory] = useState(shop?.business_category ?? "");
@@ -111,6 +112,7 @@ export default function CompanyProfilePanel({
           address: address || null,
           currency,
           city: city || null,
+          barangay: barangay || null,
           country: country || null,
           region: region || null,
           business_category: businessCategory || null,
@@ -156,6 +158,7 @@ export default function CompanyProfilePanel({
         p_country: country || null,
         p_region: region || null,
         p_city: city || null,
+        p_barangay: barangay || null,
       }
     );
 
@@ -328,17 +331,31 @@ export default function CompanyProfilePanel({
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-slate-600">
-          Municipality / City
-        </label>
-        <input
-          type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          placeholder="Kidapawan City"
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-600">
+            Municipality / City
+          </label>
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Kidapawan City"
+            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-600">
+            Barangay
+          </label>
+          <input
+            type="text"
+            value={barangay}
+            onChange={(e) => setBarangay(e.target.value)}
+            placeholder="Barangay Poblacion"
+            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+        </div>
       </div>
 
       <div>
@@ -384,13 +401,14 @@ export default function CompanyProfilePanel({
             Near You&quot; directory
           </label>
 
-          <BusinessLocationPicker
+          <LocationPickerMap
             latitude={latitude}
             longitude={longitude}
             onChange={(lat, lng) => {
               setLatitude(lat);
               setLongitude(lng);
             }}
+            description="Tap anywhere on the map to drop a pin — useful when your address has no formal street or house number. Customers will see this exact spot."
           />
         </>
       )}

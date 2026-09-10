@@ -8,11 +8,13 @@ export type Customer = {
   country: string | null;
   region: string | null;
   city: string | null;
+  barangay: string | null;
   latitude: number | null;
   longitude: number | null;
 };
 
-const CUSTOMER_FIELDS = "id, full_name, email, phone, country, region, city, latitude, longitude";
+const CUSTOMER_FIELDS =
+  "id, full_name, email, phone, country, region, city, barangay, latitude, longitude";
 
 function mapCustomerRow(data: {
   id: string;
@@ -22,6 +24,7 @@ function mapCustomerRow(data: {
   country: string | null;
   region: string | null;
   city: string | null;
+  barangay: string | null;
   latitude: number | null;
   longitude: number | null;
 }): Customer {
@@ -33,6 +36,7 @@ function mapCustomerRow(data: {
     country: data.country,
     region: data.region,
     city: data.city,
+    barangay: data.barangay,
     latitude: data.latitude,
     longitude: data.longitude,
   };
@@ -71,6 +75,7 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
     country?: string;
     region?: string;
     city?: string;
+    barangay?: string;
     latitude?: number;
     longitude?: number;
   };
@@ -85,6 +90,7 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
       country: meta.country || null,
       region: meta.region || null,
       city: meta.city || null,
+      barangay: meta.barangay || null,
       latitude: meta.latitude ?? null,
       longitude: meta.longitude ?? null,
     })
@@ -110,6 +116,7 @@ export async function signUpCustomer(params: {
   country: string;
   region: string;
   city: string;
+  barangay: string;
   latitude: number | null;
   longitude: number | null;
 }): Promise<{ needsEmailConfirmation: boolean }> {
@@ -123,6 +130,7 @@ export async function signUpCustomer(params: {
         country: params.country,
         region: params.region,
         city: params.city,
+        barangay: params.barangay,
         latitude: params.latitude,
         longitude: params.longitude,
       },

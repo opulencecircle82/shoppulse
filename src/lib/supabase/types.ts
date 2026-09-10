@@ -36,6 +36,7 @@ export type Shop = {
   longitude: number | null;
   country: string | null;
   region: string | null;
+  barangay: string | null;
 };
 
 export type StaffMember = {
