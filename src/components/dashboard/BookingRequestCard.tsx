@@ -200,7 +200,7 @@ export default function BookingRequestCard({
           type="button"
           onClick={handleAccept}
           disabled={busy}
-          className="flex-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="flex-1 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           Accept
         </button>

@@ -15,10 +15,12 @@ export default function NotificationBell({
   staffId,
   tickets,
   onOpenTicket,
+  dark = false,
 }: {
   staffId: string;
   tickets: JobTicket[];
   onOpenTicket: (ticket: JobTicket) => void;
+  dark?: boolean;
 }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
@@ -73,7 +75,11 @@ export default function NotificationBell({
       <button
         type="button"
         onClick={handleOpen}
-        className="relative rounded-full border border-slate-300 p-2.5 text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        className={
+          dark
+            ? "relative rounded-full border border-white/20 p-2.5 text-white/80 transition-colors hover:border-white/40 hover:text-white"
+            : "relative rounded-full border border-slate-300 p-2.5 text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        }
         aria-label="Notifications"
       >
         <Bell className="h-4 w-4" />

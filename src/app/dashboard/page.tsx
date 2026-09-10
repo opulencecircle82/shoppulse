@@ -26,6 +26,7 @@ import DashboardSidebarNav, {
   type DashboardTabId,
 } from "@/components/dashboard/DashboardSidebarNav";
 import NotificationBell from "@/components/dashboard/NotificationBell";
+import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
@@ -76,7 +77,7 @@ export default function DashboardPage() {
         <div className="mt-8 flex items-center gap-4">
           <a
             href="/dashboard/settings"
-            className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+            className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
           >
             Business Settings
           </a>
@@ -95,12 +96,15 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-brand-slate">
       <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{shop.shop_name}</h1>
-            <p className="mt-1 text-sm text-slate-500">Owner Command Center</p>
+        <div className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-3xl bg-brand-navy px-6 py-6 sm:px-8">
+          <CurvedLinesBackground />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/15 px-3 py-1 text-xs font-semibold text-brand-orange">
+              Owner Command Center
+            </span>
+            <h1 className="mt-2 text-2xl font-bold text-white">{shop.shop_name}</h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="relative flex items-center gap-3">
             {staffMember && (
               <NotificationBell
                 staffId={staffMember.id}
@@ -112,19 +116,20 @@ export default function DashboardPage() {
                     setActiveTab("board");
                   }
                 }}
+                dark
               />
             )}
             <button
               type="button"
               onClick={() => setSetupOpenMobile(true)}
-              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue lg:hidden"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:border-white/40 hover:text-white lg:hidden"
             >
               Setup &amp; Customize
             </button>
             <button
               type="button"
               onClick={handleSignOut}
-              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:border-red-400 hover:text-red-400"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:border-red-400 hover:text-red-300"
             >
               Sign Out
             </button>
@@ -169,7 +174,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setShowNewTicket(true)}
-                    className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+                    className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
                   >
                     + New Job Ticket
                   </button>

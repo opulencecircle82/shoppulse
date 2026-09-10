@@ -41,7 +41,7 @@ export default function WhiteLabelPanel({
         </p>
         <Link
           href="/#pricing"
-          className="mt-5 inline-block rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+          className="mt-5 inline-block rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
         >
           Upgrade to Marketing Suite
         </Link>
@@ -100,7 +100,7 @@ export default function WhiteLabelPanel({
       <button
         type="submit"
         disabled={saving}
-        className="rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {saving ? "Saving..." : "Save Changes"}
       </button>

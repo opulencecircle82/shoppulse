@@ -11,7 +11,13 @@ import {
 
 const POLL_MS = 20000;
 
-export default function CustomerNotificationBell({ customerId }: { customerId: string }) {
+export default function CustomerNotificationBell({
+  customerId,
+  dark = false,
+}: {
+  customerId: string;
+  dark?: boolean;
+}) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
@@ -66,7 +72,11 @@ export default function CustomerNotificationBell({ customerId }: { customerId: s
       <button
         type="button"
         onClick={handleOpen}
-        className="relative rounded-full p-2 text-slate-500 hover:text-slate-900"
+        className={
+          dark
+            ? "relative rounded-full p-2 text-white/80 hover:text-white"
+            : "relative rounded-full p-2 text-slate-500 hover:text-slate-900"
+        }
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />

@@ -238,7 +238,7 @@ function PromotionCard({
             type="button"
             onClick={handleApply}
             disabled={applying}
-            className="rounded-full bg-brand-blue px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-4 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {applying ? "Applying..." : "Apply"}
           </button>
@@ -414,7 +414,7 @@ function AddPromotionModal({
           <button
             type="submit"
             disabled={saving}
-            className="mt-2 w-full rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Adding..." : "Add Promotion"}
           </button>
@@ -457,7 +457,7 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
           <Plus className="h-3.5 w-3.5" /> Add Promotion
         </button>

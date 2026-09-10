@@ -189,7 +189,7 @@ export default function AdminDashboardClient({
             <button
               type="submit"
               disabled={passwordSaving}
-              className="rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {passwordSaving ? "Saving..." : "Update Password"}
             </button>

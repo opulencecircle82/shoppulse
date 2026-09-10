@@ -449,7 +449,7 @@ export default function ClientTicketPage() {
                     type="button"
                     onClick={handleSubmitReview}
                     disabled={reviewRating === 0 || reviewSubmitting}
-                    className="mt-2 w-full rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-2 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {reviewSubmitting ? "Submitting..." : "Submit Rating"}
                   </button>

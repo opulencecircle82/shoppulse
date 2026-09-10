@@ -95,7 +95,7 @@ export default function PricingSection() {
           </ul>
           <Link
             href="/signup"
-            className="mt-8 block rounded-full bg-brand-orange px-6 py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
+            className="mt-8 block rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-6 py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
           >
             Get Started Free
           </Link>

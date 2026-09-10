@@ -63,7 +63,7 @@ export default function HeroVideoSection() {
           </Link>
           <Link
             href="/signup"
-            className="rounded-full bg-brand-orange px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
+            className="rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
           >
             Get Started Free
           </Link>
@@ -103,7 +103,7 @@ export default function HeroVideoSection() {
             <Link
               href="/signup"
               onClick={() => setMenuOpen(false)}
-              className="rounded-full bg-brand-orange px-5 py-2.5 text-center text-sm font-bold text-white"
+              className="rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-2.5 text-center text-sm font-bold text-white"
             >
               Get Started Free
             </Link>
@@ -140,7 +140,7 @@ export default function HeroVideoSection() {
             />
 
             <div className="relative">
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-3 py-1 text-xs font-bold text-brand-navy">
+              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-3 py-1 text-xs font-bold text-brand-navy">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-navy opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-navy" />
@@ -180,7 +180,7 @@ export default function HeroVideoSection() {
         <div className="mt-10 flex flex-col items-center gap-3">
           <Link
             href="/signup"
-            className="rounded-full bg-brand-orange px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
+            className="rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
           >
             Get Started Free →
           </Link>

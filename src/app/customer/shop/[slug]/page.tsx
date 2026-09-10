@@ -267,7 +267,7 @@ export default function ShopDetailsPage() {
 
           <Link
             href={`/customer/book/${shop.slug}`}
-            className="mt-6 block w-full rounded-full bg-brand-blue px-6 py-3.5 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+            className="mt-6 block w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3.5 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
           >
             Book Now
           </Link>

@@ -106,7 +106,7 @@ function AddServiceModal({
         <button
           type="submit"
           disabled={saving}
-          className="mt-2 w-full rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {saving ? "Adding..." : "Add Service"}
         </button>
@@ -157,7 +157,7 @@ function ServicesSection({ shopId }: { shopId: string }) {
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
           <Plus className="h-3.5 w-3.5" /> Add
         </button>
@@ -329,7 +329,7 @@ function AddProductModal({
         <button
           type="submit"
           disabled={saving}
-          className="mt-2 w-full rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {saving ? "Adding..." : "Add Product"}
         </button>
@@ -379,7 +379,7 @@ function ProductsSection({ shopId }: { shopId: string }) {
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
           <Plus className="h-3.5 w-3.5" /> Add
         </button>

@@ -18,7 +18,7 @@ export default function Footer() {
         </p>
         <Link
           href="/signup"
-          className="mt-8 inline-block rounded-full bg-brand-orange px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
+          className="mt-8 inline-block rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
         >
           Get Started Free →
         </Link>

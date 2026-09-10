@@ -29,13 +29,14 @@ import {
 } from "@/lib/customer/bookings";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
 import CustomerNotificationBell from "./CustomerNotificationBell";
+import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-600",
   REJECTED: "bg-red-50 text-red-600",
   UNASSIGNED: "bg-slate-100 text-slate-600",
   SCHEDULED: "bg-blue-50 text-brand-blue",
-  IN_PROGRESS: "bg-amber-50 text-amber-600",
+  IN_PROGRESS: "bg-blue-50 text-brand-blue",
   COMPLETED: "bg-blue-50 text-brand-blue",
   APPROVED: "bg-emerald-50 text-emerald-600",
   DISPUTED: "bg-red-50 text-red-600",
@@ -143,17 +144,21 @@ export default function CustomerHomeScreen({
   return (
     <main className="min-h-screen bg-slate-50 px-5 py-6">
       <div className="mx-auto max-w-lg">
-        <header className="flex items-center justify-between">
-          <div>
-            <p className="text-lg font-bold text-slate-900">Hi, {customer.fullName}</p>
-            <p className="text-xs text-slate-500">Your ShopPulse jobs</p>
+        <header className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-brand-navy px-5 py-5">
+          <CurvedLinesBackground />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/15 px-2.5 py-0.5 text-[10px] font-semibold text-brand-orange">
+              ShopPulse
+            </span>
+            <p className="mt-1.5 text-lg font-bold text-white">Hi, {customer.fullName}</p>
+            <p className="text-xs text-white/60">Your jobs, all in one place</p>
           </div>
-          <div className="flex items-center gap-1">
-            <CustomerNotificationBell customerId={customer.id} />
+          <div className="relative flex items-center gap-1">
+            <CustomerNotificationBell customerId={customer.id} dark />
             <button
               type="button"
               onClick={handleSignOut}
-              className="text-sm font-medium text-slate-500 hover:text-slate-900"
+              className="text-sm font-medium text-white/70 hover:text-white"
             >
               Sign Out
             </button>
@@ -278,7 +283,7 @@ export default function CustomerHomeScreen({
                   </div>
                   <Link
                     href={`/customer/book/${service.shop_slug}`}
-                    className="mt-3 block w-full rounded-full bg-brand-blue px-4 py-2 text-center text-xs font-bold text-white shadow-sm shadow-blue-500/30"
+                    className="mt-3 block w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-4 py-2 text-center text-xs font-bold text-white shadow-sm shadow-blue-500/30"
                   >
                     Book Now
                   </Link>
@@ -305,7 +310,7 @@ export default function CustomerHomeScreen({
             />
             <button
               type="submit"
-              className="shrink-0 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
+              className="shrink-0 rounded-xl bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
             >
               Book Now
             </button>
