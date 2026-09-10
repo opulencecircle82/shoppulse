@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   listPublicShops,
   listPublicShopCategories,
@@ -11,10 +11,19 @@ import {
 } from "@/lib/customer/bookings";
 
 export default function DiscoverShopsPage() {
+  return (
+    <Suspense fallback={null}>
+      <DiscoverShopsContent />
+    </Suspense>
+  );
+}
+
+function DiscoverShopsContent() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [city, setCity] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [categories, setCategories] = useState<string[]>([]);
   const [shops, setShops] = useState<PublicShop[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,11 +40,14 @@ export default function DiscoverShopsPage() {
   );
 
   useEffect(() => {
+    const initialSearch = searchParams.get("q") ?? "";
+    const initialCategory = searchParams.get("category") ?? "";
     const id = setTimeout(() => {
-      load();
+      load({ search: initialSearch, category: initialCategory });
       listPublicShopCategories().then(setCategories).catch(() => {});
     }, 0);
     return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {

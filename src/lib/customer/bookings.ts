@@ -287,3 +287,39 @@ export async function listPublicShopProducts(shopId: string): Promise<PublicProd
   if (error) throw error;
   return (data ?? []) as PublicProduct[];
 }
+
+export type FeaturedService = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  shop_name: string;
+  shop_slug: string;
+  avg_rating: number | null;
+  review_count: number;
+};
+
+export async function listFeaturedServices(city?: string | null): Promise<FeaturedService[]> {
+  const { data, error } = await supabase.rpc("list_featured_services", {
+    p_city: city || null,
+    p_limit: 6,
+  });
+  if (error) throw error;
+  return (data ?? []) as FeaturedService[];
+}
+
+export type TicketTechnician = {
+  full_name: string;
+  avg_rating: number | null;
+  review_count: number;
+};
+
+export async function fetchTicketTechnician(
+  ticketId: string
+): Promise<TicketTechnician | null> {
+  const { data, error } = await supabase
+    .rpc("get_ticket_technician", { p_ticket_id: ticketId })
+    .maybeSingle();
+  if (error) throw error;
+  return data as TicketTechnician | null;
+}
