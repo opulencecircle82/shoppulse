@@ -7,6 +7,16 @@ export type Customer = {
   phone: string | null;
 };
 
+/**
+ * Reads the signed-in customer's profile, auto-creating it on first call
+ * if it doesn't exist yet. That covers both cases in one place: when
+ * email confirmation is off, signUpCustomer() already has a session and
+ * this creates the row right away; when confirmation is required (the
+ * common case), signUp() returns no session, so the row can't be created
+ * then — it gets created here instead, the first time we see an
+ * authenticated session with no matching customers row, which is right
+ * after the customer confirms their email and logs in.
+ */
 export async function fetchCurrentCustomer(): Promise<Customer | null> {
   const {
     data: { session },
@@ -20,36 +30,58 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
     .eq("auth_user_id", session.user.id)
     .maybeSingle();
 
-  if (!data) return null;
+  if (data) {
+    return { id: data.id, fullName: data.full_name, email: data.email, phone: data.phone };
+  }
 
-  return { id: data.id, fullName: data.full_name, email: data.email, phone: data.phone };
+  const meta = session.user.user_metadata as { full_name?: string; phone?: string };
+
+  const { data: created, error: createError } = await supabase
+    .from("customers")
+    .insert({
+      auth_user_id: session.user.id,
+      full_name: meta.full_name ?? session.user.email ?? "Customer",
+      email: session.user.email ?? "",
+      phone: meta.phone || null,
+    })
+    .select("id, full_name, email, phone")
+    .single();
+
+  if (createError || !created) return null;
+
+  return {
+    id: created.id,
+    fullName: created.full_name,
+    email: created.email,
+    phone: created.phone,
+  };
 }
 
+/**
+ * Stashes full name/phone in the auth user's metadata (available at
+ * signUp() time even without a session) so fetchCurrentCustomer can use
+ * them to create the profile row later, whenever the session actually
+ * becomes available.
+ */
 export async function signUpCustomer(params: {
   fullName: string;
   email: string;
   phone: string;
   password: string;
-}) {
+}): Promise<{ needsEmailConfirmation: boolean }> {
   const { data, error } = await supabase.auth.signUp({
     email: params.email,
     password: params.password,
+    options: {
+      data: { full_name: params.fullName, phone: params.phone },
+    },
   });
 
-  if (error || !data.user) {
-    throw new Error(error?.message ?? "Could not create account.");
+  if (error) {
+    throw new Error(error.message);
   }
 
-  const { error: profileError } = await supabase.from("customers").insert({
-    auth_user_id: data.user.id,
-    full_name: params.fullName,
-    email: params.email,
-    phone: params.phone || null,
-  });
-
-  if (profileError) {
-    throw new Error(profileError.message);
-  }
+  return { needsEmailConfirmation: !data.session };
 }
 
 export async function signInCustomer(email: string, password: string) {

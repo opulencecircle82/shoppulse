@@ -11,6 +11,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmEmailSent, setConfirmEmailSent] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,7 +20,16 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
 
     try {
       if (mode === "signup") {
-        await signUpCustomer({ fullName, email, phone, password });
+        const { needsEmailConfirmation } = await signUpCustomer({
+          fullName,
+          email,
+          phone,
+          password,
+        });
+        if (needsEmailConfirmation) {
+          setConfirmEmailSent(true);
+          return;
+        }
       } else {
         await signInCustomer(email, password);
       }
@@ -29,6 +39,31 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
     } finally {
       setLoading(false);
     }
+  }
+
+  if (confirmEmailSent) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white">
+          SP
+        </span>
+        <h1 className="mt-4 text-xl font-bold text-slate-900">Check your email</h1>
+        <p className="mt-1.5 max-w-xs text-sm text-slate-500">
+          We sent a confirmation link to {email}. Open it, then come back here
+          and log in.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setConfirmEmailSent(false);
+            setMode("login");
+          }}
+          className="mt-6 rounded-full bg-brand-blue px-6 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/30"
+        >
+          Back to Log In
+        </button>
+      </main>
+    );
   }
 
   return (
