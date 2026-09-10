@@ -3,13 +3,19 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { listPublicShops, isShopOpenNow, type PublicShop } from "@/lib/customer/bookings";
+import {
+  listPublicShops,
+  listPublicShopCategories,
+  isShopOpenNow,
+  type PublicShop,
+} from "@/lib/customer/bookings";
 
 export default function DiscoverShopsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("");
   const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
   const [shops, setShops] = useState<PublicShop[]>([]);
   const [loading, setLoading] = useState(true);
   const [searched, setSearched] = useState(false);
@@ -27,6 +33,7 @@ export default function DiscoverShopsPage() {
   useEffect(() => {
     const id = setTimeout(() => {
       load();
+      listPublicShopCategories().then(setCategories).catch(() => {});
     }, 0);
     return () => clearTimeout(id);
   }, [load]);
@@ -34,7 +41,13 @@ export default function DiscoverShopsPage() {
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSearched(true);
-    load({ search: search.trim(), city: city.trim(), category: category.trim() });
+    load({ search: search.trim(), city: city.trim(), category });
+  }
+
+  function handleCategoryChange(value: string) {
+    setCategory(value);
+    setSearched(true);
+    load({ search: search.trim(), city: city.trim(), category: value });
   }
 
   return (
@@ -54,10 +67,23 @@ export default function DiscoverShopsPage() {
           Find Services Near You
         </h1>
         <p className="mt-1 text-xs text-slate-500">
-          Browse businesses on ShopPulse by name, category, or city.
+          Browse businesses on ShopPulse by category, name, or city.
         </p>
 
         <form onSubmit={handleSearch} className="mt-4 space-y-2">
+          <select
+            value={category}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          >
+            <option value="">All Categories</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+
           <input
             type="text"
             placeholder="Search business name..."
@@ -65,22 +91,13 @@ export default function DiscoverShopsPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Category (e.g. Plumbing)"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            />
-            <input
-              type="text"
-              placeholder="City"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="City"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
           <button
             type="submit"
             className="w-full rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
@@ -109,7 +126,7 @@ export default function DiscoverShopsPage() {
                 return (
                   <li key={shop.id}>
                     <Link
-                      href={`/customer/book/${shop.slug}`}
+                      href={`/customer/shop/${shop.slug}`}
                       className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
                     >
                       {shop.logo_url ? (

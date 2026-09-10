@@ -18,6 +18,11 @@ export type BookingShop = {
   shop_name: string;
   slug: string;
   logo_url: string | null;
+  city: string | null;
+  business_category: string | null;
+  business_hours_open: string | null;
+  business_hours_close: string | null;
+  business_days: string[];
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the
@@ -62,12 +67,29 @@ export async function listPublicShops(params?: {
   return (data ?? []) as PublicShop[];
 }
 
+/** Populates the category dropdown on the discover page from real data
+ * rather than a hardcoded list that could drift from what owners type
+ * into Company Profile. */
+export async function listPublicShopCategories(): Promise<string[]> {
+  const { data, error } = await supabase.rpc("list_public_shop_categories");
+  if (error) throw error;
+  return ((data ?? []) as { business_category: string }[]).map(
+    (row) => row.business_category
+  );
+}
+
 const DAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+type ShopHours = {
+  business_hours_open: string | null;
+  business_hours_close: string | null;
+  business_days: string[];
+};
 
 /** Compares against the customer's local device clock — shop and
  * customer are assumed to share a timezone for a local service business,
  * so no server-side timezone handling is needed for this. */
-export function isShopOpenNow(shop: PublicShop): boolean {
+export function isShopOpenNow(shop: ShopHours): boolean {
   if (!shop.business_hours_open || !shop.business_hours_close) return false;
 
   const now = new Date();
