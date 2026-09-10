@@ -5,7 +5,38 @@ export type Customer = {
   fullName: string;
   email: string;
   phone: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
+
+const CUSTOMER_FIELDS = "id, full_name, email, phone, country, region, city, latitude, longitude";
+
+function mapCustomerRow(data: {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}): Customer {
+  return {
+    id: data.id,
+    fullName: data.full_name,
+    email: data.email,
+    phone: data.phone,
+    country: data.country,
+    region: data.region,
+    city: data.city,
+    latitude: data.latitude,
+    longitude: data.longitude,
+  };
+}
 
 /**
  * Reads the signed-in customer's profile, auto-creating it on first call
@@ -26,15 +57,23 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
 
   const { data } = await supabase
     .from("customers")
-    .select("id, full_name, email, phone")
+    .select(CUSTOMER_FIELDS)
     .eq("auth_user_id", session.user.id)
     .maybeSingle();
 
   if (data) {
-    return { id: data.id, fullName: data.full_name, email: data.email, phone: data.phone };
+    return mapCustomerRow(data);
   }
 
-  const meta = session.user.user_metadata as { full_name?: string; phone?: string };
+  const meta = session.user.user_metadata as {
+    full_name?: string;
+    phone?: string;
+    country?: string;
+    region?: string;
+    city?: string;
+    latitude?: number;
+    longitude?: number;
+  };
 
   const { data: created, error: createError } = await supabase
     .from("customers")
@@ -43,23 +82,23 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
       full_name: meta.full_name ?? session.user.email ?? "Customer",
       email: session.user.email ?? "",
       phone: meta.phone || null,
+      country: meta.country || null,
+      region: meta.region || null,
+      city: meta.city || null,
+      latitude: meta.latitude ?? null,
+      longitude: meta.longitude ?? null,
     })
-    .select("id, full_name, email, phone")
+    .select(CUSTOMER_FIELDS)
     .single();
 
   if (createError || !created) return null;
 
-  return {
-    id: created.id,
-    fullName: created.full_name,
-    email: created.email,
-    phone: created.phone,
-  };
+  return mapCustomerRow(created);
 }
 
 /**
- * Stashes full name/phone in the auth user's metadata (available at
- * signUp() time even without a session) so fetchCurrentCustomer can use
+ * Stashes full name/phone/location in the auth user's metadata (available
+ * at signUp() time even without a session) so fetchCurrentCustomer can use
  * them to create the profile row later, whenever the session actually
  * becomes available.
  */
@@ -68,12 +107,25 @@ export async function signUpCustomer(params: {
   email: string;
   phone: string;
   password: string;
+  country: string;
+  region: string;
+  city: string;
+  latitude: number | null;
+  longitude: number | null;
 }): Promise<{ needsEmailConfirmation: boolean }> {
   const { data, error } = await supabase.auth.signUp({
     email: params.email,
     password: params.password,
     options: {
-      data: { full_name: params.fullName, phone: params.phone },
+      data: {
+        full_name: params.fullName,
+        phone: params.phone,
+        country: params.country,
+        region: params.region,
+        city: params.city,
+        latitude: params.latitude,
+        longitude: params.longitude,
+      },
     },
   });
 

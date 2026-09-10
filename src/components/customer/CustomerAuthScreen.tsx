@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { signInCustomer, signUpCustomer } from "@/lib/customer/customerAuth";
+import { COUNTRIES } from "@/lib/location/countries";
+import { PHILIPPINES_REGIONS } from "@/lib/location/philippinesRegions";
 
 export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => void }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -9,9 +11,32 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [country, setCountry] = useState("Philippines");
+  const [region, setRegion] = useState("");
+  const [city, setCity] = useState("");
+  const [locationStatus, setLocationStatus] = useState<
+    "idle" | "locating" | "granted" | "denied"
+  >("idle");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmEmailSent, setConfirmEmailSent] = useState(false);
+
+  function enableLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus("denied");
+      return;
+    }
+    setLocationStatus("locating");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus("granted");
+      },
+      () => setLocationStatus("denied"),
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,6 +50,11 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
           email,
           phone,
           password,
+          country,
+          region,
+          city,
+          latitude: coords?.lat ?? null,
+          longitude: coords?.lng ?? null,
         });
         if (needsEmailConfirmation) {
           setConfirmEmailSent(true);
@@ -67,7 +97,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 py-10">
       <div className="w-full max-w-sm">
         <div className="text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white mx-auto">
@@ -101,6 +131,73 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
+
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={country}
+                  onChange={(e) => {
+                    setCountry(e.target.value);
+                    setRegion("");
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+
+                {country === "Philippines" ? (
+                  <select
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  >
+                    <option value="">Region</option>
+                    {PHILIPPINES_REGIONS.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="Region/State"
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  />
+                )}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Municipality / City"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              />
+
+              <button
+                type="button"
+                onClick={enableLocation}
+                disabled={locationStatus === "locating" || locationStatus === "granted"}
+                className={`w-full rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
+                  locationStatus === "granted"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                    : "border-brand-blue/30 bg-brand-blue/5 text-brand-blue hover:bg-brand-blue/10"
+                }`}
+              >
+                {locationStatus === "granted"
+                  ? "Location enabled ✓"
+                  : locationStatus === "locating"
+                    ? "Getting your location..."
+                    : locationStatus === "denied"
+                      ? "Couldn't get location — tap to retry"
+                      : "Turn on location"}
+              </button>
             </>
           )}
           <input
