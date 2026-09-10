@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import TechNotificationBell from "./TechNotificationBell";
@@ -10,19 +11,40 @@ export default function TechHomeScreen({
   task,
   onOpenTask,
   onSignedOut,
+  onRefresh,
 }: {
   shop: Shop;
   staffId: string;
   task: JobTicket | null;
   onOpenTask: (ticket: JobTicket) => void;
   onSignedOut: () => void;
+  onRefresh: () => void;
 }) {
+  const [responding, setResponding] = useState(false);
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     onSignedOut();
   }
 
+  async function handleAcceptJob() {
+    if (!task) return;
+    setResponding(true);
+    await supabase.rpc("accept_job_assignment", { p_ticket_id: task.id });
+    setResponding(false);
+    onRefresh();
+  }
+
+  async function handleDeclineJob() {
+    if (!task) return;
+    setResponding(true);
+    await supabase.rpc("decline_job_assignment", { p_ticket_id: task.id });
+    setResponding(false);
+    onRefresh();
+  }
+
   const isInProgress = task?.status === "IN_PROGRESS";
+  const needsAcceptance = task?.status === "SCHEDULED" && !task.staff_accepted_at;
 
   return (
     <main className="min-h-screen bg-brand-navy">
@@ -50,6 +72,33 @@ export default function TechHomeScreen({
             <p className="text-sm text-slate-400">
               No job assigned to you right now. Check back later.
             </p>
+          </div>
+        ) : needsAcceptance ? (
+          <div className="mt-3 w-full rounded-2xl bg-white/5 p-5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-bold text-amber-400">
+              NEEDS YOUR CONFIRMATION
+            </span>
+            <p className="mt-3 text-lg font-bold text-white">{task.client_name}</p>
+            <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
+            <p className="mt-2 text-xs text-slate-500">{task.service_address}</p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={handleAcceptJob}
+                disabled={responding}
+                className="flex-1 rounded-full bg-brand-orange px-4 py-2.5 text-xs font-bold text-white disabled:opacity-60"
+              >
+                Accept Job
+              </button>
+              <button
+                type="button"
+                onClick={handleDeclineJob}
+                disabled={responding}
+                className="flex-1 rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold text-slate-300 disabled:opacity-60"
+              >
+                Decline
+              </button>
+            </div>
           </div>
         ) : (
           <button

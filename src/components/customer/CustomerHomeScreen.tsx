@@ -9,6 +9,8 @@ import { signOutCustomer } from "@/lib/customer/customerAuth";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 
 const STATUS_STYLES: Record<string, string> = {
+  PENDING: "bg-amber-50 text-amber-600",
+  REJECTED: "bg-red-50 text-red-600",
   UNASSIGNED: "bg-slate-100 text-slate-600",
   SCHEDULED: "bg-blue-50 text-brand-blue",
   IN_PROGRESS: "bg-amber-50 text-amber-600",

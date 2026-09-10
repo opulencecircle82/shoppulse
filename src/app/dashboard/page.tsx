@@ -168,6 +168,7 @@ export default function DashboardPage() {
 
                 {!ticketsLoading && !staffLoading && (
                   <KanbanBoard
+                    shop={shop}
                     tickets={tickets}
                     staff={staff}
                     onChanged={refreshTickets}

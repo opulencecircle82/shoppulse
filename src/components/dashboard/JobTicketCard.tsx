@@ -1,39 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
+import AssignTaskingModal from "./AssignTaskingModal";
 
 export default function JobTicketCard({
   ticket,
   staff,
+  defaultTasks,
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
 }: {
   ticket: JobTicket;
   staff: StaffMember[];
+  defaultTasks: string[];
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer?: (ticket: JobTicket) => void;
 }) {
-  const [updating, setUpdating] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
-
-  async function updateTicket(fields: Partial<JobTicket>) {
-    setUpdating(true);
-    await supabase.from("job_tickets").update(fields).eq("id", ticket.id);
-    setUpdating(false);
-    onChanged();
-  }
-
-  async function handleAssign(staffId: string) {
-    await updateTicket({
-      assigned_staff_id: staffId || null,
-      status: staffId ? "SCHEDULED" : "UNASSIGNED",
-    });
-  }
 
   function copyClientLink() {
     const link = `${window.location.origin}/client/${ticket.id}`;
@@ -74,10 +62,12 @@ export default function JobTicketCard({
 
       {ticket.status === "UNASSIGNED" ? (
         <select
-          value={ticket.assigned_staff_id ?? ""}
-          onChange={(e) => handleAssign(e.target.value)}
+          value=""
+          onChange={(e) => {
+            const member = staff.find((s) => s.id === e.target.value);
+            if (member) setPendingAssignee(member);
+          }}
           onClick={(e) => e.stopPropagation()}
-          disabled={updating}
           className="mt-3 w-full rounded-xl bg-brand-slate/60 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           <option value="">Assign technician...</option>
@@ -109,9 +99,16 @@ export default function JobTicketCard({
         className="mt-3 flex flex-wrap gap-2"
         onClick={(e) => e.stopPropagation()}
       >
-        {ticket.status === "SCHEDULED" && (
-          <p className="text-xs text-slate-500">
+        {ticket.status === "SCHEDULED" && !ticket.staff_accepted_at && (
+          <p className="text-xs text-amber-600">
             Waiting for {assignedStaff?.full_name ?? "the technician"} to
+            confirm this job.
+          </p>
+        )}
+
+        {ticket.status === "SCHEDULED" && ticket.staff_accepted_at && (
+          <p className="text-xs text-slate-500">
+            Confirmed — waiting for {assignedStaff?.full_name ?? "the technician"} to
             start this job from the mobile app.
           </p>
         )}
@@ -143,6 +140,21 @@ export default function JobTicketCard({
           </button>
         )}
       </div>
+
+      {pendingAssignee && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <AssignTaskingModal
+            ticket={ticket}
+            staffMember={pendingAssignee}
+            defaultTasks={defaultTasks}
+            onClose={() => setPendingAssignee(null)}
+            onAssigned={() => {
+              setPendingAssignee(null);
+              onChanged();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

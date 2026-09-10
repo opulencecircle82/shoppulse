@@ -37,6 +37,7 @@ export type Shop = {
   country: string | null;
   region: string | null;
   barangay: string | null;
+  default_tasks: string[];
 };
 
 export type StaffMember = {
@@ -56,6 +57,8 @@ export type StaffMember = {
 };
 
 export type JobStatus =
+  | "PENDING"
+  | "REJECTED"
   | "UNASSIGNED"
   | "SCHEDULED"
   | "IN_PROGRESS"
@@ -85,6 +88,7 @@ export type JobTicket = {
   total_invoice_amount: number;
   dispute_notes: string | null;
   client_viewed_at: string | null;
+  staff_accepted_at: string | null;
   created_at: string;
 };
 

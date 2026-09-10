@@ -91,6 +91,9 @@ export default function TechAppPage() {
         shop={shop}
         staffId={staffContext!.staffId}
         task={task}
+        onRefresh={() => {
+          if (staffContext) loadHome(staffContext);
+        }}
         onOpenTask={(ticket) => {
           setSelectedTicket(ticket);
           setScreen("job");
