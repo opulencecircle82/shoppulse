@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Plus, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
 
@@ -238,14 +239,99 @@ function PromotionCard({
   );
 }
 
-export default function PromotionsManager({ shop }: { shop: Shop }) {
-  const [promotions, setPromotions] = useState<ShopPromotion[]>([]);
-  const [loading, setLoading] = useState(true);
-
+function AddPromotionModal({
+  shopId,
+  onClose,
+  onAdded,
+}: {
+  shopId: string;
+  onClose: () => void;
+  onAdded: () => void;
+}) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [discountCode, setDiscountCode] = useState("");
   const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    await supabase.from("shop_promotions").insert({
+      shop_id: shopId,
+      title,
+      description: description || null,
+      discount_code: discountCode || null,
+    });
+    setSaving(false);
+    onAdded();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl shadow-black/40">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-900">Add a Promotion</p>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-900">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-slate-400">
+          Shown to customers browsing services near your city. Free for now.
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-4 space-y-2">
+          <div>
+            <label className="block text-xs font-medium text-slate-500">Title</label>
+            <input
+              type="text"
+              required
+              autoFocus
+              placeholder="20% Off First Visit"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-500">Description</label>
+            <textarea
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-500">
+              Discount Code (optional)
+            </label>
+            <input
+              type="text"
+              value={discountCode}
+              onChange={(e) => setDiscountCode(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="mt-2 w-full rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? "Adding..." : "Add Promotion"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function PromotionsManager({ shop }: { shop: Shop }) {
+  const [promotions, setPromotions] = useState<ShopPromotion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -266,95 +352,46 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop.id]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaving(true);
-    await supabase.from("shop_promotions").insert({
-      shop_id: shop.id,
-      title,
-      description: description || null,
-      discount_code: discountCode || null,
-    });
-    setSaving(false);
-    setTitle("");
-    setDescription("");
-    setDiscountCode("");
-    load();
-  }
-
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30"
-      >
-        <h3 className="text-sm font-semibold text-slate-900">Add a Promotion</h3>
-        <p className="text-xs text-slate-400">
-          Shown to customers browsing services near your city. Free for now.
-        </p>
-
-        <div>
-          <label className="block text-xs font-medium text-slate-500">Title</label>
-          <input
-            type="text"
-            required
-            placeholder="20% Off First Visit"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-slate-500">Description</label>
-          <textarea
-            rows={2}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-slate-500">
-            Discount Code (optional)
-          </label>
-          <input
-            type="text"
-            value={discountCode}
-            onChange={(e) => setDiscountCode(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate/60 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-full bg-brand-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {saving ? "Adding..." : "Add Promotion"}
-        </button>
-      </form>
-
-      <div>
+    <div>
+      <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">
           Your Promotions ({promotions.length})
         </h3>
-        {loading && <p className="mt-3 text-sm text-slate-500">Loading...</p>}
-        {!loading && promotions.length === 0 && (
-          <p className="mt-3 text-sm text-slate-500">No promotions created yet.</p>
-        )}
-        <div className="mt-3 space-y-3">
-          {promotions.map((promotion) => (
-            <PromotionCard
-              key={promotion.id}
-              promotion={promotion}
-              shop={shop}
-              onChanged={load}
-            />
-          ))}
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-brand-blue px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add Promotion
+        </button>
       </div>
+
+      {loading && <p className="mt-3 text-sm text-slate-500">Loading...</p>}
+      {!loading && promotions.length === 0 && (
+        <p className="mt-3 text-sm text-slate-500">No promotions created yet.</p>
+      )}
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {promotions.map((promotion) => (
+          <PromotionCard
+            key={promotion.id}
+            promotion={promotion}
+            shop={shop}
+            onChanged={load}
+          />
+        ))}
+      </div>
+
+      {showModal && (
+        <AddPromotionModal
+          shopId={shop.id}
+          onClose={() => setShowModal(false)}
+          onAdded={() => {
+            setShowModal(false);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }
