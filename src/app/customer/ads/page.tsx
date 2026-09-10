@@ -1,16 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
-import { listNearbyPromotions, type NearbyPromotion } from "@/lib/customer/bookings";
+import {
+  listNearbyPromotions,
+  recordPromotionEvent,
+  type NearbyPromotion,
+} from "@/lib/customer/bookings";
 
 export default function CustomerAdsPage() {
   const router = useRouter();
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
   const [city, setCity] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const viewedRef = useRef(new Set<string>());
 
   const load = useCallback(async () => {
     const customer = await fetchCurrentCustomer();
@@ -19,6 +24,12 @@ export default function CustomerAdsPage() {
     const rows = await listNearbyPromotions(customerCity);
     setPromotions(rows);
     setLoading(false);
+    for (const promo of rows) {
+      if (!viewedRef.current.has(promo.id)) {
+        viewedRef.current.add(promo.id);
+        recordPromotionEvent(promo.id, "view");
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -62,7 +73,8 @@ export default function CustomerAdsPage() {
               {promotions.map((promo) => (
                 <li key={promo.id}>
                   <Link
-                    href={`/customer/shop/${promo.shop_slug}`}
+                    href={`/customer/book/${promo.shop_slug}`}
+                    onClick={() => recordPromotionEvent(promo.id, "click")}
                     className="block overflow-hidden rounded-2xl bg-white shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
                   >
                     {promo.image_url ? (

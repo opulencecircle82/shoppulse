@@ -250,6 +250,13 @@ export async function listNearbyPromotions(city?: string | null): Promise<Nearby
   return (data ?? []) as NearbyPromotion[];
 }
 
+/** Fire-and-forget — a failed engagement ping shouldn't block browsing. */
+export function recordPromotionEvent(promotionId: string, eventType: "view" | "click") {
+  supabase
+    .rpc("record_promotion_event", { p_promotion_id: promotionId, p_event_type: eventType })
+    .then(() => {});
+}
+
 export type PublicService = {
   id: string;
   name: string;

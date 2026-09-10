@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
 import { signOutCustomer } from "@/lib/customer/customerAuth";
-import { listNearbyPromotions, type NearbyPromotion } from "@/lib/customer/bookings";
+import {
+  listNearbyPromotions,
+  recordPromotionEvent,
+  type NearbyPromotion,
+} from "@/lib/customer/bookings";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -32,12 +36,20 @@ export default function CustomerHomeScreen({
   const router = useRouter();
   const [shopCode, setShopCode] = useState("");
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
+  const viewedRef = useRef(new Set<string>());
 
   useEffect(() => {
     let active = true;
     const id = setTimeout(() => {
       listNearbyPromotions(customer.city).then((rows) => {
-        if (active) setPromotions(rows);
+        if (!active) return;
+        setPromotions(rows);
+        for (const promo of rows.slice(0, 6)) {
+          if (!viewedRef.current.has(promo.id)) {
+            viewedRef.current.add(promo.id);
+            recordPromotionEvent(promo.id, "view");
+          }
+        }
       });
     }, 0);
     return () => {
@@ -66,7 +78,8 @@ export default function CustomerHomeScreen({
             {promotions.slice(0, 6).map((promo) => (
               <Link
                 key={promo.id}
-                href={`/customer/shop/${promo.shop_slug}`}
+                href={`/customer/book/${promo.shop_slug}`}
+                onClick={() => recordPromotionEvent(promo.id, "click")}
                 className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm shadow-slate-900/10"
               >
                 {promo.image_url ? (

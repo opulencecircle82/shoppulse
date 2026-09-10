@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Plus, X } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
+
+type DailyStat = { day: string; views: number; clicks: number };
+type Totals = { total_views: number; total_clicks: number };
 
 const CANVAS_W = 600;
 const CANVAS_H = 400;
@@ -114,6 +118,25 @@ function PromotionCard({
   const [generating, setGenerating] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [totals, setTotals] = useState<Totals | null>(null);
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
+  const [loadingStats, setLoadingStats] = useState(false);
+
+  async function handleToggleStats() {
+    const next = !showStats;
+    setShowStats(next);
+    if (next && !totals) {
+      setLoadingStats(true);
+      const [{ data: totalsData }, { data: dailyData }] = await Promise.all([
+        supabase.rpc("get_promotion_totals", { p_promotion_id: promotion.id }).maybeSingle(),
+        supabase.rpc("get_promotion_daily_stats", { p_promotion_id: promotion.id, p_days: 14 }),
+      ]);
+      setTotals((totalsData as Totals) ?? { total_views: 0, total_clicks: 0 });
+      setDailyStats((dailyData as DailyStat[]) ?? []);
+      setLoadingStats(false);
+    }
+  }
 
   async function handleGenerate() {
     setGenerating(true);
@@ -238,12 +261,56 @@ function PromotionCard({
         </button>
         <button
           type="button"
+          onClick={handleToggleStats}
+          className="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          {showStats ? "Hide Stats" : "View Stats"}
+        </button>
+        <button
+          type="button"
           onClick={handleDelete}
           className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/10"
         >
           Delete
         </button>
       </div>
+
+      {showStats && (
+        <div className="mt-3 rounded-xl bg-brand-slate/60 p-3">
+          {loadingStats ? (
+            <p className="text-xs text-slate-500">Loading stats...</p>
+          ) : (
+            <>
+              <p className="text-xs text-slate-500">
+                <span className="font-semibold text-slate-900">{totals?.total_views ?? 0}</span>{" "}
+                views ·{" "}
+                <span className="font-semibold text-slate-900">{totals?.total_clicks ?? 0}</span>{" "}
+                clicks
+              </p>
+              <div className="mt-2 h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dailyStats} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+                    <XAxis
+                      dataKey="day"
+                      tickFormatter={(d: string) => d.slice(5)}
+                      tick={{ fontSize: 10 }}
+                      interval={2}
+                    />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={24} />
+                    <Tooltip contentStyle={{ fontSize: 12 }} />
+                    <Line type="monotone" dataKey="views" stroke="#2563EB" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="clicks" stroke="#F97316" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="mt-1 text-[10px] text-slate-400">
+                Last 14 days — <span className="text-brand-blue">blue = views</span>,{" "}
+                <span className="text-brand-orange">orange = clicks</span>
+              </p>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
