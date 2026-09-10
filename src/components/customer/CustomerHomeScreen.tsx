@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
 import { signOutCustomer } from "@/lib/customer/customerAuth";
@@ -23,9 +25,19 @@ export default function CustomerHomeScreen({
   jobs: JobTicket[];
   onSignedOut: () => void;
 }) {
+  const router = useRouter();
+  const [shopCode, setShopCode] = useState("");
+
   async function handleSignOut() {
     await signOutCustomer();
     onSignedOut();
+  }
+
+  function handleBookSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const slug = shopCode.trim().toLowerCase().replace(/\s+/g, "-");
+    if (!slug) return;
+    router.push(`/customer/book/${slug}`);
   }
 
   return (
@@ -45,6 +57,30 @@ export default function CustomerHomeScreen({
           </button>
         </header>
 
+        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm shadow-slate-900/5">
+          <p className="text-sm font-semibold text-slate-900">Book a New Job</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Enter the business code your service provider gave you (it&apos;s
+            also the end of the booking link they shared).
+          </p>
+          <form onSubmit={handleBookSubmit} className="mt-3 flex gap-2">
+            <input
+              type="text"
+              required
+              placeholder="e.g. leans-electrical-service"
+              value={shopCode}
+              onChange={(e) => setShopCode(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="shrink-0 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
+            >
+              Book Now
+            </button>
+          </form>
+        </div>
+
         <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
           Your Jobs
         </p>
@@ -52,8 +88,8 @@ export default function CustomerHomeScreen({
         {jobs.length === 0 ? (
           <div className="mt-3 rounded-2xl bg-white p-6 text-center shadow-sm shadow-slate-900/5">
             <p className="text-sm text-slate-500">
-              No jobs yet. Ask your service provider for their booking link to
-              request one.
+              No jobs yet. Use the booking link your service provider shared
+              with you, or enter their business code above.
             </p>
           </div>
         ) : (
