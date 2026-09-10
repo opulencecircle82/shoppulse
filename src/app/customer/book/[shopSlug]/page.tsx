@@ -3,10 +3,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
-import { fetchShopBySlug, submitBooking } from "@/lib/customer/bookings";
+import { fetchShopBySlug, submitBooking, type BookingShop } from "@/lib/customer/bookings";
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
-
-type Shop = { id: string; shop_name: string; slug: string; logo_url: string | null };
 
 export default function BookJobPage() {
   const params = useParams();
@@ -15,7 +13,7 @@ export default function BookJobPage() {
 
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [shop, setShop] = useState<Shop | null>(null);
+  const [shop, setShop] = useState<BookingShop | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   const [serviceType, setServiceType] = useState("");

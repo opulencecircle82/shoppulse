@@ -1,0 +1,122 @@
+"use client";
+
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { listPublicShops, type PublicShop } from "@/lib/customer/bookings";
+
+export default function DiscoverShopsPage() {
+  const router = useRouter();
+  const [city, setCity] = useState("");
+  const [shops, setShops] = useState<PublicShop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searched, setSearched] = useState(false);
+
+  const load = useCallback(async (cityFilter?: string) => {
+    setLoading(true);
+    const results = await listPublicShops(cityFilter);
+    setShops(results);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      load();
+    }, 0);
+    return () => clearTimeout(id);
+  }, [load]);
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSearched(true);
+    load(city.trim());
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-50 px-5 py-6">
+      <div className="mx-auto max-w-lg">
+        <header className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-sm font-medium text-slate-500 hover:text-slate-900"
+          >
+            ← Back
+          </button>
+        </header>
+
+        <h1 className="mt-3 text-lg font-bold text-slate-900">
+          Find Services Near You
+        </h1>
+        <p className="mt-1 text-xs text-slate-500">
+          Browse businesses on ShopPulse by city.
+        </p>
+
+        <form onSubmit={handleSearch} className="mt-4 flex gap-2">
+          <input
+            type="text"
+            placeholder="Enter your city..."
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
+          >
+            Search
+          </button>
+        </form>
+
+        <div className="mt-6">
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
+            </div>
+          ) : shops.length === 0 ? (
+            <div className="rounded-2xl bg-white p-6 text-center shadow-sm shadow-slate-900/5">
+              <p className="text-sm text-slate-500">
+                {searched
+                  ? "No businesses found for that city yet."
+                  : "No businesses listed yet."}
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {shops.map((shop) => (
+                <li key={shop.id}>
+                  <Link
+                    href={`/customer/book/${shop.slug}`}
+                    className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
+                  >
+                    {shop.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={shop.logo_url}
+                        alt=""
+                        className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-brand-blue">
+                        {shop.shop_name.slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {shop.shop_name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {[shop.business_category, shop.city].filter(Boolean).join(" · ") ||
+                          "Service provider"}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}

@@ -26,6 +26,9 @@ export type Shop = {
   default_hourly_rate: number;
   default_overtime_multiplier: number;
   mobile_app_font_family: string;
+  city: string | null;
+  business_category: string | null;
+  is_publicly_listed: boolean;
 };
 
 export type StaffMember = {

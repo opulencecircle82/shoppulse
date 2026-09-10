@@ -13,15 +13,44 @@ export async function fetchMyJobs(): Promise<JobTicket[]> {
   return (data ?? []) as JobTicket[];
 }
 
-export async function fetchShopBySlug(slug: string) {
+export type BookingShop = {
+  id: string;
+  shop_name: string;
+  slug: string;
+  logo_url: string | null;
+};
+
+/** Uses a SECURITY DEFINER RPC rather than a direct table select — the
+ * only RLS policy on shops is staff-only, so a real (non-staff) customer
+ * would otherwise get nothing back here regardless of a shop's
+ * is_publicly_listed setting (direct-link access always works). */
+export async function fetchShopBySlug(slug: string): Promise<BookingShop | null> {
   const { data, error } = await supabase
-    .from("shops")
-    .select("id, shop_name, slug, logo_url")
-    .eq("slug", slug)
+    .rpc("get_public_shop_by_slug", { p_slug: slug })
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data as BookingShop | null;
+}
+
+export type PublicShop = {
+  id: string;
+  shop_name: string;
+  slug: string;
+  logo_url: string | null;
+  city: string | null;
+  business_category: string | null;
+};
+
+/** Powers the "browse services near your city" listing. Only returns
+ * shops that opted into the public directory (is_publicly_listed). */
+export async function listPublicShops(city?: string): Promise<PublicShop[]> {
+  const { data, error } = await supabase.rpc("list_public_shops", {
+    p_city: city || null,
+  });
+
+  if (error) throw error;
+  return (data ?? []) as PublicShop[];
 }
 
 export async function submitBooking(params: {

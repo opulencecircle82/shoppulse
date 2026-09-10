@@ -79,6 +79,12 @@ export default function CustomerHomeScreen({
               Book Now
             </button>
           </form>
+          <Link
+            href="/customer/discover"
+            className="mt-3 block text-center text-xs font-medium text-brand-blue"
+          >
+            Don&apos;t have a code? Browse services near you →
+          </Link>
         </div>
 
         <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">

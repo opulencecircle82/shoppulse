@@ -20,6 +20,9 @@ export default function CompanyProfilePanel({
   const [logoUrl, setLogoUrl] = useState(shop?.logo_url ?? "");
   const [address, setAddress] = useState(shop?.address ?? "");
   const [currency, setCurrency] = useState<Currency>(shop?.currency ?? "USD");
+  const [city, setCity] = useState(shop?.city ?? "");
+  const [businessCategory, setBusinessCategory] = useState(shop?.business_category ?? "");
+  const [isPubliclyListed, setIsPubliclyListed] = useState(shop?.is_publicly_listed ?? true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -95,6 +98,9 @@ export default function CompanyProfilePanel({
           logo_url: logoUrl || null,
           address: address || null,
           currency,
+          city: city || null,
+          business_category: businessCategory || null,
+          is_publicly_listed: isPubliclyListed,
         })
         .eq("id", shop.id);
 
@@ -270,6 +276,48 @@ export default function CompanyProfilePanel({
           ))}
         </select>
       </div>
+
+      {shop && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-600">
+                City
+              </label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                placeholder="San Francisco"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-600">
+                Business Category
+              </label>
+              <input
+                type="text"
+                value={businessCategory}
+                onChange={(e) => setBusinessCategory(e.target.value)}
+                className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                placeholder="Plumbing, Cleaning..."
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2.5 text-sm text-slate-600">
+            <input
+              type="checkbox"
+              checked={isPubliclyListed}
+              onChange={(e) => setIsPubliclyListed(e.target.checked)}
+              className="accent-brand-blue"
+            />
+            List my business in the customer app&apos;s &quot;Find Services
+            Near You&quot; directory
+          </label>
+        </>
+      )}
 
       {error && (
         <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
