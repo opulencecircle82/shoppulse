@@ -111,17 +111,23 @@ export default function ShopDetailsPage() {
                 {[shop.business_category, shop.city].filter(Boolean).join(" · ") ||
                   "Service provider"}
               </p>
-              {shop.avg_rating !== null && (
-                <div className="mt-1 flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-xs font-semibold text-slate-700">
-                    {shop.avg_rating.toFixed(1)}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    ({shop.review_count} review{shop.review_count === 1 ? "" : "s"})
-                  </span>
-                </div>
-              )}
+              <div className="mt-1 flex items-center gap-1">
+                <Star
+                  className={`h-3.5 w-3.5 ${
+                    shop.avg_rating !== null
+                      ? "fill-amber-400 text-amber-400"
+                      : "text-slate-300"
+                  }`}
+                />
+                <span className="text-xs font-semibold text-slate-700">
+                  {shop.avg_rating !== null ? shop.avg_rating.toFixed(1) : "0"}
+                </span>
+                <span className="text-xs text-slate-400">
+                  {shop.avg_rating !== null
+                    ? `(${shop.review_count} review${shop.review_count === 1 ? "" : "s"})`
+                    : "No rating and review yet"}
+                </span>
+              </div>
             </div>
             {hasHours && (
               <span
@@ -165,11 +171,13 @@ export default function ShopDetailsPage() {
             </div>
           )}
 
-          {reviews.length > 0 && (
-            <div className="mt-5 border-t border-slate-100 pt-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Reviews
-              </p>
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Reviews
+            </p>
+            {reviews.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-400">No rating and review yet.</p>
+            ) : (
               <div className="mt-2 space-y-3">
                 {reviews.slice(0, 5).map((review, index) => (
                   <div key={index} className="rounded-xl bg-slate-50 p-3">
@@ -197,8 +205,8 @@ export default function ShopDetailsPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           <Link
             href={`/customer/book/${shop.slug}`}

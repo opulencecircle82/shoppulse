@@ -162,11 +162,15 @@ export default function DiscoverShopsPage() {
                           {[shop.business_category, shop.city].filter(Boolean).join(" · ") ||
                             "Service provider"}
                         </p>
-                        {shop.avg_rating !== null && (
-                          <p className="mt-0.5 text-[11px] font-medium text-amber-500">
-                            ★ {shop.avg_rating.toFixed(1)} ({shop.review_count})
-                          </p>
-                        )}
+                        <p
+                          className={`mt-0.5 text-[11px] font-medium ${
+                            shop.avg_rating !== null ? "text-amber-500" : "text-slate-400"
+                          }`}
+                        >
+                          {shop.avg_rating !== null
+                            ? `★ ${shop.avg_rating.toFixed(1)} (${shop.review_count})`
+                            : "★ 0 — No rating and review yet"}
+                        </p>
                       </div>
                     </Link>
                   </li>
