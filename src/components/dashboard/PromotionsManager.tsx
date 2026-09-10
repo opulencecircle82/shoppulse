@@ -8,6 +8,15 @@ import type { Shop, ShopPromotion } from "@/lib/supabase/types";
 const CANVAS_W = 600;
 const CANVAS_H = 400;
 
+function generateDiscountCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "SAVE-";
+  for (let i = 0; i < 5; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -250,8 +259,14 @@ function AddPromotionModal({
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [includeDiscountCode, setIncludeDiscountCode] = useState(false);
   const [discountCode, setDiscountCode] = useState("");
   const [saving, setSaving] = useState(false);
+
+  function toggleDiscountCode(checked: boolean) {
+    setIncludeDiscountCode(checked);
+    setDiscountCode(checked ? generateDiscountCode() : "");
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -260,7 +275,7 @@ function AddPromotionModal({
       shop_id: shopId,
       title,
       description: description || null,
-      discount_code: discountCode || null,
+      discount_code: includeDiscountCode ? discountCode : null,
     });
     setSaving(false);
     onAdded();
@@ -304,15 +319,29 @@ function AddPromotionModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-500">
-              Discount Code (optional)
+            <label className="flex items-center gap-2.5 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={includeDiscountCode}
+                onChange={(e) => toggleDiscountCode(e.target.checked)}
+                className="accent-brand-blue"
+              />
+              Include a discount code
             </label>
-            <input
-              type="text"
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            />
+            {includeDiscountCode && (
+              <div className="mt-2 flex items-center justify-between rounded-xl bg-brand-slate px-3 py-2">
+                <span className="font-mono text-sm font-semibold text-brand-blue">
+                  {discountCode}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDiscountCode(generateDiscountCode())}
+                  className="text-xs font-medium text-slate-500 hover:text-brand-blue"
+                >
+                  Regenerate
+                </button>
+              </div>
+            )}
           </div>
 
           <button
