@@ -120,7 +120,7 @@ export default function TechHomeScreen({
                 type="button"
                 onClick={handleAcceptJob}
                 disabled={responding}
-                className="flex-1 rounded-full bg-brand-orange px-4 py-2.5 text-xs font-bold text-white disabled:opacity-60"
+                className="flex-1 rounded-full bg-brand-orange px-4 py-2.5 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] disabled:opacity-60"
               >
                 Accept Job
               </button>
@@ -158,7 +158,7 @@ export default function TechHomeScreen({
               <p className="text-lg font-bold text-white">{task.client_name}</p>
               <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
               <p className="mt-2 text-xs text-slate-500">{task.service_address}</p>
-              <span className="mt-4 inline-block rounded-full bg-brand-orange px-5 py-2 text-xs font-bold text-white">
+              <span className="mt-4 inline-block rounded-full bg-brand-orange px-5 py-2 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]">
                 {isInProgress ? "Complete Job" : "Start Job"}
               </span>
             </button>

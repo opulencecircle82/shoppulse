@@ -113,7 +113,7 @@ function DiscoverShopsContent() {
           />
           <button
             type="submit"
-            className="w-full rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
+            className="w-full rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
           >
             Search
           </button>

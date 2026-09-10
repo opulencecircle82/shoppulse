@@ -278,7 +278,7 @@ export default function CustomerHomeScreen({
                   </div>
                   <Link
                     href={`/customer/book/${service.shop_slug}`}
-                    className="mt-3 block w-full rounded-full bg-brand-blue px-4 py-2 text-center text-xs font-bold text-white"
+                    className="mt-3 block w-full rounded-full bg-brand-blue px-4 py-2 text-center text-xs font-bold text-white shadow-sm shadow-blue-500/30"
                   >
                     Book Now
                   </Link>
