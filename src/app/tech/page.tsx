@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { fetchCurrentStaffContext, type StaffContext } from "@/lib/tech/staffContext";
 import { fetchAssignedJobs } from "@/lib/tech/jobActions";
-import { pickTodayTask } from "@/lib/tech/todayTask";
+import { pickTodayTask, pickJobQueue } from "@/lib/tech/todayTask";
 import { startWatchingLocation } from "@/lib/tech/liveLocation";
 import { notifyNativeSignedIn, notifyNativeSignedOut } from "@/lib/tech/nativeBridge";
 import TechLoginScreen from "@/components/tech/TechLoginScreen";
@@ -19,6 +19,7 @@ export default function TechAppPage() {
   const [staffContext, setStaffContext] = useState<StaffContext | null>(null);
   const [shop, setShop] = useState<Shop | null>(null);
   const [task, setTask] = useState<JobTicket | null>(null);
+  const [queue, setQueue] = useState<JobTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<JobTicket | null>(null);
 
   const loadHome = useCallback(async (context: StaffContext) => {
@@ -27,8 +28,10 @@ export default function TechAppPage() {
       fetchAssignedJobs(context.staffId),
     ]);
 
+    const activeTask = pickTodayTask(tickets);
     setShop(shopRow as Shop);
-    setTask(pickTodayTask(tickets));
+    setTask(activeTask);
+    setQueue(pickJobQueue(tickets, activeTask));
     setScreen("home");
   }, []);
 
@@ -105,6 +108,7 @@ export default function TechAppPage() {
         shop={shop}
         staffId={staffContext!.staffId}
         task={task}
+        queue={queue}
         onRefresh={() => {
           if (staffContext) loadHome(staffContext);
         }}
@@ -116,6 +120,7 @@ export default function TechAppPage() {
           setStaffContext(null);
           setShop(null);
           setTask(null);
+          setQueue([]);
           setScreen("login");
         }}
       />

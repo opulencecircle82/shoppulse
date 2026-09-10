@@ -193,6 +193,22 @@ export default function ProofDisputeDrawer({
           />
         </div>
 
+        {ticket.signature_url && (
+          <div className="mt-5">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Customer Signature
+            </p>
+            <div className="mt-1.5 rounded-xl bg-white p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={ticket.signature_url}
+                alt="Customer signature"
+                className="h-20 w-full object-contain"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="mt-5">
           <label className="block text-xs font-medium text-slate-500">
             Dispute Notes

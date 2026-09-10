@@ -14,3 +14,15 @@ export function pickTodayTask(tickets: JobTicket[]): JobTicket | null {
     .find((t) => t.status === "SCHEDULED");
   return scheduled ?? null;
 }
+
+/**
+ * The rest of the technician's queued work — every other SCHEDULED job
+ * besides today's active task (and one awaiting the technician's own
+ * accept/decline still shows up here too), oldest-assigned first so the
+ * next one up is at the top.
+ */
+export function pickJobQueue(tickets: JobTicket[], activeTask: JobTicket | null): JobTicket[] {
+  return tickets
+    .filter((t) => t.status === "SCHEDULED" && t.id !== activeTask?.id)
+    .reverse();
+}

@@ -46,6 +46,7 @@ type ClientTicket = {
   selected_products: { product_id: string; name: string; price: number; quantity: number }[];
   payment_method: string | null;
   accepted_payment_methods: string[];
+  signature_url: string | null;
 };
 
 function ProofPhoto({
@@ -280,6 +281,22 @@ export default function ClientTicketPage() {
               ticket={ticket}
             />
           </div>
+
+          {ticket.signature_url && (
+            <div className="mt-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Signature on File
+              </p>
+              <div className="mt-1.5 rounded-xl border border-slate-100 bg-white p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={ticket.signature_url}
+                  alt="Signature"
+                  className="h-16 w-full object-contain"
+                />
+              </div>
+            </div>
+          )}
 
           {!ticket.start_photo_url && !ticket.end_photo_url && (
             <p className="mt-6 text-sm text-slate-500">

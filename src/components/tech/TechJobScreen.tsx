@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { MapPin, ShieldCheck } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { getCurrentPosition } from "@/lib/tech/gps";
-import { uploadJobPhoto } from "@/lib/tech/uploadJobPhoto";
+import { uploadJobPhoto, uploadSignature } from "@/lib/tech/uploadJobPhoto";
 import { submitStartProof, submitCompletionProof } from "@/lib/tech/jobActions";
+import SignaturePad from "@/components/shared/SignaturePad";
 
 export default function TechJobScreen({
   shop,
@@ -27,14 +29,25 @@ export default function TechJobScreen({
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [position, setPosition] = useState<GeolocationPosition | null>(null);
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [synced, setSynced] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const checklistCompleted = checkedItems.size >= activeChecklist.length;
+  const needsSignature = isCompletionStage;
   const canSubmit =
-    checklistCompleted && capturedFile !== null && position !== null && !submitting;
+    checklistCompleted &&
+    capturedFile !== null &&
+    position !== null &&
+    (!needsSignature || signatureDataUrl !== null) &&
+    !submitting;
+
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    ticket.service_address
+  )}`;
 
   function toggleItem(index: number) {
     setCheckedItems((prev) => {
@@ -68,30 +81,38 @@ export default function TechJobScreen({
 
     try {
       const photoUrl = await uploadJobPhoto(shop.id, ticket.id, capturedFile);
-      const params = {
-        ticketId: ticket.id,
-        photoUrl,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      };
 
       if (isStartStage) {
-        await submitStartProof(params);
+        await submitStartProof({
+          ticketId: ticket.id,
+          photoUrl,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
       } else {
-        await submitCompletionProof(params);
+        const signatureUrl = signatureDataUrl
+          ? await uploadSignature(shop.id, ticket.id, signatureDataUrl)
+          : null;
+        await submitCompletionProof({
+          ticketId: ticket.id,
+          photoUrl,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          signatureUrl,
+        });
       }
 
-      onSubmitted();
+      setSynced(true);
+      setTimeout(onSubmitted, 900);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed.");
-    } finally {
       setSubmitting(false);
     }
   }
 
   return (
     <main className="min-h-screen bg-brand-navy px-5 pb-10">
-      <header className="flex items-center gap-3 py-4">
+      <header className="flex items-center justify-between gap-3 py-4">
         <button
           type="button"
           onClick={onBack}
@@ -99,10 +120,19 @@ export default function TechJobScreen({
         >
           ← Back
         </button>
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 rounded-full border border-brand-blue/40 px-3.5 py-1.5 text-xs font-semibold text-brand-blue"
+        >
+          <MapPin className="h-3.5 w-3.5" /> Go to Maps
+        </a>
       </header>
 
       <h1 className="text-lg font-bold text-white">{ticket.client_name}</h1>
-      <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
+      <p className="mt-1 text-sm text-slate-400">{ticket.service_type}</p>
+      <p className="mt-0.5 text-sm text-slate-500">{ticket.service_address}</p>
 
       {shop.mandatory_live_camera && (
         <span className="mt-4 inline-flex rounded-full bg-brand-emerald/15 px-3 py-1.5 text-[11px] font-semibold text-brand-emerald">
@@ -156,7 +186,27 @@ export default function TechJobScreen({
         </div>
       ) : (
         <div className="mt-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
+          <div className="rounded-2xl bg-white/5 p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Site Status
+              </p>
+              {position ? (
+                <span className="flex items-center gap-1 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
+                  <ShieldCheck className="h-3 w-3" /> GPS VERIFIED
+                </span>
+              ) : (
+                <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-slate-400">
+                  AWAITING CAPTURE
+                </span>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs text-slate-500">
+              Geofence tolerance: {shop.geofence_radius_meters}m around the proof photo location.
+            </p>
+          </div>
+
+          <p className="mt-5 text-xs font-bold uppercase tracking-wide text-brand-orange">
             {isStartStage ? "Start Task Checklist" : "End Task Checklist"}
           </p>
 
@@ -213,12 +263,30 @@ export default function TechJobScreen({
 
             {capturedPreview && (
               <div className="mt-4 flex justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={capturedPreview}
-                  alt="Captured proof"
-                  className="h-40 w-40 rounded-xl object-cover"
-                />
+                <div className="relative h-48 w-full max-w-xs overflow-hidden rounded-xl">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={capturedPreview}
+                    alt="Captured proof"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-md bg-black/55 px-2 py-1 backdrop-blur">
+                    <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
+                      {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
+                    </span>
+                    <span className="text-[10px] font-semibold text-white">
+                      {shop.shop_name}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-2 left-2 rounded-md bg-black/55 px-2 py-1 text-[9px] font-medium text-white backdrop-blur">
+                    {new Date().toLocaleString()}
+                  </div>
+                  {position && (
+                    <div className="absolute bottom-2 right-2 rounded-md bg-black/55 px-2 py-1 text-[9px] font-medium text-white backdrop-blur">
+                      {position.coords.latitude.toFixed(4)}°, {position.coords.longitude.toFixed(4)}°
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -240,24 +308,56 @@ export default function TechJobScreen({
               </div>
             )}
 
+            {isCompletionStage && (
+              <div className="mt-6 border-t border-white/10 pt-6">
+                <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
+                  Customer Signature &amp; Parts
+                </p>
+
+                {ticket.selected_products.length > 0 && (
+                  <div className="mt-3 space-y-1.5 rounded-xl bg-white/5 p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      Parts Used
+                    </p>
+                    {ticket.selected_products.map((item, index) => (
+                      <div key={index} className="flex justify-between text-xs text-slate-300">
+                        <span>{item.name}</span>
+                        <span>×{item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-3">
+                  <SignaturePad onChange={setSignatureDataUrl} />
+                </div>
+              </div>
+            )}
+
             {error && (
               <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
                 {error}
               </p>
             )}
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className="mt-6 w-full rounded-full bg-brand-orange px-6 py-3.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {submitting
-                ? "Submitting..."
-                : isStartStage
-                  ? "CLOCK IN & START JOB"
-                  : "SUBMIT COMPLETION PROOF"}
-            </button>
+            {synced ? (
+              <div className="mt-6 flex items-center justify-center gap-2 rounded-full bg-brand-emerald/15 px-6 py-3.5 text-sm font-bold text-brand-emerald">
+                <ShieldCheck className="h-4 w-4" /> Proof Synced to Owner Dashboard
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className="mt-6 w-full rounded-full bg-brand-orange px-6 py-3.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {submitting
+                  ? "Submitting..."
+                  : isStartStage
+                    ? "CLOCK IN & START JOB"
+                    : "COMPLETE JOB & SYNC PROOF"}
+              </button>
+            )}
           </div>
         </div>
       )}

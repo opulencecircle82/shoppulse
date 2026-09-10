@@ -20,3 +20,24 @@ export async function uploadJobPhoto(
 
   return publicUrl;
 }
+
+export async function uploadSignature(
+  shopId: string,
+  ticketId: string,
+  dataUrl: string
+): Promise<string> {
+  const blob = await (await fetch(dataUrl)).blob();
+  const path = `${shopId}/${ticketId}/signature-${Date.now()}.png`;
+
+  const { error } = await supabase.storage
+    .from("job-photos")
+    .upload(path, blob, { contentType: "image/png" });
+
+  if (error) throw error;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("job-photos").getPublicUrl(path);
+
+  return publicUrl;
+}

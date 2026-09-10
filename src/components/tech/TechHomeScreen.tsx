@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import TechNotificationBell from "./TechNotificationBell";
+
+function mapsUrl(address: string) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+}
 
 export default function TechHomeScreen({
   shop,
   staffId,
   task,
+  queue,
   onOpenTask,
   onSignedOut,
   onRefresh,
@@ -16,6 +22,7 @@ export default function TechHomeScreen({
   shop: Shop;
   staffId: string;
   task: JobTicket | null;
+  queue: JobTicket[];
   onOpenTask: (ticket: JobTicket) => void;
   onSignedOut: () => void;
   onRefresh: () => void;
@@ -64,7 +71,7 @@ export default function TechHomeScreen({
 
       <div className="px-5 pb-10">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Today&apos;s Task
+          Active Task
         </p>
 
         {!task ? (
@@ -101,21 +108,64 @@ export default function TechHomeScreen({
             </div>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => onOpenTask(task)}
-            className="mt-3 w-full rounded-2xl bg-white/5 p-5 text-left transition-colors hover:bg-white/10"
-          >
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
-              {isInProgress ? "IN PROGRESS" : "SCHEDULED"}
-            </span>
-            <p className="mt-3 text-lg font-bold text-white">{task.client_name}</p>
-            <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
-            <p className="mt-2 text-xs text-slate-500">{task.service_address}</p>
-            <span className="mt-4 inline-block rounded-full bg-brand-orange px-5 py-2 text-xs font-bold text-white">
-              {isInProgress ? "Complete Job" : "Start Job"}
-            </span>
-          </button>
+          <div className="mt-3 rounded-2xl bg-white/5 p-5">
+            <div className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
+                {isInProgress ? "IN PROGRESS" : "SCHEDULED"}
+              </span>
+              <a
+                href={mapsUrl(task.service_address)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-xs font-medium text-brand-blue"
+              >
+                <MapPin className="h-3 w-3" /> Maps
+              </a>
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenTask(task)}
+              className="mt-3 block w-full text-left"
+            >
+              <p className="text-lg font-bold text-white">{task.client_name}</p>
+              <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
+              <p className="mt-2 text-xs text-slate-500">{task.service_address}</p>
+              <span className="mt-4 inline-block rounded-full bg-brand-orange px-5 py-2 text-xs font-bold text-white">
+                {isInProgress ? "Complete Job" : "Start Job"}
+              </span>
+            </button>
+          </div>
+        )}
+
+        {queue.length > 0 && (
+          <div className="mt-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Next Up ({queue.length})
+            </p>
+            <div className="mt-3 space-y-2">
+              {queue.map((job) => (
+                <div
+                  key={job.id}
+                  className="rounded-xl bg-white/5 px-4 py-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-semibold text-white">
+                      {job.client_name}
+                    </p>
+                    {job.preferred_date && (
+                      <span className="shrink-0 text-[10px] text-slate-500">
+                        {new Date(job.preferred_date).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-slate-400">
+                    {job.service_type} · {job.service_address}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </main>

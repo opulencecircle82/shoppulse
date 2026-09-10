@@ -95,6 +95,7 @@ export type JobTicket = {
   request_photo_url: string | null;
   selected_products: { product_id: string; name: string; price: number; quantity: number }[];
   payment_method: string | null;
+  signature_url: string | null;
   created_at: string;
 };
 

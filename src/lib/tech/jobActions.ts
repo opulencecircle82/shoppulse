@@ -37,6 +37,7 @@ export async function submitCompletionProof(params: {
   photoUrl: string;
   latitude: number;
   longitude: number;
+  signatureUrl: string | null;
 }) {
   const { error } = await supabase
     .from("job_tickets")
@@ -45,6 +46,7 @@ export async function submitCompletionProof(params: {
       end_photo_url: params.photoUrl,
       completed_at: new Date().toISOString(),
       end_gps_location: toGeographyPoint(params.latitude, params.longitude),
+      signature_url: params.signatureUrl,
     })
     .eq("id", params.ticketId);
 
