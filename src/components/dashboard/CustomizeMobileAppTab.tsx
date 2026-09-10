@@ -29,6 +29,12 @@ const FONT_OPTIONS = [
 const APP_DOWNLOAD_URL =
   "https://github.com/opulencecircle82/shoppulse-mobile/releases/latest/download/app-release.apk";
 
+// Same pattern, separate repo: the customer app is a plain WebView
+// wrapper with no per-shop native logic, so one shared APK works for
+// every shop's customers too.
+const CUSTOMER_APP_DOWNLOAD_URL =
+  "https://github.com/opulencecircle82/shoppulse-customer/releases/latest/download/app-release.apk";
+
 type ThemeProps = {
   shopName: string;
   primaryColor: string;
@@ -329,21 +335,30 @@ export default function CustomizeMobileAppTab({
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
         <div>
           <p className="text-sm font-semibold text-slate-900">
-            Customer Booking Link
+            Customer App &amp; Booking Link
           </p>
           <p className="mt-0.5 text-xs text-slate-500">
-            Share this so customers can create an account, request a job, and
-            track every job they&apos;ve booked with you. Post it on your
-            Facebook page, website, or send it directly.
+            Customers create an account, request jobs, and track everything
+            they&apos;ve booked with you — either from the app, or straight
+            from the link (post it on Facebook, your website, wherever).
           </p>
         </div>
-        <button
-          type="button"
-          onClick={copyBookingLink}
-          className="flex shrink-0 items-center gap-2 rounded-full border border-brand-blue/40 px-5 py-2.5 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
-        >
-          {bookingLinkCopied ? "Link copied!" : "Copy Booking Link"}
-        </button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={copyBookingLink}
+            className="flex items-center gap-2 rounded-full border border-brand-blue/40 px-5 py-2.5 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
+          >
+            {bookingLinkCopied ? "Link copied!" : "Copy Booking Link"}
+          </button>
+          <a
+            href={CUSTOMER_APP_DOWNLOAD_URL}
+            className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+          >
+            <Smartphone className="h-4 w-4" />
+            Download App
+          </a>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
