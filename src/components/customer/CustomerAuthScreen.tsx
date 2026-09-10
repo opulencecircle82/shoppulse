@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import dynamic from "next/dynamic";
 import { signInCustomer, signUpCustomer } from "@/lib/customer/customerAuth";
 import { COUNTRIES } from "@/lib/location/countries";
-import { PHILIPPINES_REGIONS } from "@/lib/location/philippinesRegions";
+import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
@@ -122,62 +122,58 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
 
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={country}
-                  onChange={(e) => {
-                    setCountry(e.target.value);
-                    setRegion("");
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                >
-                  {COUNTRIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+              <select
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  setRegion("");
+                  setCity("");
+                  setBarangay("");
+                }}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
 
-                {country === "Philippines" ? (
-                  <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                  >
-                    <option value="">Region</option>
-                    {PHILIPPINES_REGIONS.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
+              {country === "Philippines" ? (
+                <PhilippinesAddressFields
+                  region={region}
+                  city={city}
+                  barangay={barangay}
+                  onRegionChange={setRegion}
+                  onCityChange={setCity}
+                  onBarangayChange={setBarangay}
+                  inputClassName="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+                />
+              ) : (
+                <>
                   <input
                     type="text"
                     placeholder="Region/State"
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  placeholder="Municipality / City"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Barangay"
-                  value={barangay}
-                  onChange={(e) => setBarangay(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                />
-              </div>
+                  <input
+                    type="text"
+                    placeholder="Municipality / City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Barangay"
+                    value={barangay}
+                    onChange={(e) => setBarangay(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  />
+                </>
+              )}
 
               <div className="rounded-xl border border-slate-200 bg-white p-3">
                 <LocationPickerMap

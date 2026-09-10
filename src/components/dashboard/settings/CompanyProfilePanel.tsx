@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
 import type { Currency, Shop } from "@/lib/supabase/types";
 import { COUNTRIES } from "@/lib/location/countries";
-import { PHILIPPINES_REGIONS } from "@/lib/location/philippinesRegions";
+import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
@@ -282,81 +282,65 @@ export default function CompanyProfilePanel({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-600">
-            Country
-          </label>
-          <select
-            value={country}
-            onChange={(e) => {
-              setCountry(e.target.value);
-              setRegion("");
-            }}
-            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-600">
-            Region
-          </label>
-          {country === "Philippines" ? (
-            <select
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            >
-              <option value="">Select region</option>
-              {PHILIPPINES_REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              placeholder="Region / State / Province"
-              className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            />
-          )}
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-slate-600">
+          Country
+        </label>
+        <select
+          value={country}
+          onChange={(e) => {
+            setCountry(e.target.value);
+            setRegion("");
+            setCity("");
+            setBarangay("");
+          }}
+          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+        >
+          {COUNTRIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-600">
-            Municipality / City
-          </label>
+      {country === "Philippines" ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <PhilippinesAddressFields
+            region={region}
+            city={city}
+            barangay={barangay}
+            onRegionChange={setRegion}
+            onCityChange={setCity}
+            onBarangayChange={setBarangay}
+            inputClassName="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+          />
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <input
+            type="text"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            placeholder="Region / State / Province"
+            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="Kidapawan City"
+            placeholder="Municipality / City"
             className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-600">
-            Barangay
-          </label>
           <input
             type="text"
             value={barangay}
             onChange={(e) => setBarangay(e.target.value)}
-            placeholder="Barangay Poblacion"
+            placeholder="Barangay"
             className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
-      </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-slate-600">
