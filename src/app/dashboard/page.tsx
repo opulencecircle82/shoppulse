@@ -259,6 +259,7 @@ export default function DashboardPage() {
         <ProofDisputeDrawer
           ticket={proofTicket}
           shop={shop}
+          staff={staff}
           onClose={() => setProofTicket(null)}
           onChanged={refreshTickets}
           onApproved={(ticket) => setInvoiceTicket(ticket)}

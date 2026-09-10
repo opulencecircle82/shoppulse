@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket, Shop } from "@/lib/supabase/types";
+import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 
 function ProofPhoto({
   label,
@@ -61,12 +61,14 @@ function ProofPhoto({
 export default function ProofDisputeDrawer({
   ticket,
   shop,
+  staff,
   onClose,
   onChanged,
   onApproved,
 }: {
   ticket: JobTicket;
   shop: Shop;
+  staff: StaffMember[];
   onClose: () => void;
   onChanged: () => void;
   onApproved: (ticket: JobTicket) => void;
@@ -74,6 +76,17 @@ export default function ProofDisputeDrawer({
   const [notes, setNotes] = useState(ticket.dispute_notes ?? "");
   const [saving, setSaving] = useState<"approve" | "reject" | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
+  const timeSpent =
+    ticket.started_at && ticket.completed_at
+      ? (new Date(ticket.completed_at).getTime() - new Date(ticket.started_at).getTime()) / 60000
+      : null;
+  const productsCost = ticket.selected_products.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const gpsVerified = ticket.start_photo_url !== null && ticket.end_photo_url !== null;
 
   async function handleApprove() {
     setSaving("approve");
@@ -191,6 +204,60 @@ export default function ProofDisputeDrawer({
             timestamp={ticket.completed_at}
             shop={shop}
           />
+        </div>
+
+        <div className="mt-5 rounded-xl bg-brand-slate-light/40 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Job Metrics &amp; Cost
+          </p>
+          <dl className="mt-2 space-y-1.5 text-sm">
+            <div className="flex items-center justify-between">
+              <dt className="text-slate-500">Tech</dt>
+              <dd className="font-medium text-slate-900">
+                {assignedStaff?.full_name ?? "—"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-slate-500">Time</dt>
+              <dd className="font-medium text-slate-900">
+                {timeSpent !== null
+                  ? `${Math.floor(timeSpent / 60)}h ${Math.round(timeSpent % 60)}m`
+                  : "—"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-slate-500">Geofence</dt>
+              <dd
+                className={`font-medium ${gpsVerified ? "text-brand-emerald" : "text-slate-400"}`}
+              >
+                {gpsVerified
+                  ? `Verified (±${shop.geofence_radius_meters}m tolerance)`
+                  : "Awaiting proof"}
+              </dd>
+            </div>
+            {ticket.selected_products.length > 0 && (
+              <div className="flex items-start justify-between">
+                <dt className="shrink-0 text-slate-500">Parts</dt>
+                <dd className="text-right font-medium text-slate-900">
+                  {ticket.selected_products.map((item, i) => (
+                    <span key={i} className="block">
+                      {item.quantity}x {item.name} ({shop.currency} {item.price.toFixed(2)})
+                    </span>
+                  ))}
+                </dd>
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-slate-300/30 pt-1.5">
+              <dt className="text-slate-500">Labor + Parts Total</dt>
+              <dd className="font-semibold text-brand-emerald">
+                {shop.currency}{" "}
+                {(
+                  (timeSpent !== null ? (timeSpent / 60) * shop.default_hourly_rate : 0) +
+                  productsCost
+                ).toFixed(2)}
+              </dd>
+            </div>
+          </dl>
         </div>
 
         {ticket.signature_url && (
