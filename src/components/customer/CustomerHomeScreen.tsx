@@ -144,10 +144,10 @@ export default function CustomerHomeScreen({
   return (
     <main className="min-h-screen bg-slate-50 px-5 py-6">
       <div className="mx-auto max-w-lg">
-        <header className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-brand-navy via-brand-blue-dark to-brand-navy px-5 py-5">
+        <header className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-brand-navy px-5 py-5">
           <CurvedLinesBackground />
           <div className="relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/15 px-2.5 py-0.5 text-[10px] font-semibold text-brand-orange">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-medium text-brand-orange">
               ShopPulse
             </span>
             <p className="mt-1.5 text-lg font-bold text-white">Hi, {customer.fullName}</p>

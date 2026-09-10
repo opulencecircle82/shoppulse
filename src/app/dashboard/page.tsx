@@ -96,10 +96,10 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-blue-50 via-brand-slate to-brand-slate">
       <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
-        <div className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-brand-navy via-brand-blue-dark to-brand-navy px-6 py-6 sm:px-8">
+        <div className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-3xl bg-brand-navy px-6 py-6 sm:px-8">
           <CurvedLinesBackground />
           <div className="relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/15 px-3 py-1 text-xs font-semibold text-brand-orange">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange">
               Owner Command Center
             </span>
             <h1 className="mt-2 text-2xl font-bold text-white">{shop.shop_name}</h1>
