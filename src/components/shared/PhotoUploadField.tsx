@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 import { Camera, Loader2, X } from "lucide-react";
 import { uploadCustomerPhoto } from "@/lib/customer/bookings";
 
@@ -15,12 +15,12 @@ export default function PhotoUploadField({
   onChange: (url: string | null) => void;
   label?: string;
 }) {
+  const inputId = useId();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File | undefined) {
-    if (!file) return;
+    if (!file || uploading) return;
     // Some mobile browsers leave `file.type` blank (or generic) for a
     // photo taken directly via the camera capture prompt rather than
     // picked from the gallery — falling back to the filename extension
@@ -45,13 +45,25 @@ export default function PhotoUploadField({
 
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400">{label}</label>
+      <label htmlFor={inputId} className="block text-xs font-medium text-slate-400">
+        {label}
+      </label>
+      {/* A JS-triggered `inputRef.click()` on a hidden file input can lose
+          the browser's "user activation" by the time it runs inside some
+          Android WebViews, silently failing to open the file/camera picker
+          — Chromium logs "File chooser dialog can only be shown with a
+          user activation" with no visible error. A real <label for=...>
+          triggers the input's native default action directly from the tap
+          itself, with no JS in between, so it can't lose activation. */}
       <input
-        ref={inputRef}
+        id={inputId}
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={(e) => handleFile(e.target.files?.[0])}
+        onChange={(e) => {
+          handleFile(e.target.files?.[0]);
+          e.target.value = "";
+        }}
         className="hidden"
       />
 
@@ -69,11 +81,11 @@ export default function PhotoUploadField({
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-          className="mt-1.5 flex h-20 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/20 text-sm text-slate-400 hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
+        <label
+          htmlFor={inputId}
+          className={`mt-1.5 flex h-20 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/20 text-sm text-slate-400 hover:border-brand-blue hover:text-brand-blue ${
+            uploading ? "pointer-events-none opacity-60" : "cursor-pointer"
+          }`}
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -81,7 +93,7 @@ export default function PhotoUploadField({
             <Camera className="h-4 w-4" />
           )}
           {uploading ? "Uploading..." : "Tap to add a photo"}
-        </button>
+        </label>
       )}
 
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useId, useState, type ChangeEvent, type FormEvent } from "react";
 import dynamic from "next/dynamic";
 import { ImageUp, Loader2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -47,7 +47,7 @@ export default function CompanyProfilePanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputId = useId();
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -99,7 +99,7 @@ export default function CompanyProfilePanel({
     event.target.value = "";
   }
 
-  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+  function handleDrop(event: React.DragEvent<HTMLLabelElement>) {
     event.preventDefault();
     setDragActive(false);
     const file = event.dataTransfer.files?.[0];
@@ -209,8 +209,14 @@ export default function CompanyProfilePanel({
         <label className="block text-sm font-medium text-slate-300">
           Business Logo
         </label>
+        {/* A JS-triggered `fileInputRef.click()` can lose the browser's
+            "user activation" by the time it runs inside some Android
+            WebViews, silently failing to open the file/camera picker with
+            no visible error. A real <label for=...> triggers the input's
+            native default action directly from the tap, with no JS in
+            between, so it can't lose activation. */}
         <input
-          ref={fileInputRef}
+          id={logoInputId}
           type="file"
           accept="image/*"
           onChange={handleFileInputChange}
@@ -226,13 +232,12 @@ export default function CompanyProfilePanel({
               className="h-16 w-16 rounded-lg object-cover"
             />
             <div className="flex-1">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-sm font-medium text-brand-blue hover:text-blue-400"
+              <label
+                htmlFor={logoInputId}
+                className="cursor-pointer text-sm font-medium text-brand-blue hover:text-blue-400"
               >
                 Replace logo
-              </button>
+              </label>
             </div>
             <button
               type="button"
@@ -244,8 +249,8 @@ export default function CompanyProfilePanel({
             </button>
           </div>
         ) : (
-          <div
-            onClick={() => fileInputRef.current?.click()}
+          <label
+            htmlFor={logoInputId}
             onDragOver={(e) => {
               e.preventDefault();
               setDragActive(true);
@@ -271,7 +276,7 @@ export default function CompanyProfilePanel({
             <p className="mt-1 text-xs text-slate-500">
               PNG or JPG, up to 2MB
             </p>
-          </div>
+          </label>
         )}
 
         {uploadError && (

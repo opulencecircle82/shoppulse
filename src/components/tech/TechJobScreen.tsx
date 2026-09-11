@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 import { MapPin, ShieldCheck } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { getCurrentPosition } from "@/lib/tech/gps";
@@ -34,7 +34,7 @@ export default function TechJobScreen({
   const [submitting, setSubmitting] = useState(false);
   const [synced, setSynced] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputId = useId();
 
   const checklistCompleted = checkedItems.size >= activeChecklist.length;
   const needsSignature = isCompletionStage;
@@ -239,8 +239,14 @@ export default function TechJobScreen({
           )}
 
           <div className="mt-6 border-t border-white/10 pt-6">
+            {/* A JS-triggered `fileInputRef.click()` can lose the browser's
+                "user activation" by the time it runs inside some Android
+                WebViews, silently failing to open the camera with no
+                visible error. A real <label for=...> triggers the input's
+                native default action directly from the tap, with no JS in
+                between, so it can't lose activation. */}
             <input
-              ref={fileInputRef}
+              id={fileInputId}
               type="file"
               accept="image/*"
               capture="environment"
@@ -253,11 +259,11 @@ export default function TechJobScreen({
             />
 
             <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={capturing}
-                className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+              <label
+                htmlFor={fileInputId}
+                className={`rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] ${
+                  capturing ? "pointer-events-none opacity-60" : "cursor-pointer"
+                }`}
               >
                 {capturing
                   ? "Getting GPS..."
@@ -266,7 +272,7 @@ export default function TechJobScreen({
                     : isStartStage
                       ? "Take Live Photo Proof + GPS Tag"
                       : "Take Completion Photo + GPS Tag"}
-              </button>
+              </label>
             </div>
 
             {capturedPreview && (
