@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, Phone, Plus, X } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket, Shop, ShopProduct } from "@/lib/supabase/types";
+import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import SelectedProductsPicker from "./SelectedProductsPicker";
 
 export default function BookingRequestCard({
   ticket,
@@ -17,8 +18,6 @@ export default function BookingRequestCard({
 }) {
   const [distance, setDistance] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [products, setProducts] = useState<ShopProduct[]>([]);
-  const [showProductPicker, setShowProductPicker] = useState(false);
 
   useEffect(() => {
     if (shop.latitude === null || shop.longitude === null) return;
@@ -42,22 +41,6 @@ export default function BookingRequestCard({
     };
   }, [ticket.id, shop.latitude, shop.longitude]);
 
-  useEffect(() => {
-    let active = true;
-    const id = setTimeout(async () => {
-      const { data } = await supabase
-        .from("shop_products")
-        .select("*")
-        .eq("shop_id", shop.id)
-        .order("created_at");
-      if (active) setProducts((data as ShopProduct[]) ?? []);
-    }, 0);
-    return () => {
-      active = false;
-      clearTimeout(id);
-    };
-  }, [shop.id]);
-
   async function handleAccept() {
     setBusy(true);
     await supabase.rpc("accept_booking_request", { p_ticket_id: ticket.id });
@@ -72,18 +55,7 @@ export default function BookingRequestCard({
     onChanged();
   }
 
-  async function addProduct(product: ShopProduct) {
-    const next = [
-      ...ticket.selected_products,
-      { product_id: product.id, name: product.name, price: product.price, quantity: 1 },
-    ];
-    await supabase.from("job_tickets").update({ selected_products: next }).eq("id", ticket.id);
-    setShowProductPicker(false);
-    onChanged();
-  }
-
-  async function removeProduct(index: number) {
-    const next = ticket.selected_products.filter((_, i) => i !== index);
+  async function handleProductsChange(next: { product_id: string; name: string; price: number; quantity: number }[]) {
     await supabase.from("job_tickets").update({ selected_products: next }).eq("id", ticket.id);
     onChanged();
   }
@@ -133,66 +105,12 @@ export default function BookingRequestCard({
       </div>
 
       <div className="mt-3">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Products Needed
-          </p>
-          {products.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowProductPicker((v) => !v)}
-              className="flex items-center gap-1 text-xs font-medium text-brand-blue hover:text-blue-400"
-            >
-              <Plus className="h-3 w-3" /> Add
-            </button>
-          )}
-        </div>
-
-        {ticket.selected_products.length === 0 ? (
-          <p className="mt-1 text-xs text-slate-500">None selected yet.</p>
-        ) : (
-          <div className="mt-1.5 space-y-1">
-            {ticket.selected_products.map((item, index) => (
-              <div
-                key={`${item.product_id}-${index}`}
-                className="flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-xs"
-              >
-                <span className="text-slate-200">{item.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-white">
-                    {shop.currency} {item.price.toFixed(2)}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeProduct(index)}
-                    className="text-slate-500 hover:text-red-400"
-                    aria-label="Remove product"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {showProductPicker && (
-          <div className="mt-1.5 space-y-1 rounded-lg bg-white/5 p-2">
-            {products.map((product) => (
-              <button
-                key={product.id}
-                type="button"
-                onClick={() => addProduct(product)}
-                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-white/10"
-              >
-                <span className="text-slate-200">{product.name}</span>
-                <span className="font-medium text-white">
-                  {shop.currency} {product.price.toFixed(2)}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        <SelectedProductsPicker
+          shopId={shop.id}
+          currency={shop.currency}
+          selectedProducts={ticket.selected_products}
+          onChange={handleProductsChange}
+        />
       </div>
 
       <div className="mt-3 flex gap-2">

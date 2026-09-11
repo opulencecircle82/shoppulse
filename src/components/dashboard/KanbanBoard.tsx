@@ -83,6 +83,8 @@ export default function KanbanBoard({
                   ticket={ticket}
                   staff={staff}
                   defaultTasks={shop.default_tasks}
+                  shopId={shop.id}
+                  currency={shop.currency}
                   onChanged={onChanged}
                   onOpenInvoice={onOpenInvoice}
                   onOpenProofDrawer={

@@ -125,13 +125,42 @@ export default function ProofDisputeDrawer({
         total_invoice_amount: totalInvoiceAmount,
       })
       .eq("id", ticket.id);
-    setSaving(null);
 
     if (updateError) {
+      setSaving(null);
       setError(updateError.message);
       return;
     }
 
+    // Approval is the one point where selected_products is final — deduct
+    // the parts actually used from inventory here, once, with a movement
+    // record so it shows up in that item's stock History.
+    if (ticket.selected_products.length > 0) {
+      const productIds = ticket.selected_products.map((item) => item.product_id);
+      const { data: currentProducts } = await supabase
+        .from("shop_products")
+        .select("id, quantity")
+        .in("id", productIds);
+      const quantityById = new Map(
+        (currentProducts ?? []).map((p) => [p.id as string, p.quantity as number])
+      );
+
+      for (const item of ticket.selected_products) {
+        const current = quantityById.get(item.product_id) ?? 0;
+        await supabase
+          .from("shop_products")
+          .update({ quantity: Math.max(0, current - item.quantity) })
+          .eq("id", item.product_id);
+        await supabase.from("shop_product_stock_movements").insert({
+          shop_id: shop.id,
+          product_id: item.product_id,
+          change_qty: -item.quantity,
+          note: `Used on job for ${ticket.client_name}`,
+        });
+      }
+    }
+
+    setSaving(null);
     onChanged();
     onApproved({
       ...ticket,

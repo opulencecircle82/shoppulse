@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 import AssignTaskingModal from "./AssignTaskingModal";
+import SelectedProductsPicker from "./SelectedProductsPicker";
+
+const PRODUCTS_EDITABLE_STATUSES = new Set(["UNASSIGNED", "SCHEDULED", "IN_PROGRESS", "COMPLETED"]);
 
 export default function JobTicketCard({
   ticket,
   staff,
   defaultTasks,
+  shopId,
+  currency,
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
@@ -15,6 +21,8 @@ export default function JobTicketCard({
   ticket: JobTicket;
   staff: StaffMember[];
   defaultTasks: string[];
+  shopId: string;
+  currency: string;
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer?: (ticket: JobTicket) => void;
@@ -22,6 +30,11 @@ export default function JobTicketCard({
   const [linkCopied, setLinkCopied] = useState(false);
   const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
+
+  async function handleProductsChange(next: { product_id: string; name: string; price: number; quantity: number }[]) {
+    await supabase.from("job_tickets").update({ selected_products: next }).eq("id", ticket.id);
+    onChanged();
+  }
 
   function copyClientLink() {
     const link = `${window.location.origin}/client/${ticket.id}`;
@@ -87,6 +100,18 @@ export default function JobTicketCard({
         <p className="mt-1 text-xs font-semibold text-brand-emerald">
           Invoice: {ticket.total_invoice_amount.toFixed(2)}
         </p>
+      )}
+
+      {PRODUCTS_EDITABLE_STATUSES.has(ticket.status) && (
+        <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+          <SelectedProductsPicker
+            shopId={shopId}
+            currency={currency}
+            selectedProducts={ticket.selected_products}
+            onChange={handleProductsChange}
+            label="Products Used"
+          />
+        </div>
       )}
 
       {(ticket.status === "COMPLETED" || ticket.status === "DISPUTED") && (
