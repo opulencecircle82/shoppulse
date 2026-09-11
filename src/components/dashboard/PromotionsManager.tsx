@@ -323,6 +323,7 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const siteUrl =
     typeof window !== "undefined" ? `${window.location.origin}/site/${shop.slug}` : "";
@@ -426,6 +427,38 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
       </div>
 
       {uploadError && <p className="mt-2 text-xs text-red-400">{uploadError}</p>}
+
+      <div className="mt-4 border-t border-white/10 pt-3">
+        <label className="flex items-center justify-between text-xs">
+          <span className="font-semibold uppercase tracking-wide text-slate-400">
+            Live Website Preview
+          </span>
+          <span className="flex items-center gap-2 text-slate-400">
+            {showPreview ? "Hide" : "Show"}
+            <input
+              type="checkbox"
+              checked={showPreview}
+              onChange={(e) => setShowPreview(e.target.checked)}
+              className="h-4 w-7 cursor-pointer accent-brand-blue"
+            />
+          </span>
+        </label>
+
+        {showPreview && (
+          <div className="mt-2 overflow-hidden rounded-xl border border-white/10 bg-white">
+            {/* The real /site/[slug] page, not a mockup — always accurate,
+                can't drift out of sync with what a visitor actually sees.
+                Fixed height + overflow-hidden shows just the top, like a
+                thumbnail; the full page opens via "View Website" (the link
+                card above) or "Copy Link". */}
+            <iframe
+              src={siteUrl}
+              title="Website preview"
+              className="h-[280px] w-full border-0"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
