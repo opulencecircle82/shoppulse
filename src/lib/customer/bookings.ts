@@ -30,6 +30,9 @@ export type BookingShop = {
   default_hourly_rate: number;
   currency: string;
   accepted_payment_methods: string[];
+  website_header_url: string | null;
+  primary_color_hex: string;
+  address: string | null;
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the

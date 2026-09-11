@@ -7,6 +7,7 @@ export type Shop = {
   shop_name: string;
   slug: string;
   logo_url: string | null;
+  website_header_url: string | null;
   primary_color_hex: string;
   accent_color_hex: string;
   currency: Currency;

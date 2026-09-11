@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Plus, X, Megaphone } from "lucide-react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { Plus, X, Megaphone, Globe, Loader2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
+import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 
 type DailyStat = { day: string; views: number; clicks: number };
 type Totals = { total_views: number; total_clicks: number };
@@ -315,6 +316,119 @@ function PromotionCard({
   );
 }
 
+function BusinessWebsiteCard({ shop }: { shop: Shop }) {
+  const headerInputId = useId();
+  const [headerUrl, setHeaderUrl] = useState(shop.website_header_url);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const siteUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/site/${shop.slug}` : "";
+  const previewUrl = headerUrl || stockPhotoForCategory(shop.business_category);
+
+  async function handleFile(file: File | undefined) {
+    if (!file) return;
+    const looksLikeImage =
+      file.type.startsWith("image/") || /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(file.name);
+    if (!looksLikeImage) {
+      setUploadError("Please choose an image file.");
+      return;
+    }
+    setUploadError(null);
+    setUploading(true);
+
+    const path = `${shop.id}/website-header-${Date.now()}.${file.name.split(".").pop() ?? "jpg"}`;
+    const { error } = await supabase.storage
+      .from("shop-logos")
+      .upload(path, file, { contentType: file.type || "image/jpeg" });
+
+    if (error) {
+      setUploadError(error.message);
+      setUploading(false);
+      return;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("shop-logos").getPublicUrl(path);
+
+    await supabase.from("shops").update({ website_header_url: publicUrl }).eq("id", shop.id);
+    setHeaderUrl(publicUrl);
+    setUploading(false);
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(siteUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
+
+  return (
+    <div className="mb-6 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+      <div className="flex items-center gap-2">
+        <Globe className="h-4 w-4 text-brand-blue" />
+        <h3 className="text-sm font-semibold text-white">Your Business Website</h3>
+      </div>
+      <p className="mt-1 text-xs text-slate-400">
+        A free public page for {shop.shop_name} — share it anywhere. Uses a
+        stock photo matched to your category until you upload your own header.
+      </p>
+
+      <div className="relative mt-3 aspect-[21/9] w-full overflow-hidden rounded-xl">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-2 left-3 right-3">
+          <p className="truncate text-sm font-bold text-white">{shop.shop_name}</p>
+        </div>
+      </div>
+
+      <input
+        id={headerInputId}
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          handleFile(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+        className="hidden"
+      />
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <label
+          htmlFor={headerInputId}
+          className={`inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue ${
+            uploading ? "pointer-events-none opacity-60" : "cursor-pointer"
+          }`}
+        >
+          {uploading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          {uploading ? "Uploading..." : headerUrl ? "Replace Header Photo" : "Upload Header Photo"}
+        </label>
+
+        <a
+          href={siteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          View Website
+        </a>
+
+        <button
+          type="button"
+          onClick={copyLink}
+          className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-3.5 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          {linkCopied ? "Link copied!" : "Copy Link"}
+        </button>
+      </div>
+
+      {uploadError && <p className="mt-2 text-xs text-red-400">{uploadError}</p>}
+    </div>
+  );
+}
+
 function AddPromotionModal({
   shopId,
   onClose,
@@ -450,6 +564,8 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
 
   return (
     <div>
+      <BusinessWebsiteCard shop={shop} />
+
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">
           Your Promotions ({promotions.length})
