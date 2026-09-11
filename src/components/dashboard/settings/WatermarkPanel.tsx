@@ -28,7 +28,7 @@ export default function WatermarkPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-400">
         Set up your Company Profile first to customize photo watermarks.
       </p>
     );
@@ -67,8 +67,8 @@ export default function WatermarkPanel({
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-600">
+        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
+          <span className="text-sm text-slate-300">
             Overlay company logo
           </span>
           <input
@@ -79,8 +79,8 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-600">Overlay timestamp</span>
+        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
+          <span className="text-sm text-slate-300">Overlay timestamp</span>
           <input
             type="checkbox"
             checked={showTimestamp}
@@ -89,8 +89,8 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-xl bg-brand-slate px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-600">
+        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
+          <span className="text-sm text-slate-300">
             Overlay GPS coordinates
           </span>
           <input
@@ -122,7 +122,7 @@ export default function WatermarkPanel({
       </form>
 
       <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-500">
+        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-400">
           Live Preview
         </p>
         <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-md shadow-black/20">
@@ -131,18 +131,18 @@ export default function WatermarkPanel({
               <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
                 {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
               </span>
-              <span className="text-[10px] font-semibold text-slate-900">
+              <span className="text-[10px] font-semibold text-white">
                 {shop.shop_name}
               </span>
             </div>
           )}
           {showTimestamp && (
-            <div className="absolute bottom-3 left-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
+            <div className="absolute bottom-3 left-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
               Sep 8, 2026 &middot; 4:12 PM
             </div>
           )}
           {showGps && (
-            <div className="absolute bottom-3 right-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
+            <div className="absolute bottom-3 right-3 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
               37.7749&deg; N, -122.4194&deg; W
             </div>
           )}

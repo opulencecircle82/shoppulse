@@ -34,7 +34,7 @@ export default function DashboardSidebarNav({
 }) {
   return (
     <nav className="hidden w-56 shrink-0 lg:block">
-      <p className="px-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+      <p className="px-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
         Menu
       </p>
       <div className="mt-3 space-y-1">
@@ -49,7 +49,7 @@ export default function DashboardSidebarNav({
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-brand-blue/15 text-brand-blue"
-                  : "text-slate-500 hover:bg-brand-slate-light/40 hover:text-slate-900"
+                  : "text-slate-400 hover:bg-white/10 hover:text-white"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -59,10 +59,10 @@ export default function DashboardSidebarNav({
         })}
       </div>
 
-      <div className="mt-4 border-t border-slate-200 pt-4">
+      <div className="mt-4 border-t border-white/10 pt-4">
         <Link
           href="/dashboard/settings"
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-500 transition-colors hover:bg-brand-slate-light/40 hover:text-slate-900"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
         >
           <Settings className="h-4 w-4 shrink-0" />
           Business Settings

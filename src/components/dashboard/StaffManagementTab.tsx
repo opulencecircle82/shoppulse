@@ -71,8 +71,8 @@ export default function StaffManagementTab({
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="rounded-2xl bg-brand-slate-light/40 px-5 py-3 shadow-md shadow-black/20">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        <div className="rounded-2xl bg-white/5 px-5 py-3 shadow-md shadow-black/20">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
             Seat Usage
           </p>
           <p
@@ -100,14 +100,14 @@ export default function StaffManagementTab({
         </p>
       )}
 
-      {loading && <p className="mt-6 text-sm text-slate-500">Loading staff...</p>}
+      {loading && <p className="mt-6 text-sm text-slate-400">Loading staff...</p>}
 
       {!loading && nonOwnerStaff.length === 0 && (
-        <div className="mt-6 rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+        <div className="mt-6 rounded-2xl bg-white/5 p-8 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
             <Users className="h-5 w-5 text-brand-blue" />
           </div>
-          <p className="mt-3 text-sm text-slate-500">
+          <p className="mt-3 text-sm text-slate-400">
             No staff added yet. Use &quot;+ Add Staff&quot; to bring on your
             first technician.
           </p>
@@ -117,7 +117,7 @@ export default function StaffManagementTab({
       {!loading && nonOwnerStaff.length > 0 && (
         <div className="mt-6 overflow-x-auto rounded-2xl shadow-md shadow-black/20">
           <table className="w-full text-left text-sm">
-            <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-white/5 text-xs uppercase tracking-wide text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Mobile App Login</th>
@@ -128,25 +128,25 @@ export default function StaffManagementTab({
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-white/10">
               {nonOwnerStaff.map((member) => (
-                <tr key={member.id} className="hover:bg-brand-slate-light/20">
-                  <td className="px-4 py-3 font-medium text-slate-900">
+                <tr key={member.id} className="hover:bg-white/10-light/20">
+                  <td className="px-4 py-3 font-medium text-white">
                     {member.full_name}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-300">
                     {member.username ?? (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-500">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-300">
                     <div>{member.email}</div>
                     {member.phone && (
-                      <div className="text-xs text-slate-400">{member.phone}</div>
+                      <div className="text-xs text-slate-500">{member.phone}</div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{member.role}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-300">{member.role}</td>
+                  <td className="px-4 py-3 text-slate-300">
                     ${member.hourly_rate.toFixed(2)}/hr
                   </td>
                   <td className="px-4 py-3">
@@ -154,7 +154,7 @@ export default function StaffManagementTab({
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                         member.is_active
                           ? "bg-brand-emerald/15 text-brand-emerald"
-                          : "bg-slate-200 text-slate-500"
+                          : "bg-white/10 text-slate-400"
                       }`}
                     >
                       {member.is_active ? "Active" : "Inactive"}
@@ -166,7 +166,7 @@ export default function StaffManagementTab({
                         <button
                           type="button"
                           onClick={() => toggleActive(member)}
-                          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+                          className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
                         >
                           {member.is_active ? "Deactivate" : "Activate"}
                         </button>
@@ -174,7 +174,7 @@ export default function StaffManagementTab({
                           type="button"
                           onClick={() => deleteStaff(member)}
                           disabled={deletingId === member.id}
-                          className="rounded-full border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="rounded-full border border-red-500/40 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:border-red-500 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {deletingId === member.id ? "Removing..." : "Delete"}
                         </button>

@@ -18,16 +18,16 @@ function ProofPhoto({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
         {label}
       </p>
-      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-brand-slate-light/30 shadow-sm shadow-black/20">
+      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-white/5 shadow-sm shadow-black/20">
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={label} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500">
               No photo yet — appears once submitted via mobile app
             </span>
           </div>
@@ -38,18 +38,18 @@ function ProofPhoto({
             <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
               {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
             </span>
-            <span className="text-[10px] font-semibold text-slate-900">
+            <span className="text-[10px] font-semibold text-white">
               {shop.shop_name}
             </span>
           </div>
         )}
         {url && shop.watermark_show_timestamp && (
-          <div className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
+          <div className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
             {timestamp ? new Date(timestamp).toLocaleString() : "—"}
           </div>
         )}
         {url && shop.watermark_show_gps && (
-          <div className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-slate-900 backdrop-blur">
+          <div className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
             GPS Verified
           </div>
         )}
@@ -165,21 +165,21 @@ export default function ProofDisputeDrawer({
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex h-full w-full max-w-md flex-col overflow-y-auto bg-brand-slate p-6 shadow-2xl shadow-black/40"
+        className="flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-white/10 bg-brand-navy p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3 className="text-lg font-semibold text-white">
               Proof &amp; Dispute Review
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               {ticket.client_name} &middot; {ticket.service_type}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-900"
+            className="text-slate-400 hover:text-white"
             aria-label="Close"
           >
             ✕
@@ -206,29 +206,29 @@ export default function ProofDisputeDrawer({
           />
         </div>
 
-        <div className="mt-5 rounded-xl bg-brand-slate-light/40 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="mt-5 rounded-xl bg-white/5 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Job Metrics &amp; Cost
           </p>
           <dl className="mt-2 space-y-1.5 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Tech</dt>
-              <dd className="font-medium text-slate-900">
+              <dt className="text-slate-400">Tech</dt>
+              <dd className="font-medium text-white">
                 {assignedStaff?.full_name ?? "—"}
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Time</dt>
-              <dd className="font-medium text-slate-900">
+              <dt className="text-slate-400">Time</dt>
+              <dd className="font-medium text-white">
                 {timeSpent !== null
                   ? `${Math.floor(timeSpent / 60)}h ${Math.round(timeSpent % 60)}m`
                   : "—"}
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Geofence</dt>
+              <dt className="text-slate-400">Geofence</dt>
               <dd
-                className={`font-medium ${gpsVerified ? "text-brand-emerald" : "text-slate-400"}`}
+                className={`font-medium ${gpsVerified ? "text-brand-emerald" : "text-slate-500"}`}
               >
                 {gpsVerified
                   ? `Verified (±${shop.geofence_radius_meters}m tolerance)`
@@ -237,8 +237,8 @@ export default function ProofDisputeDrawer({
             </div>
             {ticket.selected_products.length > 0 && (
               <div className="flex items-start justify-between">
-                <dt className="shrink-0 text-slate-500">Parts</dt>
-                <dd className="text-right font-medium text-slate-900">
+                <dt className="shrink-0 text-slate-400">Parts</dt>
+                <dd className="text-right font-medium text-white">
                   {ticket.selected_products.map((item, i) => (
                     <span key={i} className="block">
                       {item.quantity}x {item.name} ({shop.currency} {item.price.toFixed(2)})
@@ -247,8 +247,8 @@ export default function ProofDisputeDrawer({
                 </dd>
               </div>
             )}
-            <div className="flex items-center justify-between border-t border-slate-300/30 pt-1.5">
-              <dt className="text-slate-500">Labor + Parts Total</dt>
+            <div className="flex items-center justify-between border-t border-white/30 pt-1.5">
+              <dt className="text-slate-400">Labor + Parts Total</dt>
               <dd className="font-semibold text-brand-emerald">
                 {shop.currency}{" "}
                 {(
@@ -262,7 +262,7 @@ export default function ProofDisputeDrawer({
 
         {ticket.signature_url && (
           <div className="mt-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
               Customer Signature
             </p>
             <div className="mt-1.5 rounded-xl bg-white p-2">
@@ -277,7 +277,7 @@ export default function ProofDisputeDrawer({
         )}
 
         <div className="mt-5">
-          <label className="block text-xs font-medium text-slate-500">
+          <label className="block text-xs font-medium text-slate-400">
             Dispute Notes
           </label>
           <textarea
@@ -285,7 +285,7 @@ export default function ProofDisputeDrawer({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="What did the client say was wrong with this job?"
-            className="mt-1.5 w-full rounded-xl bg-brand-slate-light/40 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
@@ -308,12 +308,12 @@ export default function ProofDisputeDrawer({
             type="button"
             onClick={handleReject}
             disabled={saving !== null || !notes.trim()}
-            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/100/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving === "reject" ? "Rejecting..." : "Reject Dispute"}
           </button>
           {!notes.trim() && (
-            <p className="text-center text-xs text-slate-400">
+            <p className="text-center text-xs text-slate-500">
               Add dispute notes above to reject this job.
             </p>
           )}

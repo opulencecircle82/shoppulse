@@ -15,12 +15,10 @@ export default function NotificationBell({
   staffId,
   tickets,
   onOpenTicket,
-  dark = false,
 }: {
   staffId: string;
   tickets: JobTicket[];
   onOpenTicket: (ticket: JobTicket) => void;
-  dark?: boolean;
 }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
@@ -75,11 +73,7 @@ export default function NotificationBell({
       <button
         type="button"
         onClick={handleOpen}
-        className={
-          dark
-            ? "relative rounded-full border border-white/20 p-2.5 text-white/80 transition-colors hover:border-white/40 hover:text-white"
-            : "relative rounded-full border border-slate-300 p-2.5 text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
-        }
+        className="relative rounded-full border border-white/20 p-2.5 text-white/80 transition-colors hover:border-white/40 hover:text-white"
         aria-label="Notifications"
       >
         <Bell className="h-4 w-4" />
@@ -91,7 +85,7 @@ export default function NotificationBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-2xl bg-white p-2 shadow-xl shadow-black/20 ring-1 ring-slate-200">
+        <div className="absolute right-0 z-50 mt-2 w-80 rounded-2xl bg-brand-navy p-2 shadow-xl shadow-black/40 ring-1 ring-white/10">
           <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Notifications
           </p>
@@ -114,12 +108,12 @@ export default function NotificationBell({
                     onOpenTicket(ticket);
                   }}
                   className={`block w-full rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
-                    n.jobTicketId ? "hover:bg-brand-slate" : "cursor-default"
-                  } ${n.readAt ? "text-slate-500" : "text-slate-900"}`}
+                    n.jobTicketId ? "hover:bg-white/10" : "cursor-default"
+                  } ${n.readAt ? "text-slate-400" : "text-white"}`}
                 >
                   <p className="font-medium">{n.title}</p>
-                  {n.body && <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>}
-                  <p className="mt-0.5 text-[10px] text-slate-400">
+                  {n.body && <p className="mt-0.5 text-xs text-slate-400">{n.body}</p>}
+                  <p className="mt-0.5 text-[10px] text-slate-500">
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
                 </button>

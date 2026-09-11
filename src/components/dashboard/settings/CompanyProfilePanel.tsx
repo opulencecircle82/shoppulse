@@ -12,7 +12,7 @@ import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFiel
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
-  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
+  { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
 );
 
 const CURRENCIES: Currency[] = ["USD", "AUD", "GBP", "EUR"];
@@ -188,7 +188,7 @@ export default function CompanyProfilePanel({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Business Name
         </label>
         <input
@@ -196,13 +196,13 @@ export default function CompanyProfilePanel({
           required
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           placeholder="Apex Property Services"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Business Logo
         </label>
         <input
@@ -214,7 +214,7 @@ export default function CompanyProfilePanel({
         />
 
         {logoUrl ? (
-          <div className="mt-1.5 flex items-center gap-4 rounded-xl bg-brand-slate p-4 shadow-sm shadow-black/20">
+          <div className="mt-1.5 flex items-center gap-4 rounded-xl bg-white/5 p-4 shadow-sm shadow-black/20">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
@@ -233,7 +233,7 @@ export default function CompanyProfilePanel({
             <button
               type="button"
               onClick={() => setLogoUrl("")}
-              className="text-slate-500 hover:text-red-400"
+              className="text-slate-400 hover:text-red-400"
               aria-label="Remove logo"
             >
               <X className="h-4 w-4" />
@@ -251,20 +251,20 @@ export default function CompanyProfilePanel({
             className={`mt-1.5 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
               dragActive
                 ? "border-brand-blue bg-brand-blue/5"
-                : "border-slate-300 bg-brand-slate hover:border-slate-500"
+                : "border-white/20 bg-white/5 hover:border-slate-500"
             }`}
           >
             {uploading ? (
               <Loader2 className="h-6 w-6 animate-spin text-brand-blue" />
             ) : (
-              <ImageUp className="h-6 w-6 text-slate-400" />
+              <ImageUp className="h-6 w-6 text-slate-500" />
             )}
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-400">
               {uploading
                 ? "Uploading..."
                 : "Drag & drop your logo, or click to browse"}
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-slate-500">
               PNG or JPG, up to 2MB
             </p>
           </div>
@@ -276,20 +276,20 @@ export default function CompanyProfilePanel({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Business Address
         </label>
         <input
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           placeholder="123 Main St, San Francisco, CA"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Country
         </label>
         <select
@@ -300,7 +300,7 @@ export default function CompanyProfilePanel({
             setCity("");
             setBarangay("");
           }}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           {COUNTRIES.map((c) => (
             <option key={c} value={c}>
@@ -319,7 +319,7 @@ export default function CompanyProfilePanel({
             onRegionChange={setRegion}
             onCityChange={setCity}
             onBarangayChange={setBarangay}
-            inputClassName="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+            inputClassName="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
           />
         </div>
       ) : (
@@ -329,33 +329,33 @@ export default function CompanyProfilePanel({
             value={region}
             onChange={(e) => setRegion(e.target.value)}
             placeholder="Region / State / Province"
-            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Municipality / City"
-            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <input
             type="text"
             value={barangay}
             onChange={(e) => setBarangay(e.target.value)}
             placeholder="Barangay"
-            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Primary Operating Currency
         </label>
         <select
           value={currency}
           onChange={(e) => setCurrency(e.target.value as Currency)}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           {CURRENCIES.map((c) => (
             <option key={c} value={c}>
@@ -366,7 +366,7 @@ export default function CompanyProfilePanel({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Business Category
         </label>
         <select
@@ -376,7 +376,7 @@ export default function CompanyProfilePanel({
             setCategoryChoice(value);
             setBusinessCategory(value === "Other" ? "" : value);
           }}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           <option value="">Select category</option>
           {SERVICE_CATEGORIES.map((c) => (
@@ -391,14 +391,14 @@ export default function CompanyProfilePanel({
             value={businessCategory}
             onChange={(e) => setBusinessCategory(e.target.value)}
             placeholder="Specify your category"
-            className="mt-2 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-2 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         )}
       </div>
 
       {shop && (
         <>
-          <label className="flex items-center gap-2.5 text-sm text-slate-600">
+          <label className="flex items-center gap-2.5 text-sm text-slate-300">
             <input
               type="checkbox"
               checked={isPubliclyListed}

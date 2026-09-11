@@ -89,11 +89,11 @@ export default function BookingRequestCard({
   }
 
   return (
-    <div className="rounded-2xl border border-brand-blue/20 bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
-      <p className="text-sm font-semibold text-slate-900">{ticket.client_name}</p>
-      <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
+    <div className="rounded-2xl border border-brand-blue/20 bg-white/5 p-4 shadow-md shadow-black/20">
+      <p className="text-sm font-semibold text-white">{ticket.client_name}</p>
+      <p className="mt-0.5 text-xs text-slate-400">{ticket.service_type}</p>
       {ticket.description && (
-        <p className="mt-1 text-xs text-slate-500">{ticket.description}</p>
+        <p className="mt-1 text-xs text-slate-400">{ticket.description}</p>
       )}
       {ticket.request_photo_url && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -103,9 +103,9 @@ export default function BookingRequestCard({
           className="mt-1.5 h-16 w-16 rounded-lg object-cover"
         />
       )}
-      <p className="mt-1 text-xs text-slate-400">{ticket.service_address}</p>
+      <p className="mt-1 text-xs text-slate-500">{ticket.service_address}</p>
       {ticket.preferred_date && (
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-400">
           Preferred date: {new Date(ticket.preferred_date).toLocaleDateString()}
         </p>
       )}
@@ -117,7 +117,7 @@ export default function BookingRequestCard({
         {ticket.client_email && (
           <a
             href={`mailto:${ticket.client_email}`}
-            className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-blue"
+            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-brand-blue"
           >
             <Mail className="h-3 w-3" /> Email
           </a>
@@ -125,7 +125,7 @@ export default function BookingRequestCard({
         {ticket.client_phone && (
           <a
             href={`tel:${ticket.client_phone}`}
-            className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-blue"
+            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-brand-blue"
           >
             <Phone className="h-3 w-3" /> Call
           </a>
@@ -134,7 +134,7 @@ export default function BookingRequestCard({
 
       <div className="mt-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Products Needed
           </p>
           {products.length > 0 && (
@@ -149,23 +149,23 @@ export default function BookingRequestCard({
         </div>
 
         {ticket.selected_products.length === 0 ? (
-          <p className="mt-1 text-xs text-slate-400">None selected yet.</p>
+          <p className="mt-1 text-xs text-slate-500">None selected yet.</p>
         ) : (
           <div className="mt-1.5 space-y-1">
             {ticket.selected_products.map((item, index) => (
               <div
                 key={`${item.product_id}-${index}`}
-                className="flex items-center justify-between rounded-lg bg-brand-slate/60 px-2.5 py-1.5 text-xs"
+                className="flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-1.5 text-xs"
               >
-                <span className="text-slate-700">{item.name}</span>
+                <span className="text-slate-200">{item.name}</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-white">
                     {shop.currency} {item.price.toFixed(2)}
                   </span>
                   <button
                     type="button"
                     onClick={() => removeProduct(index)}
-                    className="text-slate-400 hover:text-red-400"
+                    className="text-slate-500 hover:text-red-400"
                     aria-label="Remove product"
                   >
                     <X className="h-3 w-3" />
@@ -177,16 +177,16 @@ export default function BookingRequestCard({
         )}
 
         {showProductPicker && (
-          <div className="mt-1.5 space-y-1 rounded-lg bg-brand-slate/60 p-2">
+          <div className="mt-1.5 space-y-1 rounded-lg bg-white/5 p-2">
             {products.map((product) => (
               <button
                 key={product.id}
                 type="button"
                 onClick={() => addProduct(product)}
-                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-brand-slate"
+                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-white/10"
               >
-                <span className="text-slate-700">{product.name}</span>
-                <span className="font-medium text-slate-900">
+                <span className="text-slate-200">{product.name}</span>
+                <span className="font-medium text-white">
                   {shop.currency} {product.price.toFixed(2)}
                 </span>
               </button>
@@ -208,7 +208,7 @@ export default function BookingRequestCard({
           type="button"
           onClick={handleReject}
           disabled={busy}
-          className="flex-1 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-red-400 hover:text-red-400 disabled:opacity-60"
+          className="flex-1 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-red-400 hover:text-red-400 disabled:opacity-60"
         >
           Reject
         </button>

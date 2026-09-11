@@ -51,36 +51,36 @@ export default function AssignTaskingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl shadow-black/40">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-navy p-5 shadow-2xl shadow-black/40">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-slate-900">
+          <p className="text-sm font-bold text-white">
             Assign to {staffMember.full_name}
           </p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-900">
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-400">
           {ticket.client_name} — {ticket.service_type}
         </p>
 
-        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
           Task Checklist
         </p>
         <div className="mt-2 space-y-1.5">
           {tasks.length === 0 && (
-            <p className="text-xs text-slate-400">No tasks yet — add one below.</p>
+            <p className="text-xs text-slate-500">No tasks yet — add one below.</p>
           )}
           {tasks.map((task, index) => (
             <div
               key={`${task}-${index}`}
-              className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5"
+              className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5"
             >
-              <span className="text-sm text-slate-700">{task}</span>
+              <span className="text-sm text-slate-200">{task}</span>
               <button
                 type="button"
                 onClick={() => removeTask(index)}
-                className="shrink-0 text-slate-400 hover:text-red-400"
+                className="shrink-0 text-slate-500 hover:text-red-400"
                 aria-label="Remove task"
               >
                 <X className="h-3.5 w-3.5" />
@@ -101,12 +101,12 @@ export default function AssignTaskingModal({
               }
             }}
             placeholder="Add a task..."
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <button
             type="button"
             onClick={addTask}
-            className="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 hover:border-brand-blue hover:text-brand-blue"
+            className="shrink-0 rounded-lg border border-white/20 px-3 py-2 text-sm font-medium text-slate-300 hover:border-brand-blue hover:text-brand-blue"
           >
             Add
           </button>

@@ -31,17 +31,17 @@ function StaffRow({ member }: { member: StaffMember }) {
   }
 
   return (
-    <div className="rounded-2xl bg-brand-slate p-5 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white/5 p-5 shadow-md shadow-black/20">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-white">
             {member.full_name}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             {member.email} &middot; {member.role}
           </p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-500">
+        <label className="flex items-center gap-2 text-xs text-slate-400">
           <input
             type="checkbox"
             checked={isActive}
@@ -54,7 +54,7 @@ function StaffRow({ member }: { member: StaffMember }) {
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-500">
+          <label className="block text-xs font-medium text-slate-400">
             Hourly Rate
           </label>
           <input
@@ -63,11 +63,11 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.5}
             value={hourlyRate}
             onChange={(e) => setHourlyRate(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500">
+          <label className="block text-xs font-medium text-slate-400">
             Overtime Multiplier
           </label>
           <input
@@ -76,7 +76,7 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.1}
             value={overtimeMultiplier}
             onChange={(e) => setOvertimeMultiplier(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
       </div>
@@ -129,14 +129,14 @@ export default function StaffPayRatesPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-400">
         Set up your Company Profile first to manage staff pay rates.
       </p>
     );
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading staff...</p>;
+    return <p className="text-sm text-slate-400">Loading staff...</p>;
   }
 
   return (

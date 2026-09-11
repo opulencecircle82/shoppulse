@@ -30,7 +30,7 @@ import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
-  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
+  { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
 );
 
 export default function DashboardPage() {
@@ -50,7 +50,7 @@ export default function DashboardPage() {
 
   if (!checked || shopLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-brand-slate">
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
@@ -63,11 +63,11 @@ export default function DashboardPage() {
 
   if (!shop) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-slate px-6 text-center">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
         <span className="rounded-full bg-brand-blue/15 px-3 py-1 text-xs font-semibold text-brand-blue">
           You&apos;re in
         </span>
-        <h1 className="mt-4 text-3xl font-bold text-slate-900">
+        <h1 className="mt-4 text-3xl font-bold text-white">
           Set up your shop to get started
         </h1>
         <p className="mt-2 max-w-md text-sm text-slate-500">
@@ -84,7 +84,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+            className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
           >
             Sign Out
           </button>
@@ -94,9 +94,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50 via-brand-slate to-brand-slate">
+    <main className="min-h-screen bg-brand-navy">
       <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
-        <div className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-3xl bg-brand-navy px-6 py-6 sm:px-8">
+        <div className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-6 sm:px-8">
           <CurvedLinesBackground />
           <div className="relative">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange">
@@ -116,7 +116,6 @@ export default function DashboardPage() {
                     setActiveTab("board");
                   }
                 }}
-                dark
               />
             )}
             <button
@@ -151,7 +150,7 @@ export default function DashboardPage() {
                   className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? "bg-brand-blue/15 text-brand-blue"
-                      : "text-slate-500 hover:bg-brand-slate-light/40 hover:text-slate-900"
+                      : "text-slate-400 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {tab.label}
@@ -159,7 +158,7 @@ export default function DashboardPage() {
               ))}
               <Link
                 href="/dashboard/settings"
-                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-brand-slate-light/40 hover:text-slate-900"
+                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
               >
                 Business Settings
               </Link>
@@ -168,7 +167,7 @@ export default function DashboardPage() {
             {activeTab === "board" && (
               <div className="mt-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                     Job Tickets
                   </h2>
                   <button
@@ -181,7 +180,7 @@ export default function DashboardPage() {
                 </div>
 
                 {(ticketsLoading || staffLoading) && (
-                  <p className="text-sm text-slate-500">Loading job board...</p>
+                  <p className="text-sm text-slate-400">Loading job board...</p>
                 )}
 
                 {!ticketsLoading && !staffLoading && (

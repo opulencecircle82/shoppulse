@@ -81,33 +81,33 @@ export default function InvoiceGeneratorModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
+        className="w-full max-w-md rounded-3xl border border-white/10 bg-brand-navy p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3 className="text-lg font-semibold text-white">
               Generate Invoice
             </h3>
-            <p className="text-xs text-slate-400">{ticket.client_name}</p>
+            <p className="text-xs text-slate-500">{ticket.client_name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-900"
+            className="text-slate-400 hover:text-white"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        <div className="mt-5 inline-flex rounded-full border border-slate-300 bg-brand-slate-light/40 p-1">
+        <div className="mt-5 inline-flex rounded-full border border-white/20 bg-white/5 p-1">
           <button
             type="button"
             onClick={() => setMode("hourly")}
             className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
               mode === "hourly"
                 ? "bg-brand-blue text-white"
-                : "text-slate-500 hover:text-slate-900"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             Hourly Rate Billing
@@ -118,7 +118,7 @@ export default function InvoiceGeneratorModal({
             className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
               mode === "flat"
                 ? "bg-brand-blue text-white"
-                : "text-slate-500 hover:text-slate-900"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             Flat-Rate Job Billing
@@ -129,7 +129,7 @@ export default function InvoiceGeneratorModal({
           <div className="mt-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-500">
+                <label className="block text-xs font-medium text-slate-400">
                   Actual Hours
                 </label>
                 <input
@@ -138,11 +138,11 @@ export default function InvoiceGeneratorModal({
                   step={0.25}
                   value={actualHours}
                   onChange={(e) => setActualHours(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-500">
+                <label className="block text-xs font-medium text-slate-400">
                   Hourly Rate ({currency})
                 </label>
                 <input
@@ -151,14 +151,14 @@ export default function InvoiceGeneratorModal({
                   step={0.5}
                   value={hourlyRate}
                   onChange={(e) => setHourlyRate(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
             </div>
           </div>
         ) : (
           <div className="mt-5">
-            <label className="block text-xs font-medium text-slate-500">
+            <label className="block text-xs font-medium text-slate-400">
               Flat Rate Amount ({currency})
             </label>
             <input
@@ -167,16 +167,16 @@ export default function InvoiceGeneratorModal({
               step={1}
               value={flatAmount}
               onChange={(e) => setFlatAmount(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
         )}
 
         {ticket.selected_products.length > 0 && (
-          <div className="mt-4 space-y-1 rounded-lg bg-brand-slate-light/40 px-4 py-3">
-            <p className="text-xs font-medium text-slate-500">Products</p>
+          <div className="mt-4 space-y-1 rounded-lg bg-white/5 px-4 py-3">
+            <p className="text-xs font-medium text-slate-400">Products</p>
             {ticket.selected_products.map((item, index) => (
-              <div key={index} className="flex justify-between text-xs text-slate-600">
+              <div key={index} className="flex justify-between text-xs text-slate-300">
                 <span>{item.name}</span>
                 <span>
                   {currency} {(item.price * item.quantity).toFixed(2)}
@@ -186,8 +186,8 @@ export default function InvoiceGeneratorModal({
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-between rounded-lg bg-brand-slate-light/40 px-4 py-3">
-          <span className="text-sm text-slate-500">Total Invoice</span>
+        <div className="mt-5 flex items-center justify-between rounded-lg bg-white/5 px-4 py-3">
+          <span className="text-sm text-slate-400">Total Invoice</span>
           <span className="text-lg font-bold text-brand-emerald">
             {currency} {total.toFixed(2)}
           </span>

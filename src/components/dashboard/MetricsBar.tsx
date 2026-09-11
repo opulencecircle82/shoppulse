@@ -44,7 +44,7 @@ export default function MetricsBar({
       value: `${currency} ${metrics.wastedDollarsSaved.toFixed(2)}`,
       accent: "text-brand-emerald",
       iconBg: "bg-brand-emerald/15",
-      cardBg: "bg-gradient-to-br from-emerald-50 to-white",
+      cardBg: "bg-gradient-to-br from-emerald-500/10 to-white/5",
       borderAccent: "border-t-emerald-400",
       icon: PiggyBank,
     },
@@ -53,7 +53,7 @@ export default function MetricsBar({
       value: metrics.activeFieldStaff.toString(),
       accent: "text-brand-blue",
       iconBg: "bg-brand-blue/15",
-      cardBg: "bg-gradient-to-br from-blue-50 to-white",
+      cardBg: "bg-gradient-to-br from-blue-500/10 to-white/5",
       borderAccent: "border-t-brand-blue",
       icon: Users,
     },
@@ -62,16 +62,16 @@ export default function MetricsBar({
       value: metrics.pendingApprovals.toString(),
       accent: "text-amber-500",
       iconBg: "bg-amber-400/15",
-      cardBg: "bg-gradient-to-br from-amber-50 to-white",
+      cardBg: "bg-gradient-to-br from-amber-500/10 to-white/5",
       borderAccent: "border-t-amber-400",
       icon: ClipboardCheck,
     },
     {
       label: "Total Revenue",
       value: `${currency} ${metrics.totalRevenue.toFixed(2)}`,
-      accent: "text-slate-900",
+      accent: "text-white",
       iconBg: "bg-brand-orange/15",
-      cardBg: "bg-gradient-to-br from-orange-50 to-white",
+      cardBg: "bg-gradient-to-br from-brand-orange/10 to-white/5",
       borderAccent: "border-t-brand-orange",
       icon: TrendingUp,
     },
@@ -84,12 +84,12 @@ export default function MetricsBar({
         return (
           <div
             key={card.label}
-            className={`rounded-2xl border-t-4 ${card.borderAccent} ${card.cardBg} p-5 shadow-md shadow-black/10 transition-shadow hover:shadow-lg`}
+            className={`rounded-2xl border border-white/10 border-t-4 ${card.borderAccent} ${card.cardBg} p-5 shadow-md shadow-black/20 transition-shadow hover:shadow-lg`}
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.iconBg}`}>
               <Icon className={`h-5 w-5 ${card.accent}`} />
             </div>
-            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
+            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-400">
               {card.label}
             </p>
             <p className={`mt-1 text-2xl font-bold ${card.accent}`}>

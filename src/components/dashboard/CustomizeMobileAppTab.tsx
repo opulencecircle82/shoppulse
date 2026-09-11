@@ -7,7 +7,6 @@ import {
   Smartphone,
   ShieldCheck,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
@@ -51,7 +50,7 @@ function PhoneFrame({
 }) {
   return (
     <div className="w-[220px] shrink-0">
-      <p className="mb-2 text-center text-[11px] font-medium text-slate-500">
+      <p className="mb-2 text-center text-[11px] font-medium text-slate-400">
         {label}
       </p>
       <div className="overflow-hidden rounded-[24px] border-4 border-slate-700 bg-black shadow-2xl">
@@ -74,7 +73,7 @@ function StaffLoginPreview({ shopName, primaryColor, fontFamily }: ThemeProps) {
       <button
         type="button"
         disabled
-        className="mt-2 w-full rounded-full bg-white py-2 text-[10px] font-semibold text-slate-900"
+        className="mt-2 w-full rounded-full bg-white py-2 text-[10px] font-semibold text-slate-700"
       >
         Continue with Google
       </button>
@@ -94,7 +93,7 @@ function StaffJobListPreview({
     { name: "Oakwood HOA", status: "COMPLETED" },
   ];
   return (
-    <div className="h-[380px] bg-brand-slate" style={{ fontFamily }}>
+    <div className="h-[380px] bg-brand-navy" style={{ fontFamily }}>
       <div
         style={{ backgroundColor: primaryColor }}
         className="px-4 py-3 text-xs font-bold text-white"
@@ -105,9 +104,9 @@ function StaffJobListPreview({
         {jobs.map((job) => (
           <div
             key={job.name}
-            className="rounded-lg bg-brand-slate-light/40 p-2.5"
+            className="rounded-lg bg-white/5 p-2.5"
           >
-            <p className="text-[11px] font-semibold text-slate-900">{job.name}</p>
+            <p className="text-[11px] font-semibold text-white">{job.name}</p>
             <span
               style={{ backgroundColor: `${accentColor}33`, color: accentColor }}
               className="mt-1 inline-block rounded-full px-2 py-0.5 text-[9px] font-semibold"
@@ -127,11 +126,11 @@ function StaffVerificationPreview({
   fontFamily,
 }: ThemeProps) {
   return (
-    <div style={{ fontFamily }} className="h-[380px] space-y-3 bg-brand-slate p-4">
-      <p className="text-xs font-semibold text-slate-600">
+    <div style={{ fontFamily }} className="h-[380px] space-y-3 bg-brand-navy p-4">
+      <p className="text-xs font-semibold text-slate-300">
         JOB VERIFICATION PROTOCOL
       </p>
-      <label className="flex items-center gap-2 text-xs text-slate-500">
+      <label className="flex items-center gap-2 text-xs text-slate-400">
         <input
           type="checkbox"
           readOnly
@@ -175,7 +174,7 @@ function CustomerPortalPreview({
   fontFamily,
 }: ThemeProps) {
   return (
-    <div style={{ fontFamily }} className="h-[380px] bg-brand-slate">
+    <div style={{ fontFamily }} className="h-[380px] bg-brand-navy">
       <div
         style={{ backgroundColor: primaryColor }}
         className="flex items-center gap-2 px-4 py-3"
@@ -186,10 +185,10 @@ function CustomerPortalPreview({
         </span>
       </div>
       <div className="space-y-2.5 p-3">
-        <p className="text-[10px] text-slate-500">
+        <p className="text-[10px] text-slate-400">
           Service: Residential Deep Clean
         </p>
-        <p className="text-[10px] text-slate-500">
+        <p className="text-[10px] text-slate-400">
           Time Tracked: 2.5 Hours (14:00 - 16:30)
         </p>
         <p
@@ -199,30 +198,22 @@ function CustomerPortalPreview({
           ✓ GPS Verified On-Site
         </p>
         <div className="grid grid-cols-2 gap-1.5">
-          <div className="aspect-square rounded-md bg-brand-slate-light/50" />
-          <div className="aspect-square rounded-md bg-brand-slate-light/50" />
+          <div className="aspect-square rounded-md bg-white/10" />
+          <div className="aspect-square rounded-md bg-white/10" />
         </div>
-        <p className="pt-1 text-[11px] font-medium text-slate-900">
-          Was this job completed to your satisfaction?
+        <div
+          className="rounded-lg px-3 py-2 text-[10px] font-medium"
+          style={{ backgroundColor: `${accentColor}1A`, color: accentColor }}
+        >
+          <CheckCircle2 className="mb-1 h-3.5 w-3.5" />
+          Work is done — {shopName || "the business"} is reviewing it before
+          finalizing.
+        </div>
+        <p className="pt-1 text-[11px] font-medium text-white">
+          Rate this job
         </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled
-            style={{ backgroundColor: accentColor }}
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg py-2 text-[10px] font-bold text-white"
-          >
-            <CheckCircle2 className="h-3 w-3" />
-            Approve
-          </button>
-          <button
-            type="button"
-            disabled
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-red-400/50 py-2 text-[10px] font-bold text-red-400"
-          >
-            <XCircle className="h-3 w-3" />
-            Dispute
-          </button>
+        <div className="flex gap-1 text-amber-400">
+          {"★★★★★"}
         </div>
       </div>
     </div>
@@ -303,20 +294,20 @@ export default function CustomizeMobileAppTab({
 
   return (
     <div>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
         Customize Mobile App
       </h2>
-      <p className="mt-1 text-sm text-slate-400">
+      <p className="mt-1 text-sm text-slate-500">
         Theme applied to the ShopPulse technician app (Flutter) and the
         client verification portal.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
         <div>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-white">
             Technician App (Android)
           </p>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-slate-400">
             One shared app for every shop &mdash; it reads your saved theme
             below the moment a technician logs in. New app features and
             fixes ship as updates to this same link, no separate build per
@@ -332,12 +323,12 @@ export default function CustomizeMobileAppTab({
         </a>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
         <div>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-white">
             Customer App &amp; Booking Link
           </p>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-slate-400">
             Customers create an account, request jobs, and track everything
             they&apos;ve booked with you — either from the app, or straight
             from the link (post it on Facebook, your website, wherever).
@@ -364,7 +355,7 @@ export default function CustomizeMobileAppTab({
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div className="grid grid-cols-2 gap-4 sm:max-w-md">
           <div>
-            <label className="block text-xs font-medium text-slate-500">
+            <label className="block text-xs font-medium text-slate-400">
               Primary Color
             </label>
             <div className="mt-1.5 flex items-center gap-2">
@@ -374,11 +365,11 @@ export default function CustomizeMobileAppTab({
                 onChange={(e) => setPrimaryColor(e.target.value)}
                 className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
-              <span className="text-xs text-slate-500">{primaryColor}</span>
+              <span className="text-xs text-slate-400">{primaryColor}</span>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">
+            <label className="block text-xs font-medium text-slate-400">
               Accent Color
             </label>
             <div className="mt-1.5 flex items-center gap-2">
@@ -388,19 +379,19 @@ export default function CustomizeMobileAppTab({
                 onChange={(e) => setAccentColor(e.target.value)}
                 className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
-              <span className="text-xs text-slate-500">{accentColor}</span>
+              <span className="text-xs text-slate-400">{accentColor}</span>
             </div>
           </div>
         </div>
 
         <div className="sm:max-w-md">
-          <label className="block text-xs font-medium text-slate-500">
+          <label className="block text-xs font-medium text-slate-400">
             App Font
           </label>
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value)}
-            className="mt-1.5 w-full rounded-xl bg-brand-slate-light/40 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           >
             {FONT_OPTIONS.map((font) => (
               <option key={font} value={font}>
@@ -433,17 +424,17 @@ export default function CustomizeMobileAppTab({
 
       <div className="mt-10">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
             Live Preview
           </p>
-          <div className="inline-flex rounded-full border border-slate-300 bg-brand-slate-light/40 p-1">
+          <div className="inline-flex rounded-full border border-white/20 bg-white/5 p-1">
             <button
               type="button"
               onClick={() => setPreviewTarget("staff")}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                 previewTarget === "staff"
                   ? "bg-brand-blue text-white"
-                  : "text-slate-500 hover:text-slate-900"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Staff App
@@ -454,7 +445,7 @@ export default function CustomizeMobileAppTab({
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                 previewTarget === "customer"
                   ? "bg-brand-blue text-white"
-                  : "text-slate-500 hover:text-slate-900"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Customer Portal
@@ -462,7 +453,7 @@ export default function CustomizeMobileAppTab({
           </div>
         </div>
 
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-500">
           {previewTarget === "staff"
             ? "What your technicians see on their phones, from sign-in to job capture."
             : "What clients see when they open the job approval link you send them (sent via web link, opened on their phone — not a separate app)."}

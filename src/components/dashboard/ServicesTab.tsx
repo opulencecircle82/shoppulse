@@ -18,10 +18,10 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl shadow-black/40">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-navy p-5 shadow-2xl shadow-black/40">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-slate-900">{title}</p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-900">
+          <p className="text-sm font-bold text-white">{title}</p>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -70,36 +70,36 @@ function AddServiceModal({
           placeholder="Service name (e.g. Outlet installation)"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <textarea
           rows={2}
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-xs font-medium text-slate-500">Price</label>
+            <label className="block text-xs font-medium text-slate-400">Price</label>
             <input
               type="number"
               min="0"
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500">Extra Cost</label>
+            <label className="block text-xs font-medium text-slate-400">Extra Cost</label>
             <input
               type="number"
               min="0"
               step="0.01"
               value={extraCost}
               onChange={(e) => setExtraCost(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
         </div>
@@ -148,8 +148,8 @@ function ServicesSection({ shopId }: { shopId: string }) {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Services</h3>
-          <p className="mt-1 text-xs text-slate-400">
+          <h3 className="text-sm font-semibold text-white">Services</h3>
+          <p className="mt-1 text-xs text-slate-500">
             Listed on your shop details page so customers know what you offer
             and what it costs.
           </p>
@@ -164,26 +164,26 @@ function ServicesSection({ shopId }: { shopId: string }) {
       </div>
 
       <div className="mt-4 space-y-2">
-        {loading && <p className="text-sm text-slate-500">Loading...</p>}
+        {loading && <p className="text-sm text-slate-400">Loading...</p>}
         {!loading && services.length === 0 && (
-          <div className="rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+          <div className="rounded-2xl bg-white/5 p-8 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
               <Wrench className="h-5 w-5 text-brand-blue" />
             </div>
-            <p className="mt-3 text-sm text-slate-500">No services added yet.</p>
+            <p className="mt-3 text-sm text-slate-400">No services added yet.</p>
           </div>
         )}
         {services.map((service) => (
           <div
             key={service.id}
-            className="flex items-start justify-between gap-3 rounded-2xl bg-brand-slate-light/40 p-3"
+            className="flex items-start justify-between gap-3 rounded-2xl bg-white/5 p-3"
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900">{service.name}</p>
+              <p className="text-sm font-semibold text-white">{service.name}</p>
               {service.description && (
-                <p className="mt-0.5 text-xs text-slate-500">{service.description}</p>
+                <p className="mt-0.5 text-xs text-slate-400">{service.description}</p>
               )}
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500">
                 Price: {service.price.toFixed(2)}
                 {service.extra_cost > 0 && ` + ${service.extra_cost.toFixed(2)} extra`}
               </p>
@@ -191,7 +191,7 @@ function ServicesSection({ shopId }: { shopId: string }) {
             <button
               type="button"
               onClick={() => handleDelete(service.id)}
-              className="shrink-0 text-slate-400 hover:text-red-400"
+              className="shrink-0 text-slate-500 hover:text-red-400"
               aria-label="Delete service"
             >
               <X className="h-4 w-4" />
@@ -274,24 +274,24 @@ function AddProductModal({
           placeholder="Product name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <textarea
           rows={2}
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <div>
-          <label className="block text-xs font-medium text-slate-500">Price</label>
+          <label className="block text-xs font-medium text-slate-400">Price</label>
           <input
             type="number"
             min="0"
             step="0.01"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
@@ -303,13 +303,13 @@ function AddProductModal({
           className="hidden"
         />
         {photoUrl ? (
-          <div className="flex items-center gap-3 rounded-xl bg-brand-slate p-2">
+          <div className="flex items-center gap-3 rounded-xl bg-white/5 p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={photoUrl} alt="" className="h-12 w-12 rounded-lg object-cover" />
             <button
               type="button"
               onClick={() => setPhotoUrl("")}
-              className="text-xs text-slate-400 hover:text-red-400"
+              className="text-xs text-slate-500 hover:text-red-400"
             >
               Remove
             </button>
@@ -319,7 +319,7 @@ function AddProductModal({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 py-3 text-xs text-slate-400 hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/20 py-3 text-xs text-slate-500 hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
           >
             <ImageUp className="h-4 w-4" />
             {uploading ? "Uploading..." : "Add a photo"}
@@ -371,8 +371,8 @@ function ProductsSection({ shopId }: { shopId: string }) {
     <div className="mt-8">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Products</h3>
-          <p className="mt-1 text-xs text-slate-400">
+          <h3 className="text-sm font-semibold text-white">Products</h3>
+          <p className="mt-1 text-xs text-slate-500">
             Physical items you sell, with a photo customers can see.
           </p>
         </div>
@@ -386,21 +386,21 @@ function ProductsSection({ shopId }: { shopId: string }) {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {loading && <p className="text-sm text-slate-500">Loading...</p>}
+        {loading && <p className="text-sm text-slate-400">Loading...</p>}
         {!loading && products.length === 0 && (
-          <div className="col-span-full rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+          <div className="col-span-full rounded-2xl bg-white/5 p-8 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
               <Package className="h-5 w-5 text-brand-blue" />
             </div>
-            <p className="mt-3 text-sm text-slate-500">No products added yet.</p>
+            <p className="mt-3 text-sm text-slate-400">No products added yet.</p>
           </div>
         )}
         {products.map((product) => (
-          <div key={product.id} className="relative rounded-2xl bg-brand-slate-light/40 p-3">
+          <div key={product.id} className="relative rounded-2xl bg-white/5 p-3">
             <button
               type="button"
               onClick={() => handleDelete(product.id)}
-              className="absolute right-2 top-2 rounded-full bg-black/30 p-1 text-white hover:bg-red-500"
+              className="absolute right-2 top-2 rounded-full bg-black/30 p-1 text-white hover:bg-red-500/100"
               aria-label="Delete product"
             >
               <X className="h-3 w-3" />
@@ -413,12 +413,12 @@ function ProductsSection({ shopId }: { shopId: string }) {
                 className="h-20 w-full rounded-lg object-cover"
               />
             ) : (
-              <div className="flex h-20 w-full items-center justify-center rounded-lg bg-brand-slate/60 text-xs text-slate-400">
+              <div className="flex h-20 w-full items-center justify-center rounded-lg bg-white/5 text-xs text-slate-500">
                 No photo
               </div>
             )}
-            <p className="mt-2 truncate text-xs font-semibold text-slate-900">{product.name}</p>
-            <p className="text-xs text-slate-400">{product.price.toFixed(2)}</p>
+            <p className="mt-2 truncate text-xs font-semibold text-white">{product.name}</p>
+            <p className="text-xs text-slate-500">{product.price.toFixed(2)}</p>
           </div>
         ))}
       </div>

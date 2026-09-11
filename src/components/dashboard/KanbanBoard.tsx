@@ -34,16 +34,16 @@ export default function KanbanBoard({
     <div className="flex w-full gap-4 overflow-x-auto pb-6">
       <div className="w-[280px] min-w-[280px] shrink-0">
         <div className="flex items-center justify-between px-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Booking Requests
           </p>
-          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
             {pendingTickets.length}
           </span>
         </div>
         <div className="mt-2 space-y-3">
           {pendingTickets.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400">
+            <div className="rounded-2xl border border-dashed border-white/20 p-4 text-center text-xs text-slate-500">
               No pending requests
             </div>
           )}
@@ -63,17 +63,17 @@ export default function KanbanBoard({
         return (
           <div key={column.status} className="w-[280px] min-w-[280px] shrink-0">
             <div className="flex items-center justify-between px-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 {column.label}
               </p>
-              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
                 {columnTickets.length}
               </span>
             </div>
 
             <div className="mt-2 space-y-3">
               {columnTickets.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-center text-xs text-slate-400">
+                <div className="rounded-2xl border border-dashed border-white/20 p-4 text-center text-xs text-slate-500">
                   No jobs
                 </div>
               )}

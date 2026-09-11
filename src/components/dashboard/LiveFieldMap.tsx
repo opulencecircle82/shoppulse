@@ -234,7 +234,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
               <Popup>
                 <p className="font-semibold">Client: {pin.client_name}</p>
                 {pin.staff_name && (
-                  <p className="text-xs text-slate-600">Tech: {pin.staff_name}</p>
+                  <p className="text-xs text-slate-300">Tech: {pin.staff_name}</p>
                 )}
                 <p className="text-xs">{pin.service_address}</p>
                 <p className="text-xs">{pin.status}</p>
@@ -255,15 +255,15 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
             </Tooltip>
             <Popup>
               <p className="font-semibold">Tech: {live.staffName}</p>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-300">
                 Live position — app currently open
               </p>
               {live.accuracy !== null && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Accuracy: ±{Math.round(live.accuracy)}m
                 </p>
               )}
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Updated {new Date(live.updatedAt).toLocaleTimeString()}
               </p>
             </Popup>

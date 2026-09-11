@@ -28,7 +28,7 @@ export default function GeofencePanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-400">
         Set up your Company Profile first to configure geofencing.
       </p>
     );
@@ -68,7 +68,7 @@ export default function GeofencePanel({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-slate-600">
+          <label className="text-sm font-medium text-slate-300">
             Clock-In Geofence Radius
           </label>
           <span className="text-sm font-semibold text-brand-blue">
@@ -84,14 +84,14 @@ export default function GeofencePanel({
           onChange={(e) => setRadius(Number(e.target.value))}
           className="mt-2 w-full accent-brand-blue"
         />
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           Technicians must be within this distance of the job site to clock
           in or out.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Shift Grace Period (minutes)
         </label>
         <input
@@ -100,15 +100,15 @@ export default function GeofencePanel({
           max={120}
           value={graceMinutes}
           onChange={(e) => setGraceMinutes(Number(e.target.value))}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           Allowed buffer before an early checkout is flagged as unverified.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Lunch Break Deduction (minutes)
         </label>
         <input
@@ -117,9 +117,9 @@ export default function GeofencePanel({
           max={120}
           value={lunchMinutes}
           onChange={(e) => setLunchMinutes(Number(e.target.value))}
-          className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           Automatically deducted from actual hours on every job ticket.
         </p>
       </div>

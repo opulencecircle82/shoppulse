@@ -38,7 +38,7 @@ export default function SettingsPage() {
 
   if (!checked || loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-brand-slate">
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
@@ -46,9 +46,9 @@ export default function SettingsPage() {
 
   if (staffMember && !isOwner) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-slate px-6 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Owners only</h1>
-        <p className="mt-2 max-w-sm text-sm text-slate-500">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
+        <h1 className="text-xl font-semibold text-white">Owners only</h1>
+        <p className="mt-2 max-w-sm text-sm text-slate-400">
           Business settings can only be changed by the shop owner.
         </p>
         <Link
@@ -86,14 +86,14 @@ export default function SettingsPage() {
   const isOnboarding = onboardingStep !== null;
 
   return (
-    <main className="min-h-screen bg-brand-slate">
+    <main className="min-h-screen bg-brand-navy">
       <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-white">
               Business Settings
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-400">
               {isOnboarding
                 ? `Step ${onboardingStep! + 1} of ${ONBOARDING_ORDER.length}: complete your business info so ShopPulse can enforce and calculate accurately.`
                 : "Configure your shop profile, geofencing, staff pay, and branding."}
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           </div>
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+            className="text-sm font-medium text-slate-400 transition-colors hover:text-white"
           >
             ← Dashboard
           </Link>
@@ -115,7 +115,7 @@ export default function SettingsPage() {
                 className={`h-1.5 flex-1 rounded-full transition-colors ${
                   index <= onboardingStep!
                     ? "bg-brand-emerald"
-                    : "bg-slate-200"
+                    : "bg-white/10"
                 }`}
               />
             ))}
@@ -132,7 +132,7 @@ export default function SettingsPage() {
                 className={`whitespace-nowrap rounded-lg px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? "bg-brand-blue/15 text-brand-blue"
-                    : "text-slate-500 hover:bg-brand-slate-light/40 hover:text-slate-900"
+                    : "text-slate-400 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {tab.label}
@@ -140,7 +140,7 @@ export default function SettingsPage() {
             ))}
           </nav>
 
-          <div className="rounded-3xl bg-brand-slate-light/50 p-6 shadow-xl shadow-black/30 sm:p-8">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/30 sm:p-8">
             {activeTab === "profile" && (
               <CompanyProfilePanel shop={shop} onSaved={handleProfileSaved} />
             )}

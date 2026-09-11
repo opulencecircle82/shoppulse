@@ -32,7 +32,7 @@ export default function WorkingHoursPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-400">
         Set up your Company Profile first to configure working hours.
       </p>
     );
@@ -73,7 +73,7 @@ export default function WorkingHoursPanel({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           Operating Days
         </label>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -85,14 +85,14 @@ export default function WorkingHoursPanel({
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 days.includes(day.id)
                   ? "bg-brand-blue text-white"
-                  : "bg-brand-slate text-slate-500 hover:text-slate-900"
+                  : "bg-white/5 text-slate-400 hover:text-white"
               }`}
             >
               {day.label}
             </button>
           ))}
         </div>
-        <p className="mt-1.5 text-xs text-slate-400">
+        <p className="mt-1.5 text-xs text-slate-500">
           Customers see &quot;Open Now&quot; on your listing only on these
           days, within the hours below.
         </p>
@@ -100,25 +100,25 @@ export default function WorkingHoursPanel({
 
       <div className="grid grid-cols-2 gap-4 sm:max-w-md">
         <div>
-          <label className="block text-sm font-medium text-slate-600">
+          <label className="block text-sm font-medium text-slate-300">
             Opens At
           </label>
           <input
             type="time"
             value={openTime}
             onChange={(e) => setOpenTime(e.target.value)}
-            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-600">
+          <label className="block text-sm font-medium text-slate-300">
             Closes At
           </label>
           <input
             type="time"
             value={closeTime}
             onChange={(e) => setCloseTime(e.target.value)}
-            className="mt-1.5 w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
       </div>

@@ -19,7 +19,7 @@ export default function DefaultTasksPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-400">
         Set up your Company Profile first to configure default tasks.
       </p>
     );
@@ -48,8 +48,8 @@ export default function DefaultTasksPanel({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium text-slate-600">Default Task Checklist</p>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="text-sm font-medium text-slate-300">Default Task Checklist</p>
+        <p className="mt-1 text-xs text-slate-500">
           Pre-fills the task list whenever you assign a job to a technician —
           still editable per job at assignment time.
         </p>
@@ -57,18 +57,18 @@ export default function DefaultTasksPanel({
 
       <div className="space-y-1.5">
         {tasks.length === 0 && (
-          <p className="text-xs text-slate-400">No default tasks yet — add one below.</p>
+          <p className="text-xs text-slate-500">No default tasks yet — add one below.</p>
         )}
         {tasks.map((task, index) => (
           <div
             key={`${task}-${index}`}
-            className="flex items-center justify-between gap-2 rounded-xl bg-brand-slate px-3 py-2"
+            className="flex items-center justify-between gap-2 rounded-xl bg-white/5 px-3 py-2"
           >
-            <span className="text-sm text-slate-900">{task}</span>
+            <span className="text-sm text-white">{task}</span>
             <button
               type="button"
               onClick={() => removeTask(index)}
-              className="shrink-0 text-slate-400 hover:text-red-400"
+              className="shrink-0 text-slate-500 hover:text-red-400"
               aria-label="Remove task"
             >
               <X className="h-3.5 w-3.5" />
@@ -89,12 +89,12 @@ export default function DefaultTasksPanel({
             }
           }}
           placeholder="e.g. Confirm client identity"
-          className="w-full rounded-xl bg-brand-slate px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <button
           type="button"
           onClick={addTask}
-          className="shrink-0 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 hover:border-brand-blue hover:text-brand-blue"
+          className="shrink-0 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-medium text-slate-300 hover:border-brand-blue hover:text-brand-blue"
         >
           Add
         </button>

@@ -199,10 +199,10 @@ function PromotionCard({
   }
 
   return (
-    <div className="rounded-2xl bg-brand-slate-light/40 p-4 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-slate-900">{promotion.title}</p>
+          <p className="text-sm font-semibold text-white">{promotion.title}</p>
           {promotion.discount_code && (
             <p className="text-xs text-brand-orange">Code: {promotion.discount_code}</p>
           )}
@@ -211,14 +211,14 @@ function PromotionCard({
           className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
             promotion.is_active
               ? "bg-brand-emerald/15 text-brand-emerald"
-              : "bg-slate-200 text-slate-500"
+              : "bg-white/10 text-slate-400"
           }`}
         >
           {promotion.is_active ? "Active" : "Inactive"}
         </span>
       </div>
       {promotion.description && (
-        <p className="mt-2 text-xs text-slate-500">{promotion.description}</p>
+        <p className="mt-2 text-xs text-slate-400">{promotion.description}</p>
       )}
 
       {promotion.image_url && (
@@ -255,36 +255,36 @@ function PromotionCard({
         <button
           type="button"
           onClick={toggleActive}
-          className="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+          className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           {promotion.is_active ? "Deactivate" : "Activate"}
         </button>
         <button
           type="button"
           onClick={handleToggleStats}
-          className="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+          className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           {showStats ? "Hide Stats" : "View Stats"}
         </button>
         <button
           type="button"
           onClick={handleDelete}
-          className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/10"
+          className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/100/10"
         >
           Delete
         </button>
       </div>
 
       {showStats && (
-        <div className="mt-3 rounded-xl bg-brand-slate/60 p-3">
+        <div className="mt-3 rounded-xl bg-white/5 p-3">
           {loadingStats ? (
-            <p className="text-xs text-slate-500">Loading stats...</p>
+            <p className="text-xs text-slate-400">Loading stats...</p>
           ) : (
             <>
-              <p className="text-xs text-slate-500">
-                <span className="font-semibold text-slate-900">{totals?.total_views ?? 0}</span>{" "}
+              <p className="text-xs text-slate-400">
+                <span className="font-semibold text-white">{totals?.total_views ?? 0}</span>{" "}
                 views ·{" "}
-                <span className="font-semibold text-slate-900">{totals?.total_clicks ?? 0}</span>{" "}
+                <span className="font-semibold text-white">{totals?.total_clicks ?? 0}</span>{" "}
                 clicks
               </p>
               <div className="mt-2 h-32 w-full">
@@ -303,7 +303,7 @@ function PromotionCard({
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="mt-1 text-[10px] text-slate-500">
                 Last 14 days — <span className="text-brand-blue">blue = views</span>,{" "}
                 <span className="text-brand-orange">orange = clicks</span>
               </p>
@@ -350,20 +350,20 @@ function AddPromotionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl shadow-black/40">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-navy p-5 shadow-2xl shadow-black/40">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-slate-900">Add a Promotion</p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-900">
+          <p className="text-sm font-bold text-white">Add a Promotion</p>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           Shown to customers browsing services near your city. Free for now.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-2">
           <div>
-            <label className="block text-xs font-medium text-slate-500">Title</label>
+            <label className="block text-xs font-medium text-slate-400">Title</label>
             <input
               type="text"
               required
@@ -371,22 +371,22 @@ function AddPromotionModal({
               placeholder="20% Off First Visit"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-500">Description</label>
+            <label className="block text-xs font-medium text-slate-400">Description</label>
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-brand-slate px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="flex items-center gap-2.5 text-sm text-slate-600">
+            <label className="flex items-center gap-2.5 text-sm text-slate-300">
               <input
                 type="checkbox"
                 checked={includeDiscountCode}
@@ -396,14 +396,14 @@ function AddPromotionModal({
               Include a discount code
             </label>
             {includeDiscountCode && (
-              <div className="mt-2 flex items-center justify-between rounded-xl bg-brand-slate px-3 py-2">
+              <div className="mt-2 flex items-center justify-between rounded-xl bg-white/5 px-3 py-2">
                 <span className="font-mono text-sm font-semibold text-brand-blue">
                   {discountCode}
                 </span>
                 <button
                   type="button"
                   onClick={() => setDiscountCode(generateDiscountCode())}
-                  className="text-xs font-medium text-slate-500 hover:text-brand-blue"
+                  className="text-xs font-medium text-slate-400 hover:text-brand-blue"
                 >
                   Regenerate
                 </button>
@@ -451,7 +451,7 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900">
+        <h3 className="text-sm font-semibold text-white">
           Your Promotions ({promotions.length})
         </h3>
         <button
@@ -463,13 +463,13 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
         </button>
       </div>
 
-      {loading && <p className="mt-3 text-sm text-slate-500">Loading...</p>}
+      {loading && <p className="mt-3 text-sm text-slate-400">Loading...</p>}
       {!loading && promotions.length === 0 && (
-        <div className="mt-3 rounded-2xl bg-brand-slate-light/40 p-8 text-center">
+        <div className="mt-3 rounded-2xl bg-white/5 p-8 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
             <Megaphone className="h-5 w-5 text-brand-blue" />
           </div>
-          <p className="mt-3 text-sm text-slate-500">No promotions created yet.</p>
+          <p className="mt-3 text-sm text-slate-400">No promotions created yet.</p>
         </div>
       )}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
