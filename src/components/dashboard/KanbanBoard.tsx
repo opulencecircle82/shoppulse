@@ -19,6 +19,7 @@ export default function KanbanBoard({
   shop,
   tickets,
   staff,
+  currentStaffId,
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
@@ -26,6 +27,7 @@ export default function KanbanBoard({
   shop: Shop;
   tickets: JobTicket[];
   staff: StaffMember[];
+  currentStaffId: string | null;
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer: (ticket: JobTicket) => void;
@@ -94,6 +96,7 @@ export default function KanbanBoard({
                     defaultTasks={shop.default_tasks}
                     shopId={shop.id}
                     currency={shop.currency}
+                    currentStaffId={currentStaffId}
                     onChanged={onChanged}
                     onOpenInvoice={onOpenInvoice}
                     onOpenProofDrawer={

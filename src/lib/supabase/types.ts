@@ -89,6 +89,9 @@ export type JobTicket = {
   total_labor_cost: number;
   service_fee: number;
   total_invoice_amount: number;
+  payment_verified_at: string | null;
+  payment_verified_amount: number;
+  payment_verified_by: string | null;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;

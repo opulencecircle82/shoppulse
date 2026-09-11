@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 import AssignTaskingModal from "./AssignTaskingModal";
@@ -14,6 +14,7 @@ export default function JobTicketCard({
   defaultTasks,
   shopId,
   currency,
+  currentStaffId,
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
@@ -23,16 +24,39 @@ export default function JobTicketCard({
   defaultTasks: string[];
   shopId: string;
   currency: string;
+  currentStaffId: string | null;
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer?: (ticket: JobTicket) => void;
 }) {
   const [linkCopied, setLinkCopied] = useState(false);
   const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
 
   async function handleProductsChange(next: { product_id: string; name: string; price: number; quantity: number }[]) {
     await supabase.from("job_tickets").update({ selected_products: next }).eq("id", ticket.id);
+    onChanged();
+  }
+
+  async function handleConfirmPayment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const amount = Number(paymentAmount);
+    if (!Number.isFinite(amount) || amount < 0) return;
+
+    setConfirmingPayment(true);
+    await supabase
+      .from("job_tickets")
+      .update({
+        payment_verified_at: new Date().toISOString(),
+        payment_verified_amount: amount,
+        payment_verified_by: currentStaffId,
+      })
+      .eq("id", ticket.id);
+    setConfirmingPayment(false);
+    setShowPaymentForm(false);
     onChanged();
   }
 
@@ -139,10 +163,54 @@ export default function JobTicketCard({
         )}
 
         {ticket.status === "IN_PROGRESS" && (
-          <p className="text-xs text-slate-400">
-            In progress — waiting for {assignedStaff?.full_name ?? "the technician"}{" "}
-            to submit completion proof from the mobile app.
-          </p>
+          <div className="w-full">
+            <p className="text-xs text-slate-400">
+              In progress — waiting for {assignedStaff?.full_name ?? "the technician"}{" "}
+              to submit completion proof from the mobile app.
+            </p>
+
+            {ticket.payment_verified_at ? (
+              <p className="mt-2 text-xs font-semibold text-brand-emerald">
+                Payment Verified: {currency} {ticket.payment_verified_amount.toFixed(2)}
+              </p>
+            ) : showPaymentForm ? (
+              <form onSubmit={handleConfirmPayment} className="mt-2 flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  required
+                  autoFocus
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  placeholder={`Amount (${currency})`}
+                  className="w-28 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={confirmingPayment}
+                  className="rounded-full bg-brand-emerald px-3 py-1.5 text-xs font-semibold text-brand-slate disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {confirmingPayment ? "Saving..." : "Confirm"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentForm(false)}
+                  className="text-xs text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowPaymentForm(true)}
+                className="mt-2 rounded-full border border-brand-emerald/40 px-3 py-1.5 text-xs font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/10"
+              >
+                Confirm Payment Received
+              </button>
+            )}
+          </div>
         )}
 
         {ticket.status === "APPROVED" && (

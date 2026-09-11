@@ -13,6 +13,22 @@ export async function fetchAssignedJobs(staffId: string): Promise<JobTicket[]> {
   return (data ?? []) as JobTicket[];
 }
 
+export async function fetchPaymentVerification(
+  ticketId: string
+): Promise<{ verifiedAt: string | null; verifiedAmount: number }> {
+  const { data, error } = await supabase
+    .from("job_tickets")
+    .select("payment_verified_at, payment_verified_amount")
+    .eq("id", ticketId)
+    .single();
+
+  if (error) throw error;
+  return {
+    verifiedAt: data.payment_verified_at as string | null,
+    verifiedAmount: data.payment_verified_amount as number,
+  };
+}
+
 export async function submitStartProof(params: {
   ticketId: string;
   photoUrl: string;

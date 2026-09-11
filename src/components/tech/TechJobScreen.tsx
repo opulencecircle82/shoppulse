@@ -1,12 +1,18 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { MapPin, ShieldCheck } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { getCurrentPosition } from "@/lib/tech/gps";
 import { uploadJobPhoto, uploadSignature } from "@/lib/tech/uploadJobPhoto";
-import { submitStartProof, submitCompletionProof } from "@/lib/tech/jobActions";
+import {
+  submitStartProof,
+  submitCompletionProof,
+  fetchPaymentVerification,
+} from "@/lib/tech/jobActions";
 import SignaturePad from "@/components/shared/SignaturePad";
+
+const PAYMENT_POLL_MS = 8000;
 
 export default function TechJobScreen({
   shop,
@@ -36,13 +42,42 @@ export default function TechJobScreen({
   const [error, setError] = useState<string | null>(null);
   const fileInputId = useId();
 
+  const [paymentVerifiedAt, setPaymentVerifiedAt] = useState(ticket.payment_verified_at);
+  const [paymentVerifiedAmount, setPaymentVerifiedAmount] = useState(
+    ticket.payment_verified_amount
+  );
+
+  // The tech app deliberately doesn't poll the ticket mid-job (would risk
+  // disturbing an in-progress checklist/photo) — but once completion is
+  // gated on the owner confirming payment from a separate device, the
+  // technician needs SOME way to find out it happened without backing out
+  // and re-opening the job. This polls only the two payment fields, so it
+  // can't touch anything else in local state.
+  useEffect(() => {
+    if (!isCompletionStage || paymentVerifiedAt) return;
+    let active = true;
+    const interval = setInterval(async () => {
+      const result = await fetchPaymentVerification(ticket.id).catch(() => null);
+      if (active && result?.verifiedAt) {
+        setPaymentVerifiedAt(result.verifiedAt);
+        setPaymentVerifiedAmount(result.verifiedAmount);
+      }
+    }, PAYMENT_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [isCompletionStage, paymentVerifiedAt, ticket.id]);
+
   const checklistCompleted = checkedItems.size >= activeChecklist.length;
   const needsSignature = isCompletionStage;
+  const needsPaymentVerification = isCompletionStage;
   const canSubmit =
     checklistCompleted &&
     capturedFile !== null &&
     position !== null &&
     (!needsSignature || signatureDataUrl !== null) &&
+    (!needsPaymentVerification || paymentVerifiedAt !== null) &&
     !submitting;
 
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
@@ -342,9 +377,22 @@ export default function TechJobScreen({
                   </div>
                 )}
 
-                <div className="mt-3">
-                  <SignaturePad onChange={setSignatureDataUrl} />
-                </div>
+                {paymentVerifiedAt ? (
+                  <>
+                    <p className="mt-3 text-xs font-semibold text-brand-emerald">
+                      Payment Verified by Owner: {shop.currency} {paymentVerifiedAmount.toFixed(2)}
+                    </p>
+                    <div className="mt-3">
+                      <SignaturePad onChange={setSignatureDataUrl} />
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-3 rounded-lg bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-400">
+                    Waiting for the owner to confirm the customer&apos;s payment
+                    before you can collect a signature and complete this job.
+                    This will update automatically.
+                  </p>
+                )}
               </div>
             )}
 

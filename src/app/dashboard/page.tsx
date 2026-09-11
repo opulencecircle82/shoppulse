@@ -186,6 +186,7 @@ export default function DashboardPage() {
                     shop={shop}
                     tickets={tickets}
                     staff={staff}
+                    currentStaffId={staffMember?.id ?? null}
                     onChanged={refreshTickets}
                     onOpenInvoice={setInvoiceTicket}
                     onOpenProofDrawer={setProofTicket}
