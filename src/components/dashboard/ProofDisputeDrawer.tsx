@@ -113,7 +113,8 @@ export default function ProofDisputeDrawer({
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const totalInvoiceAmount = laborCost + productsCost;
+    const serviceFee = shop.default_service_fee;
+    const totalInvoiceAmount = laborCost + productsCost + serviceFee;
 
     const { error: updateError } = await supabase
       .from("job_tickets")
@@ -122,6 +123,7 @@ export default function ProofDisputeDrawer({
         dispute_notes: notes || null,
         actual_hours: actualHours,
         total_labor_cost: laborCost,
+        service_fee: serviceFee,
         total_invoice_amount: totalInvoiceAmount,
       })
       .eq("id", ticket.id);
@@ -167,6 +169,7 @@ export default function ProofDisputeDrawer({
       status: "APPROVED",
       actual_hours: actualHours,
       total_labor_cost: laborCost,
+      service_fee: serviceFee,
       total_invoice_amount: totalInvoiceAmount,
     });
     onClose();
@@ -276,13 +279,22 @@ export default function ProofDisputeDrawer({
                 </dd>
               </div>
             )}
+            {shop.default_service_fee > 0 && (
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-400">Service Fee</dt>
+                <dd className="font-medium text-white">
+                  {shop.currency} {shop.default_service_fee.toFixed(2)}
+                </dd>
+              </div>
+            )}
             <div className="flex items-center justify-between border-t border-white/30 pt-1.5">
-              <dt className="text-slate-400">Labor + Parts Total</dt>
+              <dt className="text-slate-400">Labor + Parts + Fee Total</dt>
               <dd className="font-semibold text-brand-emerald">
                 {shop.currency}{" "}
                 {(
                   (timeSpent !== null ? (timeSpent / 60) * shop.default_hourly_rate : 0) +
-                  productsCost
+                  productsCost +
+                  shop.default_service_fee
                 ).toFixed(2)}
               </dd>
             </div>

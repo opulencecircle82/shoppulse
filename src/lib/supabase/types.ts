@@ -25,6 +25,7 @@ export type Shop = {
   mandatory_live_camera: boolean;
   default_hourly_rate: number;
   default_overtime_multiplier: number;
+  default_service_fee: number;
   mobile_app_font_family: string;
   city: string | null;
   business_category: string | null;
@@ -86,6 +87,7 @@ export type JobTicket = {
   estimated_hours: number;
   actual_hours: number;
   total_labor_cost: number;
+  service_fee: number;
   total_invoice_amount: number;
   dispute_notes: string | null;
   client_viewed_at: string | null;

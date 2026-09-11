@@ -42,6 +42,7 @@ type ClientTicket = {
   end_lat: number | null;
   end_lng: number | null;
   total_invoice_amount: number | null;
+  service_fee: number;
   currency: string;
   selected_products: { product_id: string; name: string; price: number; quantity: number }[];
   payment_method: string | null;
@@ -342,6 +343,14 @@ export default function ClientTicketPage() {
                       </span>
                     </div>
                   ))}
+                </div>
+              )}
+              {ticket.service_fee > 0 && (
+                <div className="mt-1 flex justify-between text-sm text-slate-600">
+                  <span>Service Fee</span>
+                  <span>
+                    {ticket.currency} {ticket.service_fee.toFixed(2)}
+                  </span>
                 </div>
               )}
               <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-50 px-3.5 py-2.5">

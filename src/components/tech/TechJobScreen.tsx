@@ -166,6 +166,14 @@ export default function TechJobScreen({
                   ))}
                 </div>
               )}
+              {ticket.service_fee > 0 && (
+                <div className="mt-1.5 flex justify-between text-sm text-slate-300">
+                  <span>Service Fee</span>
+                  <span>
+                    {shop.currency} {ticket.service_fee.toFixed(2)}
+                  </span>
+                </div>
+              )}
               <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
                 <span className="text-sm font-medium text-white">Total</span>
                 <span className="text-lg font-bold text-brand-emerald">

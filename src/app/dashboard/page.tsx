@@ -256,6 +256,7 @@ export default function DashboardPage() {
           ticket={invoiceTicket}
           currency={shop.currency}
           defaultHourlyRate={shop.default_hourly_rate}
+          defaultServiceFee={shop.default_service_fee}
           onClose={() => setInvoiceTicket(null)}
           onSaved={refreshTickets}
         />
