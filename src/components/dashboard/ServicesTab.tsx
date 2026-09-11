@@ -242,13 +242,13 @@ function AddProductModal({
   }
 
   return (
-    <Modal title="Add Product" onClose={onClose}>
+    <Modal title="Add Inventory / Part" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-2">
         <input
           type="text"
           required
           autoFocus
-          placeholder="Product name"
+          placeholder="Item name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
@@ -284,7 +284,7 @@ function AddProductModal({
           disabled={saving}
           className="mt-2 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {saving ? "Adding..." : "Add Product"}
+          {saving ? "Adding..." : "Add Inventory / Part"}
         </button>
       </form>
     </Modal>
@@ -324,7 +324,7 @@ function ProductsSection({ shopId }: { shopId: string }) {
     <div className="mt-8">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-white">Products</h3>
+          <h3 className="text-sm font-semibold text-white">Inventory &amp; Parts</h3>
           <p className="mt-1 text-xs text-slate-500">
             Physical items you sell, grouped by category.
           </p>
@@ -345,7 +345,7 @@ function ProductsSection({ shopId }: { shopId: string }) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
               <Package className="h-5 w-5 text-brand-blue" />
             </div>
-            <p className="mt-3 text-sm text-slate-400">No products added yet.</p>
+            <p className="mt-3 text-sm text-slate-400">No inventory or parts added yet.</p>
           </div>
         )}
         {products.map((product) => (
@@ -371,7 +371,7 @@ function ProductsSection({ shopId }: { shopId: string }) {
               type="button"
               onClick={() => handleDelete(product.id)}
               className="shrink-0 text-slate-500 hover:text-red-400"
-              aria-label="Delete product"
+              aria-label="Delete item"
             >
               <X className="h-4 w-4" />
             </button>
