@@ -6,6 +6,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
+import PhoneFrame from "./PhoneFrame";
 
 type DailyStat = { day: string; views: number; clicks: number };
 type Totals = { total_views: number; total_clicks: number };
@@ -365,7 +366,7 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
   }
 
   return (
-    <div className="mb-6 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
       <div className="flex items-center gap-2">
         <Globe className="h-4 w-4 text-brand-blue" />
         <h3 className="text-sm font-semibold text-white">Your Business Website</h3>
@@ -426,6 +427,60 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
 
       {uploadError && <p className="mt-2 text-xs text-red-400">{uploadError}</p>}
     </div>
+  );
+}
+
+// Mirrors the exact card markup CustomerHomeScreen renders for the
+// "Promotions Near You" carousel (image or gradient-title fallback, shop
+// name overlay) so what the owner sees here is what a customer actually
+// sees — not a stylized approximation that could quietly drift out of sync.
+function PromotionsPhonePreview({
+  shop,
+  promotions,
+}: {
+  shop: Shop;
+  promotions: ShopPromotion[];
+}) {
+  const active = promotions.filter((p) => p.is_active);
+
+  return (
+    <PhoneFrame label="Customer App — Promotions Near You">
+      <div className="h-[380px] space-y-2.5 overflow-y-auto bg-brand-navy p-3">
+        {active.length === 0 ? (
+          <p className="mt-6 text-center text-[11px] text-slate-500">
+            No active promotions yet — customers won&apos;t see this section
+            until you add one.
+          </p>
+        ) : (
+          active.slice(0, 4).map((promo) => (
+            <div
+              key={promo.id}
+              className="relative h-20 w-full shrink-0 overflow-hidden rounded-xl shadow-md shadow-black/20"
+            >
+              {promo.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={promo.image_url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-2 text-center">
+                  <p className="line-clamp-2 text-[11px] font-bold text-white">
+                    {promo.title}
+                  </p>
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 bg-black/40 px-2 py-1">
+                <p className="truncate text-[9px] font-semibold text-white">
+                  {shop.shop_name}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </PhoneFrame>
   );
 }
 
@@ -564,7 +619,12 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
 
   return (
     <div>
-      <BusinessWebsiteCard shop={shop} />
+      <div className="mb-6 grid gap-4 lg:grid-cols-[1fr_auto]">
+        <BusinessWebsiteCard shop={shop} />
+        <div className="flex justify-center lg:justify-end">
+          <PromotionsPhonePreview shop={shop} promotions={promotions} />
+        </div>
+      </div>
 
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">

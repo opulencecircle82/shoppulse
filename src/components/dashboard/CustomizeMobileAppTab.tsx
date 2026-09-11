@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   Camera,
   MapPin,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
+import PhoneFrame from "./PhoneFrame";
 
 const FONT_OPTIONS = [
   "Inter",
@@ -40,25 +41,6 @@ type ThemeProps = {
   accentColor: string;
   fontFamily: string;
 };
-
-function PhoneFrame({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="w-[220px] shrink-0">
-      <p className="mb-2 text-center text-[11px] font-medium text-slate-400">
-        {label}
-      </p>
-      <div className="overflow-hidden rounded-[24px] border-4 border-slate-700 bg-black shadow-2xl">
-        {children}
-      </div>
-    </div>
-  );
-}
 
 function StaffLoginPreview({ shopName, primaryColor, fontFamily }: ThemeProps) {
   return (
