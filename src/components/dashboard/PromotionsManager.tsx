@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Plus, X, Megaphone, Globe, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, X, Megaphone, Globe, Loader2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
@@ -519,46 +519,67 @@ function PromotionsPhonePreview() {
   );
 }
 
+// A fake, clearly-labeled "sample account" — same spirit as the phone
+// mockup beside it: illustrate what a fully set-up account with active
+// promotions looks like, rather than leaving this space as plain
+// explainer prose. The "why bother" reasons still show up, just as short
+// captions instead of the whole point of the panel.
 function PromotionsExplainer() {
-  const points = [
-    {
-      title: "Libre — walang extra bayad",
-      body: "Awtomatiko itong lumalabas sa app ng mga customer, hindi tulad ng Facebook ads na kailangan mong bayaran para makita.",
-    },
-    {
-      title: "Nakikita ng mga malapit sa'yo",
-      body: "Lumalabas ito sa home screen ng mga customer na nasa lugar mo — mismong mga taong pwede mong maserbisyuhan.",
-    },
-    {
-      title: "Nakakaakit ng bagong customer",
-      body: "Isang magandang paraan para hikayatin ang mga taong hindi pa nakaka-alam sa negosyo mo na subukan ka muna.",
-    },
-    {
-      title: "May discount code, may tracking",
-      body: "Kung maglalagay ka ng code, nakikita mo agad kung ilan na ang gumamit — hindi ka bulag sa performance.",
-    },
-  ];
-
   return (
     <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
-      <h4 className="text-sm font-semibold text-white">
-        Bakit gumawa ng Promotion?
-      </h4>
-      <p className="mt-1 text-xs text-slate-400">
-        Ito ang lalabas sa app ng mga customer — tulad ng nakikita mo sa
-        preview.
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-white">Sample Business</h4>
+        <span className="rounded-full bg-brand-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-brand-emerald">
+          Active
+        </span>
+      </div>
+      <p className="mt-1 text-[11px] text-slate-500">
+        Fake account — shows what a fully set-up profile looks like.
       </p>
-      <ul className="mt-4 space-y-3">
-        {points.map((point) => (
-          <li key={point.title} className="flex gap-2.5">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-emerald" />
-            <div>
-              <p className="text-xs font-semibold text-white">{point.title}</p>
-              <p className="mt-0.5 text-xs text-slate-400">{point.body}</p>
-            </div>
+
+      <dl className="mt-3 space-y-1.5 text-xs">
+        <div className="flex justify-between gap-3">
+          <dt className="shrink-0 text-slate-500">Owner</dt>
+          <dd className="truncate text-right text-white">Miguel Reyes</dd>
+        </div>
+        <div className="flex justify-between gap-3">
+          <dt className="shrink-0 text-slate-500">Business</dt>
+          <dd className="truncate text-right text-white">
+            Reyes Landscaping LLC
+          </dd>
+        </div>
+        <div className="flex justify-between gap-3">
+          <dt className="shrink-0 text-slate-500">Service Area</dt>
+          <dd className="truncate text-right text-white">Quezon City Metro</dd>
+        </div>
+      </dl>
+
+      <div className="mt-3 border-t border-white/10 pt-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+          Active Promotions
+        </p>
+        <ul className="mt-1.5 space-y-1 text-xs text-slate-300">
+          <li>
+            15% Off Lawn Care{" "}
+            <span className="text-slate-500">— ends Dec 30</span>
           </li>
-        ))}
-      </ul>
+          <li>
+            Free Consultation{" "}
+            <span className="text-slate-500">— expires Jan 15</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="mt-3 border-t border-white/10 pt-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+          Why bother?
+        </p>
+        <ul className="mt-1.5 space-y-1 text-[11px] text-slate-400">
+          <li>• Libre, awtomatikong nakikita ng malapit na customer</li>
+          <li>• Nakakaakit ng bagong customer na hindi pa ka-alam</li>
+          <li>• May discount code kaya nakikita mo kung ilan gumamit</li>
+        </ul>
+      </div>
     </div>
   );
 }
