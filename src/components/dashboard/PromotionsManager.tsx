@@ -323,7 +323,7 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
 
   const siteUrl =
     typeof window !== "undefined" ? `${window.location.origin}/site/${shop.slug}` : "";
