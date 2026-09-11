@@ -64,22 +64,22 @@ function DiscoverShopsContent() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-6">
+    <main className="min-h-screen bg-brand-navy px-5 py-6">
       <div className="mx-auto max-w-lg">
         <header className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => router.back()}
-            className="text-sm font-medium text-slate-500 hover:text-slate-900"
+            className="text-sm font-medium text-slate-400 hover:text-white"
           >
             ← Back
           </button>
         </header>
 
-        <h1 className="mt-3 text-lg font-bold text-slate-900">
+        <h1 className="mt-3 text-lg font-bold text-white">
           Find Services Near You
         </h1>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-400">
           Browse businesses on ShopPulse by category, name, or city.
         </p>
 
@@ -87,7 +87,7 @@ function DiscoverShopsContent() {
           <select
             value={category}
             onChange={(e) => handleCategoryChange(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
@@ -102,14 +102,14 @@ function DiscoverShopsContent() {
             placeholder="Search business name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <input
             type="text"
             placeholder="City"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <button
             type="submit"
@@ -125,11 +125,11 @@ function DiscoverShopsContent() {
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
             </div>
           ) : shops.length === 0 ? (
-            <div className="rounded-2xl bg-white p-8 text-center shadow-sm shadow-slate-900/5">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+            <div className="rounded-2xl bg-white/5 p-8 text-center shadow-md shadow-black/20">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
                 <SearchX className="h-5 w-5 text-slate-400" />
               </div>
-              <p className="mt-3 text-sm text-slate-500">
+              <p className="mt-3 text-sm text-slate-400">
                 {searched
                   ? "No businesses matched your search."
                   : "No businesses listed yet."}
@@ -143,7 +143,7 @@ function DiscoverShopsContent() {
                   <li key={shop.id}>
                     <Link
                       href={`/customer/shop/${shop.slug}`}
-                      className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
+                      className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
                     >
                       {shop.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -153,34 +153,34 @@ function DiscoverShopsContent() {
                           className="h-11 w-11 shrink-0 rounded-xl object-cover"
                         />
                       ) : (
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-brand-blue">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-blue/15 text-sm font-bold text-brand-blue">
                           {shop.shop_name.slice(0, 1).toUpperCase()}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-semibold text-slate-900">
+                          <p className="truncate text-sm font-semibold text-white">
                             {shop.shop_name}
                           </p>
                           {shop.business_hours_open && (
                             <span
                               className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                                 open
-                                  ? "bg-emerald-50 text-emerald-600"
-                                  : "bg-slate-100 text-slate-500"
+                                  ? "bg-brand-emerald/15 text-brand-emerald"
+                                  : "bg-white/10 text-slate-400"
                               }`}
                             >
                               {open ? "Open Now" : "Closed"}
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p className="mt-0.5 text-xs text-slate-400">
                           {[shop.business_category, shop.city].filter(Boolean).join(" · ") ||
                             "Service provider"}
                         </p>
                         <p
                           className={`mt-0.5 text-[11px] font-medium ${
-                            shop.avg_rating !== null ? "text-amber-500" : "text-slate-400"
+                            shop.avg_rating !== null ? "text-amber-400" : "text-slate-500"
                           }`}
                         >
                           {shop.avg_rating !== null

@@ -35,7 +35,7 @@ export default function CustomerAppPage() {
 
   if (screen === "loading") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );

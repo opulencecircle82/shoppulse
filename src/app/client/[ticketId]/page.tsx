@@ -14,7 +14,7 @@ import PhotoUploadField from "@/components/shared/PhotoUploadField";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
-  { ssr: false, loading: () => <div className="h-[180px] rounded-xl bg-slate-100" /> }
+  { ssr: false, loading: () => <div className="h-[180px] rounded-xl bg-white/5" /> }
 );
 
 const LIVE_POLL_MS = 15000;
@@ -67,8 +67,8 @@ function ProofPhoto({
 
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-slate-100 shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-white/5 shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={url} alt={label} className="h-full w-full object-cover" />
 
@@ -189,7 +189,7 @@ export default function ClientTicketPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
@@ -197,14 +197,14 @@ export default function ClientTicketPage() {
 
   if (error || !ticket) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-center">
-        <p className="text-sm text-slate-500">{error}</p>
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy px-6 text-center">
+        <p className="text-sm text-slate-400">{error}</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10">
+    <main className="min-h-screen bg-brand-navy px-6 py-10">
       <div className="mx-auto max-w-lg">
         <div className="flex items-center gap-3">
           {ticket.logo_url && (
@@ -212,35 +212,35 @@ export default function ClientTicketPage() {
             <img src={ticket.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
           )}
           <div>
-            <p className="text-lg font-bold text-slate-900">{ticket.shop_name}</p>
-            <p className="text-xs text-slate-500">Job verification</p>
+            <p className="text-lg font-bold text-white">{ticket.shop_name}</p>
+            <p className="text-xs text-slate-400">Job verification</p>
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow-md shadow-slate-900/5">
+        <div className="mt-6 rounded-2xl bg-white/5 p-6 shadow-md shadow-black/20">
           <span
             className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
               ticket.status === "APPROVED"
-                ? "bg-emerald-50 text-emerald-600"
+                ? "bg-brand-emerald/15 text-brand-emerald"
                 : ticket.status === "DISPUTED"
-                  ? "bg-red-50 text-red-600"
-                  : "bg-blue-50 text-brand-blue"
+                  ? "bg-red-500/15 text-red-400"
+                  : "bg-brand-blue/15 text-brand-blue"
             }`}
           >
             {ticket.status.replace("_", " ")}
           </span>
 
-          <h1 className="mt-3 text-xl font-bold text-slate-900">{ticket.service_type}</h1>
-          <p className="mt-1 text-sm text-slate-500">{ticket.service_address}</p>
-          <p className="mt-1 text-sm text-slate-500">For: {ticket.client_name}</p>
+          <h1 className="mt-3 text-xl font-bold text-white">{ticket.service_type}</h1>
+          <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
+          <p className="mt-1 text-sm text-slate-400">For: {ticket.client_name}</p>
 
           {(ticket.description || ticket.request_photo_url) && (
-            <div className="mt-4 rounded-xl bg-slate-50 p-3">
+            <div className="mt-4 rounded-xl bg-white/5 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Original Request
               </p>
               {ticket.description && (
-                <p className="mt-1 text-sm text-slate-600">{ticket.description}</p>
+                <p className="mt-1 text-sm text-slate-300">{ticket.description}</p>
               )}
               {ticket.request_photo_url && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -285,10 +285,10 @@ export default function ClientTicketPage() {
 
           {ticket.signature_url && (
             <div className="mt-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
                 Signature on File
               </p>
-              <div className="mt-1.5 rounded-xl border border-slate-100 bg-white p-2">
+              <div className="mt-1.5 rounded-xl bg-white p-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={ticket.signature_url}
@@ -300,40 +300,40 @@ export default function ClientTicketPage() {
           )}
 
           {!ticket.start_photo_url && !ticket.end_photo_url && (
-            <p className="mt-6 text-sm text-slate-500">
+            <p className="mt-6 text-sm text-slate-400">
               Your technician hasn&apos;t started this job yet. Check back once
               it&apos;s underway to see live proof photos here.
             </p>
           )}
 
           {ticket.status === "COMPLETED" && (
-            <p className="mt-6 rounded-lg bg-blue-50 px-4 py-3 text-sm text-brand-blue">
+            <p className="mt-6 rounded-lg bg-brand-blue/15 px-4 py-3 text-sm text-brand-blue">
               Work is done — the business is reviewing it before finalizing.
             </p>
           )}
 
           {ticket.status === "APPROVED" && (
-            <p className="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <p className="mt-6 rounded-lg bg-brand-emerald/15 px-4 py-3 text-sm text-brand-emerald">
               This job has been approved.
             </p>
           )}
 
           {ticket.status === "DISPUTED" && (
-            <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mt-6 rounded-lg bg-red-500/15 px-4 py-3 text-sm text-red-400">
               <p className="font-semibold">This job was marked as disputed.</p>
               {ticket.dispute_notes && <p className="mt-1">{ticket.dispute_notes}</p>}
             </div>
           )}
 
           {ticket.total_invoice_amount !== null && ticket.total_invoice_amount > 0 && (
-            <div className="mt-6 border-t border-slate-100 pt-5">
+            <div className="mt-6 border-t border-white/10 pt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Receipt
               </p>
               {ticket.selected_products.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {ticket.selected_products.map((item, index) => (
-                    <div key={index} className="flex justify-between text-sm text-slate-600">
+                    <div key={index} className="flex justify-between text-sm text-slate-300">
                       <span>
                         {item.name}
                         {item.quantity > 1 ? ` ×${item.quantity}` : ""}
@@ -346,15 +346,15 @@ export default function ClientTicketPage() {
                 </div>
               )}
               {ticket.service_fee > 0 && (
-                <div className="mt-1 flex justify-between text-sm text-slate-600">
+                <div className="mt-1 flex justify-between text-sm text-slate-300">
                   <span>Service Fee</span>
                   <span>
                     {ticket.currency} {ticket.service_fee.toFixed(2)}
                   </span>
                 </div>
               )}
-              <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-50 px-3.5 py-2.5">
-                <span className="text-sm font-medium text-slate-700">Total</span>
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-2.5">
+                <span className="text-sm font-medium text-white">Total</span>
                 <span className="text-lg font-bold text-brand-emerald">
                   {ticket.currency} {ticket.total_invoice_amount.toFixed(2)}
                 </span>
@@ -373,7 +373,7 @@ export default function ClientTicketPage() {
                     className={`rounded-full px-3.5 py-2 text-xs font-semibold transition-colors disabled:opacity-60 ${
                       ticket.payment_method === method
                         ? "bg-brand-blue text-white"
-                        : "border border-slate-300 text-slate-600 hover:border-brand-blue hover:text-brand-blue"
+                        : "border border-white/20 text-slate-300 hover:border-brand-blue hover:text-brand-blue"
                     }`}
                   >
                     {method}
@@ -389,7 +389,7 @@ export default function ClientTicketPage() {
           )}
 
           {["COMPLETED", "APPROVED", "DISPUTED"].includes(ticket.status) && (
-            <div className="mt-6 border-t border-slate-100 pt-5">
+            <div className="mt-6 border-t border-white/10 pt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Rate this job
               </p>
@@ -402,13 +402,13 @@ export default function ClientTicketPage() {
                         className={`h-5 w-5 ${
                           i < review.rating
                             ? "fill-amber-400 text-amber-400"
-                            : "text-slate-300"
+                            : "text-slate-600"
                         }`}
                       />
                     ))}
                   </div>
                   {review.comment && (
-                    <p className="mt-1.5 text-sm text-slate-600">{review.comment}</p>
+                    <p className="mt-1.5 text-sm text-slate-300">{review.comment}</p>
                   )}
                   {review.photo_url && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -434,7 +434,7 @@ export default function ClientTicketPage() {
                           className={`h-7 w-7 ${
                             i < reviewRating
                               ? "fill-amber-400 text-amber-400"
-                              : "text-slate-300"
+                              : "text-slate-600"
                           }`}
                         />
                       </button>
@@ -445,7 +445,7 @@ export default function ClientTicketPage() {
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     placeholder="Leave a comment (optional)..."
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    className="mt-2 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                   <div className="mt-2">
                     <PhotoUploadField

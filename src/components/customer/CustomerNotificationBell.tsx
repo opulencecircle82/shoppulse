@@ -13,10 +13,8 @@ const POLL_MS = 20000;
 
 export default function CustomerNotificationBell({
   customerId,
-  dark = false,
 }: {
   customerId: string;
-  dark?: boolean;
 }) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -72,11 +70,7 @@ export default function CustomerNotificationBell({
       <button
         type="button"
         onClick={handleOpen}
-        className={
-          dark
-            ? "relative rounded-full p-2 text-white/80 hover:text-white"
-            : "relative rounded-full p-2 text-slate-500 hover:text-slate-900"
-        }
+        className="relative rounded-full p-2 text-white/80 hover:text-white"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -88,7 +82,7 @@ export default function CustomerNotificationBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-72 rounded-2xl bg-white p-2 shadow-xl shadow-black/20 ring-1 ring-slate-200">
+        <div className="absolute right-0 z-50 mt-2 w-72 rounded-2xl border border-white/10 bg-brand-navy p-2 shadow-xl shadow-black/40">
           <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Notifications
           </p>
@@ -109,12 +103,12 @@ export default function CustomerNotificationBell({
                     router.push(`/client/${n.jobTicketId}`);
                   }}
                   className={`block w-full rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
-                    n.jobTicketId ? "hover:bg-slate-100" : "cursor-default"
-                  } ${n.readAt ? "text-slate-500" : "text-slate-900"}`}
+                    n.jobTicketId ? "hover:bg-white/10" : "cursor-default"
+                  } ${n.readAt ? "text-slate-400" : "text-white"}`}
                 >
                   <p className="font-medium">{n.title}</p>
-                  {n.body && <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>}
-                  <p className="mt-0.5 text-[10px] text-slate-400">
+                  {n.body && <p className="mt-0.5 text-xs text-slate-400">{n.body}</p>}
+                  <p className="mt-0.5 text-[10px] text-slate-500">
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
                 </button>

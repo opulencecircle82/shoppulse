@@ -123,7 +123,7 @@ export default function BookJobPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
@@ -131,8 +131,8 @@ export default function BookJobPage() {
 
   if (notFound) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-center">
-        <p className="text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-brand-navy px-6 text-center">
+        <p className="text-sm text-slate-400">
           We couldn&apos;t find this business. Double-check the link and try again.
         </p>
       </main>
@@ -145,9 +145,9 @@ export default function BookJobPage() {
 
   if (submitted) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
-        <p className="text-lg font-bold text-slate-900">Request sent!</p>
-        <p className="mt-1.5 max-w-xs text-sm text-slate-500">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
+        <p className="text-lg font-bold text-white">Request sent!</p>
+        <p className="mt-1.5 max-w-xs text-sm text-slate-400">
           {shop?.shop_name} will review your request and assign a technician
           soon.
         </p>
@@ -165,7 +165,7 @@ export default function BookJobPage() {
   const knownAddress = customerAddress(customer);
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10">
+    <main className="min-h-screen bg-brand-navy px-6 py-10">
       <div className="mx-auto max-w-md">
         <div className="flex items-center gap-3">
           {shop?.logo_url && (
@@ -173,20 +173,20 @@ export default function BookJobPage() {
             <img src={shop.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
           )}
           <div>
-            <p className="text-lg font-bold text-slate-900">{shop?.shop_name}</p>
-            <p className="text-xs text-slate-500">Request a service</p>
+            <p className="text-lg font-bold text-white">{shop?.shop_name}</p>
+            <p className="text-xs text-slate-400">Request a service</p>
           </div>
         </div>
 
         {shop && (shop.default_hourly_rate > 0 || services.length > 0) && (
-          <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5">
+          <div className="mt-4 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Pricing
             </p>
             {shop.default_hourly_rate > 0 && (
-              <p className="mt-1.5 text-sm text-slate-700">
+              <p className="mt-1.5 text-sm text-slate-300">
                 Standard Labor Fee:{" "}
-                <span className="font-semibold">
+                <span className="font-semibold text-white">
                   {shop.currency} {shop.default_hourly_rate.toFixed(2)}/hr
                 </span>
               </p>
@@ -196,15 +196,15 @@ export default function BookJobPage() {
                 {services.map((service) => (
                   <div
                     key={service.id}
-                    className="flex items-start justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2"
+                    className="flex items-start justify-between gap-2 rounded-xl bg-white/5 px-3 py-2"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm text-slate-700">{service.name}</p>
+                      <p className="text-sm text-slate-300">{service.name}</p>
                       {service.description && (
-                        <p className="text-xs text-slate-400">{service.description}</p>
+                        <p className="text-xs text-slate-500">{service.description}</p>
                       )}
                     </div>
-                    <p className="shrink-0 text-sm font-semibold text-slate-900">
+                    <p className="shrink-0 text-sm font-semibold text-white">
                       {shop.currency} {service.price.toFixed(2)}
                       {service.extra_cost > 0 && (
                         <span className="text-xs font-normal text-slate-400">
@@ -220,9 +220,9 @@ export default function BookJobPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-2xl bg-white p-6 shadow-sm shadow-slate-900/5">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-2xl bg-white/5 p-6 shadow-md shadow-black/20">
           <div>
-            <label className="block text-xs font-medium text-slate-500">
+            <label className="block text-xs font-medium text-slate-400">
               What do you need done?
             </label>
             <input
@@ -231,12 +231,12 @@ export default function BookJobPage() {
               placeholder="e.g. Deep cleaning, AC repair..."
               value={serviceType}
               onChange={(e) => setServiceType(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-500">
+            <label className="block text-xs font-medium text-slate-400">
               Describe the issue (optional)
             </label>
             <textarea
@@ -244,7 +244,7 @@ export default function BookJobPage() {
               placeholder="Explain what's going on so the technician can prepare..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
@@ -256,11 +256,11 @@ export default function BookJobPage() {
           />
 
           <div>
-            <label className="block text-xs font-medium text-slate-500">
+            <label className="block text-xs font-medium text-slate-400">
               Service Address
             </label>
             {knownAddress ? (
-              <p className="mt-1 rounded-xl bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700">
+              <p className="mt-1 rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-slate-300">
                 {knownAddress}
               </p>
             ) : (
@@ -270,14 +270,14 @@ export default function BookJobPage() {
                 value={manualAddress}
                 onChange={(e) => setManualAddress(e.target.value)}
                 placeholder="Where should the technician go?"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             )}
           </div>
 
           {shop && (
             <div>
-              <label className="block text-xs font-medium text-slate-500">
+              <label className="block text-xs font-medium text-slate-400">
                 Preferred Date (optional)
               </label>
               <div className="mt-1">
@@ -297,8 +297,8 @@ export default function BookJobPage() {
                   className={`mt-1.5 text-xs ${
                     availability.active_staff_count > 0 &&
                     availability.booked_count >= availability.active_staff_count
-                      ? "text-amber-600"
-                      : "text-emerald-600"
+                      ? "text-amber-400"
+                      : "text-brand-emerald"
                   }`}
                 >
                   {availability.active_staff_count > 0 &&
@@ -316,7 +316,7 @@ export default function BookJobPage() {
           </p>
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-600">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
               {error}
             </p>
           )}

@@ -8,7 +8,7 @@ import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFiel
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
-  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
+  { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
 );
 
 export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => void }) {
@@ -63,12 +63,12 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
 
   if (confirmEmailSent) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white">
           SP
         </span>
-        <h1 className="mt-4 text-xl font-bold text-slate-900">Check your email</h1>
-        <p className="mt-1.5 max-w-xs text-sm text-slate-500">
+        <h1 className="mt-4 text-xl font-bold text-white">Check your email</h1>
+        <p className="mt-1.5 max-w-xs text-sm text-slate-400">
           We sent a confirmation link to {email}. Open it, then come back here
           and log in.
         </p>
@@ -87,16 +87,16 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 py-10">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 py-10">
       <div className="w-full max-w-sm">
         <div className="text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white mx-auto">
             SP
           </span>
-          <h1 className="mt-4 text-xl font-bold text-slate-900">
+          <h1 className="mt-4 text-xl font-bold text-white">
             {mode === "signup" ? "Create your account" : "Welcome back"}
           </h1>
-          <p className="mt-1.5 text-sm text-slate-500">
+          <p className="mt-1.5 text-sm text-slate-400">
             {mode === "signup"
               ? "Book jobs and track proof from any shop using ShopPulse."
               : "Sign in to see your jobs and book new ones."}
@@ -112,14 +112,14 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                 placeholder="Full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
               <input
                 type="tel"
                 placeholder="Phone (optional)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
 
               <select
@@ -130,7 +130,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                   setCity("");
                   setBarangay("");
                 }}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
               >
                 {COUNTRIES.map((c) => (
                   <option key={c} value={c}>
@@ -147,7 +147,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                   onRegionChange={setRegion}
                   onCityChange={setCity}
                   onBarangayChange={setBarangay}
-                  inputClassName="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+                  inputClassName="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
                 />
               ) : (
                 <>
@@ -156,26 +156,26 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                     placeholder="Region/State"
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                   <input
                     type="text"
                     placeholder="Municipality / City"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                   <input
                     type="text"
                     placeholder="Barangay"
                     value={barangay}
                     onChange={(e) => setBarangay(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                 </>
               )}
 
-              <div className="rounded-xl border border-slate-200 bg-white p-3">
+              <div className="rounded-xl bg-white/5 p-3">
                 <LocationPickerMap
                   latitude={latitude}
                   longitude={longitude}
@@ -195,7 +195,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <input
             type="password"
@@ -204,11 +204,11 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-600">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
               {error}
             </p>
           )}

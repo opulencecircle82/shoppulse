@@ -51,23 +51,23 @@ export default function AvailabilityCalendar({
   ];
 
   return (
-    <div className="rounded-xl border border-slate-200 p-3">
+    <div className="rounded-xl bg-white/5 p-3">
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => setViewMonth(new Date(year, month - 1, 1))}
-          className="rounded-full p-1 text-slate-400 hover:text-slate-900"
+          className="rounded-full p-1 text-slate-400 hover:text-white"
           aria-label="Previous month"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <p className="text-sm font-semibold text-slate-900">
+        <p className="text-sm font-semibold text-white">
           {MONTH_LABELS[month]} {year}
         </p>
         <button
           type="button"
           onClick={() => setViewMonth(new Date(year, month + 1, 1))}
-          className="rounded-full p-1 text-slate-400 hover:text-slate-900"
+          className="rounded-full p-1 text-slate-400 hover:text-white"
           aria-label="Next month"
         >
           <ChevronRight className="h-4 w-4" />
@@ -100,8 +100,8 @@ export default function AvailabilityCalendar({
                 isSelected
                   ? "bg-brand-blue text-white"
                   : disabled
-                    ? "text-slate-300"
-                    : "text-slate-700 hover:bg-brand-blue/10"
+                    ? "text-slate-600"
+                    : "text-slate-300 hover:bg-brand-blue/10"
               }`}
             >
               {date.getDate()}

@@ -39,7 +39,7 @@ export default function PhotoUploadField({
 
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-500">{label}</label>
+      <label className="block text-xs font-medium text-slate-400">{label}</label>
       <input
         ref={inputRef}
         type="file"
@@ -67,7 +67,7 @@ export default function PhotoUploadField({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="mt-1.5 flex h-20 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
+          className="mt-1.5 flex h-20 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/20 text-sm text-slate-400 hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

@@ -20,7 +20,7 @@ export default function ShopLocationMap({
   longitude: number;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl shadow-sm shadow-slate-900/10">
+    <div className="overflow-hidden rounded-xl shadow-md shadow-black/20">
       <MapContainer
         center={[latitude, longitude]}
         zoom={16}

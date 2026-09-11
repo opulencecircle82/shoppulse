@@ -70,7 +70,7 @@ export default function LocationPickerMap({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-slate-600">
+        <label className="block text-sm font-medium text-slate-300">
           {label}
         </label>
         <button

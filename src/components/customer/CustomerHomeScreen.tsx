@@ -32,14 +32,14 @@ import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
 const STATUS_STYLES: Record<string, string> = {
-  PENDING: "bg-amber-50 text-amber-600",
-  REJECTED: "bg-red-50 text-red-600",
-  UNASSIGNED: "bg-slate-100 text-slate-600",
-  SCHEDULED: "bg-blue-50 text-brand-blue",
-  IN_PROGRESS: "bg-blue-50 text-brand-blue",
-  COMPLETED: "bg-blue-50 text-brand-blue",
-  APPROVED: "bg-emerald-50 text-emerald-600",
-  DISPUTED: "bg-red-50 text-red-600",
+  PENDING: "bg-amber-500/15 text-amber-400",
+  REJECTED: "bg-red-500/15 text-red-400",
+  UNASSIGNED: "bg-white/10 text-slate-400",
+  SCHEDULED: "bg-brand-blue/15 text-brand-blue",
+  IN_PROGRESS: "bg-brand-blue/15 text-brand-blue",
+  COMPLETED: "bg-brand-blue/15 text-brand-blue",
+  APPROVED: "bg-brand-emerald/15 text-brand-emerald",
+  DISPUTED: "bg-red-500/15 text-red-400",
 };
 
 const QUICK_CATEGORIES = [
@@ -142,7 +142,7 @@ export default function CustomerHomeScreen({
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-6">
+    <main className="min-h-screen bg-brand-navy px-5 py-6">
       <div className="mx-auto max-w-lg">
         <header className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-brand-navy px-5 py-5">
           <CurvedLinesBackground />
@@ -154,7 +154,7 @@ export default function CustomerHomeScreen({
             <p className="text-xs text-white/60">Your jobs, all in one place</p>
           </div>
           <div className="relative flex items-center gap-1">
-            <CustomerNotificationBell customerId={customer.id} dark />
+            <CustomerNotificationBell customerId={customer.id} />
             <button
               type="button"
               onClick={handleSignOut}
@@ -172,7 +172,7 @@ export default function CustomerHomeScreen({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search 'Plumbing', 'AC Repair', 'Wiring'..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm shadow-slate-900/5 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 py-2.5 pl-10 pr-3.5 text-sm text-white placeholder:text-slate-500 shadow-md shadow-black/20 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </form>
 
@@ -181,10 +181,10 @@ export default function CustomerHomeScreen({
             <Link
               key={label}
               href={`/customer/discover?category=${encodeURIComponent(label)}`}
-              className="flex flex-col items-center gap-1.5 rounded-xl bg-white p-2.5 text-center shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
+              className="flex flex-col items-center gap-1.5 rounded-xl bg-white/5 p-2.5 text-center shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
             >
               <Icon className="h-5 w-5 text-brand-blue" />
-              <span className="text-[10px] font-medium leading-tight text-slate-600">
+              <span className="text-[10px] font-medium leading-tight text-slate-300">
                 {label.split(" ")[0]}
               </span>
             </Link>
@@ -229,7 +229,7 @@ export default function CustomerHomeScreen({
                 key={promo.id}
                 href={`/customer/book/${promo.shop_slug}`}
                 onClick={() => recordPromotionEvent(promo.id, "click")}
-                className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-sm shadow-slate-900/10"
+                className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-md shadow-black/20"
               >
                 {promo.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -255,29 +255,29 @@ export default function CustomerHomeScreen({
 
         {featuredServices.length > 0 && (
           <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Featured Services
             </p>
             <div className="mt-3 space-y-3">
               {featuredServices.map((service) => (
                 <div
                   key={service.id}
-                  className="rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5"
+                  className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-white">
                         {service.name}
                       </p>
-                      <p className="mt-0.5 text-xs text-slate-500">{service.shop_name}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">{service.shop_name}</p>
                       {service.avg_rating !== null && (
-                        <p className="mt-1 flex items-center gap-1 text-xs text-amber-500">
+                        <p className="mt-1 flex items-center gap-1 text-xs text-amber-400">
                           <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                           {service.avg_rating.toFixed(1)} ({service.review_count})
                         </p>
                       )}
                     </div>
-                    <p className="shrink-0 text-sm font-bold text-slate-900">
+                    <p className="shrink-0 text-sm font-bold text-white">
                       {service.price.toFixed(2)}
                     </p>
                   </div>
@@ -293,9 +293,9 @@ export default function CustomerHomeScreen({
           </div>
         )}
 
-        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm shadow-slate-900/5">
-          <p className="text-sm font-semibold text-slate-900">Book a New Job</p>
-          <p className="mt-1 text-xs text-slate-500">
+        <div className="mt-6 rounded-2xl bg-white/5 p-5 shadow-md shadow-black/20">
+          <p className="text-sm font-semibold text-white">Book a New Job</p>
+          <p className="mt-1 text-xs text-slate-400">
             Enter the business code your service provider gave you (it&apos;s
             also the end of the booking link they shared).
           </p>
@@ -306,7 +306,7 @@ export default function CustomerHomeScreen({
               placeholder="e.g. leans-electrical-service"
               value={shopCode}
               onChange={(e) => setShopCode(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
             <button
               type="submit"
@@ -325,7 +325,7 @@ export default function CustomerHomeScreen({
 
         <Link
           href="/customer/ads"
-          className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-brand-blue to-slate-900 px-5 py-4 shadow-sm shadow-blue-500/20"
+          className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-brand-blue to-slate-900 px-5 py-4 shadow-md shadow-blue-500/20"
         >
           <div>
             <p className="text-sm font-bold text-white">Promotions Near You</p>
@@ -334,16 +334,16 @@ export default function CustomerHomeScreen({
           <span className="text-white/70">→</span>
         </Link>
 
-        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-400">
           Your Jobs
         </p>
 
         {jobs.length === 0 ? (
-          <div className="mt-3 rounded-2xl bg-white p-8 text-center shadow-sm shadow-slate-900/5">
+          <div className="mt-3 rounded-2xl bg-white/5 p-8 text-center shadow-md shadow-black/20">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
               <ClipboardList className="h-5 w-5 text-brand-blue" />
             </div>
-            <p className="mt-3 text-sm text-slate-500">
+            <p className="mt-3 text-sm text-slate-400">
               No jobs yet. Use the booking link your service provider shared
               with you, or enter their business code above.
             </p>
@@ -354,19 +354,19 @@ export default function CustomerHomeScreen({
               <li key={job.id}>
                 <Link
                   href={`/client/${job.id}`}
-                  className="block rounded-2xl bg-white p-4 shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md"
+                  className="block rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
                 >
                   <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                      STATUS_STYLES[job.status] ?? "bg-slate-100 text-slate-600"
+                      STATUS_STYLES[job.status] ?? "bg-white/10 text-slate-400"
                     }`}
                   >
                     {job.status.replace("_", " ")}
                   </span>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                  <p className="mt-2 text-sm font-semibold text-white">
                     {job.service_type}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">{job.service_address}</p>
+                  <p className="mt-0.5 text-xs text-slate-400">{job.service_address}</p>
                 </Link>
               </li>
             ))}
