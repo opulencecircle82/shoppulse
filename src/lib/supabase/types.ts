@@ -140,6 +140,18 @@ export type ShopProduct = {
   quantity: number;
   photo_url: string | null;
   category: string | null;
+  sku: string | null;
+  unit: string;
+  expiry_date: string | null;
+  created_at: string;
+};
+
+export type StockMovement = {
+  id: string;
+  shop_id: string;
+  product_id: string;
+  change_qty: number;
+  note: string | null;
   created_at: string;
 };
 
