@@ -308,7 +308,7 @@ export default function ProofDisputeDrawer({
             type="button"
             onClick={handleReject}
             disabled={saving !== null || !notes.trim()}
-            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/100/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving === "reject" ? "Rejecting..." : "Reject Dispute"}
           </button>

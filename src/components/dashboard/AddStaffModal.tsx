@@ -108,13 +108,13 @@ export default function AddStaffModal({
             </p>
 
             <div className="mt-4 space-y-3">
-              <div className="rounded-xl bg-white/60 px-4 py-3">
+              <div className="rounded-xl bg-white/5 px-4 py-3">
                 <p className="text-xs font-medium text-slate-400">Username</p>
                 <p className="mt-0.5 font-mono text-sm text-white">
                   {createdLogin.username}
                 </p>
               </div>
-              <div className="rounded-xl bg-white/60 px-4 py-3">
+              <div className="rounded-xl bg-white/5 px-4 py-3">
                 <p className="text-xs font-medium text-slate-400">Password</p>
                 <p className="mt-0.5 font-mono text-sm text-white">
                   {createdLogin.password}

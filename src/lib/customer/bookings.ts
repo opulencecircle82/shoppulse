@@ -280,6 +280,7 @@ export type PublicProduct = {
   description: string | null;
   price: number;
   photo_url: string | null;
+  category: string | null;
 };
 
 export async function listPublicShopProducts(shopId: string): Promise<PublicProduct[]> {

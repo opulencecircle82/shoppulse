@@ -269,7 +269,7 @@ function PromotionCard({
         <button
           type="button"
           onClick={handleDelete}
-          className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/100/10"
+          className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/10"
         >
           Delete
         </button>
