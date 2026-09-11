@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Plus, X, Megaphone, Globe, Loader2 } from "lucide-react";
+import { Plus, X, Megaphone, Globe, Loader2, CheckCircle2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
@@ -437,27 +437,129 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
 // carousel a customer sees, or the owner's own real business name/details
 // mirrored back at them — a generic sample illustrates the placement
 // without either.
+function FakePromoCard({
+  title,
+  business,
+  from,
+  dim,
+}: {
+  title: string;
+  business: string;
+  from: string;
+  dim?: boolean;
+}) {
+  return (
+    <div
+      className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg shadow-sm shadow-black/20 ${
+        dim ? "opacity-60" : ""
+      }`}
+    >
+      <div
+        className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${from} p-1 text-center`}
+      >
+        <p className="line-clamp-2 text-[8px] font-bold text-white">{title}</p>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 bg-black/40 px-1 py-0.5">
+        <p className="truncate text-[6px] font-semibold text-white">{business}</p>
+      </div>
+    </div>
+  );
+}
+
+// A static, always-fake mockup of the customer app's home screen — same
+// convention as the other phone previews in CustomizeMobileAppTab (fake
+// shop name, fake sample content, regardless of the owner's real data).
+// Filled out with the surrounding home-screen context (search bar, a
+// second promo, a job card) rather than one card floating alone, so it
+// reads as "here's where this sits on a real screen" instead of a mostly
+// empty box.
 function PromotionsPhonePreview() {
   return (
     <PhoneFrame label="Customer App — Promotions Near You">
-      <div className="h-[380px] bg-brand-navy p-3">
-        <div className="relative h-20 w-full shrink-0 overflow-hidden rounded-xl shadow-md shadow-black/20">
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-2 text-center">
-            <p className="line-clamp-2 text-[11px] font-bold text-white">
-              20% Off First Visit
-            </p>
-          </div>
-          <div className="absolute inset-x-0 bottom-0 bg-black/40 px-2 py-1">
-            <p className="truncate text-[9px] font-semibold text-white">
-              Apex Property Services
-            </p>
+      <div className="h-[380px] space-y-3 bg-brand-navy p-3">
+        <div>
+          <p className="text-[8px] text-slate-500">Hi, Customer</p>
+          <p className="text-[11px] font-bold text-white">
+            Your jobs, all in one place
+          </p>
+        </div>
+        <div className="h-6 rounded-lg bg-white/5" />
+        <div>
+          <p className="text-[8px] font-semibold uppercase tracking-wide text-slate-500">
+            Promotions Near You
+          </p>
+          <div className="mt-1.5 flex gap-2">
+            <FakePromoCard
+              title="20% Off First Visit"
+              business="Apex Property Services"
+              from="from-brand-blue to-slate-900"
+            />
+            <FakePromoCard
+              title="Free Estimate This Week"
+              business="Bright Plumbing Co."
+              from="from-brand-orange to-slate-900"
+              dim
+            />
           </div>
         </div>
-        <p className="mt-2.5 text-center text-[10px] text-slate-500">
-          Sample preview — your active promotions appear here for customers.
-        </p>
+        <div>
+          <p className="text-[8px] font-semibold uppercase tracking-wide text-slate-500">
+            Your Jobs
+          </p>
+          <div className="mt-1.5 rounded-lg bg-white/5 p-2">
+            <span className="inline-block rounded-full bg-brand-emerald/15 px-1.5 py-0.5 text-[7px] font-semibold text-brand-emerald">
+              APPROVED
+            </span>
+            <p className="mt-1 text-[9px] font-semibold text-white">AC Repair</p>
+            <p className="text-[7px] text-slate-500">Balibago, Angeles City</p>
+          </div>
+        </div>
       </div>
     </PhoneFrame>
+  );
+}
+
+function PromotionsExplainer() {
+  const points = [
+    {
+      title: "Libre — walang extra bayad",
+      body: "Awtomatiko itong lumalabas sa app ng mga customer, hindi tulad ng Facebook ads na kailangan mong bayaran para makita.",
+    },
+    {
+      title: "Nakikita ng mga malapit sa'yo",
+      body: "Lumalabas ito sa home screen ng mga customer na nasa lugar mo — mismong mga taong pwede mong maserbisyuhan.",
+    },
+    {
+      title: "Nakakaakit ng bagong customer",
+      body: "Isang magandang paraan para hikayatin ang mga taong hindi pa nakaka-alam sa negosyo mo na subukan ka muna.",
+    },
+    {
+      title: "May discount code, may tracking",
+      body: "Kung maglalagay ka ng code, nakikita mo agad kung ilan na ang gumamit — hindi ka bulag sa performance.",
+    },
+  ];
+
+  return (
+    <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+      <h4 className="text-sm font-semibold text-white">
+        Bakit gumawa ng Promotion?
+      </h4>
+      <p className="mt-1 text-xs text-slate-400">
+        Ito ang lalabas sa app ng mga customer — tulad ng nakikita mo sa
+        preview.
+      </p>
+      <ul className="mt-4 space-y-3">
+        {points.map((point) => (
+          <li key={point.title} className="flex gap-2.5">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-emerald" />
+            <div>
+              <p className="text-xs font-semibold text-white">{point.title}</p>
+              <p className="mt-0.5 text-xs text-slate-400">{point.body}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -600,8 +702,11 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
         <BusinessWebsiteCard shop={shop} />
 
         <div>
-          <div className="flex justify-center lg:justify-start">
+          <div className="flex flex-wrap items-start justify-center gap-4 lg:justify-start">
             <PromotionsPhonePreview />
+            <div className="w-full max-w-sm flex-1">
+              <PromotionsExplainer />
+            </div>
           </div>
 
           <div className="mt-4 flex items-center justify-between">
