@@ -10,6 +10,7 @@ import {
   Smartphone,
   Settings,
   Wrench,
+  Star,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ export const DASHBOARD_TABS = [
   { id: "proof", label: "Proof & Dispute Gate", icon: ShieldCheck },
   { id: "staff", label: "Staff Management", icon: Users },
   { id: "services", label: "Services", icon: Wrench },
+  { id: "reviews", label: "Reviews", icon: Star },
   { id: "ads", label: "Promotions", icon: Megaphone },
   { id: "mobile", label: "Customize Mobile App", icon: Smartphone },
 ] as const;

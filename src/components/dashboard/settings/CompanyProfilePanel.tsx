@@ -53,7 +53,9 @@ export default function CompanyProfilePanel({
   const [dragActive, setDragActive] = useState(false);
 
   async function uploadLogo(file: File) {
-    if (!file.type.startsWith("image/")) {
+    const looksLikeImage =
+      file.type.startsWith("image/") || /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(file.name);
+    if (!looksLikeImage) {
       setUploadError("Please upload an image file.");
       return;
     }

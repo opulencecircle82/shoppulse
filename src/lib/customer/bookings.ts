@@ -154,7 +154,7 @@ export async function uploadCustomerPhoto(
 
   const { error } = await supabase.storage
     .from("job-photos")
-    .upload(path, file, { contentType: file.type });
+    .upload(path, file, { contentType: file.type || "image/jpeg" });
 
   if (error) throw error;
 

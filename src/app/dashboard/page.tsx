@@ -20,6 +20,7 @@ import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import ServicesTab from "@/components/dashboard/ServicesTab";
 import PromotionsManager from "@/components/dashboard/PromotionsManager";
 import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
+import ReviewsTab from "@/components/dashboard/ReviewsTab";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
@@ -224,6 +225,12 @@ export default function DashboardPage() {
             {activeTab === "services" && (
               <div className="mt-6">
                 <ServicesTab shopId={shop.id} />
+              </div>
+            )}
+
+            {activeTab === "reviews" && (
+              <div className="mt-6">
+                <ReviewsTab shopId={shop.id} />
               </div>
             )}
 

@@ -21,7 +21,13 @@ export default function PhotoUploadField({
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
+    // Some mobile browsers leave `file.type` blank (or generic) for a
+    // photo taken directly via the camera capture prompt rather than
+    // picked from the gallery — falling back to the filename extension
+    // catches those instead of rejecting every camera-captured photo.
+    const looksLikeImage =
+      file.type.startsWith("image/") || /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(file.name);
+    if (!looksLikeImage) {
       setError("Please choose an image file.");
       return;
     }
