@@ -1,8 +1,89 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, StaffMember } from "@/lib/supabase/types";
+
+function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void }) {
+  const [defaultHourlyRate, setDefaultHourlyRate] = useState(shop.default_hourly_rate);
+  const [defaultOvertimeMultiplier, setDefaultOvertimeMultiplier] = useState(
+    shop.default_overtime_multiplier
+  );
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setSaved(false);
+
+    const { error } = await supabase
+      .from("shops")
+      .update({
+        default_hourly_rate: defaultHourlyRate,
+        default_overtime_multiplier: defaultOvertimeMultiplier,
+      })
+      .eq("id", shop.id);
+
+    setSaving(false);
+    if (!error) {
+      setSaved(true);
+      onSaved();
+    }
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border border-brand-blue/20 bg-white/5 p-5 shadow-md shadow-black/20"
+    >
+      <p className="text-sm font-semibold text-white">Default Billing Rate</p>
+      <p className="mt-1 text-xs text-slate-500">
+        What you charge customers by default &mdash; used to auto-compute the
+        invoice when a job is approved. Separate from each technician&apos;s
+        personal pay rate below.
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-slate-400">
+            Hourly Rate
+          </label>
+          <input
+            type="number"
+            min={0}
+            step={0.5}
+            value={defaultHourlyRate}
+            onChange={(e) => setDefaultHourlyRate(Number(e.target.value))}
+            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400">
+            Overtime Multiplier
+          </label>
+          <input
+            type="number"
+            min={1}
+            step={0.1}
+            value={defaultOvertimeMultiplier}
+            onChange={(e) => setDefaultOvertimeMultiplier(Number(e.target.value))}
+            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+        </div>
+      </div>
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {saving ? "Saving..." : "Save"}
+        </button>
+        {saved && <span className="text-xs text-brand-emerald">Saved</span>}
+      </div>
+    </form>
+  );
+}
 
 function StaffRow({ member }: { member: StaffMember }) {
   const [hourlyRate, setHourlyRate] = useState(member.hourly_rate);
@@ -100,10 +181,12 @@ function StaffRow({ member }: { member: StaffMember }) {
 
 export default function StaffPayRatesPanel({
   shop,
+  onSaved,
   showContinue = false,
   onContinue,
 }: {
   shop: Shop | null;
+  onSaved?: () => void;
   showContinue?: boolean;
   onContinue?: () => void;
 }) {
@@ -141,6 +224,8 @@ export default function StaffPayRatesPanel({
 
   return (
     <div className="space-y-4">
+      <DefaultBillingRate shop={shop} onSaved={() => onSaved?.()} />
+
       {staff.map((member) => (
         <StaffRow key={member.id} member={member} />
       ))}

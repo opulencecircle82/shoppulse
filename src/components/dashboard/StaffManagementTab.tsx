@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { StaffMember } from "@/lib/supabase/types";
+import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 import AddStaffModal from "./AddStaffModal";
+import StaffJobHistoryModal from "./StaffJobHistoryModal";
 
 const FREE_TECH_SEATS = 1;
 
@@ -12,16 +13,21 @@ export default function StaffManagementTab({
   staff,
   loading,
   defaultHourlyRate,
+  tickets,
+  currency,
   onChanged,
 }: {
   staff: StaffMember[];
   loading: boolean;
   defaultHourlyRate: number;
+  tickets: JobTicket[];
+  currency: string;
   onChanged: () => void;
 }) {
   const [showAddStaff, setShowAddStaff] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [historyStaff, setHistoryStaff] = useState<StaffMember | null>(null);
   const nonOwnerStaff = staff.filter((s) => s.role !== "OWNER");
   const seatsUsed = nonOwnerStaff.length;
 
@@ -165,6 +171,13 @@ export default function StaffManagementTab({
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
+                          onClick={() => setHistoryStaff(member)}
+                          className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+                        >
+                          View Job History
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => toggleActive(member)}
                           className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
                         >
@@ -194,6 +207,15 @@ export default function StaffManagementTab({
           defaultHourlyRate={defaultHourlyRate}
           onClose={() => setShowAddStaff(false)}
           onCreated={onChanged}
+        />
+      )}
+
+      {historyStaff && (
+        <StaffJobHistoryModal
+          staffMember={historyStaff}
+          tickets={tickets}
+          currency={currency}
+          onClose={() => setHistoryStaff(null)}
         />
       )}
     </div>

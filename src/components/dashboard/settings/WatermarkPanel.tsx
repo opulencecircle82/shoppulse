@@ -17,6 +17,9 @@ export default function WatermarkPanel({
   continueLabel?: string;
   onContinue?: () => void;
 }) {
+  const [mandatoryCamera, setMandatoryCamera] = useState(
+    shop?.mandatory_live_camera ?? true
+  );
   const [showLogo, setShowLogo] = useState(shop?.watermark_show_logo ?? true);
   const [showTimestamp, setShowTimestamp] = useState(
     shop?.watermark_show_timestamp ?? true
@@ -43,6 +46,7 @@ export default function WatermarkPanel({
     const { error: updateError } = await supabase
       .from("shops")
       .update({
+        mandatory_live_camera: mandatoryCamera,
         watermark_show_logo: showLogo,
         watermark_show_timestamp: showTimestamp,
         watermark_show_gps: showGps,
@@ -67,6 +71,22 @@ export default function WatermarkPanel({
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <form onSubmit={handleSubmit} className="space-y-4">
+        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
+          <div>
+            <span className="text-sm text-slate-300">Mandatory Live Camera</span>
+            <p className="text-xs text-slate-500">
+              Disables phone gallery uploads in the tech app &mdash; live
+              capture only.
+            </p>
+          </div>
+          <input
+            type="checkbox"
+            checked={mandatoryCamera}
+            onChange={(e) => setMandatoryCamera(e.target.checked)}
+            className="h-4 w-4 shrink-0 accent-brand-blue"
+          />
+        </label>
+
         <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
           <span className="text-sm text-slate-300">
             Overlay company logo

@@ -20,7 +20,6 @@ import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import ServicesTab from "@/components/dashboard/ServicesTab";
 import PromotionsManager from "@/components/dashboard/PromotionsManager";
 import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
-import SetupCustomizePanel from "@/components/dashboard/SetupCustomizePanel";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
@@ -46,7 +45,6 @@ export default function DashboardPage() {
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
-  const [setupOpenMobile, setSetupOpenMobile] = useState(false);
 
   if (!checked || shopLoading) {
     return (
@@ -118,13 +116,12 @@ export default function DashboardPage() {
                 }}
               />
             )}
-            <button
-              type="button"
-              onClick={() => setSetupOpenMobile(true)}
-              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:border-white/40 hover:text-white lg:hidden"
+            <Link
+              href="/dashboard/settings"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:border-white/40 hover:text-white"
             >
-              Setup &amp; Customize
-            </button>
+              Business Settings
+            </Link>
             <button
               type="button"
               onClick={handleSignOut}
@@ -217,6 +214,8 @@ export default function DashboardPage() {
                   staff={staff}
                   loading={staffLoading}
                   defaultHourlyRate={shop.default_hourly_rate}
+                  tickets={tickets}
+                  currency={shop.currency}
                   onChanged={refreshStaff}
                 />
               </div>
@@ -239,15 +238,6 @@ export default function DashboardPage() {
                 <CustomizeMobileAppTab shop={shop} onSaved={refreshShop} />
               </div>
             )}
-          </div>
-
-          <div className="lg:w-80 lg:shrink-0">
-            <SetupCustomizePanel
-              shop={shop}
-              onSaved={refreshShop}
-              isMobileOpen={setupOpenMobile}
-              onCloseMobile={() => setSetupOpenMobile(false)}
-            />
           </div>
         </div>
       </div>

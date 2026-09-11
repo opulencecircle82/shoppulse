@@ -27,6 +27,7 @@ export default function CompanyProfilePanel({
 }) {
   const [shopName, setShopName] = useState(shop?.shop_name ?? "");
   const [logoUrl, setLogoUrl] = useState(shop?.logo_url ?? "");
+  const [primaryColor, setPrimaryColor] = useState(shop?.primary_color_hex ?? "#0F172A");
   const [address, setAddress] = useState(shop?.address ?? "");
   const [currency, setCurrency] = useState<Currency>(shop?.currency ?? "USD");
   const [city, setCity] = useState(shop?.city ?? "");
@@ -115,6 +116,7 @@ export default function CompanyProfilePanel({
         .update({
           shop_name: shopName,
           logo_url: logoUrl || null,
+          primary_color_hex: primaryColor,
           address: address || null,
           currency,
           city: city || null,
@@ -273,6 +275,24 @@ export default function CompanyProfilePanel({
         {uploadError && (
           <p className="mt-2 text-sm text-red-400">{uploadError}</p>
         )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-300">
+          Primary Brand Color
+        </label>
+        <p className="mt-1 text-xs text-slate-500">
+          Used for accents in your customer booking page and mobile app.
+        </p>
+        <div className="mt-1.5 flex items-center gap-3">
+          <input
+            type="color"
+            value={primaryColor}
+            onChange={(e) => setPrimaryColor(e.target.value)}
+            className="h-10 w-14 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+          <span className="text-sm text-slate-400">{primaryColor}</span>
+        </div>
       </div>
 
       <div>

@@ -164,6 +164,7 @@ export default function SettingsPage() {
             {activeTab === "staff" && (
               <StaffPayRatesPanel
                 shop={shop}
+                onSaved={refresh}
                 showContinue={isOnboarding}
                 onContinue={handleOnboardingContinue}
               />
