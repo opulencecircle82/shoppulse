@@ -430,74 +430,32 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
   );
 }
 
-// Mirrors the exact card markup CustomerHomeScreen renders for the
-// "Promotions Near You" carousel (image or gradient-title fallback, shop
-// name overlay) so what the owner sees here is what a customer actually
-// sees — not a stylized approximation that could quietly drift out of sync.
-function PromotionsPhonePreview({
-  shop,
-  promotions,
-}: {
-  shop: Shop;
-  promotions: ShopPromotion[];
-}) {
-  const active = promotions.filter((p) => p.is_active);
-
+// A static, always-fake mockup — same convention as the other phone
+// previews in CustomizeMobileAppTab (fake shop name, fake sample content,
+// regardless of the owner's real data). Showing this shop's actual live
+// promotion here would just be a smaller, redundant copy of the real
+// carousel a customer sees, or the owner's own real business name/details
+// mirrored back at them — a generic sample illustrates the placement
+// without either.
+function PromotionsPhonePreview() {
   return (
     <PhoneFrame label="Customer App — Promotions Near You">
-      <div className="h-[380px] space-y-2.5 overflow-y-auto bg-brand-navy p-3">
-        {active.length === 0 ? (
-          <>
-            {/* Sample card so this never reads as broken/empty before the
-                owner has added a real promotion — clearly marked EXAMPLE
-                and dimmed so it can't be mistaken for live data. */}
-            <div className="relative h-20 w-full shrink-0 overflow-hidden rounded-xl opacity-50 shadow-md shadow-black/20">
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-2 text-center">
-                <p className="line-clamp-2 text-[11px] font-bold text-white">
-                  20% Off First Visit
-                </p>
-              </div>
-              <div className="absolute inset-x-0 bottom-0 bg-black/40 px-2 py-1">
-                <p className="truncate text-[9px] font-semibold text-white">
-                  {shop.shop_name}
-                </p>
-              </div>
-              <div className="absolute right-1.5 top-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">
-                Example
-              </div>
-            </div>
-            <p className="text-center text-[10px] text-slate-500">
-              Add a promotion below to replace this example.
+      <div className="h-[380px] bg-brand-navy p-3">
+        <div className="relative h-20 w-full shrink-0 overflow-hidden rounded-xl shadow-md shadow-black/20">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-2 text-center">
+            <p className="line-clamp-2 text-[11px] font-bold text-white">
+              20% Off First Visit
             </p>
-          </>
-        ) : (
-          active.slice(0, 4).map((promo) => (
-            <div
-              key={promo.id}
-              className="relative h-20 w-full shrink-0 overflow-hidden rounded-xl shadow-md shadow-black/20"
-            >
-              {promo.image_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={promo.image_url}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-2 text-center">
-                  <p className="line-clamp-2 text-[11px] font-bold text-white">
-                    {promo.title}
-                  </p>
-                </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-black/40 px-2 py-1">
-                <p className="truncate text-[9px] font-semibold text-white">
-                  {shop.shop_name}
-                </p>
-              </div>
-            </div>
-          ))
-        )}
+          </div>
+          <div className="absolute inset-x-0 bottom-0 bg-black/40 px-2 py-1">
+            <p className="truncate text-[9px] font-semibold text-white">
+              Apex Property Services
+            </p>
+          </div>
+        </div>
+        <p className="mt-2.5 text-center text-[10px] text-slate-500">
+          Sample preview — your active promotions appear here for customers.
+        </p>
       </div>
     </PhoneFrame>
   );
@@ -643,7 +601,7 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
 
         <div>
           <div className="flex justify-center lg:justify-start">
-            <PromotionsPhonePreview shop={shop} promotions={promotions} />
+            <PromotionsPhonePreview />
           </div>
 
           <div className="mt-4 flex items-center justify-between">
