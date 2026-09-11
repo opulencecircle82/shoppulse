@@ -375,14 +375,23 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
         stock photo matched to your category until you upload your own header.
       </p>
 
-      <div className="relative mt-3 aspect-[21/9] w-full overflow-hidden rounded-xl">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={previewUrl} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-2 left-3 right-3">
-          <p className="truncate text-sm font-bold text-white">{shop.shop_name}</p>
+      <a
+        href={siteUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 flex items-center gap-3 rounded-xl bg-white/5 p-2.5 transition-colors hover:bg-white/10"
+      >
+        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewUrl} alt="" className="h-full w-full object-cover" />
         </div>
-      </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">{shop.shop_name}</p>
+          <p className="truncate text-xs text-brand-blue">
+            {siteUrl.replace(/^https?:\/\//, "")}
+          </p>
+        </div>
+      </a>
 
       <input
         id={headerInputId}
@@ -405,15 +414,6 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
           {uploading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
           {uploading ? "Uploading..." : headerUrl ? "Replace Header Photo" : "Upload Header Photo"}
         </label>
-
-        <a
-          href={siteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
-        >
-          View Website
-        </a>
 
         <button
           type="button"
