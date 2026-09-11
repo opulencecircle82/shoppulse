@@ -224,7 +224,9 @@ function AddProductModal({
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [costPrice, setCostPrice] = useState("");
   const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -235,7 +237,9 @@ function AddProductModal({
       name,
       category: category || null,
       description: description || null,
+      cost_price: Number(costPrice) || 0,
       price: Number(price) || 0,
+      quantity: Number(quantity) || 0,
     });
     setSaving(false);
     onAdded();
@@ -267,16 +271,40 @@ function AddProductModal({
           onChange={(e) => setDescription(e.target.value)}
           className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
-        <div>
-          <label className="block text-xs font-medium text-slate-400">Price</label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          />
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <label className="block text-xs font-medium text-slate-400">Cost</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={costPrice}
+              onChange={(e) => setCostPrice(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400">Sell Price</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400">Quantity</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
         </div>
 
         <button
@@ -365,7 +393,13 @@ function ProductsSection({ shopId }: { shopId: string }) {
               {product.description && (
                 <p className="mt-0.5 text-xs text-slate-400">{product.description}</p>
               )}
-              <p className="mt-1 text-xs text-slate-500">{product.price.toFixed(2)}</p>
+              <p className="mt-1 flex flex-wrap gap-x-3 text-xs text-slate-500">
+                <span>Cost: {product.cost_price.toFixed(2)}</span>
+                <span>Sell: {product.price.toFixed(2)}</span>
+                <span className={product.quantity === 0 ? "text-red-400" : ""}>
+                  Qty: {product.quantity}
+                </span>
+              </p>
             </div>
             <button
               type="button"

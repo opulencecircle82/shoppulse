@@ -136,6 +136,8 @@ export type ShopProduct = {
   name: string;
   description: string | null;
   price: number;
+  cost_price: number;
+  quantity: number;
   photo_url: string | null;
   category: string | null;
   created_at: string;
