@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { signInCustomer, signUpCustomer } from "@/lib/customer/customerAuth";
 import { COUNTRIES } from "@/lib/location/countries";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
+import DiagonalSplitBackground from "@/components/ui/DiagonalSplitBackground";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
@@ -63,32 +64,36 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
 
   if (confirmEmailSent) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white">
-          SP
-        </span>
-        <h1 className="mt-4 text-xl font-bold text-white">Check your email</h1>
-        <p className="mt-1.5 max-w-xs text-sm text-slate-400">
-          We sent a confirmation link to {email}. Open it, then come back here
-          and log in.
-        </p>
-        <button
-          type="button"
-          onClick={() => {
-            setConfirmEmailSent(false);
-            setMode("login");
-          }}
-          className="mt-6 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
-        >
-          Back to Log In
-        </button>
+      <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand-navy px-6 text-center">
+        <DiagonalSplitBackground />
+        <div className="relative z-10 flex w-full max-w-sm flex-col items-center rounded-3xl bg-brand-navy p-8 shadow-2xl shadow-black/40">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white">
+            SP
+          </span>
+          <h1 className="mt-4 text-xl font-bold text-white">Check your email</h1>
+          <p className="mt-1.5 max-w-xs text-sm text-slate-400">
+            We sent a confirmation link to {email}. Open it, then come back
+            here and log in.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmEmailSent(false);
+              setMode("login");
+            }}
+            className="mt-6 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+          >
+            Back to Log In
+          </button>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 py-10">
-      <div className="w-full max-w-sm">
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand-navy px-6 py-10">
+      <DiagonalSplitBackground />
+      <div className="relative z-10 w-full max-w-sm rounded-3xl bg-brand-navy p-6 shadow-2xl shadow-black/40">
         <div className="text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white mx-auto">
             SP
