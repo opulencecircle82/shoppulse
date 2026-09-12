@@ -11,8 +11,9 @@ import { notifyNativeSignedIn, notifyNativeSignedOut } from "@/lib/tech/nativeBr
 import TechLoginScreen from "@/components/tech/TechLoginScreen";
 import TechHomeScreen from "@/components/tech/TechHomeScreen";
 import TechJobScreen from "@/components/tech/TechJobScreen";
+import TechMessagesScreen from "@/components/tech/TechMessagesScreen";
 
-type Screen = "loading" | "login" | "home" | "job";
+type Screen = "loading" | "login" | "home" | "job" | "messages";
 
 export default function TechAppPage() {
   const [screen, setScreen] = useState<Screen>("loading");
@@ -106,6 +107,10 @@ export default function TechAppPage() {
     );
   }
 
+  if (screen === "messages" && shop) {
+    return <TechMessagesScreen shop={shop} onBack={() => setScreen("home")} />;
+  }
+
   if (screen === "home" && shop) {
     return (
       <TechHomeScreen
@@ -121,6 +126,7 @@ export default function TechAppPage() {
           setSelectedTicket(ticket);
           setScreen("job");
         }}
+        onOpenMessages={() => setScreen("messages")}
         onOpenTicket={(ticketId) => {
           const ticket = allTickets.find((t) => t.id === ticketId);
           if (ticket && (ticket.status === "SCHEDULED" || ticket.status === "IN_PROGRESS")) {

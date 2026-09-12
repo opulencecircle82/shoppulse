@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin, ClipboardList, CheckCircle2, Award } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MapPin, ClipboardList, CheckCircle2, Award, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
+import { listStaffConversations } from "@/lib/chat/chat";
 import TechNotificationBell from "./TechNotificationBell";
 
 function mapsUrl(address: string) {
@@ -19,6 +20,7 @@ export default function TechHomeScreen({
   stats,
   onOpenTask,
   onOpenTicket,
+  onOpenMessages,
   onSignedOut,
   onRefresh,
 }: {
@@ -29,10 +31,27 @@ export default function TechHomeScreen({
   stats: TechStats;
   onOpenTask: (ticket: JobTicket) => void;
   onOpenTicket: (jobTicketId: string) => void;
+  onOpenMessages: () => void;
   onSignedOut: () => void;
   onRefresh: () => void;
 }) {
   const [responding, setResponding] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    function loadUnread() {
+      listStaffConversations().then((rows) => {
+        if (active) setUnreadMessages(rows.reduce((sum, r) => sum + r.unreadCount, 0));
+      });
+    }
+    loadUnread();
+    const interval = setInterval(loadUnread, 20000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -63,6 +82,19 @@ export default function TechHomeScreen({
       <header className="flex items-center justify-between px-5 py-4">
         <h1 className="text-lg font-bold text-white">{shop.shop_name}</h1>
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onOpenMessages}
+            className="relative rounded-full p-2 text-slate-400 hover:text-white"
+            aria-label="Messages"
+          >
+            <MessageCircle className="h-5 w-5" />
+            {unreadMessages > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                {unreadMessages > 9 ? "9+" : unreadMessages}
+              </span>
+            )}
+          </button>
           <TechNotificationBell staffId={staffId} onOpenTicket={onOpenTicket} />
           <button
             type="button"
