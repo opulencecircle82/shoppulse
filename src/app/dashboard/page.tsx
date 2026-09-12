@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
 import ProofDisputeGateTab from "@/components/dashboard/ProofDisputeGateTab";
 import StaffManagementTab from "@/components/dashboard/StaffManagementTab";
 import ServicesTab from "@/components/dashboard/ServicesTab";
+import MessagesTab from "@/components/dashboard/MessagesTab";
 import PromotionsManager from "@/components/dashboard/PromotionsManager";
 import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
 import ReviewsTab from "@/components/dashboard/ReviewsTab";
@@ -27,6 +28,7 @@ import DashboardSidebarNav, {
 } from "@/components/dashboard/DashboardSidebarNav";
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
+import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
@@ -46,6 +48,33 @@ export default function DashboardPage() {
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    if (!staffMember) return;
+    let active = true;
+
+    async function loadUnread() {
+      const [staffRows, customerRows] = await Promise.all([
+        listStaffConversations(),
+        staffMember!.role === "OWNER"
+          ? listShopCustomerConversations()
+          : Promise.resolve([]),
+      ]);
+      if (!active) return;
+      const total =
+        staffRows.reduce((sum, c) => sum + c.unreadCount, 0) +
+        customerRows.reduce((sum, c) => sum + c.unreadCount, 0);
+      setUnreadMessages(total);
+    }
+
+    loadUnread();
+    const interval = setInterval(loadUnread, 20000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [staffMember]);
 
   if (!checked || shopLoading) {
     return (
@@ -134,7 +163,11 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 flex flex-col gap-6 lg:flex-row">
-          <DashboardSidebarNav activeTab={activeTab} onSelectTab={setActiveTab} />
+          <DashboardSidebarNav
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            unreadCount={unreadMessages}
+          />
 
           <div className="min-w-0 flex-1">
             <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
@@ -145,13 +178,16 @@ export default function DashboardPage() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? "bg-brand-blue/15 text-brand-blue"
                       : "text-slate-400 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {tab.label}
+                  {tab.id === "messages" && unreadMessages > 0 && (
+                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500" />
+                  )}
                 </button>
               ))}
               <Link
@@ -226,6 +262,12 @@ export default function DashboardPage() {
             {activeTab === "services" && (
               <div className="mt-6">
                 <ServicesTab shopId={shop.id} />
+              </div>
+            )}
+
+            {activeTab === "messages" && staffMember && (
+              <div className="mt-6">
+                <MessagesTab staffMember={staffMember} staff={staff} />
               </div>
             )}
 

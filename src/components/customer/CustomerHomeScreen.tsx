@@ -13,6 +13,7 @@ import {
   Star,
   Navigation,
   ClipboardList,
+  MessageCircle,
 } from "lucide-react";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
@@ -28,6 +29,7 @@ import {
   type TicketTechnician,
 } from "@/lib/customer/bookings";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import { listCustomerConversations } from "@/lib/chat/chat";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
@@ -66,6 +68,7 @@ export default function CustomerHomeScreen({
   const [featuredServices, setFeaturedServices] = useState<FeaturedService[]>([]);
   const [technician, setTechnician] = useState<TicketTechnician | null>(null);
   const [techDistance, setTechDistance] = useState<string | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const viewedRef = useRef(new Set<string>());
 
   const activeJob =
@@ -95,6 +98,21 @@ export default function CustomerHomeScreen({
       clearTimeout(id);
     };
   }, [customer.city]);
+
+  useEffect(() => {
+    let active = true;
+    function loadUnread() {
+      listCustomerConversations().then((rows) => {
+        if (active) setUnreadMessages(rows.reduce((sum, r) => sum + r.unreadCount, 0));
+      });
+    }
+    loadUnread();
+    const interval = setInterval(loadUnread, 20000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeJob) {
@@ -154,6 +172,18 @@ export default function CustomerHomeScreen({
             <p className="text-xs text-white/60">Your jobs, all in one place</p>
           </div>
           <div className="relative flex items-center gap-1">
+            <Link
+              href="/customer/messages"
+              className="relative rounded-full p-2 text-white/80 hover:text-white"
+              aria-label="Messages"
+            >
+              <MessageCircle className="h-5 w-5" />
+              {unreadMessages > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadMessages > 9 ? "9+" : unreadMessages}
+                </span>
+              )}
+            </Link>
             <CustomerNotificationBell customerId={customer.id} />
             <button
               type="button"

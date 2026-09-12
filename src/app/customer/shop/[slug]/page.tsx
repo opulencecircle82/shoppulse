@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Star } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import {
   fetchShopBySlug,
@@ -14,6 +14,8 @@ import {
   type ShopReview,
   type PublicService,
 } from "@/lib/customer/bookings";
+import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
+import { ensureCustomerConversation } from "@/lib/chat/chat";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -82,6 +84,17 @@ export default function ShopDetailsPage() {
   const open = isShopOpenNow(shop);
   const hasHours = Boolean(shop.business_hours_open && shop.business_hours_close);
 
+  async function handleChat(prefillText?: string) {
+    const customer = await fetchCurrentCustomer();
+    if (!customer) {
+      router.push("/customer");
+      return;
+    }
+    const conversationId = await ensureCustomerConversation(shop!.slug);
+    const query = prefillText ? `?prefill=${encodeURIComponent(prefillText)}` : "";
+    router.push(`/customer/messages/${conversationId}${query}`);
+  }
+
   return (
     <main className="min-h-screen bg-brand-navy px-5 py-6">
       <div className="mx-auto max-w-lg">
@@ -133,17 +146,26 @@ export default function ShopDetailsPage() {
                 </span>
               </div>
             </div>
-            {hasHours && (
-              <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                  open
-                    ? "bg-brand-emerald/15 text-brand-emerald"
-                    : "bg-white/10 text-slate-400"
-                }`}
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              {hasHours && (
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                    open
+                      ? "bg-brand-emerald/15 text-brand-emerald"
+                      : "bg-white/10 text-slate-400"
+                  }`}
+                >
+                  {open ? "Open Now" : "Closed"}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => handleChat()}
+                className="flex items-center gap-1 rounded-full border border-brand-blue/40 px-2.5 py-1 text-[11px] font-semibold text-brand-blue"
               >
-                {open ? "Open Now" : "Closed"}
-              </span>
-            )}
+                <MessageCircle className="h-3 w-3" /> Chat
+              </button>
+            </div>
           </div>
 
           {hasHours && (
@@ -200,15 +222,26 @@ export default function ShopDetailsPage() {
                         <p className="text-xs text-slate-500">{service.description}</p>
                       )}
                     </div>
-                    <p className="shrink-0 text-sm font-semibold text-white">
-                      {shop.currency} {service.price.toFixed(2)}
-                      {service.extra_cost > 0 && (
-                        <span className="text-xs font-normal text-slate-400">
-                          {" "}
-                          +{service.extra_cost.toFixed(2)}
-                        </span>
-                      )}
-                    </p>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <p className="text-sm font-semibold text-white">
+                        {shop.currency} {service.price.toFixed(2)}
+                        {service.extra_cost > 0 && (
+                          <span className="text-xs font-normal text-slate-400">
+                            {" "}
+                            +{service.extra_cost.toFixed(2)}
+                          </span>
+                        )}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleChat(`Hi! I'm interested in: ${service.name}`)
+                        }
+                        className="flex items-center gap-1 text-[11px] font-medium text-brand-blue"
+                      >
+                        <MessageCircle className="h-3 w-3" /> Chat
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

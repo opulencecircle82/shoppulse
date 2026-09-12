@@ -11,6 +11,7 @@ import {
   Settings,
   Wrench,
   Star,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ export const DASHBOARD_TABS = [
   { id: "proof", label: "Proof & Dispute Gate", icon: ShieldCheck },
   { id: "staff", label: "Staff Management", icon: Users },
   { id: "services", label: "Services", icon: Wrench },
+  { id: "messages", label: "Messages", icon: MessageCircle },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "ads", label: "Promotions", icon: Megaphone },
   { id: "mobile", label: "Customize Mobile App", icon: Smartphone },
@@ -30,9 +32,11 @@ export type DashboardTabId = (typeof DASHBOARD_TABS)[number]["id"];
 export default function DashboardSidebarNav({
   activeTab,
   onSelectTab,
+  unreadCount = 0,
 }: {
   activeTab: DashboardTabId;
   onSelectTab: (tab: DashboardTabId) => void;
+  unreadCount?: number;
 }) {
   return (
     <nav className="hidden w-56 shrink-0 lg:block">
@@ -56,6 +60,11 @@ export default function DashboardSidebarNav({
             >
               <Icon className="h-4 w-4 shrink-0" />
               {tab.label}
+              {tab.id === "messages" && unreadCount > 0 && (
+                <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </button>
           );
         })}
