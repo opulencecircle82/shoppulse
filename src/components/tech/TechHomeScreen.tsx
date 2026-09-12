@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin, ClipboardList, CheckCircle2, Award, MessageCircle } from "lucide-react";
+import {
+  MapPin,
+  ClipboardList,
+  CheckCircle2,
+  Award,
+  MessageCircle,
+  Home,
+  LogOut,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
@@ -81,168 +89,205 @@ export default function TechHomeScreen({
   }
 
   const isInProgress = task?.status === "IN_PROGRESS";
-  const needsAcceptance = task?.status === "SCHEDULED" && !task.staff_accepted_at;
+  const needsAcceptance =
+    task?.status === "SCHEDULED" && !task.staff_accepted_at;
 
   return (
     <main className="min-h-screen bg-brand-navy">
-      <header className="flex items-center justify-between px-5 py-4">
-        <h1 className="text-lg font-bold text-white">{shop.shop_name}</h1>
-        <div className="flex items-center gap-1">
+      <div className="flex">
+        <nav className="flex w-20 shrink-0 flex-col items-center gap-1 border-r border-white/10 bg-black/20 px-2 py-6">
+          <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-orange text-xs font-bold text-white">
+            SP
+          </div>
+
+          <button
+            type="button"
+            className="flex w-full flex-col items-center gap-1 rounded-xl bg-brand-orange/15 px-2 py-2.5 text-brand-orange"
+          >
+            <Home className="h-5 w-5" />
+            <span className="text-[10px] font-medium">Home</span>
+          </button>
+
           <button
             type="button"
             onClick={onOpenMessages}
-            className="relative flex h-10 w-10 items-center justify-center"
+            className="relative flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
             aria-label="Messages"
           >
-            {unreadMessages > 0 && (
-              <span className="absolute inset-0 animate-ping rounded-full bg-brand-orange opacity-60" />
-            )}
-            <span
-              className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-                unreadMessages > 0
-                  ? "bg-brand-orange text-white shadow-[0_0_14px_rgba(249,115,22,0.55)]"
-                  : "text-slate-400"
-              }`}
-            >
+            <span className="relative">
               <MessageCircle className="h-5 w-5" />
+              {unreadMessages > 0 && (
+                <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadMessages > 9 ? "9+" : unreadMessages}
+                </span>
+              )}
             </span>
-            {unreadMessages > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                {unreadMessages > 9 ? "9+" : unreadMessages}
-              </span>
-            )}
+            <span className="text-[10px] font-medium">Messages</span>
           </button>
+
           <TechNotificationBell staffId={staffId} onOpenTicket={onOpenTicket} />
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="text-sm font-medium text-slate-400 hover:text-white"
-          >
-            Sign Out
-          </button>
-        </div>
-      </header>
 
-      <div className="px-5 pb-10">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-white/5 p-4">
-            <div className="flex items-center gap-1.5 text-brand-emerald">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <p className="text-[10px] font-semibold uppercase tracking-wide">Today</p>
-            </div>
-            <p className="mt-1.5 text-2xl font-bold text-white">{stats.completedToday}</p>
-            <p className="text-[11px] text-slate-500">Jobs completed</p>
-          </div>
-          <div className="rounded-2xl bg-white/5 p-4">
-            <div className="flex items-center gap-1.5 text-brand-orange">
-              <Award className="h-3.5 w-3.5" />
-              <p className="text-[10px] font-semibold uppercase tracking-wide">All Time</p>
-            </div>
-            <p className="mt-1.5 text-2xl font-bold text-white">{stats.completedTotal}</p>
-            <p className="text-[11px] text-slate-500">Total completed</p>
-          </div>
-        </div>
-
-        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Active Task
-        </p>
-
-        {!task ? (
-          <div className="mt-3 rounded-2xl bg-white/5 p-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
-              <ClipboardList className="h-5 w-5 text-slate-400" />
-            </div>
-            <p className="mt-3 text-sm text-slate-400">
-              No job assigned to you right now. Check back later.
-            </p>
-          </div>
-        ) : needsAcceptance ? (
-          <div className="mt-3 w-full rounded-2xl bg-white/5 p-5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-bold text-amber-400">
-              NEEDS YOUR CONFIRMATION
-            </span>
-            <p className="mt-3 text-lg font-bold text-white">{task.client_name}</p>
-            <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
-            <p className="mt-2 text-xs text-slate-500">{task.service_address}</p>
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={handleAcceptJob}
-                disabled={responding}
-                className="flex-1 rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-4 py-2.5 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] disabled:opacity-60"
-              >
-                Accept Job
-              </button>
-              <button
-                type="button"
-                onClick={handleDeclineJob}
-                disabled={responding}
-                className="flex-1 rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold text-slate-300 disabled:opacity-60"
-              >
-                Decline
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-3 rounded-2xl bg-white/5 p-5">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
-                {isInProgress ? "IN PROGRESS" : "SCHEDULED"}
-              </span>
-              <a
-                href={mapsUrl(task.service_address)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 text-xs font-medium text-brand-blue"
-              >
-                <MapPin className="h-3 w-3" /> Maps
-              </a>
-            </div>
+          <div className="mt-auto w-full">
             <button
               type="button"
-              onClick={() => onOpenTask(task)}
-              className="mt-3 block w-full text-left"
+              onClick={handleSignOut}
+              className="flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
             >
-              <p className="text-lg font-bold text-white">{task.client_name}</p>
-              <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
-              <p className="mt-2 text-xs text-slate-500">{task.service_address}</p>
-              <span className="mt-4 inline-block rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-2 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]">
-                {isInProgress ? "Complete Job" : "Start Job"}
-              </span>
+              <LogOut className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Sign Out</span>
             </button>
           </div>
-        )}
+        </nav>
 
-        {queue.length > 0 && (
-          <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Next Up ({queue.length})
-            </p>
-            <div className="mt-3 space-y-2">
-              {queue.map((job) => (
-                <div
-                  key={job.id}
-                  className="rounded-xl bg-white/5 px-4 py-3"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-white">
-                      {job.client_name}
-                    </p>
-                    {job.preferred_date && (
-                      <span className="shrink-0 text-[10px] text-slate-500">
-                        {new Date(job.preferred_date).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-slate-400">
-                    {job.service_type} · {job.service_address}
+        <div className="min-w-0 flex-1">
+          <header className="px-5 py-4">
+            <h1 className="truncate text-lg font-bold text-white">
+              {shop.shop_name}
+            </h1>
+          </header>
+
+          <div className="px-5 pb-10">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-white/5 p-4">
+                <div className="flex items-center gap-1.5 text-brand-emerald">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <p className="text-[10px] font-semibold uppercase tracking-wide">
+                    Today
                   </p>
                 </div>
-              ))}
+                <p className="mt-1.5 text-2xl font-bold text-white">
+                  {stats.completedToday}
+                </p>
+                <p className="text-[11px] text-slate-500">Jobs completed</p>
+              </div>
+              <div className="rounded-2xl bg-white/5 p-4">
+                <div className="flex items-center gap-1.5 text-brand-orange">
+                  <Award className="h-3.5 w-3.5" />
+                  <p className="text-[10px] font-semibold uppercase tracking-wide">
+                    All Time
+                  </p>
+                </div>
+                <p className="mt-1.5 text-2xl font-bold text-white">
+                  {stats.completedTotal}
+                </p>
+                <p className="text-[11px] text-slate-500">Total completed</p>
+              </div>
             </div>
+
+            <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Active Task
+            </p>
+
+            {!task ? (
+              <div className="mt-3 rounded-2xl bg-white/5 p-6 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                  <ClipboardList className="h-5 w-5 text-slate-400" />
+                </div>
+                <p className="mt-3 text-sm text-slate-400">
+                  No job assigned to you right now. Check back later.
+                </p>
+              </div>
+            ) : needsAcceptance ? (
+              <div className="mt-3 w-full rounded-2xl bg-white/5 p-5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-bold text-amber-400">
+                  NEEDS YOUR CONFIRMATION
+                </span>
+                <p className="mt-3 text-lg font-bold text-white">
+                  {task.client_name}
+                </p>
+                <p className="mt-0.5 text-sm text-slate-300">
+                  {task.service_type}
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  {task.service_address}
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleAcceptJob}
+                    disabled={responding}
+                    className="flex-1 rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-4 py-2.5 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] disabled:opacity-60"
+                  >
+                    Accept Job
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeclineJob}
+                    disabled={responding}
+                    className="flex-1 rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold text-slate-300 disabled:opacity-60"
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-3 rounded-2xl bg-white/5 p-5">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
+                    {isInProgress ? "IN PROGRESS" : "SCHEDULED"}
+                  </span>
+                  <a
+                    href={mapsUrl(task.service_address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-1 text-xs font-medium text-brand-blue"
+                  >
+                    <MapPin className="h-3 w-3" /> Maps
+                  </a>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onOpenTask(task)}
+                  className="mt-3 block w-full text-left"
+                >
+                  <p className="text-lg font-bold text-white">
+                    {task.client_name}
+                  </p>
+                  <p className="mt-0.5 text-sm text-slate-300">
+                    {task.service_type}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    {task.service_address}
+                  </p>
+                  <span className="mt-4 inline-block rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-2 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]">
+                    {isInProgress ? "Complete Job" : "Start Job"}
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {queue.length > 0 && (
+              <div className="mt-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Next Up ({queue.length})
+                </p>
+                <div className="mt-3 space-y-2">
+                  {queue.map((job) => (
+                    <div
+                      key={job.id}
+                      className="rounded-xl bg-white/5 px-4 py-3"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold text-white">
+                          {job.client_name}
+                        </p>
+                        {job.preferred_date && (
+                          <span className="shrink-0 text-[10px] text-slate-500">
+                            {new Date(job.preferred_date).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 truncate text-xs text-slate-400">
+                        {job.service_type} · {job.service_address}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </main>
   );
