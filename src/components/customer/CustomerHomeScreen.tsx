@@ -30,6 +30,7 @@ import {
 } from "@/lib/customer/bookings";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
 import { listCustomerConversations } from "@/lib/chat/chat";
+import { playMessageChime } from "@/lib/chat/chime";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 
@@ -99,11 +100,17 @@ export default function CustomerHomeScreen({
     };
   }, [customer.city]);
 
+  const unreadRef = useRef(0);
+
   useEffect(() => {
     let active = true;
     function loadUnread() {
       listCustomerConversations().then((rows) => {
-        if (active) setUnreadMessages(rows.reduce((sum, r) => sum + r.unreadCount, 0));
+        if (!active) return;
+        const total = rows.reduce((sum, r) => sum + r.unreadCount, 0);
+        if (total > unreadRef.current) playMessageChime();
+        unreadRef.current = total;
+        setUnreadMessages(total);
       });
     }
     loadUnread();
@@ -174,12 +181,23 @@ export default function CustomerHomeScreen({
           <div className="relative flex items-center gap-1">
             <Link
               href="/customer/messages"
-              className="relative rounded-full p-2 text-white/80 hover:text-white"
+              className="relative flex h-10 w-10 items-center justify-center"
               aria-label="Messages"
             >
-              <MessageCircle className="h-5 w-5" />
               {unreadMessages > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                <span className="absolute inset-0 animate-ping rounded-full bg-brand-blue opacity-60" />
+              )}
+              <span
+                className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                  unreadMessages > 0
+                    ? "bg-brand-blue text-white shadow-[0_0_14px_rgba(37,99,235,0.55)]"
+                    : "text-white/80"
+                }`}
+              >
+                <MessageCircle className="h-5 w-5" />
+              </span>
+              {unreadMessages > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                   {unreadMessages > 9 ? "9+" : unreadMessages}
                 </span>
               )}

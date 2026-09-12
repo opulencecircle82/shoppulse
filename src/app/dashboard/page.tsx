@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,7 @@ import DashboardSidebarNav, {
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
+import { playMessageChime } from "@/lib/chat/chime";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const unreadRef = useRef(0);
 
   useEffect(() => {
     if (!staffMember) return;
@@ -65,6 +67,8 @@ export default function DashboardPage() {
       const total =
         staffRows.reduce((sum, c) => sum + c.unreadCount, 0) +
         customerRows.reduce((sum, c) => sum + c.unreadCount, 0);
+      if (total > unreadRef.current) playMessageChime();
+      unreadRef.current = total;
       setUnreadMessages(total);
     }
 
@@ -173,23 +177,31 @@ export default function DashboardPage() {
             <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
 
             <div className="mt-6 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-              {DASHBOARD_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-brand-blue/15 text-brand-blue"
-                      : "text-slate-400 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {tab.label}
-                  {tab.id === "messages" && unreadMessages > 0 && (
-                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500" />
-                  )}
-                </button>
-              ))}
+              {DASHBOARD_TABS.map((tab) => {
+                const hasUnread = tab.id === "messages" && unreadMessages > 0;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                      activeTab === tab.id
+                        ? "bg-brand-blue/15 text-brand-blue"
+                        : hasUnread
+                          ? "bg-red-500/10 text-white"
+                          : "text-slate-400 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {tab.label}
+                    {hasUnread && (
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                        <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
+                        <span className="relative h-3 w-3 rounded-full bg-red-500" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
               <Link
                 href="/dashboard/settings"
                 className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"

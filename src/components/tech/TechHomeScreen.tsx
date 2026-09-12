@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapPin, ClipboardList, CheckCircle2, Award, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
 import { listStaffConversations } from "@/lib/chat/chat";
+import { playMessageChime } from "@/lib/chat/chime";
 import TechNotificationBell from "./TechNotificationBell";
 
 function mapsUrl(address: string) {
@@ -37,12 +38,17 @@ export default function TechHomeScreen({
 }) {
   const [responding, setResponding] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const unreadRef = useRef(0);
 
   useEffect(() => {
     let active = true;
     function loadUnread() {
       listStaffConversations().then((rows) => {
-        if (active) setUnreadMessages(rows.reduce((sum, r) => sum + r.unreadCount, 0));
+        if (!active) return;
+        const total = rows.reduce((sum, r) => sum + r.unreadCount, 0);
+        if (total > unreadRef.current) playMessageChime();
+        unreadRef.current = total;
+        setUnreadMessages(total);
       });
     }
     loadUnread();
@@ -85,12 +91,23 @@ export default function TechHomeScreen({
           <button
             type="button"
             onClick={onOpenMessages}
-            className="relative rounded-full p-2 text-slate-400 hover:text-white"
+            className="relative flex h-10 w-10 items-center justify-center"
             aria-label="Messages"
           >
-            <MessageCircle className="h-5 w-5" />
             {unreadMessages > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+              <span className="absolute inset-0 animate-ping rounded-full bg-brand-orange opacity-60" />
+            )}
+            <span
+              className={`relative flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                unreadMessages > 0
+                  ? "bg-brand-orange text-white shadow-[0_0_14px_rgba(249,115,22,0.55)]"
+                  : "text-slate-400"
+              }`}
+            >
+              <MessageCircle className="h-5 w-5" />
+            </span>
+            {unreadMessages > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                 {unreadMessages > 9 ? "9+" : unreadMessages}
               </span>
             )}
