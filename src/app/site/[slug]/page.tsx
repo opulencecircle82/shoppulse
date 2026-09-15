@@ -17,6 +17,7 @@ import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import {
   getWebsiteTemplate,
   websiteTextClasses,
+  resolveWebsiteColors,
   getButtonStyleProps,
 } from "@/lib/site/websiteTemplates";
 
@@ -27,6 +28,12 @@ type PreviewThemeOverride = {
   website_font_family?: string;
   website_font_scale?: number;
   website_button_style?: string;
+  website_bg_color?: string | null;
+  website_card_color?: string;
+  website_text_color?: string;
+  website_heading_color?: string;
+  website_price_color?: string;
+  website_muted_color?: string;
 };
 
 // Same shared-APK link used in the dashboard's "Customize Mobile App" tab
@@ -142,6 +149,7 @@ export default function ShopWebsitePage() {
   const bookHref = `/customer/book/${shop.slug}`;
   const template = getWebsiteTemplate(displayShop.website_template);
   const tc = websiteTextClasses(template.textMode);
+  const colors = resolveWebsiteColors(template, displayShop);
   const bookButton = getButtonStyleProps(
     displayShop.website_button_style,
     displayShop.primary_color_hex,
@@ -152,7 +160,7 @@ export default function ShopWebsitePage() {
     <main
       className="min-h-screen"
       style={{
-        background: template.background,
+        background: colors.background,
         fontFamily: `"${displayShop.website_font_family}", sans-serif`,
         zoom: `${displayShop.website_font_scale}%`,
       }}
@@ -185,7 +193,10 @@ export default function ShopWebsitePage() {
                   {shop.business_category}
                 </span>
               )}
-              <h1 className="mt-1.5 truncate text-2xl font-bold text-white sm:text-3xl">
+              <h1
+                className="mt-1.5 truncate text-2xl font-bold sm:text-3xl"
+                style={{ color: colors.heading }}
+              >
                 {shop.shop_name}
               </h1>
               {shop.avg_rating !== null && (
@@ -209,7 +220,7 @@ export default function ShopWebsitePage() {
           Book Now
         </Link>
 
-        <div className={`mt-6 flex flex-wrap gap-4 text-sm ${tc.body}`}>
+        <div className="mt-6 flex flex-wrap gap-4 text-sm" style={{ color: colors.body }}>
           {shop.address && (
             <p className="flex items-center gap-1.5">
               <MapPin className="h-4 w-4" style={{ color: displayShop.accent_color_hex }} />
@@ -223,10 +234,9 @@ export default function ShopWebsitePage() {
               {shop.business_hours_open}–{shop.business_hours_close}
               <span
                 className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  open
-                    ? "bg-brand-emerald/15 text-brand-emerald"
-                    : `${tc.card} ${tc.muted}`
+                  open ? "bg-brand-emerald/15 text-brand-emerald" : ""
                 }`}
+                style={open ? undefined : { backgroundColor: colors.card, color: colors.muted }}
               >
                 {open ? "Open Now" : "Closed"}
               </span>
@@ -242,13 +252,16 @@ export default function ShopWebsitePage() {
 
         {(shop.default_hourly_rate > 0 || services.length > 0) && (
           <div className={`mt-8 border-t pt-6 ${tc.border}`}>
-            <h2 className={`text-xs font-semibold uppercase tracking-wide ${tc.muted}`}>
+            <h2
+              className="text-xs font-semibold uppercase tracking-wide"
+              style={{ color: colors.muted }}
+            >
               Pricing
             </h2>
             {shop.default_hourly_rate > 0 && (
-              <p className={`mt-2 text-sm ${tc.body}`}>
+              <p className="mt-2 text-sm" style={{ color: colors.body }}>
                 Standard Labor Fee:{" "}
-                <span className={`font-semibold ${tc.heading}`}>
+                <span className="font-semibold" style={{ color: colors.price }}>
                   {shop.currency} {shop.default_hourly_rate.toFixed(2)}/hr
                 </span>
               </p>
@@ -258,15 +271,20 @@ export default function ShopWebsitePage() {
                 {services.map((service) => (
                   <div
                     key={service.id}
-                    className={`flex items-start justify-between gap-2 rounded-xl px-4 py-3 ${tc.card}`}
+                    className="flex items-start justify-between gap-2 rounded-xl px-4 py-3"
+                    style={{ backgroundColor: colors.card }}
                   >
                     <div className="min-w-0">
-                      <p className={`text-sm ${tc.heading}`}>{service.name}</p>
+                      <p className="text-sm" style={{ color: colors.heading }}>
+                        {service.name}
+                      </p>
                       {service.description && (
-                        <p className={`text-xs ${tc.muted}`}>{service.description}</p>
+                        <p className="text-xs" style={{ color: colors.muted }}>
+                          {service.description}
+                        </p>
                       )}
                     </div>
-                    <p className={`shrink-0 text-sm font-semibold ${tc.heading}`}>
+                    <p className="shrink-0 text-sm font-semibold" style={{ color: colors.price }}>
                       {shop.currency} {service.price.toFixed(2)}
                     </p>
                   </div>
@@ -278,12 +296,15 @@ export default function ShopWebsitePage() {
 
         {reviews.length > 0 && (
           <div className={`mt-8 border-t pt-6 ${tc.border}`}>
-            <h2 className={`text-xs font-semibold uppercase tracking-wide ${tc.muted}`}>
+            <h2
+              className="text-xs font-semibold uppercase tracking-wide"
+              style={{ color: colors.muted }}
+            >
               What customers say
             </h2>
             <div className="mt-3 space-y-3">
               {reviews.slice(0, 5).map((review, index) => (
-                <div key={index} className={`rounded-xl p-4 ${tc.card}`}>
+                <div key={index} className="rounded-xl p-4" style={{ backgroundColor: colors.card }}>
                   <div className="flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
@@ -297,7 +318,9 @@ export default function ShopWebsitePage() {
                     ))}
                   </div>
                   {review.comment && (
-                    <p className={`mt-1.5 text-sm ${tc.body}`}>{review.comment}</p>
+                    <p className="mt-1.5 text-sm" style={{ color: colors.body }}>
+                      {review.comment}
+                    </p>
                   )}
                   <p className={`mt-1 text-xs ${tc.faint}`}>— {review.client_name}</p>
                 </div>
@@ -306,9 +329,11 @@ export default function ShopWebsitePage() {
           </div>
         )}
 
-        <div className={`mt-10 rounded-2xl p-6 text-center ${tc.card}`}>
-          <p className={`text-sm font-semibold ${tc.heading}`}>Get the ShopPulse App</p>
-          <p className={`mt-1 text-xs ${tc.muted}`}>
+        <div className="mt-10 rounded-2xl p-6 text-center" style={{ backgroundColor: colors.card }}>
+          <p className="text-sm font-semibold" style={{ color: colors.heading }}>
+            Get the ShopPulse App
+          </p>
+          <p className="mt-1 text-xs" style={{ color: colors.muted }}>
             Track your booking, live technician location, and proof photos
             right from your phone.
           </p>

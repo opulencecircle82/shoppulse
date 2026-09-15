@@ -17,6 +17,29 @@ import {
   type WebsiteButtonStyleKey,
 } from "@/lib/site/websiteTemplates";
 
+type ColorFieldProps = {
+  label: string;
+  value: string;
+  onChange: (hex: string) => void;
+};
+
+function ColorField({ label, value, onChange }: ColorFieldProps) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-slate-400">{label}</label>
+      <div className="mt-1.5 flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-11 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
+        />
+        <span className="truncate text-xs text-slate-400">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 function templateTags(template: WebsiteTemplate): string[] {
   const shade = template.textMode === "light" ? "DARK" : "LIGHT";
   const surface = template.background.includes("gradient") ? "GRADIENT" : "SOLID";
@@ -36,6 +59,13 @@ export default function WebsiteCustomizePage() {
   const [buttonStyle, setButtonStyle] = useState<WebsiteButtonStyleKey>(
     (shop?.website_button_style as WebsiteButtonStyleKey) ?? "3d"
   );
+  const [customBg, setCustomBg] = useState(Boolean(shop?.website_bg_color));
+  const [bgColor, setBgColor] = useState(shop?.website_bg_color ?? "#0F172A");
+  const [cardColor, setCardColor] = useState(shop?.website_card_color ?? "#1E293B");
+  const [textColor, setTextColor] = useState(shop?.website_text_color ?? "#CBD5E1");
+  const [headingColor, setHeadingColor] = useState(shop?.website_heading_color ?? "#FFFFFF");
+  const [priceColor, setPriceColor] = useState(shop?.website_price_color ?? "#F97316");
+  const [mutedColor, setMutedColor] = useState(shop?.website_muted_color ?? "#94A3B8");
   const [initialized, setInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -50,6 +80,13 @@ export default function WebsiteCustomizePage() {
     setFontFamily(shop.website_font_family);
     setFontScale(shop.website_font_scale);
     setButtonStyle((shop.website_button_style as WebsiteButtonStyleKey) ?? "3d");
+    setCustomBg(Boolean(shop.website_bg_color));
+    setBgColor(shop.website_bg_color ?? "#0F172A");
+    setCardColor(shop.website_card_color);
+    setTextColor(shop.website_text_color);
+    setHeadingColor(shop.website_heading_color);
+    setPriceColor(shop.website_price_color);
+    setMutedColor(shop.website_muted_color);
   }
 
   if (shop && !initialized) {
@@ -88,6 +125,12 @@ export default function WebsiteCustomizePage() {
           website_font_family: fontFamily,
           website_font_scale: fontScale,
           website_button_style: buttonStyle,
+          website_bg_color: customBg ? bgColor : null,
+          website_card_color: cardColor,
+          website_text_color: textColor,
+          website_heading_color: headingColor,
+          website_price_color: priceColor,
+          website_muted_color: mutedColor,
         },
       },
       window.location.origin
@@ -97,7 +140,21 @@ export default function WebsiteCustomizePage() {
   useEffect(() => {
     sendPreviewTheme();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templateKey, primaryColor, accentColor, fontFamily, fontScale, buttonStyle]);
+  }, [
+    templateKey,
+    primaryColor,
+    accentColor,
+    fontFamily,
+    fontScale,
+    buttonStyle,
+    customBg,
+    bgColor,
+    cardColor,
+    textColor,
+    headingColor,
+    priceColor,
+    mutedColor,
+  ]);
 
   if (!checked || loading) {
     return (
@@ -153,6 +210,12 @@ export default function WebsiteCustomizePage() {
         website_font_family: fontFamily,
         website_font_scale: fontScale,
         website_button_style: buttonStyle,
+        website_bg_color: customBg ? bgColor : null,
+        website_card_color: cardColor,
+        website_text_color: textColor,
+        website_heading_color: headingColor,
+        website_price_color: priceColor,
+        website_muted_color: mutedColor,
       })
       .eq("id", shop!.id);
 
@@ -232,6 +295,12 @@ export default function WebsiteCustomizePage() {
                       setTemplateKey(template.key);
                       setPrimaryColor(template.defaultPrimary);
                       setAccentColor(template.defaultAccent);
+                      setBgColor(template.defaultBg);
+                      setCardColor(template.defaultCard);
+                      setTextColor(template.defaultText);
+                      setHeadingColor(template.defaultHeading);
+                      setPriceColor(template.defaultAccent);
+                      setMutedColor(template.defaultMuted);
                     }}
                     className={`rounded-xl p-2.5 text-left transition-colors ${
                       isActive ? "bg-white/10 ring-2 ring-brand-blue" : "bg-white/5 hover:bg-white/10"
@@ -342,31 +411,42 @@ export default function WebsiteCustomizePage() {
               Colors
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-400">Primary</label>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="h-9 w-11 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                  />
-                  <span className="truncate text-xs text-slate-400">{primaryColor}</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400">Accent</label>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={accentColor}
-                    onChange={(e) => setAccentColor(e.target.value)}
-                    className="h-9 w-11 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                  />
-                  <span className="truncate text-xs text-slate-400">{accentColor}</span>
-                </div>
-              </div>
+              <ColorField label="Primary / Gradient" value={primaryColor} onChange={setPrimaryColor} />
+              <ColorField label="Accent / Buttons" value={accentColor} onChange={setAccentColor} />
+              <ColorField label="Cards / Panels" value={cardColor} onChange={setCardColor} />
+              <ColorField label="Text Color" value={textColor} onChange={setTextColor} />
+              <ColorField label="Product Name" value={headingColor} onChange={setHeadingColor} />
+              <ColorField label="Price Text" value={priceColor} onChange={setPriceColor} />
+              <ColorField
+                label="Muted / Label Text"
+                value={mutedColor}
+                onChange={setMutedColor}
+              />
             </div>
+
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-400">
+                <input
+                  type="checkbox"
+                  checked={customBg}
+                  onChange={(e) => setCustomBg(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-brand-blue"
+                />
+                Override page background
+              </label>
+              {customBg && (
+                <div className="mt-2">
+                  <ColorField label="Background" value={bgColor} onChange={setBgColor} />
+                </div>
+              )}
+              {!customBg && (
+                <p className="mt-1.5 text-[11px] text-slate-500">
+                  Using the {WEBSITE_TEMPLATES.find((t) => t.key === templateKey)?.name} template&apos;s
+                  own background.
+                </p>
+              )}
+            </div>
+
             {lowContrast && (
               <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
                 ⚠️ These colors look too close to white — button text may be

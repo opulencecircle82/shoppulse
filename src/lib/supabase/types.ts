@@ -14,6 +14,12 @@ export type Shop = {
   website_font_family: string;
   website_font_scale: number;
   website_button_style: string;
+  website_bg_color: string | null;
+  website_card_color: string;
+  website_text_color: string;
+  website_heading_color: string;
+  website_price_color: string;
+  website_muted_color: string;
   currency: Currency;
   tax_id_ein: string | null;
   is_verified: boolean;

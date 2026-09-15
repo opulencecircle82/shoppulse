@@ -38,6 +38,12 @@ export type BookingShop = {
   website_font_scale: number;
   website_button_style: string;
   address: string | null;
+  website_bg_color: string | null;
+  website_card_color: string;
+  website_text_color: string;
+  website_heading_color: string;
+  website_price_color: string;
+  website_muted_color: string;
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the

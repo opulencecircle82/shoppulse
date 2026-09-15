@@ -18,6 +18,13 @@ export type WebsiteTemplate = {
   textMode: "light" | "dark";
   defaultPrimary: string;
   defaultAccent: string;
+  /** Solid-color fallback for the "Background" override field (the first
+   * gradient stop) — used as its starting swatch before a shop customizes it. */
+  defaultBg: string;
+  defaultCard: string;
+  defaultHeading: string;
+  defaultText: string;
+  defaultMuted: string;
 };
 
 export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
@@ -28,6 +35,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#2563EB",
     defaultAccent: "#F97316",
+    defaultBg: "#0F172A",
+    defaultCard: "#1E293B",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#CBD5E1",
+    defaultMuted: "#94A3B8",
   },
   {
     key: "clean-light",
@@ -36,6 +48,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "dark",
     defaultPrimary: "#2563EB",
     defaultAccent: "#0EA5E9",
+    defaultBg: "#F8FAFC",
+    defaultCard: "#F1F5F9",
+    defaultHeading: "#0F172A",
+    defaultText: "#475569",
+    defaultMuted: "#64748B",
   },
   {
     key: "midnight-glow",
@@ -44,6 +61,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#1D4ED8",
     defaultAccent: "#38BDF8",
+    defaultBg: "#0F172A",
+    defaultCard: "#1E293B",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#CBD5E1",
+    defaultMuted: "#94A3B8",
   },
   {
     key: "sunset-bold",
@@ -52,6 +74,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#7C3AED",
     defaultAccent: "#FDBA74",
+    defaultBg: "#4C1D95",
+    defaultCard: "#3B1273",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#E5D9FA",
+    defaultMuted: "#C4B5E8",
   },
   {
     key: "forest",
@@ -60,6 +87,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#16A34A",
     defaultAccent: "#84CC16",
+    defaultBg: "#052e16",
+    defaultCard: "#0B4022",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#D1E9D8",
+    defaultMuted: "#9DBFA8",
   },
   {
     key: "coffee",
@@ -68,6 +100,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#B45309",
     defaultAccent: "#F59E0B",
+    defaultBg: "#1C1917",
+    defaultCard: "#2B2521",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#E7DCCF",
+    defaultMuted: "#B3A493",
   },
   {
     key: "ocean",
@@ -76,6 +113,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#0891B2",
     defaultAccent: "#22D3EE",
+    defaultBg: "#042f2e",
+    defaultCard: "#0A3F3D",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#CFE9E7",
+    defaultMuted: "#93BDBB",
   },
   {
     key: "rose",
@@ -84,6 +126,11 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     textMode: "light",
     defaultPrimary: "#BE123C",
     defaultAccent: "#FB7185",
+    defaultBg: "#1E1B2E",
+    defaultCard: "#2D2740",
+    defaultHeading: "#FFFFFF",
+    defaultText: "#E6DFF0",
+    defaultMuted: "#AFA5C4",
   },
 ];
 
@@ -99,12 +146,35 @@ export function getWebsiteTemplate(key: string | null | undefined): WebsiteTempl
 export function websiteTextClasses(textMode: "light" | "dark") {
   const isLight = textMode === "light";
   return {
-    heading: isLight ? "text-white" : "text-slate-900",
-    body: isLight ? "text-slate-300" : "text-slate-600",
-    muted: isLight ? "text-slate-400" : "text-slate-500",
     faint: isLight ? "text-slate-500" : "text-slate-400",
     border: isLight ? "border-white/10" : "border-slate-200",
-    card: isLight ? "bg-white/5" : "bg-slate-100",
+  };
+}
+
+export type WebsiteColorOverrides = {
+  website_bg_color?: string | null;
+  website_card_color?: string | null;
+  website_text_color?: string | null;
+  website_heading_color?: string | null;
+  website_price_color?: string | null;
+  website_muted_color?: string | null;
+};
+
+/** Resolves the per-element colors shown on the public site page and its
+ * live preview — a shop's saved overrides win, falling back to the active
+ * template's own defaults (background falls back to the template's own
+ * background value, gradient included, when no override is set). */
+export function resolveWebsiteColors(
+  template: WebsiteTemplate,
+  overrides: WebsiteColorOverrides
+) {
+  return {
+    background: overrides.website_bg_color || template.background,
+    card: overrides.website_card_color || template.defaultCard,
+    heading: overrides.website_heading_color || template.defaultHeading,
+    body: overrides.website_text_color || template.defaultText,
+    muted: overrides.website_muted_color || template.defaultMuted,
+    price: overrides.website_price_color || template.defaultAccent,
   };
 }
 
