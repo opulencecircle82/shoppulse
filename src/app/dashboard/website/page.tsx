@@ -59,7 +59,6 @@ export default function WebsiteCustomizePage() {
   const [buttonStyle, setButtonStyle] = useState<WebsiteButtonStyleKey>(
     (shop?.website_button_style as WebsiteButtonStyleKey) ?? "3d"
   );
-  const [customBg, setCustomBg] = useState(Boolean(shop?.website_bg_color));
   const [bgColor, setBgColor] = useState(shop?.website_bg_color ?? "#0F172A");
   const [cardColor, setCardColor] = useState(shop?.website_card_color ?? "#1E293B");
   const [textColor, setTextColor] = useState(shop?.website_text_color ?? "#CBD5E1");
@@ -80,7 +79,6 @@ export default function WebsiteCustomizePage() {
     setFontFamily(shop.website_font_family);
     setFontScale(shop.website_font_scale);
     setButtonStyle((shop.website_button_style as WebsiteButtonStyleKey) ?? "3d");
-    setCustomBg(Boolean(shop.website_bg_color));
     setBgColor(shop.website_bg_color ?? "#0F172A");
     setCardColor(shop.website_card_color);
     setTextColor(shop.website_text_color);
@@ -125,7 +123,7 @@ export default function WebsiteCustomizePage() {
           website_font_family: fontFamily,
           website_font_scale: fontScale,
           website_button_style: buttonStyle,
-          website_bg_color: customBg ? bgColor : null,
+          website_bg_color: bgColor,
           website_card_color: cardColor,
           website_text_color: textColor,
           website_heading_color: headingColor,
@@ -147,7 +145,6 @@ export default function WebsiteCustomizePage() {
     fontFamily,
     fontScale,
     buttonStyle,
-    customBg,
     bgColor,
     cardColor,
     textColor,
@@ -210,7 +207,7 @@ export default function WebsiteCustomizePage() {
         website_font_family: fontFamily,
         website_font_scale: fontScale,
         website_button_style: buttonStyle,
-        website_bg_color: customBg ? bgColor : null,
+        website_bg_color: bgColor,
         website_card_color: cardColor,
         website_text_color: textColor,
         website_heading_color: headingColor,
@@ -413,6 +410,7 @@ export default function WebsiteCustomizePage() {
             <div className="grid grid-cols-2 gap-3">
               <ColorField label="Primary / Gradient" value={primaryColor} onChange={setPrimaryColor} />
               <ColorField label="Accent / Buttons" value={accentColor} onChange={setAccentColor} />
+              <ColorField label="Background" value={bgColor} onChange={setBgColor} />
               <ColorField label="Cards / Panels" value={cardColor} onChange={setCardColor} />
               <ColorField label="Text Color" value={textColor} onChange={setTextColor} />
               <ColorField label="Product Name" value={headingColor} onChange={setHeadingColor} />
@@ -422,29 +420,6 @@ export default function WebsiteCustomizePage() {
                 value={mutedColor}
                 onChange={setMutedColor}
               />
-            </div>
-
-            <div className="mt-4 border-t border-white/10 pt-4">
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-400">
-                <input
-                  type="checkbox"
-                  checked={customBg}
-                  onChange={(e) => setCustomBg(e.target.checked)}
-                  className="h-3.5 w-3.5 accent-brand-blue"
-                />
-                Override page background
-              </label>
-              {customBg && (
-                <div className="mt-2">
-                  <ColorField label="Background" value={bgColor} onChange={setBgColor} />
-                </div>
-              )}
-              {!customBg && (
-                <p className="mt-1.5 text-[11px] text-slate-500">
-                  Using the {WEBSITE_TEMPLATES.find((t) => t.key === templateKey)?.name} template&apos;s
-                  own background.
-                </p>
-              )}
             </div>
 
             {lowContrast && (
