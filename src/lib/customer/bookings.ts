@@ -33,6 +33,7 @@ export type BookingShop = {
   website_header_url: string | null;
   primary_color_hex: string;
   accent_color_hex: string;
+  website_template: string;
   address: string | null;
 };
 

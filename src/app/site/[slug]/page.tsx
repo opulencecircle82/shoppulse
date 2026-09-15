@@ -14,6 +14,7 @@ import {
   type PublicService,
 } from "@/lib/customer/bookings";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
+import { getWebsiteTemplate, websiteTextClasses } from "@/lib/site/websiteTemplates";
 
 const DAY_LABELS: Record<string, string> = {
   MON: "Mon",
@@ -77,13 +78,15 @@ export default function ShopWebsitePage() {
   const hasHours = Boolean(shop.business_hours_open && shop.business_hours_close);
   const headerUrl = shop.website_header_url || stockPhotoForCategory(shop.business_category);
   const bookHref = `/customer/book/${shop.slug}`;
+  const template = getWebsiteTemplate(shop.website_template);
+  const tc = websiteTextClasses(template.textMode);
 
   return (
-    <main className="min-h-screen bg-brand-navy">
+    <main className="min-h-screen" style={{ background: template.background }}>
       <div className="relative h-72 w-full overflow-hidden sm:h-96">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={headerUrl} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/40 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 
         <div className="absolute inset-x-0 bottom-0 px-6 pb-6 sm:px-10">
           <div className="mx-auto flex max-w-3xl items-end gap-4">
@@ -92,7 +95,7 @@ export default function ShopWebsitePage() {
               <img
                 src={shop.logo_url}
                 alt=""
-                className="h-16 w-16 shrink-0 rounded-2xl border-2 border-brand-navy object-cover shadow-lg sm:h-20 sm:w-20"
+                className="h-16 w-16 shrink-0 rounded-2xl border-2 border-black/20 object-cover shadow-lg sm:h-20 sm:w-20"
               />
             )}
             <div className="min-w-0">
@@ -135,7 +138,7 @@ export default function ShopWebsitePage() {
           Book Now
         </Link>
 
-        <div className="mt-6 flex flex-wrap gap-4 text-sm text-slate-300">
+        <div className={`mt-6 flex flex-wrap gap-4 text-sm ${tc.body}`}>
           {shop.address && (
             <p className="flex items-center gap-1.5">
               <MapPin className="h-4 w-4" style={{ color: shop.accent_color_hex }} />
@@ -151,7 +154,7 @@ export default function ShopWebsitePage() {
                 className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                   open
                     ? "bg-brand-emerald/15 text-brand-emerald"
-                    : "bg-white/10 text-slate-400"
+                    : `${tc.card} ${tc.muted}`
                 }`}
               >
                 {open ? "Open Now" : "Closed"}
@@ -161,20 +164,20 @@ export default function ShopWebsitePage() {
         </div>
 
         {hasHours && shop.business_days.length > 0 && (
-          <p className="mt-2 text-xs text-slate-500">
+          <p className={`mt-2 text-xs ${tc.faint}`}>
             Open {shop.business_days.map((d) => DAY_LABELS[d] ?? d).join(", ")}
           </p>
         )}
 
         {(shop.default_hourly_rate > 0 || services.length > 0) && (
-          <div className="mt-8 border-t border-white/10 pt-6">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className={`mt-8 border-t pt-6 ${tc.border}`}>
+            <h2 className={`text-xs font-semibold uppercase tracking-wide ${tc.muted}`}>
               Pricing
             </h2>
             {shop.default_hourly_rate > 0 && (
-              <p className="mt-2 text-sm text-slate-300">
+              <p className={`mt-2 text-sm ${tc.body}`}>
                 Standard Labor Fee:{" "}
-                <span className="font-semibold text-white">
+                <span className={`font-semibold ${tc.heading}`}>
                   {shop.currency} {shop.default_hourly_rate.toFixed(2)}/hr
                 </span>
               </p>
@@ -184,15 +187,15 @@ export default function ShopWebsitePage() {
                 {services.map((service) => (
                   <div
                     key={service.id}
-                    className="flex items-start justify-between gap-2 rounded-xl bg-white/5 px-4 py-3"
+                    className={`flex items-start justify-between gap-2 rounded-xl px-4 py-3 ${tc.card}`}
                   >
                     <div className="min-w-0">
-                      <p className="text-sm text-white">{service.name}</p>
+                      <p className={`text-sm ${tc.heading}`}>{service.name}</p>
                       {service.description && (
-                        <p className="text-xs text-slate-400">{service.description}</p>
+                        <p className={`text-xs ${tc.muted}`}>{service.description}</p>
                       )}
                     </div>
-                    <p className="shrink-0 text-sm font-semibold text-white">
+                    <p className={`shrink-0 text-sm font-semibold ${tc.heading}`}>
                       {shop.currency} {service.price.toFixed(2)}
                     </p>
                   </div>
@@ -203,13 +206,13 @@ export default function ShopWebsitePage() {
         )}
 
         {reviews.length > 0 && (
-          <div className="mt-8 border-t border-white/10 pt-6">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className={`mt-8 border-t pt-6 ${tc.border}`}>
+            <h2 className={`text-xs font-semibold uppercase tracking-wide ${tc.muted}`}>
               What customers say
             </h2>
             <div className="mt-3 space-y-3">
               {reviews.slice(0, 5).map((review, index) => (
-                <div key={index} className="rounded-xl bg-white/5 p-4">
+                <div key={index} className={`rounded-xl p-4 ${tc.card}`}>
                   <div className="flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
@@ -217,24 +220,24 @@ export default function ShopWebsitePage() {
                         className={`h-3.5 w-3.5 ${
                           i < review.rating
                             ? "fill-amber-400 text-amber-400"
-                            : "text-slate-600"
+                            : "text-slate-400"
                         }`}
                       />
                     ))}
                   </div>
                   {review.comment && (
-                    <p className="mt-1.5 text-sm text-slate-300">{review.comment}</p>
+                    <p className={`mt-1.5 text-sm ${tc.body}`}>{review.comment}</p>
                   )}
-                  <p className="mt-1 text-xs text-slate-500">— {review.client_name}</p>
+                  <p className={`mt-1 text-xs ${tc.faint}`}>— {review.client_name}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="mt-10 rounded-2xl bg-white/5 p-6 text-center">
-          <p className="text-sm font-semibold text-white">Get the ShopPulse App</p>
-          <p className="mt-1 text-xs text-slate-400">
+        <div className={`mt-10 rounded-2xl p-6 text-center ${tc.card}`}>
+          <p className={`text-sm font-semibold ${tc.heading}`}>Get the ShopPulse App</p>
+          <p className={`mt-1 text-xs ${tc.muted}`}>
             Track your booking, live technician location, and proof photos —
             coming soon to Google Play and the App Store.
           </p>
@@ -246,9 +249,9 @@ export default function ShopWebsitePage() {
           </Link>
         </div>
 
-        <p className="mt-8 text-center text-xs text-slate-600">
+        <p className={`mt-8 text-center text-xs ${tc.faint}`}>
           Powered by{" "}
-          <Link href="/" className="text-slate-400 hover:text-brand-blue">
+          <Link href="/" className="hover:text-brand-blue">
             ShopPulse
           </Link>
         </p>

@@ -10,6 +10,7 @@ export type Shop = {
   website_header_url: string | null;
   primary_color_hex: string;
   accent_color_hex: string;
+  website_template: string;
   currency: Currency;
   tax_id_ein: string | null;
   is_verified: boolean;

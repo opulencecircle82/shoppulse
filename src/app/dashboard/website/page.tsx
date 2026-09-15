@@ -7,19 +7,19 @@ import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
 import { supabase } from "@/lib/supabase/client";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
-
-const COLOR_TEMPLATES = [
-  { name: "ShopPulse", primary: "#2563EB", accent: "#F97316" },
-  { name: "Emerald", primary: "#0F172A", accent: "#10B981" },
-  { name: "Violet", primary: "#5B21B6", accent: "#F59E0B" },
-  { name: "Rose", primary: "#1E293B", accent: "#E11D48" },
-  { name: "Teal", primary: "#0F766E", accent: "#FB7185" },
-  { name: "Indigo", primary: "#4338CA", accent: "#84CC16" },
-] as const;
+import {
+  WEBSITE_TEMPLATES,
+  getWebsiteTemplate,
+  websiteTextClasses,
+  type WebsiteTemplateKey,
+} from "@/lib/site/websiteTemplates";
 
 export default function WebsiteCustomizePage() {
   const { checked } = useRequireAuth();
   const { loading, shop, staffMember, isOwner, refresh } = useShop();
+  const [templateKey, setTemplateKey] = useState<WebsiteTemplateKey>(
+    (shop?.website_template as WebsiteTemplateKey) ?? "classic-dark"
+  );
   const [primaryColor, setPrimaryColor] = useState(shop?.primary_color_hex ?? "#2563EB");
   const [accentColor, setAccentColor] = useState(shop?.accent_color_hex ?? "#F97316");
   const [initialized, setInitialized] = useState(false);
@@ -28,6 +28,7 @@ export default function WebsiteCustomizePage() {
   const [error, setError] = useState<string | null>(null);
 
   if (shop && !initialized) {
+    setTemplateKey((shop.website_template as WebsiteTemplateKey) ?? "classic-dark");
     setPrimaryColor(shop.primary_color_hex);
     setAccentColor(shop.accent_color_hex);
     setInitialized(true);
@@ -80,7 +81,11 @@ export default function WebsiteCustomizePage() {
 
     const { error: updateError } = await supabase
       .from("shops")
-      .update({ primary_color_hex: primaryColor, accent_color_hex: accentColor })
+      .update({
+        primary_color_hex: primaryColor,
+        accent_color_hex: accentColor,
+        website_template: templateKey,
+      })
       .eq("id", shop!.id);
 
     setSaving(false);
@@ -96,6 +101,8 @@ export default function WebsiteCustomizePage() {
 
   const headerUrl = shop.website_header_url || stockPhotoForCategory(shop.business_category);
   const siteUrl = `/site/${shop.slug}`;
+  const currentTemplate = getWebsiteTemplate(templateKey);
+  const tc = websiteTextClasses(currentTemplate.textMode);
 
   return (
     <main className="min-h-screen bg-brand-navy">
@@ -104,7 +111,7 @@ export default function WebsiteCustomizePage() {
           <div>
             <h1 className="text-2xl font-bold text-white">Customize Your Website</h1>
             <p className="mt-1 text-sm text-slate-400">
-              Pick the colors your free public website ({" "}
+              Pick a design for your free public website ({" "}
               <a
                 href={siteUrl}
                 target="_blank"
@@ -113,7 +120,7 @@ export default function WebsiteCustomizePage() {
               >
                 shoppulse-web.vercel.app{siteUrl}
               </a>
-              {" "}) uses.
+              {" "}).
             </p>
           </div>
           <Link
@@ -130,30 +137,40 @@ export default function WebsiteCustomizePage() {
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Templates
               </p>
-              <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
-                {COLOR_TEMPLATES.map((template) => {
-                  const isActive =
-                    primaryColor.toLowerCase() === template.primary.toLowerCase() &&
-                    accentColor.toLowerCase() === template.accent.toLowerCase();
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {WEBSITE_TEMPLATES.map((template) => {
+                  const isActive = templateKey === template.key;
                   return (
                     <button
-                      key={template.name}
+                      key={template.key}
                       type="button"
                       onClick={() => {
-                        setPrimaryColor(template.primary);
-                        setAccentColor(template.accent);
+                        setTemplateKey(template.key);
+                        setPrimaryColor(template.defaultPrimary);
+                        setAccentColor(template.defaultAccent);
                       }}
-                      className={`flex flex-col items-center gap-1.5 rounded-2xl p-2.5 transition-colors ${
-                        isActive ? "bg-white/10 ring-2 ring-brand-blue" : "hover:bg-white/5"
+                      className={`overflow-hidden rounded-2xl transition-colors ${
+                        isActive ? "ring-2 ring-brand-blue" : "hover:opacity-90"
                       }`}
                     >
+                      <div
+                        style={{ background: template.background }}
+                        className="flex h-16 items-center justify-center gap-1.5"
+                      >
+                        <span
+                          className="h-3.5 w-3.5 rounded-full shadow"
+                          style={{ backgroundColor: template.defaultPrimary }}
+                        />
+                        <span
+                          className="h-3.5 w-3.5 rounded-full shadow"
+                          style={{ backgroundColor: template.defaultAccent }}
+                        />
+                      </div>
                       <span
-                        style={{
-                          backgroundImage: `linear-gradient(135deg, ${template.primary}, ${template.accent})`,
-                        }}
-                        className="h-10 w-10 rounded-full shadow-md shadow-black/30"
-                      />
-                      <span className="text-[10px] font-medium text-slate-300">
+                        className={`block px-2 py-1.5 text-[11px] font-medium ${
+                          isActive ? "bg-brand-blue/15 text-brand-blue" : "bg-white/5 text-slate-300"
+                        }`}
+                      >
                         {template.name}
                       </span>
                     </button>
@@ -191,6 +208,10 @@ export default function WebsiteCustomizePage() {
                   </div>
                 </div>
               </div>
+              <p className="mt-2 text-xs text-slate-500 sm:max-w-md">
+                Fine-tune the button/accent colors without changing the
+                template&apos;s background.
+              </p>
 
               {error && (
                 <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400 sm:max-w-md">
@@ -199,7 +220,7 @@ export default function WebsiteCustomizePage() {
               )}
               {success && (
                 <p className="mt-4 rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald sm:max-w-md">
-                  Saved — your website is now live with these colors.
+                  Saved — your website is now live with this design.
                 </p>
               )}
 
@@ -208,7 +229,7 @@ export default function WebsiteCustomizePage() {
                 disabled={saving}
                 className="mt-6 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? "Saving..." : "Save Website Colors"}
+                {saving ? "Saving..." : "Save Website Design"}
               </button>
             </div>
           </form>
@@ -217,21 +238,24 @@ export default function WebsiteCustomizePage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               Live Preview
             </p>
-            <div className="mt-3 overflow-hidden rounded-3xl border border-white/10 bg-brand-navy shadow-xl shadow-black/30">
+            <div
+              style={{ background: currentTemplate.background }}
+              className="mt-3 overflow-hidden rounded-3xl border border-white/10 shadow-xl shadow-black/30"
+            >
               <div className="relative h-36 w-full overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={headerUrl} alt="" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/40 to-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
                 <div className="absolute inset-x-0 bottom-0 flex items-end gap-2.5 px-4 pb-3">
                   {shop.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={shop.logo_url}
                       alt=""
-                      className="h-9 w-9 shrink-0 rounded-xl border-2 border-brand-navy object-cover"
+                      className="h-9 w-9 shrink-0 rounded-xl border-2 border-black/20 object-cover"
                     />
                   ) : (
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 border-brand-navy bg-brand-blue text-xs font-bold text-white">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 border-black/20 bg-brand-blue text-xs font-bold text-white">
                       {shop.shop_name.slice(0, 1).toUpperCase()}
                     </span>
                   )}
@@ -265,7 +289,7 @@ export default function WebsiteCustomizePage() {
                   Book Now
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-400">
+                <div className={`mt-3 flex flex-wrap gap-3 text-[11px] ${tc.body}`}>
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" style={{ color: accentColor }} />
                     {shop.address || shop.city || "Service area"}
@@ -278,8 +302,8 @@ export default function WebsiteCustomizePage() {
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-500">
-              Updates live as you pick colors — save to publish it to your real
-              website.
+              Updates live as you pick a template or colors — save to publish
+              it to your real website.
             </p>
           </div>
         </div>
