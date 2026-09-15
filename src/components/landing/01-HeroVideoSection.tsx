@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import LaborLeakCounter from "./LaborLeakCounter";
-import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
+import GlowingWavesBackground from "./GlowingWavesBackground";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -19,7 +19,7 @@ export default function HeroVideoSection() {
 
   return (
     <section className="relative overflow-hidden bg-brand-navy">
-      <CurvedLinesBackground />
+      <GlowingWavesBackground />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] w-full opacity-20 sm:h-[42rem] lg:h-[48rem]">
         <Image
