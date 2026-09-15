@@ -113,16 +113,27 @@ export default function HeroVideoSection() {
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 pb-24 pt-12 text-center lg:px-8 lg:pt-16">
         <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Eliminate Field Labor Fraud{" "}
-          <span className="text-brand-orange">& Customer Disputes</span> Forever
+          Sign Up & Launch Your{" "}
+          <span className="text-brand-orange">Free Business Website</span> Today
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-          Stop losing revenue to unverified hours and chargebacks. ShopPulse
-          enforces live, GPS-tagged photo proof on every job — trusted by
-          service businesses across the{" "}
-          <span className="text-white">US, AU, UK, and EU</span>.
+          Get an instant professional booking site for your business—complete
+          with built-in GPS proof, time-stamped photo logs, and
+          zero-chargeback protection.
         </p>
+
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <Link
+            href="/signup"
+            className="rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
+          >
+            Claim Your Free Website
+          </Link>
+          <p className="text-sm text-slate-400">
+            1 Owner + 1 Tech seat free forever. No credit card required.
+          </p>
+        </div>
 
         {/* GIANT CENTER STAGE ANIMATION CARD */}
         <div className="relative mx-auto mt-12 max-w-3xl">
@@ -175,18 +186,6 @@ export default function HeroVideoSection() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-10 flex flex-col items-center gap-3">
-          <Link
-            href="/signup"
-            className="rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
-          >
-            Get Started Free →
-          </Link>
-          <p className="text-sm text-slate-400">
-            1 Owner + 1 Tech seat free forever. No credit card required.
-          </p>
         </div>
       </div>
     </section>
