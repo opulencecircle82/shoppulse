@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Star, MapPin } from "lucide-react";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
@@ -9,9 +9,13 @@ import { supabase } from "@/lib/supabase/client";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import {
   WEBSITE_TEMPLATES,
+  WEBSITE_FONT_OPTIONS,
+  WEBSITE_BUTTON_STYLES,
   getWebsiteTemplate,
   websiteTextClasses,
+  getButtonStyleProps,
   type WebsiteTemplateKey,
+  type WebsiteButtonStyleKey,
 } from "@/lib/site/websiteTemplates";
 
 export default function WebsiteCustomizePage() {
@@ -22,6 +26,11 @@ export default function WebsiteCustomizePage() {
   );
   const [primaryColor, setPrimaryColor] = useState(shop?.primary_color_hex ?? "#2563EB");
   const [accentColor, setAccentColor] = useState(shop?.accent_color_hex ?? "#F97316");
+  const [fontFamily, setFontFamily] = useState(shop?.website_font_family ?? "Inter");
+  const [fontScale, setFontScale] = useState(shop?.website_font_scale ?? 100);
+  const [buttonStyle, setButtonStyle] = useState<WebsiteButtonStyleKey>(
+    (shop?.website_button_style as WebsiteButtonStyleKey) ?? "3d"
+  );
   const [initialized, setInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,8 +40,25 @@ export default function WebsiteCustomizePage() {
     setTemplateKey((shop.website_template as WebsiteTemplateKey) ?? "classic-dark");
     setPrimaryColor(shop.primary_color_hex);
     setAccentColor(shop.accent_color_hex);
+    setFontFamily(shop.website_font_family);
+    setFontScale(shop.website_font_scale);
+    setButtonStyle((shop.website_button_style as WebsiteButtonStyleKey) ?? "3d");
     setInitialized(true);
   }
+
+  useEffect(() => {
+    const linkId = "website-customize-font-preview";
+    let link = document.getElementById(linkId) as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.id = linkId;
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
+      fontFamily
+    )}:wght@400;600;700;800&display=swap`;
+  }, [fontFamily]);
 
   if (!checked || loading) {
     return (
@@ -85,6 +111,9 @@ export default function WebsiteCustomizePage() {
         primary_color_hex: primaryColor,
         accent_color_hex: accentColor,
         website_template: templateKey,
+        website_font_family: fontFamily,
+        website_font_scale: fontScale,
+        website_button_style: buttonStyle,
       })
       .eq("id", shop!.id);
 
@@ -103,6 +132,7 @@ export default function WebsiteCustomizePage() {
   const siteUrl = `/site/${shop.slug}`;
   const currentTemplate = getWebsiteTemplate(templateKey);
   const tc = websiteTextClasses(currentTemplate.textMode);
+  const bookButton = getButtonStyleProps(buttonStyle, primaryColor, accentColor);
 
   return (
     <main className="min-h-screen bg-brand-navy">
@@ -212,26 +242,104 @@ export default function WebsiteCustomizePage() {
                 Fine-tune the button/accent colors without changing the
                 template&apos;s background.
               </p>
-
-              {error && (
-                <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400 sm:max-w-md">
-                  {error}
-                </p>
-              )}
-              {success && (
-                <p className="mt-4 rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald sm:max-w-md">
-                  Saved — your website is now live with this design.
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="mt-6 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? "Saving..." : "Save Website Design"}
-              </button>
             </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/30 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Font
+              </p>
+              <div className="mt-3 sm:max-w-md">
+                <label className="block text-xs font-medium text-slate-400">
+                  Font Family
+                </label>
+                <select
+                  value={fontFamily}
+                  onChange={(e) => setFontFamily(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                >
+                  {WEBSITE_FONT_OPTIONS.map((font) => (
+                    <option key={font} value={font}>
+                      {font}
+                    </option>
+                  ))}
+                </select>
+                <p
+                  style={{ fontFamily: `"${fontFamily}", sans-serif` }}
+                  className="mt-2 rounded-lg bg-black/20 px-3 py-2 text-sm text-white"
+                >
+                  The quick brown fox — {shop.currency} 1,234.56
+                </p>
+              </div>
+
+              <div className="mt-5 sm:max-w-md">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-400">
+                    Font Size Scale
+                  </label>
+                  <span className="text-xs text-slate-400">{fontScale}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={80}
+                  max={150}
+                  step={5}
+                  value={fontScale}
+                  onChange={(e) => setFontScale(Number(e.target.value))}
+                  className="mt-1.5 w-full accent-brand-blue"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/30 sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Button Style
+              </p>
+              <div className="mt-3 grid grid-cols-5 gap-2">
+                {WEBSITE_BUTTON_STYLES.map((style) => {
+                  const preview = getButtonStyleProps(style.key, primaryColor, accentColor);
+                  const isActive = buttonStyle === style.key;
+                  return (
+                    <button
+                      key={style.key}
+                      type="button"
+                      onClick={() => setButtonStyle(style.key)}
+                      className={`flex flex-col items-center gap-2 rounded-xl p-2.5 transition-colors ${
+                        isActive ? "bg-white/10 ring-2 ring-brand-blue" : "hover:bg-white/5"
+                      }`}
+                    >
+                      <span
+                        style={preview.style}
+                        className={`flex h-7 w-full items-center justify-center text-[9px] ${preview.className}`}
+                      >
+                        Go
+                      </span>
+                      <span className="text-[10px] font-medium text-slate-300">
+                        {style.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {error && (
+              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400 sm:max-w-md">
+                {error}
+              </p>
+            )}
+            {success && (
+              <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald sm:max-w-md">
+                Saved — your website is now live with this design.
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Save Website Design"}
+            </button>
           </form>
 
           <div>
@@ -239,7 +347,11 @@ export default function WebsiteCustomizePage() {
               Live Preview
             </p>
             <div
-              style={{ background: currentTemplate.background }}
+              style={{
+                background: currentTemplate.background,
+                fontFamily: `"${fontFamily}", sans-serif`,
+                zoom: `${fontScale}%`,
+              }}
               className="mt-3 overflow-hidden rounded-3xl border border-white/10 shadow-xl shadow-black/30"
             >
               <div className="relative h-36 w-full overflow-hidden">
@@ -281,10 +393,8 @@ export default function WebsiteCustomizePage() {
 
               <div className="p-4">
                 <div
-                  style={{
-                    backgroundImage: `linear-gradient(to right, ${primaryColor}, ${accentColor})`,
-                  }}
-                  className="rounded-full px-4 py-2.5 text-center text-xs font-bold text-white"
+                  style={bookButton.style}
+                  className={`px-4 py-2.5 text-center text-xs ${bookButton.className}`}
                 >
                   Book Now
                 </div>
@@ -302,8 +412,8 @@ export default function WebsiteCustomizePage() {
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-500">
-              Updates live as you pick a template or colors — save to publish
-              it to your real website.
+              Updates live as you customize — save to publish it to your real
+              website.
             </p>
           </div>
         </div>

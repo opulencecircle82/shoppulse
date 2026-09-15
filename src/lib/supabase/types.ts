@@ -11,6 +11,9 @@ export type Shop = {
   primary_color_hex: string;
   accent_color_hex: string;
   website_template: string;
+  website_font_family: string;
+  website_font_scale: number;
+  website_button_style: string;
   currency: Currency;
   tax_id_ein: string | null;
   is_verified: boolean;

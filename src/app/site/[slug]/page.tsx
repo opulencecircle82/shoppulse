@@ -14,7 +14,11 @@ import {
   type PublicService,
 } from "@/lib/customer/bookings";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
-import { getWebsiteTemplate, websiteTextClasses } from "@/lib/site/websiteTemplates";
+import {
+  getWebsiteTemplate,
+  websiteTextClasses,
+  getButtonStyleProps,
+} from "@/lib/site/websiteTemplates";
 
 const DAY_LABELS: Record<string, string> = {
   MON: "Mon",
@@ -56,6 +60,21 @@ export default function ShopWebsitePage() {
     return () => clearTimeout(id);
   }, [load]);
 
+  useEffect(() => {
+    if (!shop?.website_font_family) return;
+    const linkId = "site-font-preview";
+    let link = document.getElementById(linkId) as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.id = linkId;
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
+      shop.website_font_family
+    )}:wght@400;600;700;800&display=swap`;
+  }, [shop?.website_font_family]);
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-brand-navy">
@@ -80,9 +99,21 @@ export default function ShopWebsitePage() {
   const bookHref = `/customer/book/${shop.slug}`;
   const template = getWebsiteTemplate(shop.website_template);
   const tc = websiteTextClasses(template.textMode);
+  const bookButton = getButtonStyleProps(
+    shop.website_button_style,
+    shop.primary_color_hex,
+    shop.accent_color_hex
+  );
 
   return (
-    <main className="min-h-screen" style={{ background: template.background }}>
+    <main
+      className="min-h-screen"
+      style={{
+        background: template.background,
+        fontFamily: `"${shop.website_font_family}", sans-serif`,
+        zoom: `${shop.website_font_scale}%`,
+      }}
+    >
       <div className="relative h-72 w-full overflow-hidden sm:h-96">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={headerUrl} alt="" className="h-full w-full object-cover" />
@@ -129,11 +160,8 @@ export default function ShopWebsitePage() {
       <div className="mx-auto max-w-3xl px-6 py-8 sm:px-10">
         <Link
           href={bookHref}
-          style={{
-            backgroundImage: `linear-gradient(to right, ${shop.primary_color_hex}, ${shop.accent_color_hex})`,
-            boxShadow: `0 0 25px ${shop.primary_color_hex}66`,
-          }}
-          className="block w-full rounded-full px-6 py-4 text-center text-base font-bold text-white transition-shadow hover:brightness-110"
+          style={bookButton.style}
+          className={`block w-full px-6 py-4 text-center text-base ${bookButton.className}`}
         >
           Book Now
         </Link>

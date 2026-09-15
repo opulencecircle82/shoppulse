@@ -1,8 +1,14 @@
+import type { CSSProperties } from "react";
+
 export type WebsiteTemplateKey =
   | "classic-dark"
   | "clean-light"
   | "midnight-glow"
-  | "sunset-bold";
+  | "sunset-bold"
+  | "forest"
+  | "coffee"
+  | "ocean"
+  | "rose";
 
 export type WebsiteTemplate = {
   key: WebsiteTemplateKey;
@@ -47,6 +53,38 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     defaultPrimary: "#7C3AED",
     defaultAccent: "#FDBA74",
   },
+  {
+    key: "forest",
+    name: "Forest",
+    background: "linear-gradient(160deg, #052e16 0%, #14532D 100%)",
+    textMode: "light",
+    defaultPrimary: "#16A34A",
+    defaultAccent: "#84CC16",
+  },
+  {
+    key: "coffee",
+    name: "Coffee",
+    background: "linear-gradient(160deg, #1C1917 0%, #451A03 100%)",
+    textMode: "light",
+    defaultPrimary: "#B45309",
+    defaultAccent: "#F59E0B",
+  },
+  {
+    key: "ocean",
+    name: "Ocean",
+    background: "linear-gradient(160deg, #042f2e 0%, #0E7490 100%)",
+    textMode: "light",
+    defaultPrimary: "#0891B2",
+    defaultAccent: "#22D3EE",
+  },
+  {
+    key: "rose",
+    name: "Rose",
+    background: "linear-gradient(160deg, #1E1B2E 0%, #4C0519 100%)",
+    textMode: "light",
+    defaultPrimary: "#BE123C",
+    defaultAccent: "#FB7185",
+  },
 ];
 
 const DEFAULT_TEMPLATE = WEBSITE_TEMPLATES[0];
@@ -68,4 +106,76 @@ export function websiteTextClasses(textMode: "light" | "dark") {
     border: isLight ? "border-white/10" : "border-slate-200",
     card: isLight ? "bg-white/5" : "bg-slate-100",
   };
+}
+
+export const WEBSITE_FONT_OPTIONS = [
+  "Inter",
+  "Roboto",
+  "Poppins",
+  "Montserrat",
+  "Nunito",
+  "Lato",
+  "Open Sans",
+] as const;
+
+export type WebsiteButtonStyleKey = "flat" | "3d" | "neon" | "glass" | "pill";
+
+export const WEBSITE_BUTTON_STYLES: { key: WebsiteButtonStyleKey; name: string }[] = [
+  { key: "flat", name: "Flat" },
+  { key: "3d", name: "3D" },
+  { key: "neon", name: "Neon" },
+  { key: "glass", name: "Glass" },
+  { key: "pill", name: "Pill" },
+];
+
+/** Returns the className + inline style for the "Book Now" button,
+ * shared between the real /site/[slug] page and the customizer's live
+ * preview so they can never drift apart. */
+export function getButtonStyleProps(
+  styleKey: string | null | undefined,
+  primary: string,
+  accent: string
+): { className: string; style: CSSProperties } {
+  switch (styleKey) {
+    case "flat":
+      return {
+        className: "rounded-lg font-bold text-white transition-opacity hover:opacity-90",
+        style: { backgroundColor: primary },
+      };
+    case "neon":
+      return {
+        className:
+          "rounded-full border-2 bg-transparent font-bold transition-shadow hover:brightness-110",
+        style: {
+          borderColor: accent,
+          color: accent,
+          boxShadow: `0 0 12px ${accent}, 0 0 28px ${accent}66, inset 0 0 12px ${accent}33`,
+          textShadow: `0 0 8px ${accent}99`,
+        },
+      };
+    case "glass":
+      return {
+        className:
+          "rounded-2xl border font-bold text-white backdrop-blur-md transition-colors hover:bg-white/20",
+        style: {
+          backgroundColor: `${primary}33`,
+          borderColor: `${accent}66`,
+        },
+      };
+    case "pill":
+      return {
+        className: "rounded-full font-bold text-white transition-opacity hover:opacity-90",
+        style: { backgroundColor: accent },
+      };
+    case "3d":
+    default:
+      return {
+        className:
+          "rounded-full font-bold text-white transition-shadow hover:brightness-110",
+        style: {
+          backgroundImage: `linear-gradient(to right, ${primary}, ${accent})`,
+          boxShadow: `0 8px 25px -5px ${primary}99`,
+        },
+      };
+  }
 }

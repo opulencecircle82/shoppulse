@@ -34,6 +34,9 @@ export type BookingShop = {
   primary_color_hex: string;
   accent_color_hex: string;
   website_template: string;
+  website_font_family: string;
+  website_font_scale: number;
+  website_button_style: string;
   address: string | null;
 };
 
