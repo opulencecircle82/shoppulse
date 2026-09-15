@@ -190,11 +190,11 @@ export default function WebsiteCustomizePage() {
         </div>
       </header>
 
-      <div className="grid flex-1 overflow-hidden lg:grid-cols-[320px_1fr]">
+      <div className="grid flex-1 overflow-hidden md:grid-cols-[300px_1fr]">
         <form
           id="website-form"
           onSubmit={handleSubmit}
-          className="space-y-6 overflow-y-auto border-b border-white/10 p-5 lg:border-b-0 lg:border-r"
+          className="space-y-6 overflow-y-auto border-b border-white/10 p-5 md:border-b-0 md:border-r"
         >
           <section>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
