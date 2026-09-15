@@ -97,7 +97,14 @@ export default function ShopWebsitePage() {
             )}
             <div className="min-w-0">
               {shop.business_category && (
-                <span className="inline-flex rounded-full border border-brand-orange/30 bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-medium text-brand-orange">
+                <span
+                  style={{
+                    borderColor: `${shop.accent_color_hex}4D`,
+                    backgroundColor: `${shop.accent_color_hex}1A`,
+                    color: shop.accent_color_hex,
+                  }}
+                  className="inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
+                >
                   {shop.business_category}
                 </span>
               )}
@@ -119,7 +126,11 @@ export default function ShopWebsitePage() {
       <div className="mx-auto max-w-3xl px-6 py-8 sm:px-10">
         <Link
           href={bookHref}
-          className="block w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-4 text-center text-base font-bold text-white shadow-[0_0_25px_rgba(37,99,235,0.4)] transition-shadow hover:shadow-[0_0_35px_rgba(37,99,235,0.55)]"
+          style={{
+            backgroundImage: `linear-gradient(to right, ${shop.primary_color_hex}, ${shop.accent_color_hex})`,
+            boxShadow: `0 0 25px ${shop.primary_color_hex}66`,
+          }}
+          className="block w-full rounded-full px-6 py-4 text-center text-base font-bold text-white transition-shadow hover:brightness-110"
         >
           Book Now
         </Link>
@@ -127,14 +138,14 @@ export default function ShopWebsitePage() {
         <div className="mt-6 flex flex-wrap gap-4 text-sm text-slate-300">
           {shop.address && (
             <p className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-brand-blue" />
+              <MapPin className="h-4 w-4" style={{ color: shop.accent_color_hex }} />
               {shop.address}
               {shop.city ? `, ${shop.city}` : ""}
             </p>
           )}
           {hasHours && (
             <p className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-brand-blue" />
+              <Clock className="h-4 w-4" style={{ color: shop.accent_color_hex }} />
               {shop.business_hours_open}–{shop.business_hours_close}
               <span
                 className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${

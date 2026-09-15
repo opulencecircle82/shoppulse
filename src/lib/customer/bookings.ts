@@ -32,6 +32,7 @@ export type BookingShop = {
   accepted_payment_methods: string[];
   website_header_url: string | null;
   primary_color_hex: string;
+  accent_color_hex: string;
   address: string | null;
 };
 

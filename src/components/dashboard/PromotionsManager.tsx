@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Plus, X, Megaphone, Globe, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Plus, X, Megaphone, Globe, Loader2, Palette } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
@@ -424,6 +425,14 @@ function BusinessWebsiteCard({ shop }: { shop: Shop }) {
         >
           {linkCopied ? "Link copied!" : "Copy Link"}
         </button>
+
+        <Link
+          href="/dashboard/website"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          <Palette className="h-3.5 w-3.5" />
+          Customize
+        </Link>
       </div>
 
       {uploadError && <p className="mt-2 text-xs text-red-400">{uploadError}</p>}
