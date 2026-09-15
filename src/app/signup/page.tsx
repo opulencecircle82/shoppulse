@@ -1,25 +1,25 @@
 import Link from "next/link";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
-import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
+import GlowingWavesBackground from "@/components/landing/GlowingWavesBackground";
 
 export default function SignupPage() {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-slate px-6 py-16">
-      <CurvedLinesBackground />
-      <div className="relative z-10 w-full max-w-md rounded-3xl bg-brand-slate-light/50 p-8 shadow-2xl shadow-black/40">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-navy px-6 py-16">
+      <GlowingWavesBackground />
+      <div className="relative z-10 w-full max-w-md rounded-3xl bg-brand-navy p-8 shadow-2xl shadow-black/40 ring-1 ring-white/10">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-blue text-white font-bold">
             SP
           </span>
-          <span className="text-lg font-semibold tracking-tight text-slate-900">
+          <span className="text-lg font-semibold tracking-tight text-white">
             ShopPulse
           </span>
         </Link>
 
-        <h1 className="mt-6 text-2xl font-bold text-slate-900">
+        <h1 className="mt-6 text-2xl font-bold text-white">
           Create your free account
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-400">
           1 Owner + 1 Tech seat free forever. No credit card required.
         </p>
 
@@ -27,7 +27,7 @@ export default function SignupPage() {
           <GoogleSignInButton label="Sign up with Google" />
         </div>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{" "}
           <Link
             href="/login"

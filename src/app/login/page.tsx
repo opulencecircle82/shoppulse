@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
-import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
+import GlowingWavesBackground from "@/components/landing/GlowingWavesBackground";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,20 +40,20 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-slate px-6 py-16">
-      <CurvedLinesBackground />
-      <div className="relative z-10 w-full max-w-md rounded-3xl bg-brand-slate-light/50 p-8 shadow-2xl shadow-black/40">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-navy px-6 py-16">
+      <GlowingWavesBackground />
+      <div className="relative z-10 w-full max-w-md rounded-3xl bg-brand-navy p-8 shadow-2xl shadow-black/40 ring-1 ring-white/10">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-blue text-white font-bold">
             SP
           </span>
-          <span className="text-lg font-semibold tracking-tight text-slate-900">
+          <span className="text-lg font-semibold tracking-tight text-white">
             ShopPulse
           </span>
         </Link>
 
-        <h1 className="mt-6 text-2xl font-bold text-slate-900">Welcome back</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="mt-6 text-2xl font-bold text-white">Welcome back</h1>
+        <p className="mt-1 text-sm text-slate-400">
           Log in to your ShopPulse dashboard.
         </p>
 
@@ -62,11 +62,11 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-300" />
-          <span className="text-xs font-medium text-slate-400">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs font-medium text-slate-500">
             Or sign in with email
           </span>
-          <div className="h-px flex-1 bg-slate-300" />
+          <div className="h-px flex-1 bg-white/10" />
         </div>
 
         <form onSubmit={handleEmailLogin} className="mt-4 space-y-3">
@@ -76,7 +76,7 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl bg-brand-slate-light/60 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <input
             type="password"
@@ -84,7 +84,7 @@ export default function LoginPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl bg-brand-slate-light/60 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           {error && (
             <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
@@ -100,7 +100,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-400">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
