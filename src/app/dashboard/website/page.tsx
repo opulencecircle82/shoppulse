@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeft, Star, MapPin } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
 import { supabase } from "@/lib/supabase/client";
-import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import {
   WEBSITE_TEMPLATES,
   WEBSITE_FONT_OPTIONS,
   WEBSITE_BUTTON_STYLES,
-  getWebsiteTemplate,
-  websiteTextClasses,
   getButtonStyleProps,
+  contrastRatio,
   type WebsiteTemplate,
   type WebsiteTemplateKey,
   type WebsiteButtonStyleKey,
@@ -42,6 +40,7 @@ export default function WebsiteCustomizePage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const previewFrameRef = useRef<HTMLIFrameElement>(null);
 
   function loadFromShop() {
     if (!shop) return;
@@ -71,6 +70,34 @@ export default function WebsiteCustomizePage() {
       fontFamily
     )}:wght@400;600;700;800&display=swap`;
   }, [fontFamily]);
+
+  // The preview is the real /site/[slug] page, loaded in an iframe (not a
+  // hand-built mockup) — draft colors/template/font/scale/button style are
+  // pushed into it live via postMessage, so this can never drift out of
+  // sync with what a real visitor sees.
+  function sendPreviewTheme() {
+    const frame = previewFrameRef.current;
+    if (!frame?.contentWindow) return;
+    frame.contentWindow.postMessage(
+      {
+        type: "shoppulse_preview_theme",
+        theme: {
+          website_template: templateKey,
+          primary_color_hex: primaryColor,
+          accent_color_hex: accentColor,
+          website_font_family: fontFamily,
+          website_font_scale: fontScale,
+          website_button_style: buttonStyle,
+        },
+      },
+      window.location.origin
+    );
+  }
+
+  useEffect(() => {
+    sendPreviewTheme();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templateKey, primaryColor, accentColor, fontFamily, fontScale, buttonStyle]);
 
   if (!checked || loading) {
     return (
@@ -140,15 +167,9 @@ export default function WebsiteCustomizePage() {
     refresh();
   }
 
-  const headerUrl = shop.website_header_url || stockPhotoForCategory(shop.business_category);
   const siteUrl = `/site/${shop.slug}`;
-  const currentTemplate = getWebsiteTemplate(templateKey);
-  const tc = websiteTextClasses(currentTemplate.textMode);
-  const bookButton = getButtonStyleProps(buttonStyle, primaryColor, accentColor);
-  const sampleServices = [
-    { name: "Standard Visit", price: 500 },
-    { name: "Priority Callout", price: 850 },
-  ];
+  const lowContrast =
+    contrastRatio(primaryColor, "#FFFFFF") < 3 || contrastRatio(accentColor, "#FFFFFF") < 3;
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-brand-navy">
@@ -346,6 +367,12 @@ export default function WebsiteCustomizePage() {
                 </div>
               </div>
             </div>
+            {lowContrast && (
+              <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+                ⚠️ These colors look too close to white — button text may be
+                hard to read.
+              </p>
+            )}
           </section>
 
           {error && (
@@ -368,90 +395,17 @@ export default function WebsiteCustomizePage() {
             <p className="text-xs text-slate-500">Changes update in real-time</p>
           </div>
 
-          <div
-            style={{
-              background: currentTemplate.background,
-              fontFamily: `"${fontFamily}", sans-serif`,
-              zoom: `${fontScale}%`,
-            }}
-            className="mx-auto mt-3 max-w-3xl overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40"
-          >
-            <div className="relative h-64 w-full overflow-hidden sm:h-72">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={headerUrl} alt="" className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 px-6 pb-5">
-                {shop.logo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={shop.logo_url}
-                    alt=""
-                    className="h-14 w-14 shrink-0 rounded-2xl border-2 border-black/20 object-cover"
-                  />
-                ) : (
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-black/20 bg-brand-blue text-lg font-bold text-white">
-                    {shop.shop_name.slice(0, 1).toUpperCase()}
-                  </span>
-                )}
-                <div className="min-w-0">
-                  {shop.business_category && (
-                    <span
-                      style={{
-                        borderColor: `${accentColor}4D`,
-                        backgroundColor: `${accentColor}1A`,
-                        color: accentColor,
-                      }}
-                      className="inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
-                    >
-                      {shop.business_category}
-                    </span>
-                  )}
-                  <p className="mt-1 truncate text-2xl font-bold text-white">
-                    {shop.shop_name}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8">
-              <div
-                style={bookButton.style}
-                className={`px-6 py-4 text-center text-base ${bookButton.className}`}
-              >
-                Book Now
-              </div>
-
-              <div className={`mt-5 flex flex-wrap gap-4 text-sm ${tc.body}`}>
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4" style={{ color: accentColor }} />
-                  {shop.address || shop.city || "Service area"}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  4.9 (sample rating)
-                </span>
-              </div>
-
-              <div className={`mt-6 border-t pt-5 ${tc.border}`}>
-                <p className={`text-xs font-semibold uppercase tracking-wide ${tc.muted}`}>
-                  Pricing
-                </p>
-                <div className="mt-2.5 space-y-1.5">
-                  {sampleServices.map((service) => (
-                    <div
-                      key={service.name}
-                      className={`flex items-center justify-between rounded-xl px-4 py-2.5 ${tc.card}`}
-                    >
-                      <p className={`text-sm ${tc.heading}`}>{service.name}</p>
-                      <p className={`text-sm font-semibold ${tc.heading}`}>
-                        {shop.currency} {service.price.toFixed(2)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* The real /site/[slug] page, loaded live in preview mode — not
+              a mockup, so it always shows real services/reviews and can
+              never look different from what a visitor actually gets. */}
+          <iframe
+            ref={previewFrameRef}
+            src={`${siteUrl}?preview=1`}
+            onLoad={sendPreviewTheme}
+            title="Website live preview"
+            className="mx-auto mt-3 block w-full max-w-3xl rounded-3xl border-0 shadow-2xl shadow-black/40"
+            style={{ height: 900 }}
+          />
         </div>
       </div>
     </main>

@@ -128,6 +128,25 @@ export const WEBSITE_BUTTON_STYLES: { key: WebsiteButtonStyleKey; name: string }
   { key: "pill", name: "Pill" },
 ];
 
+function relLuminance(hex: string): number {
+  const channels = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((h) => {
+    const v = parseInt(h, 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  const [r, g, b] = channels;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG-style contrast ratio between two hex colors (1 = identical,
+ * 21 = max black/white contrast). Used to warn when a chosen button
+ * color would make the (usually white) button text hard to read. */
+export function contrastRatio(hex1: string, hex2: string): number {
+  const l1 = relLuminance(hex1);
+  const l2 = relLuminance(hex2);
+  const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
 /** Returns the className + inline style for the "Book Now" button,
  * shared between the real /site/[slug] page and the customizer's live
  * preview so they can never drift apart. */

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Star, MapPin, Clock } from "lucide-react";
 import {
   fetchShopBySlug,
@@ -20,6 +20,15 @@ import {
   getButtonStyleProps,
 } from "@/lib/site/websiteTemplates";
 
+type PreviewThemeOverride = {
+  website_template?: string;
+  primary_color_hex?: string;
+  accent_color_hex?: string;
+  website_font_family?: string;
+  website_font_scale?: number;
+  website_button_style?: string;
+};
+
 const DAY_LABELS: Record<string, string> = {
   MON: "Mon",
   TUE: "Tue",
@@ -32,13 +41,16 @@ const DAY_LABELS: Record<string, string> = {
 
 export default function ShopWebsitePage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
+  const isPreview = searchParams.get("preview") === "1";
 
   const [loading, setLoading] = useState(true);
   const [shop, setShop] = useState<BookingShop | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [reviews, setReviews] = useState<ShopReview[]>([]);
   const [services, setServices] = useState<PublicService[]>([]);
+  const [previewTheme, setPreviewTheme] = useState<PreviewThemeOverride | null>(null);
 
   const load = useCallback(async () => {
     const shopRow = await fetchShopBySlug(slug);
@@ -60,8 +72,27 @@ export default function ShopWebsitePage() {
     return () => clearTimeout(id);
   }, [load]);
 
+  // Preview mode (embedded as an iframe by the dashboard's customizer): the
+  // real shop is still fetched normally for its actual name/photo/services/
+  // reviews, but the customizer's unsaved draft colors/template/font/button
+  // style arrive live via postMessage and override just those fields — so
+  // the preview can never drift from what this page actually renders, since
+  // it IS this page.
   useEffect(() => {
-    if (!shop?.website_font_family) return;
+    if (!isPreview) return;
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "shoppulse_preview_theme") return;
+      setPreviewTheme(event.data.theme as PreviewThemeOverride);
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [isPreview]);
+
+  const activeFontFamily = previewTheme?.website_font_family ?? shop?.website_font_family;
+
+  useEffect(() => {
+    if (!activeFontFamily) return;
     const linkId = "site-font-preview";
     let link = document.getElementById(linkId) as HTMLLinkElement | null;
     if (!link) {
@@ -71,9 +102,9 @@ export default function ShopWebsitePage() {
       document.head.appendChild(link);
     }
     link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
-      shop.website_font_family
+      activeFontFamily
     )}:wght@400;600;700;800&display=swap`;
-  }, [shop?.website_font_family]);
+  }, [activeFontFamily]);
 
   if (loading) {
     return (
@@ -93,16 +124,22 @@ export default function ShopWebsitePage() {
     );
   }
 
+  // Style fields (template/colors/font/scale/button style) fold in the
+  // customizer's live preview overrides when embedded as an iframe; every
+  // other field (name, photo, address, hours, currency...) always comes
+  // from the real saved shop.
+  const displayShop: BookingShop = { ...shop, ...(previewTheme ?? {}) };
+
   const open = isShopOpenNow(shop);
   const hasHours = Boolean(shop.business_hours_open && shop.business_hours_close);
   const headerUrl = shop.website_header_url || stockPhotoForCategory(shop.business_category);
   const bookHref = `/customer/book/${shop.slug}`;
-  const template = getWebsiteTemplate(shop.website_template);
+  const template = getWebsiteTemplate(displayShop.website_template);
   const tc = websiteTextClasses(template.textMode);
   const bookButton = getButtonStyleProps(
-    shop.website_button_style,
-    shop.primary_color_hex,
-    shop.accent_color_hex
+    displayShop.website_button_style,
+    displayShop.primary_color_hex,
+    displayShop.accent_color_hex
   );
 
   return (
@@ -110,8 +147,8 @@ export default function ShopWebsitePage() {
       className="min-h-screen"
       style={{
         background: template.background,
-        fontFamily: `"${shop.website_font_family}", sans-serif`,
-        zoom: `${shop.website_font_scale}%`,
+        fontFamily: `"${displayShop.website_font_family}", sans-serif`,
+        zoom: `${displayShop.website_font_scale}%`,
       }}
     >
       <div className="relative h-72 w-full overflow-hidden sm:h-96">
@@ -133,9 +170,9 @@ export default function ShopWebsitePage() {
               {shop.business_category && (
                 <span
                   style={{
-                    borderColor: `${shop.accent_color_hex}4D`,
-                    backgroundColor: `${shop.accent_color_hex}1A`,
-                    color: shop.accent_color_hex,
+                    borderColor: `${displayShop.accent_color_hex}4D`,
+                    backgroundColor: `${displayShop.accent_color_hex}1A`,
+                    color: displayShop.accent_color_hex,
                   }}
                   className="inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
                 >
@@ -169,14 +206,14 @@ export default function ShopWebsitePage() {
         <div className={`mt-6 flex flex-wrap gap-4 text-sm ${tc.body}`}>
           {shop.address && (
             <p className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4" style={{ color: shop.accent_color_hex }} />
+              <MapPin className="h-4 w-4" style={{ color: displayShop.accent_color_hex }} />
               {shop.address}
               {shop.city ? `, ${shop.city}` : ""}
             </p>
           )}
           {hasHours && (
             <p className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" style={{ color: shop.accent_color_hex }} />
+              <Clock className="h-4 w-4" style={{ color: displayShop.accent_color_hex }} />
               {shop.business_hours_open}–{shop.business_hours_close}
               <span
                 className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
