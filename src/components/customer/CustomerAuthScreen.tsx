@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { signInCustomer, signUpCustomer } from "@/lib/customer/customerAuth";
 import { COUNTRIES } from "@/lib/location/countries";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
-import DiagonalSplitBackground from "@/components/ui/DiagonalSplitBackground";
+import CurvedBlobBackground from "@/components/ui/CurvedBlobBackground";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
@@ -65,7 +65,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
   if (confirmEmailSent) {
     return (
       <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand-navy px-6 text-center">
-        <DiagonalSplitBackground />
+        <CurvedBlobBackground />
         <div className="relative z-10 flex w-full max-w-sm flex-col items-center rounded-3xl bg-brand-navy p-8 shadow-[0_30px_60px_-15px_rgba(14,165,233,0.45),0_45px_80px_-10px_rgba(249,115,22,0.35)]">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white">
             SP
@@ -92,7 +92,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand-navy px-6 py-10">
-      <DiagonalSplitBackground />
+      <CurvedBlobBackground />
       <div className="relative z-10 w-full max-w-sm rounded-3xl bg-brand-navy p-6 shadow-[0_30px_60px_-15px_rgba(14,165,233,0.45),0_45px_80px_-10px_rgba(249,115,22,0.35)]">
         <div className="text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue text-lg font-bold text-white mx-auto">

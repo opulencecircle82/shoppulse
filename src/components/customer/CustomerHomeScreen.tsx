@@ -46,11 +46,11 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const QUICK_CATEGORIES = [
-  { label: "Electrician", icon: Zap },
-  { label: "Plumbing", icon: Droplet },
-  { label: "HVAC / Aircon Repair", icon: Wind },
-  { label: "Handyman", icon: Wrench },
-  { label: "Cleaning Services", icon: Sparkles },
+  { label: "Electrician", icon: Zap, color: "text-amber-500" },
+  { label: "Plumbing", icon: Droplet, color: "text-brand-sky" },
+  { label: "HVAC / Aircon Repair", icon: Wind, color: "text-cyan-500" },
+  { label: "Handyman", icon: Wrench, color: "text-brand-orange" },
+  { label: "Cleaning Services", icon: Sparkles, color: "text-fuchsia-500" },
 ] as const;
 
 export default function CustomerHomeScreen({
@@ -225,13 +225,15 @@ export default function CustomerHomeScreen({
         </form>
 
         <div className="mt-4 grid grid-cols-5 gap-2">
-          {QUICK_CATEGORIES.map(({ label, icon: Icon }) => (
+          {QUICK_CATEGORIES.map(({ label, icon: Icon, color }) => (
             <Link
               key={label}
               href={`/customer/discover?category=${encodeURIComponent(label)}`}
-              className="flex flex-col items-center gap-1.5 rounded-xl bg-white/5 p-2.5 text-center shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
+              className="flex flex-col items-center gap-1.5 text-center"
             >
-              <Icon className="h-5 w-5 text-brand-blue" />
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md shadow-black/25 transition-transform active:scale-95">
+                <Icon className={`h-5 w-5 ${color}`} />
+              </span>
               <span className="text-[10px] font-medium leading-tight text-slate-300">
                 {label.split(" ")[0]}
               </span>
