@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { Star, MapPin, Clock } from "lucide-react";
+import { Star, MapPin, Clock, Smartphone } from "lucide-react";
 import {
   fetchShopBySlug,
   isShopOpenNow,
@@ -28,6 +28,12 @@ type PreviewThemeOverride = {
   website_font_scale?: number;
   website_button_style?: string;
 };
+
+// Same shared-APK link used in the dashboard's "Customize Mobile App" tab
+// (Download App button) — one plain WebView wrapper, no per-shop native
+// logic, so it works for every shop's customers without a separate build.
+const CUSTOMER_APP_DOWNLOAD_URL =
+  "https://github.com/opulencecircle82/shoppulse-customer/releases/latest/download/app-release.apk";
 
 const DAY_LABELS: Record<string, string> = {
   MON: "Mon",
@@ -303,14 +309,22 @@ export default function ShopWebsitePage() {
         <div className={`mt-10 rounded-2xl p-6 text-center ${tc.card}`}>
           <p className={`text-sm font-semibold ${tc.heading}`}>Get the ShopPulse App</p>
           <p className={`mt-1 text-xs ${tc.muted}`}>
-            Track your booking, live technician location, and proof photos —
-            coming soon to Google Play and the App Store.
+            Track your booking, live technician location, and proof photos
+            right from your phone.
           </p>
+          <a
+            href={CUSTOMER_APP_DOWNLOAD_URL}
+            style={bookButton.style}
+            className={`mt-3 inline-flex items-center gap-2 px-5 py-2.5 text-sm ${bookButton.className}`}
+          >
+            <Smartphone className="h-4 w-4" />
+            Download App (Android)
+          </a>
           <Link
             href={bookHref}
-            className="mt-3 inline-block text-xs font-semibold text-brand-blue hover:text-blue-400"
+            className="mt-3 block text-xs font-semibold text-brand-blue hover:text-blue-400"
           >
-            For now, book right here →
+            Or book right here, no app needed →
           </Link>
         </div>
 
