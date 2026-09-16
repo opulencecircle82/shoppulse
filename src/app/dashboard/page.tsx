@@ -211,8 +211,14 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {activeTab === "home" && (
-              <DashboardHomeTab onSelectTab={setActiveTab} unreadMessages={unreadMessages} />
+            {activeTab === "home" && staffMember && (
+              <DashboardHomeTab
+                ownerName={staffMember.full_name}
+                tickets={tickets}
+                currency={shop.currency}
+                onSelectTab={setActiveTab}
+                unreadMessages={unreadMessages}
+              />
             )}
 
             {activeTab === "board" && (
