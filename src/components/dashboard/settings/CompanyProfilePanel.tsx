@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
 import type { Currency, Shop } from "@/lib/supabase/types";
 import { COUNTRIES } from "@/lib/location/countries";
-import { SERVICE_CATEGORIES } from "@/lib/location/serviceCategories";
+import { SERVICE_CATEGORIES, SERVICE_CATEGORY_GROUPS } from "@/lib/location/serviceCategories";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
 
 const LocationPickerMap = dynamic(
@@ -406,11 +406,16 @@ export default function CompanyProfilePanel({
           className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
         >
           <option value="">Select category</option>
-          {SERVICE_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
+          {SERVICE_CATEGORY_GROUPS.map((group) => (
+            <optgroup key={group.group} label={group.group}>
+              {group.categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </optgroup>
           ))}
+          <option value="Other">Other</option>
         </select>
         {categoryChoice === "Other" && (
           <input

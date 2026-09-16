@@ -46,11 +46,11 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const QUICK_CATEGORIES = [
-  { label: "Electrician", icon: Zap, color: "text-amber-500" },
+  { label: "Electrical", icon: Zap, color: "text-amber-500" },
   { label: "Plumbing", icon: Droplet, color: "text-brand-sky" },
-  { label: "HVAC / Aircon Repair", icon: Wind, color: "text-cyan-500" },
-  { label: "Handyman", icon: Wrench, color: "text-brand-orange" },
-  { label: "Cleaning Services", icon: Sparkles, color: "text-fuchsia-500" },
+  { label: "HVAC", icon: Wind, color: "text-cyan-500" },
+  { label: "Handyman & Painting", icon: Wrench, color: "text-brand-orange" },
+  { label: "House Cleaning", icon: Sparkles, color: "text-fuchsia-500" },
 ] as const;
 
 export default function CustomerHomeScreen({
