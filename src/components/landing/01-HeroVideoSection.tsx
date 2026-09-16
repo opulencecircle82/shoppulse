@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Check, Menu, X } from "lucide-react";
 import LaborLeakCounter from "./LaborLeakCounter";
 import GlowingWavesBackground from "./GlowingWavesBackground";
 
@@ -165,9 +165,20 @@ export default function HeroVideoSection() {
           >
             Protect My Business Free
           </Link>
-          <p className="text-sm text-slate-400">
-            1 Owner + 1 Tech seat free forever. No credit card required.
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm text-slate-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-brand-orange" />
+              1 Owner + 1 Tech seat free forever
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-brand-orange" />
+              Free Business Website
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-brand-orange" />
+              No credit card required
+            </span>
+          </div>
         </div>
 
         {/* WHO THIS IS FOR */}
