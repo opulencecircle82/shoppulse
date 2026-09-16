@@ -41,12 +41,14 @@ function monthKey(date: Date) {
 
 export default function DashboardHomeTab({
   ownerName,
+  slug,
   tickets,
   currency,
   onSelectTab,
   unreadMessages,
 }: {
   ownerName: string;
+  slug: string;
   tickets: JobTicket[];
   currency: string;
   onSelectTab: (tab: DashboardTabId) => void;
@@ -253,9 +255,28 @@ export default function DashboardHomeTab({
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-orange text-white">
           <Globe className="h-6 w-6" />
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-base font-bold text-white">Your Website</p>
           <p className="text-sm text-slate-300">Click here to customize your website</p>
+        </div>
+
+        {/* Small live thumbnail of the real /site/[slug] page, shrunk down
+            with a CSS transform rather than a screenshot — always exactly
+            what a visitor would see, never a stale image. */}
+        <div
+          className="shrink-0 overflow-hidden rounded-lg border border-white/20 bg-white shadow-lg"
+          style={{ width: 80, height: 120 }}
+        >
+          <div style={{ width: 320, height: 480, transform: "scale(0.25)", transformOrigin: "top left" }}>
+            <iframe
+              src={`/site/${slug}`}
+              title="Your website preview"
+              tabIndex={-1}
+              loading="lazy"
+              className="h-full w-full border-0"
+              style={{ pointerEvents: "none" }}
+            />
+          </div>
         </div>
       </Link>
 
