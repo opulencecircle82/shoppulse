@@ -14,6 +14,40 @@ const NAV_LINKS = [
   { label: "Pricing", href: "#pricing" },
 ];
 
+const AUDIENCE_CATEGORIES = [
+  {
+    name: "Exterior Property Care",
+    items: [
+      "Lawn Care & Landscaping",
+      "Pressure Washing",
+      "Roofing",
+      "Tree Services",
+      "Gutter & Window Cleaning",
+    ],
+  },
+  {
+    name: "Interior Services",
+    items: [
+      "House Cleaning",
+      "Appliance Repair",
+      "Carpet Cleaning",
+      "Pest Control",
+      "Handyman & Painting",
+    ],
+  },
+  {
+    name: "Specialized Trades",
+    items: [
+      "Septic Tank & Sewer Pumping",
+      "Plumbing",
+      "Electrical",
+      "HVAC",
+      "Pool Maintenance",
+      "Restoration Services",
+    ],
+  },
+];
+
 export default function HeroVideoSection() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -113,14 +147,15 @@ export default function HeroVideoSection() {
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 pb-24 pt-12 text-center lg:px-8 lg:pt-16">
         <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Sign Up & Launch Your{" "}
-          <span className="text-brand-orange">Free Business Website</span> Today
+          Stop Losing Money to{" "}
+          <span className="text-brand-orange">Ghost Hours</span> and{" "}
+          <span className="text-brand-orange">Payment Disputes</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-          Get an instant professional booking site for your business—complete
-          with built-in GPS proof, time-stamped photo logs, and
-          zero-chargeback protection.
+          Running an Exterior Property Care, Interior Service, or Specialized
+          Trade business? Claim your free business website and mobile app to
+          manage schedules, dispatch techs, and lock down photo proof of work.
         </p>
 
         <div className="mt-8 flex flex-col items-center gap-3">
@@ -128,11 +163,39 @@ export default function HeroVideoSection() {
             href="/signup"
             className="rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-8 py-4 text-base font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_35px_rgba(249,115,22,0.5)]"
           >
-            Claim Your Free Website
+            Protect My Business Free
           </Link>
           <p className="text-sm text-slate-400">
             1 Owner + 1 Tech seat free forever. No credit card required.
           </p>
+        </div>
+
+        {/* WHO THIS IS FOR */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            This SaaS is for:
+          </h2>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 text-left sm:grid-cols-3">
+            {AUDIENCE_CATEGORIES.map((category) => (
+              <div
+                key={category.name}
+                className="rounded-2xl bg-white p-5 shadow-xl shadow-black/20"
+              >
+                <p className="text-sm font-bold uppercase tracking-wide text-brand-orange-dark">
+                  {category.name}
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {category.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-slate-700">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-orange" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* GIANT CENTER STAGE ANIMATION CARD */}
