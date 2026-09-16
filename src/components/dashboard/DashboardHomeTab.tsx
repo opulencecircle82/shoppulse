@@ -248,7 +248,7 @@ export default function DashboardHomeTab({
         </div>
       </div>
 
-      <BusinessWebsiteCard shop={shop} />
+      <BusinessWebsiteCard shop={shop} compact />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {tiles.map((tab) => {
