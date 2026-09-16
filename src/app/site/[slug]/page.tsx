@@ -199,7 +199,7 @@ export default function ShopWebsitePage() {
                 className="mt-1.5 truncate text-2xl font-bold sm:text-3xl"
                 style={{ color: colors.heading }}
               >
-                {displayShop.website_headline || shop.shop_name}
+                {shop.shop_name}
               </h1>
               {shop.avg_rating !== null && (
                 <p className="mt-0.5 flex items-center gap-1 text-sm text-white/80">
@@ -214,10 +214,25 @@ export default function ShopWebsitePage() {
       </div>
 
       <div className="mx-auto max-w-3xl px-6 py-8 sm:px-10">
-        {displayShop.website_subheadline && (
-          <p className="mb-6 text-base leading-relaxed" style={{ color: colors.body }}>
-            {displayShop.website_subheadline}
-          </p>
+        {(displayShop.website_headline || displayShop.website_subheadline) && (
+          <div className="mb-6">
+            {displayShop.website_headline && (
+              <h2
+                className="text-xl font-bold leading-tight sm:text-2xl"
+                style={{ color: colors.heading }}
+              >
+                {displayShop.website_headline}
+              </h2>
+            )}
+            {displayShop.website_subheadline && (
+              <p
+                className={`text-base leading-relaxed ${displayShop.website_headline ? "mt-2" : ""}`}
+                style={{ color: colors.body }}
+              >
+                {displayShop.website_subheadline}
+              </p>
+            )}
+          </div>
         )}
 
         <Link
