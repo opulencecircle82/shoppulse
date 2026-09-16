@@ -429,11 +429,14 @@ export default function WebsiteCustomizePage() {
               Content
             </p>
             <label className="block text-xs font-medium text-slate-400">Primary Headline</label>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              A catchy line, not your business name — shown big at the top of your site.
+            </p>
             <input
               type="text"
               value={headline}
               onChange={(e) => setHeadline(e.target.value)}
-              placeholder={shop.shop_name}
+              placeholder="e.g. Book Now — We're Quality Field Workers"
               maxLength={80}
               className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
@@ -442,7 +445,7 @@ export default function WebsiteCustomizePage() {
             <textarea
               value={subheadline}
               onChange={(e) => setSubheadline(e.target.value)}
-              placeholder="A short line about what makes your business great"
+              placeholder="e.g. Fast, reliable service you can count on — call us today"
               maxLength={160}
               rows={3}
               className="mt-1.5 w-full resize-none rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
