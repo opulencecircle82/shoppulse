@@ -12,15 +12,15 @@ import {
   Line,
 } from "recharts";
 import {
-  Globe,
   Settings,
   Calendar,
   TrendingUp,
   TrendingDown,
   type LucideIcon,
 } from "lucide-react";
-import type { JobTicket, JobStatus } from "@/lib/supabase/types";
+import type { JobTicket, JobStatus, Shop } from "@/lib/supabase/types";
 import { DASHBOARD_TABS, type DashboardTabId } from "./DashboardSidebarNav";
+import BusinessWebsiteCard from "./BusinessWebsiteCard";
 
 const STATUS_GROUPS: { label: string; color: string; statuses: JobStatus[] }[] = [
   { label: "Needs Attention", color: "#F97316", statuses: ["PENDING", "UNASSIGNED", "DISPUTED"] },
@@ -41,14 +41,14 @@ function monthKey(date: Date) {
 
 export default function DashboardHomeTab({
   ownerName,
-  slug,
+  shop,
   tickets,
   currency,
   onSelectTab,
   unreadMessages,
 }: {
   ownerName: string;
-  slug: string;
+  shop: Shop;
   tickets: JobTicket[];
   currency: string;
   onSelectTab: (tab: DashboardTabId) => void;
@@ -248,37 +248,7 @@ export default function DashboardHomeTab({
         </div>
       </div>
 
-      <Link
-        href="/dashboard/website"
-        className="relative flex items-center gap-4 overflow-hidden rounded-2xl border border-brand-orange/30 bg-gradient-to-r from-brand-orange/15 to-amber-500/10 p-5 transition-colors hover:from-brand-orange/25 hover:to-amber-500/20"
-      >
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-orange text-white">
-          <Globe className="h-6 w-6" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-base font-bold text-white">Your Website</p>
-          <p className="text-sm text-slate-300">Click here to customize your website</p>
-        </div>
-
-        {/* Small live thumbnail of the real /site/[slug] page, shrunk down
-            with a CSS transform rather than a screenshot — always exactly
-            what a visitor would see, never a stale image. */}
-        <div
-          className="shrink-0 overflow-hidden rounded-lg border border-white/20 bg-white shadow-lg"
-          style={{ width: 80, height: 120 }}
-        >
-          <div style={{ width: 320, height: 480, transform: "scale(0.25)", transformOrigin: "top left" }}>
-            <iframe
-              src={`/site/${slug}`}
-              title="Your website preview"
-              tabIndex={-1}
-              loading="lazy"
-              className="h-full w-full border-0"
-              style={{ pointerEvents: "none" }}
-            />
-          </div>
-        </div>
-      </Link>
+      <BusinessWebsiteCard shop={shop} />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {tiles.map((tab) => {

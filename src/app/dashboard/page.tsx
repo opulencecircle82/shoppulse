@@ -214,7 +214,7 @@ export default function DashboardPage() {
             {activeTab === "home" && staffMember && (
               <DashboardHomeTab
                 ownerName={staffMember.full_name}
-                slug={shop.slug}
+                shop={shop}
                 tickets={tickets}
                 currency={shop.currency}
                 onSelectTab={setActiveTab}
