@@ -20,6 +20,8 @@ export type Shop = {
   website_heading_color: string;
   website_price_color: string;
   website_muted_color: string;
+  website_headline: string | null;
+  website_subheadline: string | null;
   currency: Currency;
   tax_id_ein: string | null;
   is_verified: boolean;

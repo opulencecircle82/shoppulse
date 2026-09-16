@@ -34,6 +34,8 @@ type PreviewThemeOverride = {
   website_heading_color?: string;
   website_price_color?: string;
   website_muted_color?: string;
+  website_headline?: string | null;
+  website_subheadline?: string | null;
 };
 
 // Same shared-APK link used in the dashboard's "Customize Mobile App" tab
@@ -197,7 +199,7 @@ export default function ShopWebsitePage() {
                 className="mt-1.5 truncate text-2xl font-bold sm:text-3xl"
                 style={{ color: colors.heading }}
               >
-                {shop.shop_name}
+                {displayShop.website_headline || shop.shop_name}
               </h1>
               {shop.avg_rating !== null && (
                 <p className="mt-0.5 flex items-center gap-1 text-sm text-white/80">
@@ -212,6 +214,12 @@ export default function ShopWebsitePage() {
       </div>
 
       <div className="mx-auto max-w-3xl px-6 py-8 sm:px-10">
+        {displayShop.website_subheadline && (
+          <p className="mb-6 text-base leading-relaxed" style={{ color: colors.body }}>
+            {displayShop.website_subheadline}
+          </p>
+        )}
+
         <Link
           href={bookHref}
           style={bookButton.style}

@@ -44,6 +44,8 @@ export type BookingShop = {
   website_heading_color: string;
   website_price_color: string;
   website_muted_color: string;
+  website_headline: string | null;
+  website_subheadline: string | null;
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the

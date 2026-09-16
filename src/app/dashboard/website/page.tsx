@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ImageUp, Loader2 } from "lucide-react";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
 import { supabase } from "@/lib/supabase/client";
+import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import {
   WEBSITE_TEMPLATES,
   WEBSITE_FONT_OPTIONS,
@@ -49,9 +50,15 @@ function templateTags(template: WebsiteTemplate): string[] {
 export default function WebsiteCustomizePage() {
   const { checked } = useRequireAuth();
   const { loading, shop, staffMember, isOwner, refresh } = useShop();
+  const headerInputId = useId();
   const [templateKey, setTemplateKey] = useState<WebsiteTemplateKey>(
     (shop?.website_template as WebsiteTemplateKey) ?? "classic-dark"
   );
+  const [headerUrl, setHeaderUrl] = useState(shop?.website_header_url ?? null);
+  const [uploadingHeader, setUploadingHeader] = useState(false);
+  const [headerUploadError, setHeaderUploadError] = useState<string | null>(null);
+  const [headline, setHeadline] = useState(shop?.website_headline ?? "");
+  const [subheadline, setSubheadline] = useState(shop?.website_subheadline ?? "");
   const [primaryColor, setPrimaryColor] = useState(shop?.primary_color_hex ?? "#2563EB");
   const [accentColor, setAccentColor] = useState(shop?.accent_color_hex ?? "#F97316");
   const [fontFamily, setFontFamily] = useState(shop?.website_font_family ?? "Inter");
@@ -85,6 +92,41 @@ export default function WebsiteCustomizePage() {
     setHeadingColor(shop.website_heading_color);
     setPriceColor(shop.website_price_color);
     setMutedColor(shop.website_muted_color);
+    setHeaderUrl(shop.website_header_url);
+    setHeadline(shop.website_headline ?? "");
+    setSubheadline(shop.website_subheadline ?? "");
+  }
+
+  async function handleHeaderFile(file: File | undefined) {
+    if (!file || !shop) return;
+    const looksLikeImage =
+      file.type.startsWith("image/") || /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(file.name);
+    if (!looksLikeImage) {
+      setHeaderUploadError("Please choose an image file.");
+      return;
+    }
+    setHeaderUploadError(null);
+    setUploadingHeader(true);
+
+    const path = `${shop.id}/website-header-${Date.now()}.${file.name.split(".").pop() ?? "jpg"}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("shop-logos")
+      .upload(path, file, { contentType: file.type || "image/jpeg" });
+
+    if (uploadErr) {
+      setHeaderUploadError(uploadErr.message);
+      setUploadingHeader(false);
+      return;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("shop-logos").getPublicUrl(path);
+
+    await supabase.from("shops").update({ website_header_url: publicUrl }).eq("id", shop.id);
+    setHeaderUrl(publicUrl);
+    setUploadingHeader(false);
+    refresh();
   }
 
   if (shop && !initialized) {
@@ -129,6 +171,8 @@ export default function WebsiteCustomizePage() {
           website_heading_color: headingColor,
           website_price_color: priceColor,
           website_muted_color: mutedColor,
+          website_headline: headline || null,
+          website_subheadline: subheadline || null,
         },
       },
       window.location.origin
@@ -151,6 +195,8 @@ export default function WebsiteCustomizePage() {
     headingColor,
     priceColor,
     mutedColor,
+    headline,
+    subheadline,
   ]);
 
   if (!checked || loading) {
@@ -213,6 +259,8 @@ export default function WebsiteCustomizePage() {
         website_heading_color: headingColor,
         website_price_color: priceColor,
         website_muted_color: mutedColor,
+        website_headline: headline || null,
+        website_subheadline: subheadline || null,
       })
       .eq("id", shop!.id);
 
@@ -333,6 +381,72 @@ export default function WebsiteCustomizePage() {
                 );
               })}
             </div>
+          </section>
+
+          <section>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Header Image
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white/5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={headerUrl || stockPhotoForCategory(shop.business_category)}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="min-w-0">
+                <input
+                  id={headerInputId}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    handleHeaderFile(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                  className="hidden"
+                />
+                <label
+                  htmlFor={headerInputId}
+                  className={`inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue ${
+                    uploadingHeader ? "pointer-events-none opacity-60" : "cursor-pointer"
+                  }`}
+                >
+                  {uploadingHeader && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {!uploadingHeader && <ImageUp className="h-3.5 w-3.5" />}
+                  {uploadingHeader ? "Uploading..." : "Change"}
+                </label>
+              </div>
+            </div>
+            {headerUploadError && (
+              <p className="mt-2 text-xs text-red-400">{headerUploadError}</p>
+            )}
+          </section>
+
+          <section>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Content
+            </p>
+            <label className="block text-xs font-medium text-slate-400">Primary Headline</label>
+            <input
+              type="text"
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              placeholder={shop.shop_name}
+              maxLength={80}
+              className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+
+            <label className="mt-4 block text-xs font-medium text-slate-400">Sub Headline</label>
+            <textarea
+              value={subheadline}
+              onChange={(e) => setSubheadline(e.target.value)}
+              placeholder="A short line about what makes your business great"
+              maxLength={160}
+              rows={3}
+              className="mt-1.5 w-full resize-none rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
           </section>
 
           <section>
