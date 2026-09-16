@@ -450,6 +450,27 @@ export default function WebsiteCustomizePage() {
               rows={3}
               className="mt-1.5 w-full resize-none rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
+
+            {(headline || subheadline) && (
+              <div
+                className="mt-3 rounded-xl bg-black/20 px-3.5 py-3"
+                style={{ fontFamily: `"${fontFamily}", sans-serif` }}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                  Preview
+                </p>
+                {headline && (
+                  <p className="mt-1.5 text-lg font-bold leading-tight" style={{ color: headingColor }}>
+                    {headline}
+                  </p>
+                )}
+                {subheadline && (
+                  <p className="mt-1 text-sm" style={{ color: textColor }}>
+                    {subheadline}
+                  </p>
+                )}
+              </div>
+            )}
           </section>
 
           <section>
