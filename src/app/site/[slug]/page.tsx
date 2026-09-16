@@ -215,7 +215,7 @@ export default function ShopWebsitePage() {
 
       <div className="mx-auto max-w-3xl px-6 py-8 sm:px-10">
         {(displayShop.website_headline || displayShop.website_subheadline) && (
-          <div className="mb-6">
+          <div className="mb-6 text-center">
             {displayShop.website_headline && (
               <h2
                 className="text-xl font-bold leading-tight sm:text-2xl"

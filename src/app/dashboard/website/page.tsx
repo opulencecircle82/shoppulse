@@ -459,16 +459,18 @@ export default function WebsiteCustomizePage() {
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   Preview
                 </p>
-                {headline && (
-                  <p className="mt-1.5 text-lg font-bold leading-tight" style={{ color: headingColor }}>
-                    {headline}
-                  </p>
-                )}
-                {subheadline && (
-                  <p className="mt-1 text-sm" style={{ color: textColor }}>
-                    {subheadline}
-                  </p>
-                )}
+                <div className="text-center">
+                  {headline && (
+                    <p className="mt-1.5 text-lg font-bold leading-tight" style={{ color: headingColor }}>
+                      {headline}
+                    </p>
+                  )}
+                  {subheadline && (
+                    <p className="mt-1 text-sm" style={{ color: textColor }}>
+                      {subheadline}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </section>
