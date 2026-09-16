@@ -10,6 +10,7 @@ import { useJobTickets } from "@/lib/hooks/useJobTickets";
 import { useStaffMembers } from "@/lib/hooks/useStaffMembers";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket } from "@/lib/supabase/types";
+import DashboardHomeTab from "@/components/dashboard/DashboardHomeTab";
 import MetricsBar from "@/components/dashboard/MetricsBar";
 import KanbanBoard from "@/components/dashboard/KanbanBoard";
 import NewJobTicketModal from "@/components/dashboard/NewJobTicketModal";
@@ -45,7 +46,7 @@ export default function DashboardPage() {
   const { staff, loading: staffLoading, refresh: refreshStaff } =
     useStaffMembers(shop?.id);
 
-  const [activeTab, setActiveTab] = useState<DashboardTabId>("board");
+  const [activeTab, setActiveTab] = useState<DashboardTabId>("home");
   const [showNewTicket, setShowNewTicket] = useState(false);
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
@@ -209,6 +210,10 @@ export default function DashboardPage() {
                 Business Settings
               </Link>
             </div>
+
+            {activeTab === "home" && (
+              <DashboardHomeTab onSelectTab={setActiveTab} unreadMessages={unreadMessages} />
+            )}
 
             {activeTab === "board" && (
               <div className="mt-6 space-y-6">
