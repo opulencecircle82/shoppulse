@@ -216,6 +216,7 @@ export default function DashboardPage() {
                 ownerName={staffMember.full_name}
                 shop={shop}
                 tickets={tickets}
+                staff={staff}
                 currency={shop.currency}
                 onSelectTab={setActiveTab}
                 unreadMessages={unreadMessages}
