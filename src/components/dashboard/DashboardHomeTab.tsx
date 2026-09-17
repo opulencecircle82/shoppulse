@@ -17,6 +17,7 @@ import {
   TrendingUp,
   TrendingDown,
   Megaphone,
+  BellRing,
   type LucideIcon,
 } from "lucide-react";
 import type { JobTicket, JobStatus, Shop, StaffMember } from "@/lib/supabase/types";
@@ -148,6 +149,22 @@ export default function DashboardHomeTab({
       .slice(0, 5);
   }, [tickets]);
 
+  // Reminder list — jobs scheduled exactly 1 day from now, so an owner
+  // sees them here the day before (e.g. scheduled for Saturday shows up
+  // on Friday), not just buried in the general Pending Jobs list below.
+  const tomorrowJobs = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+    return tickets
+      .filter(
+        (t) =>
+          t.preferred_date?.slice(0, 10) === tomorrowStr &&
+          !UPCOMING_EXCLUDED_STATUSES.has(t.status)
+      )
+      .sort((a, b) => (a.preferred_date ?? "").localeCompare(b.preferred_date ?? ""));
+  }, [tickets]);
+
   const tiles = DASHBOARD_TABS.filter((tab) => tab.id !== "home");
 
   return (
@@ -228,6 +245,52 @@ export default function DashboardHomeTab({
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          <div
+            className={`rounded-2xl border p-5 ${
+              tomorrowJobs.length > 0
+                ? "border-amber-500/30 bg-amber-500/10"
+                : "border-white/10 bg-white/5"
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              {tomorrowJobs.length > 0 && <BellRing className="h-4 w-4 text-amber-400" />}
+              <p className="text-sm font-semibold text-white">Schedule — Tomorrow</p>
+              {tomorrowJobs.length > 0 && (
+                <span className="ml-auto shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-brand-navy">
+                  {tomorrowJobs.length}
+                </span>
+              )}
+            </div>
+            {tomorrowJobs.length === 0 ? (
+              <p className="mt-6 text-center text-sm text-slate-500">
+                Nothing scheduled for tomorrow yet.
+              </p>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {tomorrowJobs.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => onSelectTab("board")}
+                    className="flex w-full items-center gap-3 rounded-xl bg-black/20 px-3 py-2.5 text-left transition-colors hover:bg-black/30"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+                      <BellRing className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs font-semibold text-white">
+                        {t.client_name}
+                      </span>
+                      <span className="block truncate text-[11px] text-slate-400">
+                        {t.service_type}
+                      </span>
+                    </span>
+                  </button>
+                ))}
               </div>
             )}
           </div>
