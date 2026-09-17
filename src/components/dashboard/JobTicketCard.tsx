@@ -105,7 +105,7 @@ export default function JobTicketCard({
             if (member) setPendingAssignee(member);
           }}
           onClick={(e) => e.stopPropagation()}
-          className="mt-3 w-full rounded-xl bg-white/5 px-2.5 py-1.5 text-xs text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-3 w-full rounded-xl bg-white/5 px-2.5 py-1.5 text-xs text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
           <option value="">Assign technician...</option>
           {staff.map((member) => (

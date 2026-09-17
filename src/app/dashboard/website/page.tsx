@@ -483,7 +483,7 @@ export default function WebsiteCustomizePage() {
             <select
               value={fontFamily}
               onChange={(e) => setFontFamily(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
             >
               {WEBSITE_FONT_OPTIONS.map((font) => (
                 <option key={font} value={font}>

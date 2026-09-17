@@ -135,7 +135,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                   setCity("");
                   setBarangay("");
                 }}
-                className="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
               >
                 {COUNTRIES.map((c) => (
                   <option key={c} value={c}>
@@ -152,7 +152,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                   onRegionChange={setRegion}
                   onCityChange={setCity}
                   onBarangayChange={setBarangay}
-                  inputClassName="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+                  inputClassName="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50 [color-scheme:dark]"
                 />
               ) : (
                 <>

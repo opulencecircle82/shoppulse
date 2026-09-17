@@ -327,7 +327,7 @@ export default function CompanyProfilePanel({
             setCity("");
             setBarangay("");
           }}
-          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
           {COUNTRIES.map((c) => (
             <option key={c} value={c}>
@@ -346,7 +346,7 @@ export default function CompanyProfilePanel({
             onRegionChange={setRegion}
             onCityChange={setCity}
             onBarangayChange={setBarangay}
-            inputClassName="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+            inputClassName="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none disabled:opacity-50 [color-scheme:dark]"
           />
         </div>
       ) : (
@@ -382,7 +382,7 @@ export default function CompanyProfilePanel({
         <select
           value={currency}
           onChange={(e) => setCurrency(e.target.value as Currency)}
-          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
           {CURRENCIES.map((c) => (
             <option key={c} value={c}>
@@ -403,7 +403,7 @@ export default function CompanyProfilePanel({
             setCategoryChoice(value);
             setBusinessCategory(value === "Other" ? "" : value);
           }}
-          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
           <option value="">Select category</option>
           {SERVICE_CATEGORY_GROUPS.map((group) => (
