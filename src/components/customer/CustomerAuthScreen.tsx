@@ -138,7 +138,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                 className="w-full rounded-xl bg-white/5 px-3 py-3 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
               >
                 {COUNTRIES.map((c) => (
-                  <option key={c} value={c}>
+                  <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
                     {c}
                   </option>
                 ))}

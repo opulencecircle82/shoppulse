@@ -92,9 +92,11 @@ export default function PhilippinesAddressFields({
         }}
         className={inputClassName}
       >
-        <option value="">Select region</option>
+        <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+          Select region
+        </option>
         {PH_REGIONS.map((r) => (
-          <option key={r.reg_code} value={r.name}>
+          <option key={r.reg_code} value={r.name} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
             {r.name}
           </option>
         ))}
@@ -109,11 +111,11 @@ export default function PhilippinesAddressFields({
         disabled={!regionCode || loadingCities}
         className={inputClassName}
       >
-        <option value="">
+        <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
           {loadingCities ? "Loading..." : "Select municipality/city"}
         </option>
         {cities.map((c) => (
-          <option key={c.mun_code} value={c.name}>
+          <option key={c.mun_code} value={c.name} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
             {c.name}
           </option>
         ))}
@@ -125,11 +127,11 @@ export default function PhilippinesAddressFields({
         disabled={!cityMunCode || loadingBarangays}
         className={inputClassName}
       >
-        <option value="">
+        <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
           {loadingBarangays ? "Loading..." : "Select barangay"}
         </option>
         {barangays.map((b) => (
-          <option key={b.name} value={b.name}>
+          <option key={b.name} value={b.name} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
             {b.name}
           </option>
         ))}

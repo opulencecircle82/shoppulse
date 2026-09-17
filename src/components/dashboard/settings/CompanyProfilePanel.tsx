@@ -330,7 +330,7 @@ export default function CompanyProfilePanel({
           className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
           {COUNTRIES.map((c) => (
-            <option key={c} value={c}>
+            <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
               {c}
             </option>
           ))}
@@ -385,7 +385,7 @@ export default function CompanyProfilePanel({
           className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
           {CURRENCIES.map((c) => (
-            <option key={c} value={c}>
+            <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
               {c}
             </option>
           ))}
@@ -405,17 +405,25 @@ export default function CompanyProfilePanel({
           }}
           className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
-          <option value="">Select category</option>
+          <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+            Select category
+          </option>
           {SERVICE_CATEGORY_GROUPS.map((group) => (
-            <optgroup key={group.group} label={group.group}>
+            <optgroup
+              key={group.group}
+              label={group.group}
+              style={{ backgroundColor: "#0F172A", color: "#fff" }}
+            >
               {group.categories.map((c) => (
-                <option key={c} value={c}>
+                <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
                   {c}
                 </option>
               ))}
             </optgroup>
           ))}
-          <option value="Other">Other</option>
+          <option value="Other" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+            Other
+          </option>
         </select>
         {categoryChoice === "Other" && (
           <input

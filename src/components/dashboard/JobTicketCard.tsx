@@ -107,9 +107,15 @@ export default function JobTicketCard({
           onClick={(e) => e.stopPropagation()}
           className="mt-3 w-full rounded-xl bg-white/5 px-2.5 py-1.5 text-xs text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
         >
-          <option value="">Assign technician...</option>
+          <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+            Assign technician...
+          </option>
           {staff.map((member) => (
-            <option key={member.id} value={member.id}>
+            <option
+              key={member.id}
+              value={member.id}
+              style={{ backgroundColor: "#0F172A", color: "#fff" }}
+            >
               {member.full_name}
             </option>
           ))}

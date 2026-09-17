@@ -89,9 +89,11 @@ function DiscoverShopsContent() {
             onChange={(e) => handleCategoryChange(e.target.value)}
             className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
           >
-            <option value="">All Categories</option>
+            <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+              All Categories
+            </option>
             {categories.map((c) => (
-              <option key={c} value={c}>
+              <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
                 {c}
               </option>
             ))}
