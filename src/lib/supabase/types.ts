@@ -63,6 +63,7 @@ export type StaffMember = {
   full_name: string;
   email: string;
   phone: string | null;
+  address: string | null;
   hourly_rate: number;
   overtime_multiplier: number;
   is_active: boolean;
