@@ -27,6 +27,21 @@ import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
 } from "@/components/dashboard/DashboardSidebarNav";
+
+// Shown once at the top of every tab except Home (which has its own
+// welcome header) — title on the left, a one-line explainer on the
+// right, so a non-technical owner always knows what a section is for.
+const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
+  board: "Here are your jobs — create, assign, and track them through to completion.",
+  map: "See where your technicians are right now while they're clocked in.",
+  proof: "Review photo proof from completed jobs before approving payment.",
+  staff: "Add your team, manage their mobile app logins, and see who's active.",
+  services: "List what you offer and track the parts and inventory you use.",
+  messages: "Chat directly with your staff and customers.",
+  reviews: "See what customers are saying about your business.",
+  ads: "Create promotions and customize your free business website.",
+  mobile: "Personalize how your team's mobile app looks and feels.",
+};
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
@@ -210,6 +225,17 @@ export default function DashboardPage() {
                 Business Settings
               </Link>
             </div>
+
+            {TAB_DESCRIPTIONS[activeTab] && (
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <h2 className="text-lg font-bold text-white">
+                  {DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label}
+                </h2>
+                <p className="text-right text-xs text-slate-400">
+                  {TAB_DESCRIPTIONS[activeTab]}
+                </p>
+              </div>
+            )}
 
             {activeTab === "home" && staffMember && (
               <DashboardHomeTab
