@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Users } from "lucide-react";
+import { Users, KeyRound } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 import AddStaffModal from "./AddStaffModal";
 import StaffJobHistoryModal from "./StaffJobHistoryModal";
+import ResetStaffPasswordModal from "./ResetStaffPasswordModal";
 
 const FREE_TECH_SEATS = 1;
 
@@ -28,6 +29,7 @@ export default function StaffManagementTab({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [historyStaff, setHistoryStaff] = useState<StaffMember | null>(null);
+  const [passwordStaff, setPasswordStaff] = useState<StaffMember | null>(null);
   const nonOwnerStaff = staff.filter((s) => s.role !== "OWNER");
   const seatsUsed = nonOwnerStaff.length;
 
@@ -178,6 +180,14 @@ export default function StaffManagementTab({
                         </button>
                         <button
                           type="button"
+                          onClick={() => setPasswordStaff(member)}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+                        >
+                          <KeyRound className="h-3 w-3" />
+                          Edit
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => toggleActive(member)}
                           className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
                         >
@@ -216,6 +226,13 @@ export default function StaffManagementTab({
           tickets={tickets}
           currency={currency}
           onClose={() => setHistoryStaff(null)}
+        />
+      )}
+
+      {passwordStaff && (
+        <ResetStaffPasswordModal
+          staffMember={passwordStaff}
+          onClose={() => setPasswordStaff(null)}
         />
       )}
     </div>
