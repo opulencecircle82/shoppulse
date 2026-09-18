@@ -11,17 +11,9 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import {
-  Settings,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  Megaphone,
-  BellRing,
-  type LucideIcon,
-} from "lucide-react";
+import { Calendar, TrendingUp, TrendingDown, Megaphone, BellRing } from "lucide-react";
 import type { JobTicket, JobStatus, Shop, StaffMember } from "@/lib/supabase/types";
-import { DASHBOARD_TABS, type DashboardTabId } from "./DashboardSidebarNav";
+import type { DashboardTabId } from "./DashboardSidebarNav";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -52,7 +44,6 @@ export default function DashboardHomeTab({
   staff,
   currency,
   onSelectTab,
-  unreadMessages,
 }: {
   ownerName: string;
   shop: Shop;
@@ -60,7 +51,6 @@ export default function DashboardHomeTab({
   staff: StaffMember[];
   currency: string;
   onSelectTab: (tab: DashboardTabId) => void;
-  unreadMessages: number;
 }) {
   const firstName = ownerName.trim().split(" ")[0] || ownerName;
   const [linkCopied, setLinkCopied] = useState(false);
@@ -164,8 +154,6 @@ export default function DashboardHomeTab({
       )
       .sort((a, b) => (a.preferred_date ?? "").localeCompare(b.preferred_date ?? ""));
   }, [tickets]);
-
-  const tiles = DASHBOARD_TABS.filter((tab) => tab.id !== "home");
 
   return (
     <div className="mt-6 space-y-6">
@@ -417,46 +405,6 @@ export default function DashboardHomeTab({
           </div>
           <p className="mt-1 text-[10px] text-slate-500">Last 14 days, approved invoices only</p>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {tiles.map((tab) => {
-          const Icon: LucideIcon = tab.icon;
-          const hasUnread = tab.id === "messages" && unreadMessages > 0;
-
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onSelectTab(tab.id)}
-              className="relative flex aspect-square flex-col items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-4 text-center transition-colors hover:border-white/20 hover:bg-white/10"
-            >
-              <span
-                className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-                  hasUnread ? "bg-red-500/15 text-red-400" : "bg-white/10 text-brand-blue"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-              </span>
-              <p className="text-sm font-semibold text-white">{tab.label}</p>
-              {hasUnread && (
-                <span className="absolute right-3 top-3 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                  {unreadMessages > 9 ? "9+" : unreadMessages}
-                </span>
-              )}
-            </button>
-          );
-        })}
-
-        <Link
-          href="/dashboard/settings"
-          className="relative flex aspect-square flex-col items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-4 text-center transition-colors hover:border-white/20 hover:bg-white/10"
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-brand-blue">
-            <Settings className="h-5 w-5" />
-          </span>
-          <p className="text-sm font-semibold text-white">Business Settings</p>
-        </Link>
       </div>
     </div>
   );

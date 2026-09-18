@@ -219,7 +219,6 @@ export default function DashboardPage() {
                 staff={staff}
                 currency={shop.currency}
                 onSelectTab={setActiveTab}
-                unreadMessages={unreadMessages}
               />
             )}
 
