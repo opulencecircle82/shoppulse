@@ -228,11 +228,11 @@ export default function DashboardPage() {
             </div>
 
             {TAB_DESCRIPTIONS[activeTab] && (
-              <div className="mt-6 flex flex-wrap items-start justify-between gap-x-4 gap-y-1.5">
+              <div className="mt-6 text-center">
                 <h2 className="text-lg font-bold text-white">
                   {DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label}
                 </h2>
-                <p className="max-w-md text-right text-xs leading-relaxed text-slate-400">
+                <p className="mx-auto mt-1.5 max-w-2xl text-xs leading-relaxed text-slate-400">
                   {TAB_DESCRIPTIONS[activeTab]}
                 </p>
               </div>
