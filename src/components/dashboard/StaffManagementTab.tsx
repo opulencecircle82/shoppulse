@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Pencil } from "lucide-react";
+import { Users, Pencil, LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 import AddStaffModal from "./AddStaffModal";
@@ -30,6 +30,8 @@ export default function StaffManagementTab({
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [historyStaff, setHistoryStaff] = useState<StaffMember | null>(null);
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+  const [loggingOutId, setLoggingOutId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const nonOwnerStaff = staff.filter((s) => s.role !== "OWNER");
   const seatsUsed = nonOwnerStaff.length;
 
@@ -39,6 +41,26 @@ export default function StaffManagementTab({
       .update({ is_active: !member.is_active })
       .eq("id", member.id);
     onChanged();
+  }
+
+  async function forceLogout(member: StaffMember) {
+    const confirmed = window.confirm(
+      `Sign ${member.full_name} out of the mobile app everywhere? They'll need to log back in.`
+    );
+    if (!confirmed) return;
+
+    setLoggingOutId(member.id);
+    setActionError(null);
+
+    const { error } = await supabase.rpc("force_logout_staff", {
+      p_staff_id: member.id,
+    });
+
+    setLoggingOutId(null);
+
+    if (error) {
+      setActionError(error.message);
+    }
   }
 
   async function deleteStaff(member: StaffMember) {
@@ -102,9 +124,9 @@ export default function StaffManagementTab({
         </button>
       </div>
 
-      {deleteError && (
+      {(deleteError || actionError) && (
         <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-500">
-          {deleteError}
+          {deleteError || actionError}
         </p>
       )}
 
@@ -188,6 +210,15 @@ export default function StaffManagementTab({
                         >
                           <Pencil className="h-3 w-3" />
                           Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => forceLogout(member)}
+                          disabled={loggingOutId === member.id}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-amber-400 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <LogOut className="h-3 w-3" />
+                          {loggingOutId === member.id ? "Logging out..." : "Force Logout"}
                         </button>
                         <button
                           type="button"
