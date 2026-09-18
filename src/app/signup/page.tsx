@@ -1,8 +1,49 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import GlowingWavesBackground from "@/components/landing/GlowingWavesBackground";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleEmailSignup(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+
+    if (!data.session) {
+      setError("Check your email to confirm your account, then log in.");
+      return;
+    }
+
+    router.push("/dashboard");
+  }
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-navy px-6 py-16">
       <GlowingWavesBackground />
@@ -26,6 +67,45 @@ export default function SignupPage() {
         <div className="mt-8">
           <GoogleSignInButton label="Sign up with Google" />
         </div>
+
+        <div className="mt-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs font-medium text-slate-500">
+            Or sign up with email
+          </span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <form onSubmit={handleEmailSignup} className="mt-4 space-y-3">
+          <input
+            type="email"
+            required
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+          <input
+            type="password"
+            required
+            placeholder="Password (min. 8 characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? "Creating account..." : "Create Account"}
+          </button>
+        </form>
 
         <p className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{" "}
