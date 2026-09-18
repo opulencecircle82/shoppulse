@@ -32,7 +32,8 @@ import DashboardSidebarNav, {
 // welcome header) — title on the left, a one-line explainer on the
 // right, so a non-technical owner always knows what a section is for.
 const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
-  board: "Here are your jobs — create, assign, and track them through to completion.",
+  board:
+    "Jobs move through stages: Booking Requests → Unassigned → Scheduled → In Progress → Completed → Approved (or Disputed). Example: a customer books (Booking Requests), you assign a tech (→ Scheduled), they work the job (→ In Progress → Completed), then you approve payment (→ Approved).",
   map: "See where your technicians are right now while they're clocked in.",
   proof: "Review photo proof from completed jobs before approving payment.",
   staff: "Add your team, manage their mobile app logins, and see who's active.",
@@ -227,11 +228,11 @@ export default function DashboardPage() {
             </div>
 
             {TAB_DESCRIPTIONS[activeTab] && (
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+              <div className="mt-6 flex flex-wrap items-start justify-between gap-x-4 gap-y-1.5">
                 <h2 className="text-lg font-bold text-white">
                   {DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label}
                 </h2>
-                <p className="text-right text-xs text-slate-400">
+                <p className="max-w-md text-right text-xs leading-relaxed text-slate-400">
                   {TAB_DESCRIPTIONS[activeTab]}
                 </p>
               </div>
