@@ -165,7 +165,10 @@ export default function DashboardHomeTab({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-white">Your Website Preview</p>
+            <div>
+              <p className="text-sm font-semibold text-white">This is your FREE website</p>
+              <p className="text-xs text-slate-400">Live now — share it with customers.</p>
+            </div>
             <Link
               href="/dashboard/website"
               className="text-xs font-semibold text-brand-blue hover:text-blue-400"
