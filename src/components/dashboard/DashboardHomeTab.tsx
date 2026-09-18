@@ -184,11 +184,16 @@ export default function DashboardHomeTab({
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
               <span className="ml-2 truncate text-[10px] text-slate-500">{siteUrl}</span>
             </div>
-            {/* The real /site/[slug] page, not a mockup. */}
+            {/* The real /site/[slug] page, not a mockup — but view-only
+                here (pointer-events disabled) since this is just a
+                preview, not somewhere a click like "Book Now" should
+                actually do anything. */}
             <iframe
               src={`/site/${shop.slug}`}
               title="Your website preview"
+              tabIndex={-1}
               className="h-[320px] w-full border-0"
+              style={{ pointerEvents: "none" }}
             />
           </div>
 
