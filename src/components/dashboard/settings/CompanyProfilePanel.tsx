@@ -134,7 +134,11 @@ export default function CompanyProfilePanel({
 
       setSaving(false);
       if (updateError) {
-        setError(updateError.message);
+        setError(
+          updateError.code === "23505"
+            ? "This business name is already taken. Please choose a different one."
+            : updateError.message
+        );
         return;
       }
       setSuccess(true);
