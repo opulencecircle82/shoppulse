@@ -26,7 +26,8 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
   if (loading || !profile) return null;
 
   const address = [profile.barangay, profile.city, profile.region].filter(Boolean).join(", ");
-  const totalInvoiced = profile.jobs.reduce((sum, job) => sum + job.total_invoice_amount, 0);
+  const total = profile.jobs.reduce((sum, job) => sum + job.effective_amount, 0);
+  const hasEstimate = profile.jobs.some((job) => job.is_estimate);
 
   return (
     <div className="mb-3 rounded-2xl bg-white/5 p-4">
@@ -73,9 +74,14 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
                   Job History ({profile.jobs.length})
                 </p>
                 <p className="text-xs font-semibold text-brand-emerald">
-                  Total: {profile.currency} {totalInvoiced.toFixed(2)}
+                  Total: {profile.currency} {total.toFixed(2)}
                 </p>
               </div>
+              {hasEstimate && (
+                <p className="mt-1 text-[10px] text-slate-500">
+                  Jobs not yet invoiced count their service fee as an estimate.
+                </p>
+              )}
               <div className="mt-2 max-h-40 space-y-1.5 overflow-y-auto">
                 {profile.jobs.map((job) => (
                   <div
@@ -88,9 +94,10 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
                         {new Date(job.created_at).toLocaleDateString()} · {job.status}
                       </p>
                     </div>
-                    {job.total_invoice_amount > 0 && (
+                    {job.effective_amount > 0 && (
                       <span className="shrink-0 font-semibold text-brand-emerald">
-                        {job.total_invoice_amount.toFixed(2)}
+                        {job.effective_amount.toFixed(2)}
+                        {job.is_estimate && <span className="text-slate-500"> (est.)</span>}
                       </span>
                     )}
                   </div>

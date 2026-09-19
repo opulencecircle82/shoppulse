@@ -201,6 +201,8 @@ export type ShopCustomerProfile = {
     status: string;
     created_at: string;
     total_invoice_amount: number;
+    effective_amount: number;
+    is_estimate: boolean;
   }[];
 };
 
