@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { MapPin, Plus } from "lucide-react";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
+import {
+  listCustomerAddresses,
+  formatAddress,
+  type CustomerAddress,
+} from "@/lib/customer/addresses";
 import {
   fetchShopBySlug,
   submitBooking,
@@ -15,12 +21,7 @@ import {
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
 import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
-
-function customerAddress(customer: Customer): string {
-  return [customer.barangay, customer.city, customer.region]
-    .filter(Boolean)
-    .join(", ");
-}
+import AddAddressModal from "@/components/customer/AddAddressModal";
 
 export default function BookJobPage() {
   const params = useParams();
@@ -36,6 +37,9 @@ export default function BookJobPage() {
   const [serviceType, setServiceType] = useState("");
   const [description, setDescription] = useState("");
   const [requestPhotoUrl, setRequestPhotoUrl] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showAddAddress, setShowAddAddress] = useState(false);
   const [manualAddress, setManualAddress] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
   const [availability, setAvailability] = useState<DateAvailability | null>(null);
@@ -60,6 +64,16 @@ export default function BookJobPage() {
     setCustomer(current);
     setLoading(false);
     listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
+
+    if (current) {
+      listCustomerAddresses()
+        .then((list) => {
+          setAddresses(list);
+          const preferred = list.find((a) => a.isDefault) ?? list[0];
+          if (preferred) setSelectedAddressId(preferred.id);
+        })
+        .catch(() => {});
+    }
   }, [shopSlug]);
 
   useEffect(() => {
@@ -92,7 +106,8 @@ export default function BookJobPage() {
     event.preventDefault();
     if (!customer) return;
 
-    const serviceAddress = customerAddress(customer) || manualAddress;
+    const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
+    const serviceAddress = (selectedAddress && formatAddress(selectedAddress)) || manualAddress;
     if (!serviceAddress) {
       setError("Please provide your service address.");
       return;
@@ -161,8 +176,6 @@ export default function BookJobPage() {
       </main>
     );
   }
-
-  const knownAddress = customerAddress(customer);
 
   return (
     <main className="min-h-screen bg-brand-navy px-6 py-10">
@@ -259,19 +272,65 @@ export default function BookJobPage() {
             <label className="block text-xs font-medium text-slate-400">
               Service Address
             </label>
-            {knownAddress ? (
-              <p className="mt-1 rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-slate-300">
-                {knownAddress}
-              </p>
+            {addresses.length > 0 ? (
+              <div className="mt-1.5 space-y-1.5">
+                {addresses.map((address) => (
+                  <label
+                    key={address.id}
+                    className={`flex cursor-pointer items-start gap-2.5 rounded-xl px-3.5 py-2.5 text-sm transition-colors ${
+                      selectedAddressId === address.id
+                        ? "bg-brand-blue/15 ring-1 ring-brand-blue"
+                        : "bg-white/5 hover:bg-white/10"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="serviceAddress"
+                      checked={selectedAddressId === address.id}
+                      onChange={() => setSelectedAddressId(address.id)}
+                      className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue focus:ring-brand-blue"
+                    />
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-1.5">
+                        <span className="font-semibold text-white">{address.label}</span>
+                        {address.isDefault && (
+                          <span className="rounded-full bg-brand-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-brand-emerald">
+                            Default
+                          </span>
+                        )}
+                      </span>
+                      <span className="block text-slate-400">{formatAddress(address)}</span>
+                    </span>
+                  </label>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setShowAddAddress(true)}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3.5 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add New Address
+                </button>
+              </div>
             ) : (
-              <input
-                type="text"
-                required
-                value={manualAddress}
-                onChange={(e) => setManualAddress(e.target.value)}
-                placeholder="Where should the technician go?"
-                className="mt-1 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-              />
+              <>
+                <input
+                  type="text"
+                  required
+                  value={manualAddress}
+                  onChange={(e) => setManualAddress(e.target.value)}
+                  placeholder="Where should the technician go?"
+                  className="mt-1 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAddAddress(true)}
+                  className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3.5 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  Save a pinned address instead
+                </button>
+              </>
             )}
           </div>
 
@@ -330,6 +389,24 @@ export default function BookJobPage() {
           </button>
         </form>
       </div>
+
+      {showAddAddress && (
+        <AddAddressModal
+          customerId={customer.id}
+          defaultCountry={customer.country}
+          hasExistingAddresses={addresses.length > 0}
+          onClose={() => setShowAddAddress(false)}
+          onCreated={(address) => {
+            setAddresses((prev) =>
+              address.isDefault
+                ? [address, ...prev.map((a) => ({ ...a, isDefault: false }))]
+                : [...prev, address]
+            );
+            setSelectedAddressId(address.id);
+            setShowAddAddress(false);
+          }}
+        />
+      )}
     </main>
   );
 }
