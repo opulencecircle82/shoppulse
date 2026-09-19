@@ -22,10 +22,12 @@ import {
   listNearbyPromotions,
   recordPromotionEvent,
   listFeaturedServices,
+  listNearbyShopServices,
   fetchTicketTechnician,
   fetchTicketStaffLocation,
   type NearbyPromotion,
   type FeaturedService,
+  type NearbyService,
   type TicketTechnician,
 } from "@/lib/customer/bookings";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
@@ -66,7 +68,8 @@ export default function CustomerHomeScreen({
   const [shopCode, setShopCode] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
-  const [featuredServices, setFeaturedServices] = useState<FeaturedService[]>([]);
+  const [nearbyServices, setNearbyServices] = useState<(NearbyService | FeaturedService)[]>([]);
+  const [nearbyIsDistanceBased, setNearbyIsDistanceBased] = useState(false);
   const [technician, setTechnician] = useState<TicketTechnician | null>(null);
   const [techDistance, setTechDistance] = useState<string | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -90,15 +93,23 @@ export default function CustomerHomeScreen({
           }
         }
       });
-      listFeaturedServices(customer.city).then((rows) => {
-        if (active) setFeaturedServices(rows);
-      });
+      if (customer.latitude !== null && customer.longitude !== null) {
+        listNearbyShopServices(customer.latitude, customer.longitude, 10).then((rows) => {
+          if (!active) return;
+          setNearbyServices(rows);
+          setNearbyIsDistanceBased(true);
+        });
+      } else {
+        listFeaturedServices(customer.city).then((rows) => {
+          if (active) setNearbyServices(rows);
+        });
+      }
     }, 0);
     return () => {
       active = false;
       clearTimeout(id);
     };
-  }, [customer.city]);
+  }, [customer.city, customer.latitude, customer.longitude]);
 
   const unreadRef = useRef(0);
 
@@ -303,13 +314,13 @@ export default function CustomerHomeScreen({
           </div>
         )}
 
-        {featuredServices.length > 0 && (
+        {nearbyServices.length > 0 && (
           <div className="mt-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Featured Services
+              {nearbyIsDistanceBased ? "Services Near You (within 10 km)" : "Featured Services"}
             </p>
             <div className="mt-3 space-y-3">
-              {featuredServices.map((service) => (
+              {nearbyServices.map((service) => (
                 <div
                   key={service.id}
                   className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20"
@@ -320,12 +331,20 @@ export default function CustomerHomeScreen({
                         {service.name}
                       </p>
                       <p className="mt-0.5 text-xs text-slate-400">{service.shop_name}</p>
-                      {service.avg_rating !== null && (
-                        <p className="mt-1 flex items-center gap-1 text-xs text-amber-400">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                          {service.avg_rating.toFixed(1)} ({service.review_count})
-                        </p>
-                      )}
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        {service.avg_rating !== null && (
+                          <p className="flex items-center gap-1 text-xs text-amber-400">
+                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            {service.avg_rating.toFixed(1)} ({service.review_count})
+                          </p>
+                        )}
+                        {"distance_km" in service && (
+                          <p className="flex items-center gap-1 text-xs text-slate-400">
+                            <Navigation className="h-3 w-3" />
+                            {formatDistance(service.distance_km)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <p className="shrink-0 text-sm font-bold text-white">
                       {service.price.toFixed(2)}
@@ -372,17 +391,6 @@ export default function CustomerHomeScreen({
             Don&apos;t have a code? Browse services near you →
           </Link>
         </div>
-
-        <Link
-          href="/customer/ads"
-          className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-brand-blue to-slate-900 px-5 py-4 shadow-md shadow-blue-500/20"
-        >
-          <div>
-            <p className="text-sm font-bold text-white">Promotions Near You</p>
-            <p className="mt-0.5 text-xs text-white/70">See local deals and discount codes</p>
-          </div>
-          <span className="text-white/70">→</span>
-        </Link>
 
         <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-400">
           Your Jobs

@@ -325,6 +325,25 @@ export async function listFeaturedServices(city?: string | null): Promise<Featur
   return (data ?? []) as FeaturedService[];
 }
 
+export type NearbyService = FeaturedService & { distance_km: number };
+
+/** Distance-based (not just same-city) — only returns services from shops
+ * with a pinned location, within p_radiusKm of the customer's own pin. */
+export async function listNearbyShopServices(
+  lat: number,
+  lng: number,
+  radiusKm = 10
+): Promise<NearbyService[]> {
+  const { data, error } = await supabase.rpc("list_nearby_shop_services", {
+    p_lat: lat,
+    p_lng: lng,
+    p_radius_km: radiusKm,
+    p_limit: 20,
+  });
+  if (error) throw error;
+  return (data ?? []) as NearbyService[];
+}
+
 export type TicketTechnician = {
   full_name: string;
   avg_rating: number | null;
