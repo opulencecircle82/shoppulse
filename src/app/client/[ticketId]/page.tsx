@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Download, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -101,7 +101,21 @@ function ProofPhoto({
 
 export default function ClientTicketPage() {
   const params = useParams();
+  const router = useRouter();
   const ticketId = params.ticketId as string;
+
+  // This page is usually reached via a shared link (Copy Client Link,
+  // SMS, Messenger) rather than in-app navigation, so there's often no
+  // page before it in history for the phone's own back gesture to land
+  // on — go back if there's somewhere to go back to, otherwise fall
+  // back to the customer home instead of leaving the user stuck.
+  function handleBack() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/customer");
+    }
+  }
 
   const [ticket, setTicket] = useState<ClientTicket | null>(null);
   const [loading, setLoading] = useState(true);
@@ -259,7 +273,15 @@ export default function ClientTicketPage() {
   return (
     <main className="min-h-screen bg-brand-navy px-6 py-10">
       <div className="mx-auto max-w-lg">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="text-sm font-medium text-slate-400 hover:text-white"
+        >
+          ← Back
+        </button>
+
+        <div className="mt-3 flex items-center gap-3">
           {ticket.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={ticket.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
