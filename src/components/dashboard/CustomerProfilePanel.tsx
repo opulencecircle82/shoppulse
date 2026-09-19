@@ -7,7 +7,7 @@ import { getShopCustomerProfile, type ShopCustomerProfile } from "@/lib/chat/cha
 export default function CustomerProfilePanel({ customerId }: { customerId: string }) {
   const [profile, setProfile] = useState<ShopCustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => {
     let active = true;
