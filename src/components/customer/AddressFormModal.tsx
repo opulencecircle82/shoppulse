@@ -5,33 +5,39 @@ import dynamic from "next/dynamic";
 import { X } from "lucide-react";
 import { COUNTRIES } from "@/lib/location/countries";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
-import { createCustomerAddress, type CustomerAddress } from "@/lib/customer/addresses";
+import {
+  createCustomerAddress,
+  updateCustomerAddress,
+  type CustomerAddress,
+} from "@/lib/customer/addresses";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
   { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
 );
 
-export default function AddAddressModal({
+export default function AddressFormModal({
   customerId,
   defaultCountry,
   hasExistingAddresses,
+  editingAddress,
   onClose,
-  onCreated,
+  onSaved,
 }: {
   customerId: string;
   defaultCountry: string | null;
   hasExistingAddresses: boolean;
+  editingAddress?: CustomerAddress;
   onClose: () => void;
-  onCreated: (address: CustomerAddress) => void;
+  onSaved: (address: CustomerAddress) => void;
 }) {
-  const [label, setLabel] = useState("");
-  const [country, setCountry] = useState(defaultCountry || "Philippines");
-  const [region, setRegion] = useState("");
-  const [city, setCity] = useState("");
-  const [barangay, setBarangay] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
+  const [label, setLabel] = useState(editingAddress?.label ?? "");
+  const [country, setCountry] = useState(editingAddress?.country || defaultCountry || "Philippines");
+  const [region, setRegion] = useState(editingAddress?.region ?? "");
+  const [city, setCity] = useState(editingAddress?.city ?? "");
+  const [barangay, setBarangay] = useState(editingAddress?.barangay ?? "");
+  const [latitude, setLatitude] = useState<number | null>(editingAddress?.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(editingAddress?.longitude ?? null);
   const [makeDefault, setMakeDefault] = useState(!hasExistingAddresses);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,18 +48,28 @@ export default function AddAddressModal({
     setError(null);
 
     try {
-      const address = await createCustomerAddress({
-        customerId,
-        label: label.trim(),
-        country,
-        region,
-        city,
-        barangay,
-        latitude,
-        longitude,
-        makeDefault,
-      });
-      onCreated(address);
+      const address = editingAddress
+        ? await updateCustomerAddress(editingAddress.id, {
+            label: label.trim(),
+            country,
+            region,
+            city,
+            barangay,
+            latitude,
+            longitude,
+          })
+        : await createCustomerAddress({
+            customerId,
+            label: label.trim(),
+            country,
+            region,
+            city,
+            barangay,
+            latitude,
+            longitude,
+            makeDefault,
+          });
+      onSaved(address);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save address.");
     } finally {
@@ -65,7 +81,9 @@ export default function AddAddressModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-0 py-0 sm:items-center sm:px-6">
       <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-brand-navy p-6 shadow-[0_30px_60px_-15px_rgba(14,165,233,0.45)] sm:rounded-3xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">Add New Address</h2>
+          <h2 className="text-lg font-bold text-white">
+            {editingAddress ? "Edit Address" : "Add New Address"}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -151,7 +169,7 @@ export default function AddAddressModal({
             />
           </div>
 
-          {hasExistingAddresses && (
+          {!editingAddress && hasExistingAddresses && (
             <label className="flex items-center gap-2 text-sm text-slate-300">
               <input
                 type="checkbox"

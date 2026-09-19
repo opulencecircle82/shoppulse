@@ -94,6 +94,37 @@ export async function createCustomerAddress(params: {
   return mapAddressRow(data);
 }
 
+export async function updateCustomerAddress(
+  addressId: string,
+  params: {
+    label: string;
+    country: string;
+    region: string;
+    city: string;
+    barangay: string;
+    latitude: number | null;
+    longitude: number | null;
+  }
+): Promise<CustomerAddress> {
+  const { data, error } = await supabase
+    .from("customer_addresses")
+    .update({
+      label: params.label,
+      country: params.country || null,
+      region: params.region || null,
+      city: params.city || null,
+      barangay: params.barangay || null,
+      latitude: params.latitude,
+      longitude: params.longitude,
+    })
+    .eq("id", addressId)
+    .select(ADDRESS_FIELDS)
+    .single();
+
+  if (error) throw error;
+  return mapAddressRow(data);
+}
+
 export async function setDefaultCustomerAddress(addressId: string) {
   const { error } = await supabase.rpc("set_default_customer_address", {
     p_address_id: addressId,

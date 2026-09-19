@@ -21,7 +21,7 @@ import {
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
 import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
-import AddAddressModal from "@/components/customer/AddAddressModal";
+import AddressFormModal from "@/components/customer/AddressFormModal";
 
 export default function BookJobPage() {
   const params = useParams();
@@ -391,12 +391,12 @@ export default function BookJobPage() {
       </div>
 
       {showAddAddress && (
-        <AddAddressModal
+        <AddressFormModal
           customerId={customer.id}
           defaultCountry={customer.country}
           hasExistingAddresses={addresses.length > 0}
           onClose={() => setShowAddAddress(false)}
-          onCreated={(address) => {
+          onSaved={(address) => {
             setAddresses((prev) =>
               address.isDefault
                 ? [address, ...prev.map((a) => ({ ...a, isDefault: false }))]

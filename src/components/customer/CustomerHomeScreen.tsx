@@ -14,10 +14,12 @@ import {
   Navigation,
   ClipboardList,
   MessageCircle,
+  Settings,
 } from "lucide-react";
 import type { JobTicket } from "@/lib/supabase/types";
 import type { Customer } from "@/lib/customer/customerAuth";
 import { signOutCustomer } from "@/lib/customer/customerAuth";
+import { listCustomerAddresses } from "@/lib/customer/addresses";
 import {
   listNearbyPromotions,
   recordPromotionEvent,
@@ -70,6 +72,11 @@ export default function CustomerHomeScreen({
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
   const [nearbyServices, setNearbyServices] = useState<(NearbyService | FeaturedService)[]>([]);
   const [nearbyIsDistanceBased, setNearbyIsDistanceBased] = useState(false);
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(
+    customer.latitude !== null && customer.longitude !== null
+      ? { lat: customer.latitude, lng: customer.longitude }
+      : null
+  );
   const [technician, setTechnician] = useState<TicketTechnician | null>(null);
   const [techDistance, setTechDistance] = useState<string | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -93,23 +100,38 @@ export default function CustomerHomeScreen({
           }
         }
       });
-      if (customer.latitude !== null && customer.longitude !== null) {
-        listNearbyShopServices(customer.latitude, customer.longitude, 10).then((rows) => {
-          if (!active) return;
-          setNearbyServices(rows);
-          setNearbyIsDistanceBased(true);
-        });
-      } else {
-        listFeaturedServices(customer.city).then((rows) => {
-          if (active) setNearbyServices(rows);
-        });
-      }
+      listCustomerAddresses().then((addresses) => {
+        if (!active) return;
+        const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
+        if (defaultAddress?.latitude !== null && defaultAddress?.latitude !== undefined &&
+            defaultAddress?.longitude !== null && defaultAddress?.longitude !== undefined) {
+          setPin({ lat: defaultAddress.latitude, lng: defaultAddress.longitude });
+        }
+      });
     }, 0);
     return () => {
       active = false;
       clearTimeout(id);
     };
-  }, [customer.city, customer.latitude, customer.longitude]);
+  }, [customer.city]);
+
+  useEffect(() => {
+    let active = true;
+    if (pin) {
+      listNearbyShopServices(pin.lat, pin.lng, 10).then((rows) => {
+        if (!active) return;
+        setNearbyServices(rows);
+        setNearbyIsDistanceBased(true);
+      });
+    } else {
+      listFeaturedServices(customer.city).then((rows) => {
+        if (active) setNearbyServices(rows);
+      });
+    }
+    return () => {
+      active = false;
+    };
+  }, [pin, customer.city]);
 
   const unreadRef = useRef(0);
 
@@ -145,20 +167,15 @@ export default function CustomerHomeScreen({
       if (active) setTechnician(tech);
     });
     fetchTicketStaffLocation(activeJob.id).then((loc) => {
-      if (!active || !loc) return;
-      if (customer.latitude !== null && customer.longitude !== null) {
-        const km = distanceKm(
-          { lat: customer.latitude, lng: customer.longitude },
-          { lat: loc.lat, lng: loc.lng }
-        );
-        setTechDistance(formatDistance(km));
-      }
+      if (!active || !loc || !pin) return;
+      const km = distanceKm(pin, { lat: loc.lat, lng: loc.lng });
+      setTechDistance(formatDistance(km));
     });
     return () => {
       active = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeJob?.id]);
+  }, [activeJob?.id, pin]);
 
   async function handleSignOut() {
     await signOutCustomer();
@@ -214,6 +231,13 @@ export default function CustomerHomeScreen({
               )}
             </Link>
             <CustomerNotificationBell customerId={customer.id} />
+            <Link
+              href="/customer/settings"
+              aria-label="Settings"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
             <button
               type="button"
               onClick={handleSignOut}
