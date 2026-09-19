@@ -244,9 +244,11 @@ export default function StaffPayRatesPanel({
     <div className="space-y-4">
       <DefaultBillingRate shop={shop} onSaved={() => onSaved?.()} />
 
-      {staff.map((member) => (
-        <StaffRow key={member.id} member={member} />
-      ))}
+      {staff
+        .filter((member) => member.role !== "OWNER")
+        .map((member) => (
+          <StaffRow key={member.id} member={member} />
+        ))}
 
       {showContinue && (
         <button
