@@ -68,6 +68,7 @@ export default function DashboardPage() {
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const unreadRef = useRef(0);
+  const pendingBookingRequests = tickets.filter((t) => t.status === "PENDING").length;
 
   useEffect(() => {
     if (!staffMember) return;
@@ -188,6 +189,7 @@ export default function DashboardPage() {
             activeTab={activeTab}
             onSelectTab={setActiveTab}
             unreadCount={unreadMessages}
+            bookingRequestCount={pendingBookingRequests}
           />
 
           <div className="min-w-0 flex-1">
@@ -200,7 +202,9 @@ export default function DashboardPage() {
 
             <div className="mt-6 flex gap-2 overflow-x-auto pb-1 lg:hidden">
               {DASHBOARD_TABS.map((tab) => {
-                const hasUnread = tab.id === "messages" && unreadMessages > 0;
+                const hasUnread =
+                  (tab.id === "messages" && unreadMessages > 0) ||
+                  (tab.id === "board" && pendingBookingRequests > 0);
                 return (
                   <button
                     key={tab.id}

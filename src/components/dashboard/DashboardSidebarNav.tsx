@@ -35,11 +35,18 @@ export default function DashboardSidebarNav({
   activeTab,
   onSelectTab,
   unreadCount = 0,
+  bookingRequestCount = 0,
 }: {
   activeTab: DashboardTabId;
   onSelectTab: (tab: DashboardTabId) => void;
   unreadCount?: number;
+  bookingRequestCount?: number;
 }) {
+  const badgeCounts: Partial<Record<DashboardTabId, number>> = {
+    messages: unreadCount,
+    board: bookingRequestCount,
+  };
+
   return (
     <nav className="hidden w-56 shrink-0 lg:block">
       <p className="px-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -49,7 +56,8 @@ export default function DashboardSidebarNav({
         {DASHBOARD_TABS.map((tab) => {
           const Icon: LucideIcon = tab.icon;
           const isActive = activeTab === tab.id;
-          const hasUnread = tab.id === "messages" && unreadCount > 0;
+          const badgeCount = badgeCounts[tab.id] ?? 0;
+          const hasUnread = badgeCount > 0;
           return (
             <button
               key={tab.id}
@@ -69,7 +77,7 @@ export default function DashboardSidebarNav({
                 <span className="relative ml-auto flex h-4 min-w-4 items-center justify-center">
                   <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
                   <span className="relative flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                    {unreadCount > 9 ? "9+" : unreadCount}
+                    {badgeCount > 9 ? "9+" : badgeCount}
                   </span>
                 </span>
               )}
