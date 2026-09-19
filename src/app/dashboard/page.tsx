@@ -146,8 +146,13 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-brand-navy">
       <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
-        <div className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-6 sm:px-8">
-          <CurvedLinesBackground />
+        <div className="relative flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-6 sm:px-8">
+          {/* Clipped in its own layer, not on the header itself — the
+              header needs to stay overflow-visible so the notification
+              dropdown below isn't cut off. */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+            <CurvedLinesBackground />
+          </div>
           <div className="relative">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange">
               Owner Command Center

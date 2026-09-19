@@ -204,8 +204,13 @@ export default function CustomerHomeScreen({
   return (
     <main className="min-h-screen bg-brand-navy px-5 py-6">
       <div className="mx-auto max-w-lg">
-        <header className="relative flex items-center justify-between overflow-hidden rounded-3xl bg-brand-navy px-5 py-5">
-          <CurvedLinesBackground />
+        <header className="relative flex items-center justify-between rounded-3xl bg-brand-navy px-5 py-5">
+          {/* Clipped in its own layer, not on the header itself — the
+              header needs to stay overflow-visible so the notification
+              dropdown below isn't cut off. */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+            <CurvedLinesBackground />
+          </div>
           <div className="relative">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-medium text-brand-orange">
               ShopPulse
