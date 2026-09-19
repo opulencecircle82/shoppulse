@@ -72,11 +72,9 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Job History ({profile.jobs.length})
                 </p>
-                {totalInvoiced > 0 && (
-                  <p className="text-xs font-semibold text-brand-emerald">
-                    Total: {profile.currency} {totalInvoiced.toFixed(2)}
-                  </p>
-                )}
+                <p className="text-xs font-semibold text-brand-emerald">
+                  Total: {profile.currency} {totalInvoiced.toFixed(2)}
+                </p>
               </div>
               <div className="mt-2 max-h-40 space-y-1.5 overflow-y-auto">
                 {profile.jobs.map((job) => (
