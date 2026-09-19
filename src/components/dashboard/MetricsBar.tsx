@@ -8,10 +8,12 @@ export default function MetricsBar({
   tickets,
   staff,
   currency,
+  onOpenPendingApprovals,
 }: {
   tickets: JobTicket[];
   staff: StaffMember[];
   currency: string;
+  onOpenPendingApprovals?: () => void;
 }) {
   const metrics = useMemo(() => {
     const wastedDollarsSaved = tickets.reduce((sum, ticket) => {
@@ -65,6 +67,7 @@ export default function MetricsBar({
       cardBg: "bg-gradient-to-br from-amber-500/10 to-white/5",
       borderAccent: "border-t-amber-400",
       icon: ClipboardCheck,
+      onClick: onOpenPendingApprovals,
     },
     {
       label: "Total Revenue",
@@ -74,6 +77,7 @@ export default function MetricsBar({
       cardBg: "bg-gradient-to-br from-brand-orange/10 to-white/5",
       borderAccent: "border-t-brand-orange",
       icon: TrendingUp,
+      onClick: undefined as (() => void) | undefined,
     },
   ];
 
@@ -81,10 +85,15 @@ export default function MetricsBar({
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
+        const Wrapper = card.onClick ? "button" : "div";
         return (
-          <div
+          <Wrapper
             key={card.label}
-            className={`rounded-2xl border border-white/10 border-t-4 ${card.borderAccent} ${card.cardBg} p-5 shadow-md shadow-black/20 transition-shadow hover:shadow-lg`}
+            type={card.onClick ? "button" : undefined}
+            onClick={card.onClick}
+            className={`rounded-2xl border border-white/10 border-t-4 ${card.borderAccent} ${card.cardBg} p-5 text-left shadow-md shadow-black/20 transition-shadow hover:shadow-lg ${
+              card.onClick ? "cursor-pointer" : ""
+            }`}
           >
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.iconBg}`}>
               <Icon className={`h-5 w-5 ${card.accent}`} />
@@ -95,7 +104,12 @@ export default function MetricsBar({
             <p className={`mt-1 text-2xl font-bold ${card.accent}`}>
               {card.value}
             </p>
-          </div>
+            {card.onClick && metrics.pendingApprovals > 0 && (
+              <p className="mt-1 text-[11px] font-medium text-amber-400">
+                Click to review →
+              </p>
+            )}
+          </Wrapper>
         );
       })}
     </div>

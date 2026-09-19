@@ -191,7 +191,12 @@ export default function DashboardPage() {
           />
 
           <div className="min-w-0 flex-1">
-            <MetricsBar tickets={tickets} staff={staff} currency={shop.currency} />
+            <MetricsBar
+              tickets={tickets}
+              staff={staff}
+              currency={shop.currency}
+              onOpenPendingApprovals={() => setActiveTab("proof")}
+            />
 
             <div className="mt-6 flex gap-2 overflow-x-auto pb-1 lg:hidden">
               {DASHBOARD_TABS.map((tab) => {
