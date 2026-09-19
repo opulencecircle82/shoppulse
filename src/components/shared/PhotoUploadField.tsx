@@ -10,7 +10,7 @@ export default function PhotoUploadField({
   onChange,
   label = "Add a photo (optional)",
 }: {
-  folder: "requests" | "reviews";
+  folder: "requests" | "reviews" | "receipts";
   photoUrl: string | null;
   onChange: (url: string | null) => void;
   label?: string;

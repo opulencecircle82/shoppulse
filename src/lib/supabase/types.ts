@@ -28,6 +28,7 @@ export type Shop = {
   has_quality_booster: boolean;
   has_marketing_tier: boolean;
   address: string | null;
+  contact_phone: string | null;
   geofence_radius_meters: number;
   shift_grace_minutes: number;
   lunch_break_minutes: number;
@@ -102,10 +103,14 @@ export type JobTicket = {
   actual_hours: number;
   total_labor_cost: number;
   service_fee: number;
+  tax_amount: number;
   total_invoice_amount: number;
   payment_verified_at: string | null;
   payment_verified_amount: number;
   payment_verified_by: string | null;
+  payment_receipt_url: string | null;
+  invoice_paid_at: string | null;
+  invoice_paid_by: string | null;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;

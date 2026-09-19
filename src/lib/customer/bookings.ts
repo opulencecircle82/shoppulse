@@ -162,7 +162,7 @@ export async function submitBooking(params: {
  * bucket, for both the customer's booking-request photo and their
  * review photo. */
 export async function uploadCustomerPhoto(
-  folder: "requests" | "reviews",
+  folder: "requests" | "reviews" | "receipts",
   file: File
 ): Promise<string> {
   const extension = file.name.split(".").pop() ?? "jpg";
@@ -349,6 +349,17 @@ export type TicketTechnician = {
   avg_rating: number | null;
   review_count: number;
 };
+
+/** Lets the client attach a screenshot/photo of their payment (e.g. a
+ * bank transfer confirmation) so the owner can review it before marking
+ * the job's invoice as paid. */
+export async function uploadPaymentReceipt(ticketId: string, receiptUrl: string) {
+  const { error } = await supabase.rpc("client_upload_payment_receipt", {
+    p_ticket_id: ticketId,
+    p_receipt_url: receiptUrl,
+  });
+  if (error) throw new Error(error.message);
+}
 
 export async function fetchTicketTechnician(
   ticketId: string

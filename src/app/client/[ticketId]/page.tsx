@@ -3,14 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Star } from "lucide-react";
+import { Download, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
   fetchTicketStaffLocation,
   fetchTicketReview,
   submitShopReview,
+  uploadPaymentReceipt,
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
+import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -34,6 +36,8 @@ type ClientTicket = {
   dispute_notes: string | null;
   shop_name: string;
   logo_url: string | null;
+  shop_address: string | null;
+  shop_contact_phone: string | null;
   watermark_show_logo: boolean;
   watermark_show_timestamp: boolean;
   watermark_show_gps: boolean;
@@ -42,12 +46,15 @@ type ClientTicket = {
   end_lat: number | null;
   end_lng: number | null;
   total_invoice_amount: number | null;
+  tax_amount: number;
   service_fee: number;
   currency: string;
   selected_products: { product_id: string; name: string; price: number; quantity: number }[];
   payment_method: string | null;
   accepted_payment_methods: string[];
   signature_url: string | null;
+  payment_receipt_url: string | null;
+  invoice_paid_at: string | null;
 };
 
 function ProofPhoto({
@@ -110,6 +117,8 @@ export default function ClientTicketPage() {
   const [reviewPhotoUrl, setReviewPhotoUrl] = useState<string | null>(null);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [selectingPayment, setSelectingPayment] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -185,6 +194,50 @@ export default function ClientTicketPage() {
     });
     setSelectingPayment(false);
     await load();
+  }
+
+  async function handleUploadReceipt(url: string | null) {
+    if (!url) return;
+    setUploadingReceipt(true);
+    try {
+      await uploadPaymentReceipt(ticketId, url);
+      await load();
+    } finally {
+      setUploadingReceipt(false);
+    }
+  }
+
+  async function handleDownloadInvoice() {
+    if (!ticket || ticket.total_invoice_amount === null) return;
+    setDownloadingInvoice(true);
+    try {
+      const items = [
+        ...ticket.selected_products.map((item) => ({
+          label: `${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
+          amount: item.price * item.quantity,
+        })),
+        ...(ticket.service_fee > 0 ? [{ label: "Service Fee", amount: ticket.service_fee }] : []),
+      ];
+      await downloadInvoicePng(
+        {
+          shopName: ticket.shop_name,
+          shopLogoUrl: ticket.logo_url,
+          shopAddress: ticket.shop_address,
+          shopContactPhone: ticket.shop_contact_phone,
+          clientName: ticket.client_name,
+          serviceType: ticket.service_type,
+          date: new Date().toLocaleDateString(),
+          currency: ticket.currency,
+          items,
+          taxAmount: ticket.tax_amount,
+          totalAmount: ticket.total_invoice_amount,
+          paymentMethod: ticket.payment_method,
+        },
+        `invoice-${ticket.shop_name.replace(/\s+/g, "-").toLowerCase()}.png`
+      );
+    } finally {
+      setDownloadingInvoice(false);
+    }
   }
 
   if (loading) {
@@ -353,12 +406,30 @@ export default function ClientTicketPage() {
                   </span>
                 </div>
               )}
+              {ticket.tax_amount > 0 && (
+                <div className="mt-1 flex justify-between text-sm text-slate-300">
+                  <span>Tax</span>
+                  <span>
+                    {ticket.currency} {ticket.tax_amount.toFixed(2)}
+                  </span>
+                </div>
+              )}
               <div className="mt-2 flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-2.5">
                 <span className="text-sm font-medium text-white">Total</span>
                 <span className="text-lg font-bold text-brand-emerald">
                   {ticket.currency} {ticket.total_invoice_amount.toFixed(2)}
                 </span>
               </div>
+
+              <button
+                type="button"
+                onClick={handleDownloadInvoice}
+                disabled={downloadingInvoice}
+                className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/20 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Download className="h-3.5 w-3.5" />
+                {downloadingInvoice ? "Preparing..." : "Download Invoice (PNG)"}
+              </button>
 
               <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Payment Method
@@ -385,6 +456,32 @@ export default function ClientTicketPage() {
                   You selected {ticket.payment_method}. Pay the technician or shop directly.
                 </p>
               )}
+
+              <div className="mt-4 border-t border-white/10 pt-4">
+                {ticket.invoice_paid_at ? (
+                  <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
+                    Payment confirmed — thank you!
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Paid already? Upload your receipt
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      A screenshot of your bank transfer or payment confirmation helps
+                      the business verify it faster.
+                    </p>
+                    <div className="mt-2">
+                      <PhotoUploadField
+                        folder="receipts"
+                        photoUrl={ticket.payment_receipt_url}
+                        onChange={handleUploadReceipt}
+                        label={uploadingReceipt ? "Uploading..." : "Upload payment receipt"}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
 

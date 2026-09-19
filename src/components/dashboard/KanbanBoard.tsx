@@ -94,8 +94,7 @@ export default function KanbanBoard({
                     ticket={ticket}
                     staff={staff}
                     defaultTasks={shop.default_tasks}
-                    shopId={shop.id}
-                    currency={shop.currency}
+                    shop={shop}
                     currentStaffId={currentStaffId}
                     onChanged={onChanged}
                     onOpenInvoice={onOpenInvoice}

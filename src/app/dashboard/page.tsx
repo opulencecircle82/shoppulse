@@ -355,9 +355,7 @@ export default function DashboardPage() {
       {invoiceTicket && (
         <InvoiceGeneratorModal
           ticket={invoiceTicket}
-          currency={shop.currency}
-          defaultHourlyRate={shop.default_hourly_rate}
-          defaultServiceFee={shop.default_service_fee}
+          shop={shop}
           onClose={() => setInvoiceTicket(null)}
           onSaved={refreshTickets}
         />

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Download } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket, StaffMember } from "@/lib/supabase/types";
+import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
+import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
@@ -12,8 +14,7 @@ export default function JobTicketCard({
   ticket,
   staff,
   defaultTasks,
-  shopId,
-  currency,
+  shop,
   currentStaffId,
   onChanged,
   onOpenInvoice,
@@ -22,18 +23,21 @@ export default function JobTicketCard({
   ticket: JobTicket;
   staff: StaffMember[];
   defaultTasks: string[];
-  shopId: string;
-  currency: string;
+  shop: Shop;
   currentStaffId: string | null;
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer?: (ticket: JobTicket) => void;
 }) {
+  const shopId = shop.id;
+  const currency = shop.currency;
   const [linkCopied, setLinkCopied] = useState(false);
   const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [markingPaid, setMarkingPaid] = useState(false);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
 
   async function handleProductsChange(next: { product_id: string; name: string; price: number; quantity: number }[]) {
@@ -65,6 +69,59 @@ export default function JobTicketCard({
     navigator.clipboard.writeText(link);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  }
+
+  async function handleDownloadInvoice() {
+    setDownloadingInvoice(true);
+    try {
+      const items = [
+        ...(ticket.total_labor_cost > 0
+          ? [{ label: `Labor (${ticket.actual_hours}h)`, amount: ticket.total_labor_cost }]
+          : []),
+        ...ticket.selected_products.map((item) => ({
+          label: `${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
+          amount: item.price * item.quantity,
+        })),
+        ...(ticket.service_fee > 0 ? [{ label: "Service Fee", amount: ticket.service_fee }] : []),
+      ];
+      await downloadInvoicePng(
+        {
+          shopName: shop.shop_name,
+          shopLogoUrl: shop.logo_url,
+          shopAddress: shop.address,
+          shopContactPhone: shop.contact_phone,
+          clientName: ticket.client_name,
+          serviceType: ticket.service_type,
+          date: new Date().toLocaleDateString(),
+          currency,
+          items,
+          taxAmount: ticket.tax_amount,
+          totalAmount: ticket.total_invoice_amount,
+          paymentMethod: ticket.payment_method,
+        },
+        `invoice-${ticket.client_name.replace(/\s+/g, "-").toLowerCase()}.png`
+      );
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  }
+
+  async function handleMarkPaid() {
+    const confirmed = window.confirm(
+      `Mark this job as paid? Confirm you've received ${currency} ${ticket.total_invoice_amount.toFixed(2)} from ${ticket.client_name}.`
+    );
+    if (!confirmed) return;
+
+    setMarkingPaid(true);
+    await supabase
+      .from("job_tickets")
+      .update({
+        invoice_paid_at: new Date().toISOString(),
+        invoice_paid_by: currentStaffId,
+      })
+      .eq("id", ticket.id);
+    setMarkingPaid(false);
+    onChanged();
   }
 
   return (
@@ -220,13 +277,65 @@ export default function JobTicketCard({
         )}
 
         {ticket.status === "APPROVED" && (
-          <button
-            type="button"
-            onClick={() => onOpenInvoice(ticket)}
-            className="rounded-full border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
-          >
-            {ticket.total_invoice_amount > 0 ? "Edit Invoice" : "Generate Invoice"}
-          </button>
+          <div className="w-full">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenInvoice(ticket)}
+                className="rounded-full border border-brand-blue/40 px-3 py-1.5 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10"
+              >
+                {ticket.total_invoice_amount > 0 ? "Edit Invoice" : "Generate Invoice"}
+              </button>
+
+              {ticket.total_invoice_amount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleDownloadInvoice}
+                  disabled={downloadingInvoice}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Download className="h-3 w-3" />
+                  {downloadingInvoice ? "..." : "Invoice PNG"}
+                </button>
+              )}
+            </div>
+
+            {ticket.total_invoice_amount > 0 && (
+              <div className="mt-2">
+                {ticket.payment_receipt_url && (
+                  <a
+                    href={ticket.payment_receipt_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mb-2 flex items-center gap-2 text-xs text-slate-400 hover:text-brand-blue"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={ticket.payment_receipt_url}
+                      alt="Client-uploaded payment receipt"
+                      className="h-10 w-10 rounded-lg object-cover"
+                    />
+                    Client uploaded a payment receipt — view full size
+                  </a>
+                )}
+
+                {ticket.invoice_paid_at ? (
+                  <p className="text-xs font-semibold text-brand-emerald">
+                    Paid on {new Date(ticket.invoice_paid_at).toLocaleDateString()}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleMarkPaid}
+                    disabled={markingPaid}
+                    className="rounded-full bg-brand-emerald px-3 py-1.5 text-xs font-semibold text-brand-slate disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {markingPaid ? "Saving..." : "Mark as Paid"}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {ticket.status !== "UNASSIGNED" && (

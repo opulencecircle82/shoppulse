@@ -1,24 +1,25 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Download } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket } from "@/lib/supabase/types";
+import type { JobTicket, Shop } from "@/lib/supabase/types";
+import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 
 export default function InvoiceGeneratorModal({
   ticket,
-  currency,
-  defaultHourlyRate,
-  defaultServiceFee,
+  shop,
   onClose,
   onSaved,
 }: {
   ticket: JobTicket;
-  currency: string;
-  defaultHourlyRate: number;
-  defaultServiceFee: number;
+  shop: Shop;
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const currency = shop.currency;
+  const defaultHourlyRate = shop.default_hourly_rate;
+  const defaultServiceFee = shop.default_service_fee;
   // Products cost and service fee are always added on top of labor/flat
   // below (both here and in the auto-invoice ProofDisputeDrawer computes on
   // Approve) — so they have to be subtracted back out of any *existing*
@@ -44,14 +45,17 @@ export default function InvoiceGeneratorModal({
     Math.max(0, (ticket.total_invoice_amount || 0) - productsCost - (ticket.service_fee || 0))
   );
   const [serviceFee, setServiceFee] = useState(ticket.service_fee || defaultServiceFee);
+  const [taxAmount, setTaxAmount] = useState(ticket.tax_amount || 0);
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const laborCost = useMemo(
     () => Math.round(actualHours * hourlyRate * 100) / 100,
     [actualHours, hourlyRate]
   );
-  const total = (mode === "hourly" ? laborCost : flatAmount) + productsCost + serviceFee;
+  const subtotal = (mode === "hourly" ? laborCost : flatAmount) + productsCost + serviceFee;
+  const total = subtotal + taxAmount;
 
   async function handleSave() {
     setSaving(true);
@@ -63,6 +67,7 @@ export default function InvoiceGeneratorModal({
         actual_hours: mode === "hourly" ? actualHours : ticket.actual_hours,
         total_labor_cost: mode === "hourly" ? laborCost : ticket.total_labor_cost,
         service_fee: serviceFee,
+        tax_amount: taxAmount,
         total_invoice_amount: total,
       })
       .eq("id", ticket.id);
@@ -76,6 +81,39 @@ export default function InvoiceGeneratorModal({
 
     onSaved();
     onClose();
+  }
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      const items = [
+        { label: mode === "hourly" ? `Labor (${actualHours}h)` : "Service", amount: mode === "hourly" ? laborCost : flatAmount },
+        ...ticket.selected_products.map((item) => ({
+          label: `${item.name}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`,
+          amount: item.price * item.quantity,
+        })),
+        ...(serviceFee > 0 ? [{ label: "Service Fee", amount: serviceFee }] : []),
+      ];
+      await downloadInvoicePng(
+        {
+          shopName: shop.shop_name,
+          shopLogoUrl: shop.logo_url,
+          shopAddress: shop.address,
+          shopContactPhone: shop.contact_phone,
+          clientName: ticket.client_name,
+          serviceType: ticket.service_type,
+          date: new Date().toLocaleDateString(),
+          currency,
+          items,
+          taxAmount,
+          totalAmount: total,
+          paymentMethod: ticket.payment_method,
+        },
+        `invoice-${ticket.client_name.replace(/\s+/g, "-").toLowerCase()}.png`
+      );
+    } finally {
+      setDownloading(false);
+    }
   }
 
   return (
@@ -190,18 +228,33 @@ export default function InvoiceGeneratorModal({
           </div>
         )}
 
-        <div className="mt-4">
-          <label className="block text-xs font-medium text-slate-400">
-            Service Fee ({currency})
-          </label>
-          <input
-            type="number"
-            min={0}
-            step={0.5}
-            value={serviceFee}
-            onChange={(e) => setServiceFee(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          />
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-400">
+              Service Fee ({currency})
+            </label>
+            <input
+              type="number"
+              min={0}
+              step={0.5}
+              value={serviceFee}
+              onChange={(e) => setServiceFee(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400">
+              Tax ({currency})
+            </label>
+            <input
+              type="number"
+              min={0}
+              step={0.5}
+              value={taxAmount}
+              onChange={(e) => setTaxAmount(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
         </div>
 
         <div className="mt-5 flex items-center justify-between rounded-lg bg-white/5 px-4 py-3">
@@ -217,14 +270,25 @@ export default function InvoiceGeneratorModal({
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="mt-5 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {saving ? "Saving..." : "Save Invoice"}
-        </button>
+        <div className="mt-5 flex gap-2">
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={downloading}
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-white/20 px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download className="h-4 w-4" />
+            {downloading ? "..." : "PNG"}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? "Saving..." : "Save Invoice"}
+          </button>
+        </div>
       </div>
     </div>
   );

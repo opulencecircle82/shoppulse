@@ -29,6 +29,7 @@ export default function CompanyProfilePanel({
   const [logoUrl, setLogoUrl] = useState(shop?.logo_url ?? "");
   const [primaryColor, setPrimaryColor] = useState(shop?.primary_color_hex ?? "#0F172A");
   const [address, setAddress] = useState(shop?.address ?? "");
+  const [contactPhone, setContactPhone] = useState(shop?.contact_phone ?? "");
   const [currency, setCurrency] = useState<Currency>(shop?.currency ?? "USD");
   const [city, setCity] = useState(shop?.city ?? "");
   const [barangay, setBarangay] = useState(shop?.barangay ?? "");
@@ -120,6 +121,7 @@ export default function CompanyProfilePanel({
           logo_url: logoUrl || null,
           primary_color_hex: primaryColor,
           address: address || null,
+          contact_phone: contactPhone || null,
           currency,
           city: city || null,
           barangay: barangay || null,
@@ -318,6 +320,24 @@ export default function CompanyProfilePanel({
           placeholder="123 Main St, San Francisco, CA"
         />
       </div>
+
+      {shop && (
+        <div>
+          <label className="block text-sm font-medium text-slate-300">
+            Contact Number
+          </label>
+          <p className="mt-1 text-xs text-slate-500">
+            Shown on invoices you generate for customers.
+          </p>
+          <input
+            type="tel"
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            placeholder="+1 555 123 4567"
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-slate-300">
