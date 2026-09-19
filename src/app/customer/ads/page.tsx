@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Megaphone } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import {
   listNearbyPromotions,
   recordPromotionEvent,
   type NearbyPromotion,
 } from "@/lib/customer/bookings";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 export default function CustomerAdsPage() {
-  const router = useRouter();
+  const goBack = useSmartBack("/customer");
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
   const [city, setCity] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export default function CustomerAdsPage() {
         <header className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={goBack}
             className="text-sm font-medium text-slate-400 hover:text-white"
           >
             ← Back

@@ -16,6 +16,7 @@ import {
 } from "@/lib/customer/bookings";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import { ensureCustomerConversation } from "@/lib/chat/chat";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -35,6 +36,7 @@ const DAY_LABELS: Record<string, string> = {
 export default function ShopDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const goBack = useSmartBack("/customer");
   const slug = params.slug as string;
 
   const [loading, setLoading] = useState(true);
@@ -100,7 +102,7 @@ export default function ShopDetailsPage() {
       <div className="mx-auto max-w-lg">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={goBack}
           className="text-sm font-medium text-slate-400 hover:text-white"
         >
           ← Back

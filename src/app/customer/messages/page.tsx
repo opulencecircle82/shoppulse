@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import { listCustomerConversations, type CustomerShopConversation } from "@/lib/chat/chat";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 function timeLabel(iso: string | null) {
   if (!iso) return "";
@@ -19,6 +20,7 @@ function timeLabel(iso: string | null) {
 
 export default function CustomerMessagesPage() {
   const router = useRouter();
+  const goBack = useSmartBack("/customer");
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<CustomerShopConversation[]>([]);
 
@@ -46,7 +48,7 @@ export default function CustomerMessagesPage() {
         <header className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={goBack}
             className="text-sm font-medium text-slate-400 hover:text-white"
           >
             ← Back

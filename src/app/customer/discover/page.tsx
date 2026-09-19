@@ -3,13 +3,14 @@
 import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { SearchX } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   listPublicShops,
   listPublicShopCategories,
   isShopOpenNow,
   type PublicShop,
 } from "@/lib/customer/bookings";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 export default function DiscoverShopsPage() {
   return (
@@ -20,7 +21,7 @@ export default function DiscoverShopsPage() {
 }
 
 function DiscoverShopsContent() {
-  const router = useRouter();
+  const goBack = useSmartBack("/customer");
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [city, setCity] = useState("");
@@ -69,7 +70,7 @@ function DiscoverShopsContent() {
         <header className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={goBack}
             className="text-sm font-medium text-slate-400 hover:text-white"
           >
             ← Back

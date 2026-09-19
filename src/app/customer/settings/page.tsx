@@ -12,9 +12,11 @@ import {
   type CustomerAddress,
 } from "@/lib/customer/addresses";
 import AddressFormModal from "@/components/customer/AddressFormModal";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 export default function CustomerSettingsPage() {
   const router = useRouter();
+  const goBack = useSmartBack("/customer");
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ export default function CustomerSettingsPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={goBack}
             className="text-sm font-medium text-slate-400 hover:text-white"
           >
             ← Back

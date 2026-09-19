@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Download, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -13,6 +13,7 @@ import {
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -101,21 +102,8 @@ function ProofPhoto({
 
 export default function ClientTicketPage() {
   const params = useParams();
-  const router = useRouter();
+  const goBack = useSmartBack("/customer");
   const ticketId = params.ticketId as string;
-
-  // This page is usually reached via a shared link (Copy Client Link,
-  // SMS, Messenger) rather than in-app navigation, so there's often no
-  // page before it in history for the phone's own back gesture to land
-  // on — go back if there's somewhere to go back to, otherwise fall
-  // back to the customer home instead of leaving the user stuck.
-  function handleBack() {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/customer");
-    }
-  }
 
   const [ticket, setTicket] = useState<ClientTicket | null>(null);
   const [loading, setLoading] = useState(true);
@@ -275,7 +263,7 @@ export default function ClientTicketPage() {
       <div className="mx-auto max-w-lg">
         <button
           type="button"
-          onClick={handleBack}
+          onClick={goBack}
           className="text-sm font-medium text-slate-400 hover:text-white"
         >
           ← Back
