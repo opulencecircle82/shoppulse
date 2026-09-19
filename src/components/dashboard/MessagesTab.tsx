@@ -1,20 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Plus } from "lucide-react";
 import type { StaffMember } from "@/lib/supabase/types";
 import {
   listStaffConversations,
   listShopCustomerConversations,
   ensureStaffConversation,
+  ensureCustomerConversationById,
   type StaffConversation,
   type ShopCustomerConversation,
+  type ShopCustomer,
 } from "@/lib/chat/chat";
 import ChatThread from "@/components/chat/ChatThread";
+import NewCustomerMessageModal from "./NewCustomerMessageModal";
+import CustomerProfilePanel from "./CustomerProfilePanel";
 
 type SelectedThread =
   | { kind: "staff"; conversationId: string; name: string }
-  | { kind: "customer"; conversationId: string; name: string };
+  | { kind: "customer"; conversationId: string; name: string; customerId: string };
 
 type TeamRow = {
   staffMemberId: string;
@@ -47,6 +51,8 @@ export default function MessagesTab({
   const [customerConvos, setCustomerConvos] = useState<ShopCustomerConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SelectedThread | null>(null);
+  const [showNewMessage, setShowNewMessage] = useState(false);
+  const [startingConversation, setStartingConversation] = useState(false);
 
   const load = useCallback(async () => {
     let staffRows: StaffConversation[] = await listStaffConversations();
@@ -125,6 +131,23 @@ export default function MessagesTab({
     setSelected({ kind: "staff", conversationId, name: row.name });
   }
 
+  async function handleSelectNewCustomer(customer: ShopCustomer) {
+    setStartingConversation(true);
+    try {
+      const conversationId = await ensureCustomerConversationById(customer.customerId);
+      setSelected({
+        kind: "customer",
+        conversationId,
+        name: customer.fullName,
+        customerId: customer.customerId,
+      });
+      setShowNewMessage(false);
+      load();
+    } finally {
+      setStartingConversation(false);
+    }
+  }
+
   const hasAnyConversations = teamRows.length > 0 || customerConvos.length > 0;
 
   return (
@@ -132,15 +155,13 @@ export default function MessagesTab({
       <div className="space-y-4">
         {loading ? (
           <p className="text-sm text-slate-400">Loading conversations...</p>
-        ) : !hasAnyConversations ? (
+        ) : !hasAnyConversations && !isOwner ? (
           <div className="rounded-2xl bg-white/5 p-6 text-center">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
               <MessageCircle className="h-4 w-4 text-slate-400" />
             </div>
             <p className="mt-3 text-sm text-slate-400">
-              {isOwner
-                ? "Add staff to your team to start chatting with them here."
-                : "No conversation yet. Send the owner a message to get started."}
+              No conversation yet. Send the owner a message to get started.
             </p>
           </div>
         ) : (
@@ -189,12 +210,27 @@ export default function MessagesTab({
               </div>
             )}
 
-            {isOwner && customerConvos.length > 0 && (
+            {isOwner && (
               <div>
-                <p className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Customers
-                </p>
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Customers
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewMessage(true)}
+                    className="flex items-center gap-1 text-xs font-semibold text-brand-blue hover:text-blue-400"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    New
+                  </button>
+                </div>
                 <div className="mt-2 space-y-1">
+                  {customerConvos.length === 0 && (
+                    <p className="px-1 py-3 text-xs text-slate-500">
+                      No conversations yet — tap &quot;New&quot; to message a customer.
+                    </p>
+                  )}
                   {customerConvos.map((c) => (
                     <button
                       key={c.conversationId}
@@ -204,6 +240,7 @@ export default function MessagesTab({
                           kind: "customer",
                           conversationId: c.conversationId,
                           name: c.customerName,
+                          customerId: c.customerId,
                         })
                       }
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
@@ -244,19 +281,36 @@ export default function MessagesTab({
 
       <div className="min-h-[420px]">
         {selected ? (
-          <ChatThread
-            key={selected.conversationId}
-            conversationId={selected.conversationId}
-            currentRole={isOwner ? "owner" : "staff"}
-            title={selected.name}
-            subtitle={selected.kind === "customer" ? "Customer" : undefined}
-          />
+          <>
+            {selected.kind === "customer" && (
+              <CustomerProfilePanel key={selected.customerId} customerId={selected.customerId} />
+            )}
+            <ChatThread
+              key={selected.conversationId}
+              conversationId={selected.conversationId}
+              currentRole={isOwner ? "owner" : "staff"}
+              title={selected.name}
+              subtitle={selected.kind === "customer" ? "Customer" : undefined}
+            />
+          </>
         ) : (
           <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl bg-white/5 text-sm text-slate-400">
             Select a conversation to start chatting.
           </div>
         )}
       </div>
+
+      {showNewMessage && (
+        <NewCustomerMessageModal
+          onClose={() => setShowNewMessage(false)}
+          onSelect={handleSelectNewCustomer}
+        />
+      )}
+      {startingConversation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
+        </div>
+      )}
     </div>
   );
 }

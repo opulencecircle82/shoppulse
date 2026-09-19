@@ -144,6 +144,93 @@ export async function listShopCustomerConversations(): Promise<ShopCustomerConve
   }));
 }
 
+export type ShopCustomer = {
+  customerId: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  jobCount: number;
+  lastJobAt: string | null;
+};
+
+/** Every customer who has ever booked a job with this shop, whether or
+ * not they've messaged before — powers the owner's "start a new
+ * conversation" picker. */
+export async function listShopCustomers(): Promise<ShopCustomer[]> {
+  const { data, error } = await supabase.rpc("list_shop_customers");
+  if (error) throw error;
+  return ((data ?? []) as {
+    customer_id: string;
+    full_name: string;
+    email: string;
+    phone: string | null;
+    job_count: number;
+    last_job_at: string | null;
+  }[]).map((row) => ({
+    customerId: row.customer_id,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    jobCount: Number(row.job_count),
+    lastJobAt: row.last_job_at,
+  }));
+}
+
+/** Owner/manager-initiated equivalent of ensureCustomerConversation —
+ * only works for a customer who actually has a job with this shop. */
+export async function ensureCustomerConversationById(customerId: string): Promise<string> {
+  const { data, error } = await supabase.rpc("ensure_customer_conversation_by_id", {
+    p_customer_id: customerId,
+  });
+  if (error) throw new Error(error.message);
+  return data as string;
+}
+
+export type ShopCustomerProfile = {
+  fullName: string;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+  barangay: string | null;
+  jobs: {
+    id: string;
+    service_type: string;
+    status: string;
+    created_at: string;
+    total_invoice_amount: number;
+  }[];
+};
+
+export async function getShopCustomerProfile(customerId: string): Promise<ShopCustomerProfile | null> {
+  const { data, error } = await supabase
+    .rpc("get_shop_customer_profile", { p_customer_id: customerId })
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const row = data as {
+    full_name: string;
+    email: string;
+    phone: string | null;
+    country: string | null;
+    region: string | null;
+    city: string | null;
+    barangay: string | null;
+    jobs: ShopCustomerProfile["jobs"];
+  };
+  return {
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    country: row.country,
+    region: row.region,
+    city: row.city,
+    barangay: row.barangay,
+    jobs: row.jobs,
+  };
+}
+
 export type CustomerShopConversation = {
   conversationId: string;
   shopId: string;
