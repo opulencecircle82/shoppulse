@@ -98,7 +98,7 @@ export default function ChatThread({
   }
 
   return (
-    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-2xl bg-white/5">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white/5">
       <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
         {onBack && (
           <button

@@ -70,7 +70,7 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Job History ({profile.jobs.length})
               </p>
-              <div className="mt-2 space-y-1.5">
+              <div className="mt-2 max-h-40 space-y-1.5 overflow-y-auto">
                 {profile.jobs.map((job) => (
                   <div
                     key={job.id}

@@ -279,22 +279,26 @@ export default function MessagesTab({
         )}
       </div>
 
-      <div className="min-h-[420px]">
+      <div className="flex h-[600px] flex-col">
         {selected ? (
           <>
             {selected.kind === "customer" && (
-              <CustomerProfilePanel key={selected.customerId} customerId={selected.customerId} />
+              <div className="shrink-0">
+                <CustomerProfilePanel key={selected.customerId} customerId={selected.customerId} />
+              </div>
             )}
-            <ChatThread
-              key={selected.conversationId}
-              conversationId={selected.conversationId}
-              currentRole={isOwner ? "owner" : "staff"}
-              title={selected.name}
-              subtitle={selected.kind === "customer" ? "Customer" : undefined}
-            />
+            <div className="min-h-0 flex-1">
+              <ChatThread
+                key={selected.conversationId}
+                conversationId={selected.conversationId}
+                currentRole={isOwner ? "owner" : "staff"}
+                title={selected.name}
+                subtitle={selected.kind === "customer" ? "Customer" : undefined}
+              />
+            </div>
           </>
         ) : (
-          <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl bg-white/5 text-sm text-slate-400">
+          <div className="flex h-full items-center justify-center rounded-2xl bg-white/5 text-sm text-slate-400">
             Select a conversation to start chatting.
           </div>
         )}
