@@ -45,3 +45,14 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Dragging inside an embedded map (or any inner scroll area) can leak
+ * into the browser/WebView's own pull-to-refresh gesture when it isn't
+ * fully captured, reloading the whole page mid-drag — this reads to the
+ * user as a random "Could not load ShopPulse / net::ERR_FAILED" crash.
+ * Containing overscroll at the document level stops that gesture from
+ * ever reaching the browser's native refresh handling. */
+html,
+body {
+  overscroll-behavior-y: contain;
+}

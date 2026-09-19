@@ -83,7 +83,10 @@ export default function LocationPickerMap({
         </button>
       </div>
       <p className="mt-1 text-xs text-slate-400">{description}</p>
-      <div className="mt-2 overflow-hidden rounded-xl shadow-sm shadow-black/20">
+      <div
+        className="mt-2 overflow-hidden rounded-xl shadow-sm shadow-black/20"
+        style={{ overscrollBehavior: "contain" }}
+      >
         <MapContainer
           center={center}
           zoom={hasPin ? 16 : 12}
