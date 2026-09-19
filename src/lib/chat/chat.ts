@@ -194,6 +194,7 @@ export type ShopCustomerProfile = {
   region: string | null;
   city: string | null;
   barangay: string | null;
+  currency: string;
   jobs: {
     id: string;
     service_type: string;
@@ -217,6 +218,7 @@ export async function getShopCustomerProfile(customerId: string): Promise<ShopCu
     region: string | null;
     city: string | null;
     barangay: string | null;
+    currency: string;
     jobs: ShopCustomerProfile["jobs"];
   };
   return {
@@ -227,6 +229,7 @@ export async function getShopCustomerProfile(customerId: string): Promise<ShopCu
     region: row.region,
     city: row.city,
     barangay: row.barangay,
+    currency: row.currency,
     jobs: row.jobs,
   };
 }

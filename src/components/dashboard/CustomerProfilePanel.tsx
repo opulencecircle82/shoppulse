@@ -26,6 +26,7 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
   if (loading || !profile) return null;
 
   const address = [profile.barangay, profile.city, profile.region].filter(Boolean).join(", ");
+  const totalInvoiced = profile.jobs.reduce((sum, job) => sum + job.total_invoice_amount, 0);
 
   return (
     <div className="mb-3 rounded-2xl bg-white/5 p-4">
@@ -67,9 +68,16 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
 
           {profile.jobs.length > 0 && (
             <div className="mt-3 border-t border-white/10 pt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Job History ({profile.jobs.length})
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Job History ({profile.jobs.length})
+                </p>
+                {totalInvoiced > 0 && (
+                  <p className="text-xs font-semibold text-brand-emerald">
+                    Total: {profile.currency} {totalInvoiced.toFixed(2)}
+                  </p>
+                )}
+              </div>
               <div className="mt-2 max-h-40 space-y-1.5 overflow-y-auto">
                 {profile.jobs.map((job) => (
                   <div
