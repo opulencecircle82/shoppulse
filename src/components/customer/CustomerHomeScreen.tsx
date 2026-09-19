@@ -49,6 +49,13 @@ const STATUS_STYLES: Record<string, string> = {
   DISPUTED: "bg-red-500/15 text-red-400",
 };
 
+// The business hasn't accepted this yet, so it isn't a real job on the
+// books — showing the raw "PENDING" status here reads like it already
+// is one. Every other status keeps its plain label.
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "Request Sent",
+};
+
 const QUICK_CATEGORIES = [
   { label: "Electrical", icon: Zap, color: "text-amber-500" },
   { label: "Plumbing", icon: Droplet, color: "text-brand-sky" },
@@ -443,7 +450,7 @@ export default function CustomerHomeScreen({
                       STATUS_STYLES[job.status] ?? "bg-white/10 text-slate-400"
                     }`}
                   >
-                    {job.status.replace("_", " ")}
+                    {STATUS_LABELS[job.status] ?? job.status.replace("_", " ")}
                   </span>
                   <p className="mt-2 text-sm font-semibold text-white">
                     {job.service_type}

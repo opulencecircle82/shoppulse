@@ -280,7 +280,7 @@ export default function ClientTicketPage() {
                   : "bg-brand-blue/15 text-brand-blue"
             }`}
           >
-            {ticket.status.replace("_", " ")}
+            {ticket.status === "PENDING" ? "Request Sent" : ticket.status.replace("_", " ")}
           </span>
 
           <h1 className="mt-3 text-xl font-bold text-white">{ticket.service_type}</h1>
