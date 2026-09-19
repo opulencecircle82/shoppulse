@@ -229,15 +229,33 @@ function drawDashedLine(ctx: CanvasRenderingContext2D, y: number) {
   ctx.restore();
 }
 
-/** Renders then triggers a browser download of the invoice PNG. */
+/** Renders then triggers a browser download of the invoice PNG.
+ *
+ * Rendering is async (loading the logo, encoding the canvas), so by the
+ * time a blob URL is ready, the click that started this is no longer
+ * "fresh" — many mobile browsers (iOS Safari especially, and some Android
+ * WebViews) only allow opening a tab or download as a direct, synchronous
+ * result of a user gesture, and silently drop it once real work has
+ * happened in between. Opening a blank tab synchronously first, then
+ * pointing it at the finished image once ready, keeps it inside that
+ * original gesture instead of losing it. */
 export async function downloadInvoicePng(data: InvoiceData, filename: string) {
+  const preOpenedTab = typeof window !== "undefined" ? window.open("", "_blank") : null;
+
   const blob = await renderInvoicePng(data);
   const url = URL.createObjectURL(blob);
+
+  if (preOpenedTab && !preOpenedTab.closed) {
+    preOpenedTab.location.href = url;
+    return;
+  }
+
+  // Popup blocked (or no window at all) — fall back to a direct download
+  // link, which at least works on desktop browsers.
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 }
