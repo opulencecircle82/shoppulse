@@ -56,6 +56,9 @@ type ClientTicket = {
   signature_url: string | null;
   payment_receipt_url: string | null;
   invoice_paid_at: string | null;
+  quote_submitted_at: string | null;
+  quote_approved_at: string | null;
+  total_labor_cost: number;
 };
 
 function ProofPhoto({
@@ -121,6 +124,8 @@ export default function ClientTicketPage() {
   const [selectingPayment, setSelectingPayment] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const [approvingQuote, setApprovingQuote] = useState(false);
+  const [approveError, setApproveError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -146,7 +151,11 @@ export default function ClientTicketPage() {
   }, [load]);
 
   useEffect(() => {
-    if (!ticket || (ticket.status !== "SCHEDULED" && ticket.status !== "IN_PROGRESS")) return;
+    if (
+      !ticket ||
+      !["SCHEDULED", "ESTIMATE_PENDING", "IN_PROGRESS"].includes(ticket.status)
+    )
+      return;
 
     let active = true;
     async function poll() {
@@ -186,6 +195,20 @@ export default function ClientTicketPage() {
     } finally {
       setReviewSubmitting(false);
     }
+  }
+
+  async function handleApproveQuote() {
+    setApprovingQuote(true);
+    setApproveError(null);
+    const { error: rpcError } = await supabase.rpc("client_approve_quote", {
+      p_ticket_id: ticketId,
+    });
+    setApprovingQuote(false);
+    if (rpcError) {
+      setApproveError(rpcError.message);
+      return;
+    }
+    await load();
   }
 
   async function handleSelectPayment(method: string) {
@@ -319,7 +342,7 @@ export default function ClientTicketPage() {
           {staffLocation && (
             <div className="mt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {ticket.status === "IN_PROGRESS"
+                {ticket.status === "IN_PROGRESS" || ticket.status === "ESTIMATE_PENDING"
                   ? "Your technician is on site"
                   : "Your technician is on the way"}
               </p>
@@ -369,6 +392,76 @@ export default function ClientTicketPage() {
             </p>
           )}
 
+          {ticket.status === "ESTIMATE_PENDING" && (
+            <div className="mt-6 border-t border-white/10 pt-5">
+              {ticket.quote_submitted_at ? (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Estimate From Your Technician
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {ticket.selected_products.map((item, index) => (
+                      <div key={index} className="flex justify-between text-sm text-slate-300">
+                        <span>
+                          {item.name}
+                          {item.quantity > 1 ? ` ×${item.quantity}` : ""}
+                        </span>
+                        <span>
+                          {ticket.currency} {(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                    {ticket.service_fee > 0 && (
+                      <div className="flex justify-between text-sm text-slate-300">
+                        <span>Diagnostic Fee</span>
+                        <span>
+                          {ticket.currency} {ticket.service_fee.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    {ticket.total_labor_cost > 0 && (
+                      <div className="flex justify-between text-sm text-slate-300">
+                        <span>Labor Fee</span>
+                        <span>
+                          {ticket.currency} {ticket.total_labor_cost.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2 flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-2.5">
+                    <span className="text-sm font-medium text-white">Total</span>
+                    <span className="text-lg font-bold text-brand-emerald">
+                      {ticket.currency} {(ticket.total_invoice_amount ?? 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-xs text-slate-400">
+                    Approving lets your technician begin the repair. Final billing may
+                    still differ slightly once the job is complete.
+                  </p>
+
+                  {approveError && (
+                    <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+                      {approveError}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleApproveQuote}
+                    disabled={approvingQuote}
+                    className="mt-3 w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {approvingQuote ? "Approving..." : "Approve Estimate"}
+                  </button>
+                </>
+              ) : (
+                <p className="rounded-lg bg-brand-blue/15 px-4 py-3 text-sm text-brand-blue">
+                  Your technician is diagnosing the issue and will send you a quote shortly.
+                </p>
+              )}
+            </div>
+          )}
+
           {ticket.status === "COMPLETED" && (
             <p className="mt-6 rounded-lg bg-brand-blue/15 px-4 py-3 text-sm text-brand-blue">
               Work is done — the business is reviewing it before finalizing.
@@ -388,7 +481,9 @@ export default function ClientTicketPage() {
             </div>
           )}
 
-          {ticket.total_invoice_amount !== null && ticket.total_invoice_amount > 0 && (
+          {ticket.status !== "ESTIMATE_PENDING" &&
+            ticket.total_invoice_amount !== null &&
+            ticket.total_invoice_amount > 0 && (
             <div className="mt-6 border-t border-white/10 pt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Receipt

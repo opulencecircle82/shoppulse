@@ -33,7 +33,7 @@ import DashboardSidebarNav, {
 // right, so a non-technical owner always knows what a section is for.
 const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
   board:
-    "Jobs move through stages: Booking Requests → Unassigned → Scheduled → In Progress → Completed → Approved (or Disputed). Example: a customer books (Booking Requests), you assign a tech (→ Scheduled), they work the job (→ In Progress → Completed), then you approve payment (→ Approved).",
+    "Jobs move through stages: Booking Requests → Unassigned → Scheduled → Awaiting Quote Approval → In Progress → Completed → Approved (or Disputed). Example: a customer books (Booking Requests), you assign a tech (→ Scheduled), the tech arrives and sends an on-site quote (→ Awaiting Quote Approval), the customer approves it (→ In Progress → Completed), then you approve payment (→ Approved).",
   map: "See where your technicians are right now while they're clocked in.",
   proof: "Review photo proof from completed jobs before approving payment.",
   staff: "Add your team, manage their mobile app logins, and see who's active.",

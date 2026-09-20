@@ -108,12 +108,19 @@ export default function ProofDisputeDrawer({
               3600000
           )
         : ticket.estimated_hours || 0;
-    const laborCost = Math.round(actualHours * shop.default_hourly_rate * 100) / 100;
     const productsCost = ticket.selected_products.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const serviceFee = shop.default_service_fee;
+    // If the client already approved an on-site quote, that's the figure
+    // they agreed to pay for the diagnostic + labor — carry it forward as
+    // the invoice's starting point instead of silently recomputing a
+    // different number from hours × the shop's standard rate. Products
+    // still get refreshed since parts used can change during the repair.
+    const laborCost = ticket.quote_approved_at
+      ? ticket.total_labor_cost
+      : Math.round(actualHours * shop.default_hourly_rate * 100) / 100;
+    const serviceFee = ticket.quote_approved_at ? ticket.service_fee : shop.default_service_fee;
     const totalInvoiceAmount = laborCost + productsCost + serviceFee;
 
     const { error: updateError } = await supabase

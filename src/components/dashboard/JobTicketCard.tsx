@@ -225,6 +225,29 @@ export default function JobTicketCard({
           </p>
         )}
 
+        {ticket.status === "ESTIMATE_PENDING" && (
+          <div className="w-full">
+            {ticket.quote_submitted_at ? (
+              <>
+                <p className="text-xs text-slate-400">
+                  Quote sent — waiting for {ticket.client_name} to approve it before{" "}
+                  {assignedStaff?.full_name ?? "the technician"} can start the repair.
+                </p>
+                {ticket.total_invoice_amount > 0 && (
+                  <p className="mt-1.5 text-xs font-semibold text-brand-orange">
+                    Proposed Total: {currency} {ticket.total_invoice_amount.toFixed(2)}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-xs text-slate-400">
+                {assignedStaff?.full_name ?? "The technician"} is on site diagnosing the
+                issue and preparing a quote.
+              </p>
+            )}
+          </div>
+        )}
+
         {ticket.status === "IN_PROGRESS" && (
           <div className="w-full">
             <p className="text-xs text-slate-400">

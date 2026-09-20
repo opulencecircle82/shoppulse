@@ -9,6 +9,7 @@ const COLUMNS: { status: JobStatus; label: string }[] = [
   { status: "PENDING", label: "Booking Requests" },
   { status: "UNASSIGNED", label: "Unassigned" },
   { status: "SCHEDULED", label: "Scheduled" },
+  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval" },
   { status: "IN_PROGRESS", label: "In Progress" },
   { status: "COMPLETED", label: "Completed" },
   { status: "DISPUTED", label: "Disputed" },

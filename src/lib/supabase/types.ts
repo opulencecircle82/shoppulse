@@ -78,6 +78,7 @@ export type JobStatus =
   | "REJECTED"
   | "UNASSIGNED"
   | "SCHEDULED"
+  | "ESTIMATE_PENDING"
   | "IN_PROGRESS"
   | "COMPLETED"
   | "DISPUTED"
@@ -111,6 +112,8 @@ export type JobTicket = {
   payment_receipt_url: string | null;
   invoice_paid_at: string | null;
   invoice_paid_by: string | null;
+  quote_submitted_at: string | null;
+  quote_approved_at: string | null;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;

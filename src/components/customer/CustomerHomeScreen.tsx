@@ -43,6 +43,7 @@ const STATUS_STYLES: Record<string, string> = {
   REJECTED: "bg-red-500/15 text-red-400",
   UNASSIGNED: "bg-white/10 text-slate-400",
   SCHEDULED: "bg-brand-blue/15 text-brand-blue",
+  ESTIMATE_PENDING: "bg-amber-500/15 text-amber-400",
   IN_PROGRESS: "bg-brand-blue/15 text-brand-blue",
   COMPLETED: "bg-brand-blue/15 text-brand-blue",
   APPROVED: "bg-brand-emerald/15 text-brand-emerald",
@@ -54,6 +55,7 @@ const STATUS_STYLES: Record<string, string> = {
 // is one. Every other status keeps its plain label.
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Request Sent",
+  ESTIMATE_PENDING: "Quote Ready",
 };
 
 const QUICK_CATEGORIES = [

@@ -8,11 +8,17 @@ import { uploadJobPhoto, uploadSignature } from "@/lib/tech/uploadJobPhoto";
 import {
   submitStartProof,
   submitCompletionProof,
+  submitEstimate,
   fetchPaymentVerification,
+  fetchQuoteApproval,
 } from "@/lib/tech/jobActions";
 import SignaturePad from "@/components/shared/SignaturePad";
+import SelectedProductsPicker, {
+  type SelectedProduct,
+} from "@/components/dashboard/SelectedProductsPicker";
 
 const PAYMENT_POLL_MS = 8000;
+const QUOTE_APPROVAL_POLL_MS = 8000;
 
 export default function TechJobScreen({
   shop,
@@ -25,8 +31,16 @@ export default function TechJobScreen({
   onBack: () => void;
   onSubmitted: () => void;
 }) {
-  const isStartStage = ticket.status === "SCHEDULED";
-  const isCompletionStage = ticket.status === "IN_PROGRESS";
+  // Once the client approves the on-site quote (from a different
+  // device), this flips locally so the screen moves straight into the
+  // completion stage instead of forcing the technician to back out and
+  // reopen the job to see the new status.
+  const [effectiveStatus, setEffectiveStatus] = useState(ticket.status);
+  const [quoteSubmittedAt, setQuoteSubmittedAt] = useState(ticket.quote_submitted_at);
+
+  const isStartStage = effectiveStatus === "SCHEDULED";
+  const isEstimateStage = effectiveStatus === "ESTIMATE_PENDING";
+  const isCompletionStage = effectiveStatus === "IN_PROGRESS";
   const isActionable = isStartStage || isCompletionStage;
 
   const activeChecklist = isStartStage ? ticket.start_checklist : ticket.end_checklist;
@@ -46,6 +60,51 @@ export default function TechJobScreen({
   const [paymentVerifiedAmount, setPaymentVerifiedAmount] = useState(
     ticket.payment_verified_amount
   );
+
+  const [diagnosticFee, setDiagnosticFee] = useState(shop.default_service_fee);
+  const [laborFee, setLaborFee] = useState(0);
+  const [quoteProducts, setQuoteProducts] = useState<SelectedProduct[]>(
+    ticket.selected_products
+  );
+  const [submittingQuote, setSubmittingQuote] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
+  // The technician has no way to know the client approved the quote
+  // from their own phone — poll just the approval fields, same
+  // narrow-poll pattern as payment verification below, then flip the
+  // stage locally instead of forcing a back-out/reopen.
+  useEffect(() => {
+    if (!isEstimateStage || !quoteSubmittedAt) return;
+    let active = true;
+    const interval = setInterval(async () => {
+      const result = await fetchQuoteApproval(ticket.id).catch(() => null);
+      if (active && result?.approvedAt) {
+        setEffectiveStatus("IN_PROGRESS");
+      }
+    }, QUOTE_APPROVAL_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [isEstimateStage, quoteSubmittedAt, ticket.id]);
+
+  async function handleSubmitEstimate() {
+    setSubmittingQuote(true);
+    setQuoteError(null);
+    try {
+      await submitEstimate({
+        ticketId: ticket.id,
+        diagnosticFee,
+        laborFee,
+        selectedProducts: quoteProducts,
+      });
+      setQuoteSubmittedAt(new Date().toISOString());
+    } catch (e) {
+      setQuoteError(e instanceof Error ? e.message : "Could not submit estimate.");
+    } finally {
+      setSubmittingQuote(false);
+    }
+  }
 
   // The tech app deliberately doesn't poll the ticket mid-job (would risk
   // disturbing an in-progress checklist/photo) — but once completion is
@@ -175,7 +234,119 @@ export default function TechJobScreen({
         </span>
       )}
 
-      {!isActionable ? (
+      {isEstimateStage ? (
+        <div className="mt-6">
+          {quoteSubmittedAt ? (
+            <div className="rounded-2xl bg-white/5 p-5 text-center">
+              <p className="text-sm font-semibold text-white">Estimate sent to customer</p>
+              <p className="mt-1.5 text-xs text-slate-400">
+                Waiting for them to approve it before you can start the actual repair. This
+                updates automatically.
+              </p>
+              <div className="mt-4 space-y-1.5 rounded-xl bg-white/5 p-3 text-left text-sm">
+                {diagnosticFee > 0 && (
+                  <div className="flex justify-between text-slate-300">
+                    <span>Diagnostic Fee</span>
+                    <span>{shop.currency} {diagnosticFee.toFixed(2)}</span>
+                  </div>
+                )}
+                {laborFee > 0 && (
+                  <div className="flex justify-between text-slate-300">
+                    <span>Labor (est.)</span>
+                    <span>{shop.currency} {laborFee.toFixed(2)}</span>
+                  </div>
+                )}
+                {quoteProducts.map((item, index) => (
+                  <div key={index} className="flex justify-between text-slate-300">
+                    <span>{item.name}{item.quantity > 1 ? ` ×${item.quantity}` : ""}</span>
+                    <span>{shop.currency} {(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between border-t border-white/10 pt-1.5 font-semibold text-white">
+                  <span>Total</span>
+                  <span>{shop.currency} {ticket.total_invoice_amount.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
+                Create On-Site Estimate
+              </p>
+              <p className="mt-1.5 text-xs text-slate-400">
+                Diagnose the issue, then send the customer a quote. They&apos;ll need to
+                approve it before you can start the repair.
+              </p>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400">
+                    Diagnostic Fee ({shop.currency})
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.5}
+                    value={diagnosticFee}
+                    onChange={(e) => setDiagnosticFee(Number(e.target.value))}
+                    className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400">
+                    Labor Fee ({shop.currency})
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.5}
+                    value={laborFee}
+                    onChange={(e) => setLaborFee(Number(e.target.value))}
+                    className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <SelectedProductsPicker
+                  shopId={shop.id}
+                  currency={shop.currency}
+                  selectedProducts={quoteProducts}
+                  onChange={setQuoteProducts}
+                  label="Parts Needed"
+                />
+              </div>
+
+              <div className="mt-4 flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
+                <span className="text-sm text-slate-400">Estimated Total</span>
+                <span className="text-lg font-bold text-brand-emerald">
+                  {shop.currency}{" "}
+                  {(
+                    diagnosticFee +
+                    laborFee +
+                    quoteProducts.reduce((sum, item) => sum + item.price * item.quantity, 0)
+                  ).toFixed(2)}
+                </span>
+              </div>
+
+              {quoteError && (
+                <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+                  {quoteError}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleSubmitEstimate}
+                disabled={submittingQuote}
+                className="mt-4 w-full rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {submittingQuote ? "Sending..." : "Send Estimate to Customer"}
+              </button>
+            </div>
+          )}
+        </div>
+      ) : !isActionable ? (
         <div className="mt-6">
           <p className="text-sm text-slate-400">
             This job is {ticket.status}. No action needed here.
