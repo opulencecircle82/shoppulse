@@ -83,6 +83,14 @@ template" font). The established type scale, used consistently:
 - Body: `text-sm text-slate-300` (dark) / `text-slate-600` (light)
 - Micro / metadata: `text-[10px]`–`text-xs text-slate-500`
 
+## Touch targets
+
+Every tappable element on a phone screen needs a real hit area of at
+least 44×44px (iOS/Android HIG minimum) — a `p-2` icon button with an
+`h-5 w-5` icon already clears this because the padding counts, but a bare
+small icon or a thin text link with no padding doesn't. Check this
+specifically for anything added to a header icon row or a dense list row.
+
 ## Layout
 
 - Every screen is mobile-first. Design and review at **phone width first**
