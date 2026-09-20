@@ -61,7 +61,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={() => setViewMonth(new Date(year, month - 1, 1))}
-          className="rounded-full p-1 text-slate-400 hover:text-white"
+          className="rounded-full p-3.5 text-slate-400 hover:text-white"
           aria-label="Previous month"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -72,7 +72,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={() => setViewMonth(new Date(year, month + 1, 1))}
-          className="rounded-full p-1 text-slate-400 hover:text-white"
+          className="rounded-full p-3.5 text-slate-400 hover:text-white"
           aria-label="Next month"
         >
           <ChevronRight className="h-4 w-4" />

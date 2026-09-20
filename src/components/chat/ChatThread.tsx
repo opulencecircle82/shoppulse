@@ -104,7 +104,7 @@ export default function ChatThread({
           <button
             type="button"
             onClick={onBack}
-            className="shrink-0 text-slate-400 hover:text-white"
+            className="-ml-2 shrink-0 rounded-full p-2 text-slate-400 hover:text-white"
             aria-label="Back"
           >
             <ArrowLeft className="h-4 w-4" />
