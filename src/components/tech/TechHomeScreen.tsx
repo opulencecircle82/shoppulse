@@ -7,8 +7,6 @@ import {
   CheckCircle2,
   Award,
   MessageCircle,
-  Home,
-  LogOut,
   Siren,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -137,61 +135,46 @@ export default function TechHomeScreen({
     task?.status === "SCHEDULED" && !task.staff_accepted_at;
 
   return (
-    <main className="min-h-screen bg-brand-navy">
-      <div className="flex">
-        <nav className="flex w-20 shrink-0 flex-col items-center gap-1 border-r border-white/10 bg-black/20 px-2 py-6">
-          <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-orange text-xs font-bold text-white">
-            SP
+    <main className="min-h-screen bg-brand-navy px-5 py-6">
+      <div className="mx-auto max-w-lg">
+        <header className="flex items-center justify-between">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-medium text-brand-orange">
+              ShopPulse Staff
+            </span>
+            <h1 className="mt-1.5 truncate text-lg font-bold text-white">
+              {shop.shop_name}
+            </h1>
           </div>
-
-          <button
-            type="button"
-            className="flex w-full flex-col items-center gap-1 rounded-xl bg-brand-orange/15 px-2 py-2.5 text-brand-orange"
-          >
-            <Home className="h-5 w-5" />
-            <span className="text-[10px] font-medium">Home</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenMessages}
-            className="relative flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
-            aria-label="Messages"
-          >
-            <span className="relative">
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={onOpenMessages}
+              className="relative rounded-full p-2 text-white/80 hover:text-white"
+              aria-label="Messages"
+            >
               <MessageCircle className="h-5 w-5" />
               {unreadMessages > 0 && (
-                <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                   {unreadMessages > 9 ? "9+" : unreadMessages}
                 </span>
               )}
-            </span>
-            <span className="text-[10px] font-medium">Messages</span>
-          </button>
+            </button>
 
-          <TechNotificationBell staffId={staffId} onOpenTicket={onOpenTicket} />
+            <TechNotificationBell staffId={staffId} onOpenTicket={onOpenTicket} />
 
-          <div className="mt-auto w-full">
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
+              className="ml-1 text-sm font-medium text-white/70 hover:text-white"
             >
-              <LogOut className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Sign Out</span>
+              Sign Out
             </button>
           </div>
-        </nav>
+        </header>
 
-        <div className="min-w-0 flex-1">
-          <header className="px-5 py-4">
-            <h1 className="truncate text-lg font-bold text-white">
-              {shop.shop_name}
-            </h1>
-          </header>
-
-          <div className="px-5 pb-10">
-            <div className="grid grid-cols-2 gap-3">
+        <div className="pb-10">
+          <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/5 p-4">
                 <div className="flex items-center gap-1.5 text-brand-emerald">
                   <CheckCircle2 className="h-3.5 w-3.5" />
@@ -371,7 +354,6 @@ export default function TechHomeScreen({
                 </div>
               </div>
             )}
-          </div>
         </div>
       </div>
     </main>

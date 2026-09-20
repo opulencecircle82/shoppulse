@@ -69,26 +69,23 @@ export default function TechNotificationBell({
   }
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div className="relative" ref={containerRef}>
       <button
         type="button"
         onClick={handleOpen}
-        className="relative flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+        className="relative rounded-full p-2 text-white/80 hover:text-white"
         aria-label="Notifications"
       >
-        <span className="relative">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[10px] font-bold text-white">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
-        </span>
-        <span className="text-[10px] font-medium">Alerts</span>
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-orange px-1 text-[10px] font-bold text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
       </button>
 
       {open && (
-        <div className="absolute left-full top-0 z-50 ml-2 w-72 rounded-2xl bg-brand-navy p-2 shadow-xl shadow-black/40 ring-1 ring-white/10">
+        <div className="absolute right-0 z-50 mt-2 w-72 rounded-2xl border border-white/10 bg-brand-navy p-2 shadow-xl shadow-black/40">
           <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Notifications
           </p>
