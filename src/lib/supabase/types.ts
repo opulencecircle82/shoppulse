@@ -98,6 +98,10 @@ export type JobTicket = {
   status: JobStatus;
   start_photo_url: string | null;
   end_photo_url: string | null;
+  start_photo_hash: string | null;
+  end_photo_hash: string | null;
+  start_geofence_distance_m: number | null;
+  end_geofence_distance_m: number | null;
   start_checklist: string[];
   end_checklist: string[];
   started_at: string | null;

@@ -77,6 +77,8 @@ export async function fetchPaymentVerification(
 export async function submitStartProof(params: {
   ticketId: string;
   photoUrl: string;
+  photoHash: string;
+  geofenceDistanceM: number | null;
   latitude: number;
   longitude: number;
 }) {
@@ -88,6 +90,8 @@ export async function submitStartProof(params: {
     .update({
       status: "ESTIMATE_PENDING",
       start_photo_url: params.photoUrl,
+      start_photo_hash: params.photoHash,
+      start_geofence_distance_m: params.geofenceDistanceM,
       started_at: new Date().toISOString(),
       start_gps_location: toGeographyPoint(params.latitude, params.longitude),
     })
@@ -141,6 +145,8 @@ export async function fetchQuoteApproval(
 export async function submitCompletionProof(params: {
   ticketId: string;
   photoUrl: string;
+  photoHash: string;
+  geofenceDistanceM: number | null;
   latitude: number;
   longitude: number;
   signatureUrl: string | null;
@@ -150,6 +156,8 @@ export async function submitCompletionProof(params: {
     .update({
       status: "COMPLETED",
       end_photo_url: params.photoUrl,
+      end_photo_hash: params.photoHash,
+      end_geofence_distance_m: params.geofenceDistanceM,
       completed_at: new Date().toISOString(),
       end_gps_location: toGeographyPoint(params.latitude, params.longitude),
       signature_url: params.signatureUrl,

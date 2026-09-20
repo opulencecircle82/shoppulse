@@ -82,14 +82,20 @@ function ActivityLog({ ticketId }: { ticketId: string }) {
 function ProofPhoto({
   label,
   url,
-  timestamp,
-  shop,
+  hash,
+  distanceM,
+  geofenceRadiusM,
 }: {
   label: string;
   url: string | null;
-  timestamp: string | null;
-  shop: Shop;
+  hash: string | null;
+  distanceM: number | null;
+  geofenceRadiusM: number;
 }) {
+  // The GPS/timestamp/logo badges are burned into the photo's pixels
+  // at capture time now (see renderWatermarkedPhoto), so this just
+  // displays the file as-is instead of stacking a second CSS overlay
+  // on top of one that's already there.
   return (
     <div>
       <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -106,28 +112,19 @@ function ProofPhoto({
             </span>
           </div>
         )}
-
-        {url && shop.watermark_show_logo && (
-          <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-md bg-black/50 px-2 py-1 backdrop-blur">
-            <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
-              {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
-            </span>
-            <span className="text-[10px] font-semibold text-white">
-              {shop.shop_name}
-            </span>
-          </div>
-        )}
-        {url && shop.watermark_show_timestamp && (
-          <div className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
-            {timestamp ? new Date(timestamp).toLocaleString() : "—"}
-          </div>
-        )}
-        {url && shop.watermark_show_gps && (
-          <div className="absolute bottom-2 right-2 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white backdrop-blur">
-            GPS Verified
-          </div>
-        )}
       </div>
+      {url && (
+        <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
+          <span>
+            {distanceM !== null
+              ? distanceM <= geofenceRadiusM
+                ? `✓ ${Math.round(distanceM)}m from site`
+                : `⚠ ${Math.round(distanceM)}m from site (outside ${geofenceRadiusM}m)`
+              : "Site coordinates unavailable"}
+          </span>
+          {hash && <span className="font-mono">#{hash.slice(0, 10)}</span>}
+        </div>
+      )}
     </div>
   );
 }
@@ -160,7 +157,12 @@ export default function ProofDisputeDrawer({
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const gpsVerified = ticket.start_photo_url !== null && ticket.end_photo_url !== null;
+  const hasBothProofs = ticket.start_photo_url !== null && ticket.end_photo_url !== null;
+  const geofenceBreached =
+    (ticket.start_geofence_distance_m !== null &&
+      ticket.start_geofence_distance_m > shop.geofence_radius_meters) ||
+    (ticket.end_geofence_distance_m !== null &&
+      ticket.end_geofence_distance_m > shop.geofence_radius_meters);
 
   async function handleApprove() {
     setSaving("approve");
@@ -314,14 +316,16 @@ export default function ProofDisputeDrawer({
           <ProofPhoto
             label="Job Start Proof"
             url={ticket.start_photo_url}
-            timestamp={ticket.started_at}
-            shop={shop}
+            hash={ticket.start_photo_hash}
+            distanceM={ticket.start_geofence_distance_m}
+            geofenceRadiusM={shop.geofence_radius_meters}
           />
           <ProofPhoto
             label="Job Completion Proof"
             url={ticket.end_photo_url}
-            timestamp={ticket.completed_at}
-            shop={shop}
+            hash={ticket.end_photo_hash}
+            distanceM={ticket.end_geofence_distance_m}
+            geofenceRadiusM={shop.geofence_radius_meters}
           />
         </div>
 
@@ -347,11 +351,19 @@ export default function ProofDisputeDrawer({
             <div className="flex items-center justify-between">
               <dt className="text-slate-400">Geofence</dt>
               <dd
-                className={`font-medium ${gpsVerified ? "text-brand-emerald" : "text-slate-500"}`}
+                className={`font-medium ${
+                  !hasBothProofs
+                    ? "text-slate-500"
+                    : geofenceBreached
+                      ? "text-red-400"
+                      : "text-brand-emerald"
+                }`}
               >
-                {gpsVerified
-                  ? `Verified (±${shop.geofence_radius_meters}m tolerance)`
-                  : "Awaiting proof"}
+                {!hasBothProofs
+                  ? "Awaiting proof"
+                  : geofenceBreached
+                    ? `Outside ${shop.geofence_radius_meters}m tolerance`
+                    : `Within ${shop.geofence_radius_meters}m tolerance`}
               </dd>
             </div>
             {ticket.selected_products.length > 0 && (

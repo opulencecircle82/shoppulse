@@ -3,14 +3,13 @@ import { supabase } from "@/lib/supabase/client";
 export async function uploadJobPhoto(
   shopId: string,
   ticketId: string,
-  file: File
+  file: Blob
 ): Promise<string> {
-  const extension = file.name.split(".").pop() ?? "jpg";
-  const path = `${shopId}/${ticketId}/${Date.now()}.${extension}`;
+  const path = `${shopId}/${ticketId}/${Date.now()}.jpg`;
 
   const { error } = await supabase.storage
     .from("job-photos")
-    .upload(path, file, { contentType: file.type });
+    .upload(path, file, { contentType: "image/jpeg" });
 
   if (error) throw error;
 

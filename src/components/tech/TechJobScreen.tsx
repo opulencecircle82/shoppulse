@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { MapPin, ShieldCheck } from "lucide-react";
+import { MapPin, ShieldCheck, ShieldAlert } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
-import { getCurrentPosition } from "@/lib/tech/gps";
+import { getCurrentPosition, haversineDistanceMeters } from "@/lib/tech/gps";
 import { uploadJobPhoto, uploadSignature } from "@/lib/tech/uploadJobPhoto";
+import { renderWatermarkedPhoto, sha256Hex } from "@/lib/tech/photoProof";
 import {
   submitStartProof,
   submitCompletionProof,
@@ -49,6 +50,7 @@ export default function TechJobScreen({
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [position, setPosition] = useState<GeolocationPosition | null>(null);
+  const [geofenceDistanceM, setGeofenceDistanceM] = useState<number | null>(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -131,10 +133,14 @@ export default function TechJobScreen({
   const checklistCompleted = checkedItems.size >= activeChecklist.length;
   const needsSignature = isCompletionStage;
   const needsPaymentVerification = isCompletionStage;
+  const hasGeofenceTarget = ticket.booking_latitude !== null && ticket.booking_longitude !== null;
+  const withinGeofence =
+    !hasGeofenceTarget || geofenceDistanceM === null || geofenceDistanceM <= shop.geofence_radius_meters;
   const canSubmit =
     checklistCompleted &&
     capturedFile !== null &&
     position !== null &&
+    withinGeofence &&
     (!needsSignature || signatureDataUrl !== null) &&
     (!needsPaymentVerification || paymentVerifiedAt !== null) &&
     !submitting;
@@ -160,6 +166,16 @@ export default function TechJobScreen({
       setCapturedFile(file);
       setCapturedPreview(URL.createObjectURL(file));
       setPosition(pos);
+      setGeofenceDistanceM(
+        ticket.booking_latitude !== null && ticket.booking_longitude !== null
+          ? haversineDistanceMeters(
+              pos.coords.latitude,
+              pos.coords.longitude,
+              ticket.booking_latitude,
+              ticket.booking_longitude
+            )
+          : null
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not capture proof.");
     } finally {
@@ -174,12 +190,24 @@ export default function TechJobScreen({
     setError(null);
 
     try {
-      const photoUrl = await uploadJobPhoto(shop.id, ticket.id, capturedFile);
+      const watermarked = await renderWatermarkedPhoto(capturedFile, {
+        shopName: shop.shop_name,
+        showLogo: shop.watermark_show_logo,
+        showTimestamp: shop.watermark_show_timestamp,
+        showGps: shop.watermark_show_gps,
+        timestamp: new Date(),
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+      const photoHash = await sha256Hex(watermarked);
+      const photoUrl = await uploadJobPhoto(shop.id, ticket.id, watermarked);
 
       if (isStartStage) {
         await submitStartProof({
           ticketId: ticket.id,
           photoUrl,
+          photoHash,
+          geofenceDistanceM,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
@@ -190,6 +218,8 @@ export default function TechJobScreen({
         await submitCompletionProof({
           ticketId: ticket.id,
           photoUrl,
+          photoHash,
+          geofenceDistanceM,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           signatureUrl,
@@ -415,9 +445,27 @@ export default function TechJobScreen({
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-xs text-slate-500">
-              Geofence tolerance: {shop.geofence_radius_meters}m around the proof photo location.
-            </p>
+            {hasGeofenceTarget && geofenceDistanceM !== null ? (
+              <p
+                className={`mt-1.5 flex items-center gap-1 text-xs font-semibold ${
+                  withinGeofence ? "text-brand-emerald" : "text-red-400"
+                }`}
+              >
+                {withinGeofence ? (
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                ) : (
+                  <ShieldAlert className="h-3.5 w-3.5" />
+                )}
+                {withinGeofence
+                  ? `Within geofence — ${Math.round(geofenceDistanceM)}m from the job site (limit ${shop.geofence_radius_meters}m)`
+                  : `Too far from the job site — ${Math.round(geofenceDistanceM)}m away, must be within ${shop.geofence_radius_meters}m`}
+              </p>
+            ) : (
+              <p className="mt-1.5 text-xs text-slate-500">
+                Geofence tolerance: {shop.geofence_radius_meters}m around the job site.
+                {!hasGeofenceTarget && " (No site coordinates on this ticket — not enforced.)"}
+              </p>
+            )}
           </div>
 
           <p className="mt-5 text-xs font-bold uppercase tracking-wide text-brand-orange">
