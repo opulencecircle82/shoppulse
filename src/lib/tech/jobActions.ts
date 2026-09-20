@@ -3,6 +3,50 @@ import type { JobTicket } from "@/lib/supabase/types";
 import type { SelectedProduct } from "@/components/dashboard/SelectedProductsPicker";
 import { toGeographyPoint } from "./gps";
 
+export type NearbyEmergencyJob = {
+  id: string;
+  clientName: string;
+  serviceType: string;
+  serviceAddress: string;
+  description: string | null;
+  createdAt: string;
+  distanceKm: number;
+};
+
+/** Unclaimed emergency bookings within 5km of this technician's own
+ * last live-location ping — empty if they haven't pinged recently
+ * (the RPC treats that as "not currently online"). */
+export async function listNearbyEmergencyJobs(): Promise<NearbyEmergencyJob[]> {
+  const { data, error } = await supabase.rpc("list_nearby_emergency_jobs");
+  if (error) throw error;
+  return ((data ?? []) as {
+    id: string;
+    client_name: string;
+    service_type: string;
+    service_address: string;
+    description: string | null;
+    created_at: string;
+    distance_km: number;
+  }[]).map((row) => ({
+    id: row.id,
+    clientName: row.client_name,
+    serviceType: row.service_type,
+    serviceAddress: row.service_address,
+    description: row.description,
+    createdAt: row.created_at,
+    distanceKm: row.distance_km,
+  }));
+}
+
+/** First technician to claim it wins — throws if someone else already
+ * did between the list fetch and this call. */
+export async function claimEmergencyJob(ticketId: string) {
+  const { error } = await supabase.rpc("technician_claim_emergency_job", {
+    p_ticket_id: ticketId,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchAssignedJobs(staffId: string): Promise<JobTicket[]> {
   const { data, error } = await supabase
     .from("job_tickets")

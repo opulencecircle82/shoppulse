@@ -39,6 +39,11 @@ export default function AvailabilityCalendar({
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  // Scheduled bookings only go 14 days out — anything further needs a
+  // phone call, since the shop's own availability that far ahead isn't
+  // reliably known yet.
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + 14);
 
   const year = viewMonth.getFullYear();
   const month = viewMonth.getMonth();
@@ -86,8 +91,9 @@ export default function AvailabilityCalendar({
 
           const iso = toIso(date);
           const isPast = date < today;
+          const isTooFarAhead = date > maxDate;
           const isOpenDay = businessDays.includes(DAY_CODES[date.getDay()]);
-          const disabled = isPast || !isOpenDay;
+          const disabled = isPast || isTooFarAhead || !isOpenDay;
           const isSelected = iso === selectedDate;
 
           return (
@@ -110,8 +116,12 @@ export default function AvailabilityCalendar({
         })}
       </div>
 
+      <p className="mt-2 text-[11px] text-slate-500">
+        Bookable up to 2 weeks ahead.
+      </p>
+
       {businessHoursOpen && businessHoursClose && (
-        <p className="mt-2 text-[11px] text-slate-400">
+        <p className="mt-1 text-[11px] text-slate-400">
           Open {businessHoursOpen} – {businessHoursClose} on available days
         </p>
       )}

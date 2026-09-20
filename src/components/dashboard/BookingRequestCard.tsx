@@ -61,7 +61,16 @@ export default function BookingRequestCard({
   }
 
   return (
-    <div className="rounded-2xl border border-brand-blue/20 bg-white/5 p-4 shadow-md shadow-black/20">
+    <div
+      className={`rounded-2xl border bg-white/5 p-4 shadow-md shadow-black/20 ${
+        ticket.is_emergency ? "border-red-500/50 ring-1 ring-red-500/30" : "border-brand-blue/20"
+      }`}
+    >
+      {ticket.is_emergency && (
+        <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-400">
+          🚨 EMERGENCY
+        </span>
+      )}
       <p className="text-sm font-semibold text-white">{ticket.client_name}</p>
       <p className="mt-0.5 text-xs text-slate-400">{ticket.service_type}</p>
       {ticket.description && (

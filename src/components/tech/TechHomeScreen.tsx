@@ -9,13 +9,21 @@ import {
   MessageCircle,
   Home,
   LogOut,
+  Siren,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
 import { listStaffConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
+import {
+  listNearbyEmergencyJobs,
+  claimEmergencyJob,
+  type NearbyEmergencyJob,
+} from "@/lib/tech/jobActions";
 import TechNotificationBell from "./TechNotificationBell";
+
+const EMERGENCY_POLL_MS = 15000;
 
 function mapsUrl(address: string) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
@@ -47,6 +55,9 @@ export default function TechHomeScreen({
   const [responding, setResponding] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const unreadRef = useRef(0);
+  const [emergencyJobs, setEmergencyJobs] = useState<NearbyEmergencyJob[]>([]);
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -66,6 +77,39 @@ export default function TechHomeScreen({
       clearInterval(interval);
     };
   }, []);
+
+  // Polls rather than waiting for the technician to notice the bell —
+  // an emergency job sitting unclaimed for minutes defeats the point.
+  useEffect(() => {
+    let active = true;
+    function loadEmergencyJobs() {
+      listNearbyEmergencyJobs()
+        .then((jobs) => {
+          if (active) setEmergencyJobs(jobs);
+        })
+        .catch(() => {});
+    }
+    loadEmergencyJobs();
+    const interval = setInterval(loadEmergencyJobs, EMERGENCY_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  async function handleClaimEmergencyJob(jobId: string) {
+    setClaimingId(jobId);
+    setClaimError(null);
+    try {
+      await claimEmergencyJob(jobId);
+      onRefresh();
+    } catch (e) {
+      setClaimError(e instanceof Error ? e.message : "Could not claim this job.");
+      setEmergencyJobs((prev) => prev.filter((j) => j.id !== jobId));
+    } finally {
+      setClaimingId(null);
+    }
+  }
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -173,6 +217,47 @@ export default function TechHomeScreen({
                 <p className="text-[11px] text-slate-500">Total completed</p>
               </div>
             </div>
+
+            {emergencyJobs.length > 0 && (
+              <div className="mt-6">
+                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-400">
+                  <Siren className="h-3.5 w-3.5" />
+                  Emergency Jobs Nearby ({emergencyJobs.length})
+                </p>
+                {claimError && (
+                  <p className="mt-1.5 text-xs text-red-400">{claimError}</p>
+                )}
+                <div className="mt-2 space-y-2">
+                  {emergencyJobs.map((job) => (
+                    <div
+                      key={job.id}
+                      className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-bold text-white">{job.serviceType}</p>
+                        <span className="shrink-0 text-xs font-semibold text-red-300">
+                          {job.distanceKm < 1
+                            ? `${Math.round(job.distanceKm * 1000)}m away`
+                            : `${job.distanceKm.toFixed(1)}km away`}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-slate-300">{job.serviceAddress}</p>
+                      {job.description && (
+                        <p className="mt-1 text-xs text-slate-400">{job.description}</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleClaimEmergencyJob(job.id)}
+                        disabled={claimingId === job.id}
+                        className="mt-3 w-full rounded-full bg-gradient-to-r from-red-500 to-red-700 px-4 py-2.5 text-xs font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {claimingId === job.id ? "Claiming..." : "Claim This Job"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Active Task

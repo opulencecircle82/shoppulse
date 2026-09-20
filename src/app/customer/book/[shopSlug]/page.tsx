@@ -41,6 +41,7 @@ export default function BookJobPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [manualAddress, setManualAddress] = useState("");
+  const [isEmergency, setIsEmergency] = useState(false);
   const [preferredDate, setPreferredDate] = useState("");
   const [availability, setAvailability] = useState<DateAvailability | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -124,9 +125,12 @@ export default function BookJobPage() {
         phone: customer.phone ?? "",
         serviceType,
         serviceAddress,
-        preferredDate: preferredDate || null,
+        preferredDate: isEmergency ? null : preferredDate || null,
         description,
         requestPhotoUrl,
+        isEmergency,
+        latitude: selectedAddress?.latitude ?? null,
+        longitude: selectedAddress?.longitude ?? null,
       });
       setSubmitted(true);
     } catch (e) {
@@ -248,6 +252,30 @@ export default function BookJobPage() {
             />
           </div>
 
+          <label
+            className={`flex cursor-pointer items-start gap-3 rounded-xl px-3.5 py-3 transition-colors ${
+              isEmergency
+                ? "bg-red-500/15 ring-1 ring-red-500/50"
+                : "bg-white/5 hover:bg-white/10"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={isEmergency}
+              onChange={(e) => setIsEmergency(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-red-500"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-white">
+                🚨 This is an emergency
+              </span>
+              <span className="block text-xs text-slate-400">
+                Skips scheduling — we&apos;ll try to dispatch the nearest available
+                technician to you right away.
+              </span>
+            </span>
+          </label>
+
           <div>
             <label className="block text-xs font-medium text-slate-400">
               Describe the issue (optional)
@@ -334,7 +362,7 @@ export default function BookJobPage() {
             )}
           </div>
 
-          {shop && (
+          {shop && !isEmergency && (
             <div>
               <label className="block text-xs font-medium text-slate-400">
                 Preferred Date (optional)
@@ -383,9 +411,17 @@ export default function BookJobPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+            className={`w-full rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60 ${
+              isEmergency
+                ? "bg-gradient-to-r from-red-500 to-red-700"
+                : "bg-gradient-to-r from-brand-sky to-brand-blue-dark"
+            }`}
           >
-            {submitting ? "Sending..." : "Send Request"}
+            {submitting
+              ? "Sending..."
+              : isEmergency
+                ? "🚨 Send Emergency Request"
+                : "Send Request"}
           </button>
         </form>
       </div>

@@ -34,7 +34,9 @@ export default function KanbanBoard({
   onOpenProofDrawer: (ticket: JobTicket) => void;
 }) {
   const [activeStatus, setActiveStatus] = useState<JobStatus>("PENDING");
-  const activeTickets = tickets.filter((t) => t.status === activeStatus);
+  const activeTickets = tickets
+    .filter((t) => t.status === activeStatus)
+    .sort((a, b) => Number(b.is_emergency) - Number(a.is_emergency));
 
   return (
     <div>

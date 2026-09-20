@@ -141,6 +141,9 @@ export async function submitBooking(params: {
   preferredDate?: string | null;
   description?: string;
   requestPhotoUrl?: string | null;
+  isEmergency?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 }) {
   const { error } = await supabase.rpc("submit_job_booking", {
     p_shop_slug: params.shopSlug,
@@ -152,6 +155,9 @@ export async function submitBooking(params: {
     p_preferred_date: params.preferredDate || null,
     p_description: params.description || null,
     p_request_photo_url: params.requestPhotoUrl || null,
+    p_is_emergency: params.isEmergency || false,
+    p_latitude: params.latitude ?? null,
+    p_longitude: params.longitude ?? null,
   });
 
   if (error) throw new Error(error.message);

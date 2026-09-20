@@ -117,6 +117,9 @@ export type JobTicket = {
   quote_approved_at: string | null;
   warranty_expires_at: string | null;
   warranty_claim_of_ticket_id: string | null;
+  is_emergency: boolean;
+  booking_latitude: number | null;
+  booking_longitude: number | null;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;
