@@ -29,6 +29,7 @@ export type Shop = {
   has_marketing_tier: boolean;
   address: string | null;
   contact_phone: string | null;
+  warranty_days: number;
   geofence_radius_meters: number;
   shift_grace_minutes: number;
   lunch_break_minutes: number;
@@ -114,6 +115,8 @@ export type JobTicket = {
   invoice_paid_by: string | null;
   quote_submitted_at: string | null;
   quote_approved_at: string | null;
+  warranty_expires_at: string | null;
+  warranty_claim_of_ticket_id: string | null;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;

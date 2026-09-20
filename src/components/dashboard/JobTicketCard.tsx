@@ -358,6 +358,14 @@ export default function JobTicketCard({
                 )}
               </div>
             )}
+
+            {ticket.warranty_expires_at && (
+              <p className="mt-2 text-[11px] text-slate-500">
+                {ticket.warranty_claim_of_ticket_id ? "Warranty claim — " : ""}
+                Warranty {new Date(ticket.warranty_expires_at) > new Date() ? "active until" : "expired"}{" "}
+                {new Date(ticket.warranty_expires_at).toLocaleDateString()}
+              </p>
+            )}
           </div>
         )}
 

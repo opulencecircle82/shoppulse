@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Download, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -59,6 +60,7 @@ type ClientTicket = {
   quote_submitted_at: string | null;
   quote_approved_at: string | null;
   total_labor_cost: number;
+  warranty_expires_at: string | null;
 };
 
 function ProofPhoto({
@@ -126,6 +128,9 @@ export default function ClientTicketPage() {
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [approvingQuote, setApprovingQuote] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
+  const [claimingWarranty, setClaimingWarranty] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimedTicketId, setClaimedTicketId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -209,6 +214,20 @@ export default function ClientTicketPage() {
       return;
     }
     await load();
+  }
+
+  async function handleClaimWarranty() {
+    setClaimingWarranty(true);
+    setClaimError(null);
+    const { data, error: rpcError } = await supabase.rpc("client_claim_warranty", {
+      p_ticket_id: ticketId,
+    });
+    setClaimingWarranty(false);
+    if (rpcError) {
+      setClaimError(rpcError.message);
+      return;
+    }
+    setClaimedTicketId(data as string);
   }
 
   async function handleSelectPayment(method: string) {
@@ -469,9 +488,59 @@ export default function ClientTicketPage() {
           )}
 
           {ticket.status === "APPROVED" && (
-            <p className="mt-6 rounded-lg bg-brand-emerald/15 px-4 py-3 text-sm text-brand-emerald">
-              This job has been approved.
-            </p>
+            <div className="mt-6">
+              <p className="rounded-lg bg-brand-emerald/15 px-4 py-3 text-sm text-brand-emerald">
+                This job has been approved.
+              </p>
+
+              {ticket.warranty_expires_at && (
+                <div className="mt-3 rounded-lg bg-white/5 px-4 py-3">
+                  {claimedTicketId ? (
+                    <>
+                      <p className="text-sm font-semibold text-white">
+                        Warranty claim submitted!
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        The business will review your follow-up request shortly.
+                      </p>
+                      <Link
+                        href={`/client/${claimedTicketId}`}
+                        className="mt-2 inline-block text-xs font-semibold text-brand-blue hover:text-blue-400"
+                      >
+                        View your claim →
+                      </Link>
+                    </>
+                  ) : new Date(ticket.warranty_expires_at) > new Date() ? (
+                    <>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Warranty Active
+                      </p>
+                      <p className="mt-1 text-sm text-slate-300">
+                        Covered until{" "}
+                        {new Date(ticket.warranty_expires_at).toLocaleDateString()}. Still
+                        having the same issue? Claim it for a free follow-up visit.
+                      </p>
+                      {claimError && (
+                        <p className="mt-2 text-xs text-red-400">{claimError}</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleClaimWarranty}
+                        disabled={claimingWarranty}
+                        className="mt-2 rounded-full border border-brand-blue/40 px-4 py-2 text-xs font-semibold text-brand-blue transition-colors hover:bg-brand-sky/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {claimingWarranty ? "Submitting..." : "Claim Warranty"}
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-xs text-slate-500">
+                      Warranty expired on{" "}
+                      {new Date(ticket.warranty_expires_at).toLocaleDateString()}.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {ticket.status === "DISPUTED" && (

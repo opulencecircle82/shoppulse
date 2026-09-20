@@ -10,6 +10,7 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
     shop.default_overtime_multiplier
   );
   const [defaultServiceFee, setDefaultServiceFee] = useState(shop.default_service_fee);
+  const [warrantyDays, setWarrantyDays] = useState(shop.warranty_days);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -24,6 +25,7 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
         default_hourly_rate: defaultHourlyRate,
         default_overtime_multiplier: defaultOvertimeMultiplier,
         default_service_fee: defaultServiceFee,
+        warranty_days: warrantyDays,
       })
       .eq("id", shop.id);
 
@@ -86,6 +88,22 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
           />
           <p className="mt-1 text-[11px] text-slate-500">
             Flat call-out charge added to every job.
+          </p>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400">
+            Warranty Period (days)
+          </label>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            value={warrantyDays}
+            onChange={(e) => setWarrantyDays(Number(e.target.value))}
+            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          />
+          <p className="mt-1 text-[11px] text-slate-500">
+            Starts once you approve a job. Set to 0 to turn off warranties.
           </p>
         </div>
       </div>

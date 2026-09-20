@@ -122,6 +122,10 @@ export default function ProofDisputeDrawer({
       : Math.round(actualHours * shop.default_hourly_rate * 100) / 100;
     const serviceFee = ticket.quote_approved_at ? ticket.service_fee : shop.default_service_fee;
     const totalInvoiceAmount = laborCost + productsCost + serviceFee;
+    const warrantyExpiresAt =
+      shop.warranty_days > 0
+        ? new Date(Date.now() + shop.warranty_days * 86400000).toISOString()
+        : null;
 
     const { error: updateError } = await supabase
       .from("job_tickets")
@@ -132,6 +136,7 @@ export default function ProofDisputeDrawer({
         total_labor_cost: laborCost,
         service_fee: serviceFee,
         total_invoice_amount: totalInvoiceAmount,
+        warranty_expires_at: warrantyExpiresAt,
       })
       .eq("id", ticket.id);
 
@@ -178,6 +183,7 @@ export default function ProofDisputeDrawer({
       total_labor_cost: laborCost,
       service_fee: serviceFee,
       total_invoice_amount: totalInvoiceAmount,
+      warranty_expires_at: warrantyExpiresAt,
     });
     onClose();
   }
