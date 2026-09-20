@@ -1,9 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ShieldCheck, ChevronDown, ChevronUp, History } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
+
+type JobTicketLog = {
+  id: string;
+  event_type: string;
+  detail: string;
+  actor_role: string | null;
+  actor_name: string | null;
+  created_at: string;
+};
+
+/** Every meaningful change to this ticket (status, assignment, quote,
+ * invoice, payment), for dispute resolution — who changed what, and
+ * when. Collapsed by default since it's reference material, not
+ * something the owner needs on every open. */
+function ActivityLog({ ticketId }: { ticketId: string }) {
+  const [logs, setLogs] = useState<JobTicketLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("job_ticket_logs")
+      .select("id, event_type, detail, actor_role, actor_name, created_at")
+      .eq("job_ticket_id", ticketId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (active) {
+          setLogs((data as JobTicketLog[]) ?? []);
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [ticketId]);
+
+  if (loading || logs.length === 0) return null;
+
+  return (
+    <div className="mt-5 rounded-xl bg-white/5 p-4">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <History className="h-3.5 w-3.5" />
+          Activity Log ({logs.length})
+        </p>
+        {expanded ? (
+          <ChevronUp className="h-4 w-4 text-slate-400" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-slate-400" />
+        )}
+      </button>
+
+      {expanded && (
+        <div className="mt-3 max-h-56 space-y-2.5 overflow-y-auto">
+          {logs.map((log) => (
+            <div key={log.id} className="text-xs">
+              <p className="text-slate-300">{log.detail}</p>
+              <p className="mt-0.5 text-slate-500">
+                {log.actor_name ?? "System"}
+                {log.actor_role && log.actor_role !== "system" ? ` (${log.actor_role})` : ""} ·{" "}
+                {new Date(log.created_at).toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ProofPhoto({
   label,
@@ -329,6 +403,8 @@ export default function ProofDisputeDrawer({
             </div>
           </div>
         )}
+
+        <ActivityLog ticketId={ticket.id} />
 
         <div className="mt-5">
           <label className="block text-xs font-medium text-slate-400">

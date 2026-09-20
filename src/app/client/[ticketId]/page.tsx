@@ -11,6 +11,7 @@ import {
   fetchTicketReview,
   submitShopReview,
   uploadPaymentReceipt,
+  cancelBooking,
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
@@ -61,6 +62,9 @@ type ClientTicket = {
   quote_approved_at: string | null;
   total_labor_cost: number;
   warranty_expires_at: string | null;
+  cancelled_at: string | null;
+  cancellation_reason: string | null;
+  cancellation_fee_applied: boolean;
 };
 
 function ProofPhoto({
@@ -131,6 +135,9 @@ export default function ClientTicketPage() {
   const [claimingWarranty, setClaimingWarranty] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claimedTicketId, setClaimedTicketId] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -230,6 +237,20 @@ export default function ClientTicketPage() {
     setClaimedTicketId(data as string);
   }
 
+  async function handleCancelBooking() {
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      await cancelBooking(ticketId);
+      setShowCancelConfirm(false);
+      await load();
+    } catch (e) {
+      setCancelError(e instanceof Error ? e.message : "Could not cancel this booking.");
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   async function handleSelectPayment(method: string) {
     setSelectingPayment(true);
     await supabase.rpc("client_select_payment_method", {
@@ -327,7 +348,7 @@ export default function ClientTicketPage() {
             className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
               ticket.status === "APPROVED"
                 ? "bg-brand-emerald/15 text-brand-emerald"
-                : ticket.status === "DISPUTED"
+                : ticket.status === "DISPUTED" || ticket.status === "CANCELLED"
                   ? "bg-red-500/15 text-red-400"
                   : "bg-brand-blue/15 text-brand-blue"
             }`}
@@ -338,6 +359,48 @@ export default function ClientTicketPage() {
           <h1 className="mt-3 text-xl font-bold text-white">{ticket.service_type}</h1>
           <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-400">For: {ticket.client_name}</p>
+
+          {["PENDING", "UNASSIGNED", "SCHEDULED", "ESTIMATE_PENDING"].includes(ticket.status) && (
+            <div className="mt-4">
+              {showCancelConfirm ? (
+                <div className="rounded-xl bg-red-500/10 p-3.5">
+                  <p className="text-xs text-red-300">
+                    {ticket.status === "ESTIMATE_PENDING"
+                      ? "Your technician has already arrived on site, so the shop's standard call-out fee will apply if you cancel now."
+                      : "Cancelling now is free."}
+                  </p>
+                  {cancelError && (
+                    <p className="mt-2 text-xs text-red-400">{cancelError}</p>
+                  )}
+                  <div className="mt-2.5 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCancelBooking}
+                      disabled={cancelling}
+                      className="rounded-full bg-red-500 px-3.5 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {cancelling ? "Cancelling..." : "Yes, Cancel Booking"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCancelConfirm(false)}
+                      className="rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300"
+                    >
+                      Never Mind
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="text-xs font-medium text-red-400 hover:text-red-300"
+                >
+                  Cancel this booking
+                </button>
+              )}
+            </div>
+          )}
 
           {(ticket.description || ticket.request_photo_url) && (
             <div className="mt-4 rounded-xl bg-white/5 p-3">
@@ -547,6 +610,25 @@ export default function ClientTicketPage() {
             <div className="mt-6 rounded-lg bg-red-500/15 px-4 py-3 text-sm text-red-400">
               <p className="font-semibold">This job was marked as disputed.</p>
               {ticket.dispute_notes && <p className="mt-1">{ticket.dispute_notes}</p>}
+            </div>
+          )}
+
+          {ticket.status === "CANCELLED" && (
+            <div className="mt-6 rounded-lg bg-white/5 px-4 py-3 text-sm text-slate-300">
+              <p className="font-semibold text-white">
+                This booking was cancelled
+                {ticket.cancelled_at &&
+                  ` on ${new Date(ticket.cancelled_at).toLocaleDateString()}`}
+                .
+              </p>
+              {ticket.cancellation_reason && (
+                <p className="mt-1 text-slate-400">{ticket.cancellation_reason}</p>
+              )}
+              {ticket.cancellation_fee_applied && (
+                <p className="mt-1.5 text-xs text-amber-400">
+                  A call-out fee applies since the technician had already arrived.
+                </p>
+              )}
             </div>
           )}
 

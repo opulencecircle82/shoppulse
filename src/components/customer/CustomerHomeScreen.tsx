@@ -48,6 +48,7 @@ const STATUS_STYLES: Record<string, string> = {
   COMPLETED: "bg-brand-blue/15 text-brand-blue",
   APPROVED: "bg-brand-emerald/15 text-brand-emerald",
   DISPUTED: "bg-red-500/15 text-red-400",
+  CANCELLED: "bg-white/10 text-slate-400",
 };
 
 // The business hasn't accepted this yet, so it isn't a real job on the

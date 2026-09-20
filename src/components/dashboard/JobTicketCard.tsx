@@ -248,6 +248,23 @@ export default function JobTicketCard({
           </div>
         )}
 
+        {ticket.status === "CANCELLED" && (
+          <div className="w-full">
+            <p className="text-xs text-slate-400">
+              Cancelled by the customer
+              {ticket.cancelled_at && ` on ${new Date(ticket.cancelled_at).toLocaleDateString()}`}.
+            </p>
+            {ticket.cancellation_reason && (
+              <p className="mt-1 text-xs text-slate-500">{ticket.cancellation_reason}</p>
+            )}
+            {ticket.cancellation_fee_applied && (
+              <p className="mt-1.5 text-xs font-semibold text-amber-400">
+                Call-out fee applies: {currency} {ticket.total_invoice_amount.toFixed(2)}
+              </p>
+            )}
+          </div>
+        )}
+
         {ticket.status === "IN_PROGRESS" && (
           <div className="w-full">
             <p className="text-xs text-slate-400">

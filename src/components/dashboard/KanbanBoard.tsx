@@ -14,6 +14,7 @@ const COLUMNS: { status: JobStatus; label: string }[] = [
   { status: "COMPLETED", label: "Completed" },
   { status: "DISPUTED", label: "Disputed" },
   { status: "APPROVED", label: "Approved" },
+  { status: "CANCELLED", label: "Cancelled" },
 ];
 
 export default function KanbanBoard({

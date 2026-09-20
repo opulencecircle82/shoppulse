@@ -83,7 +83,8 @@ export type JobStatus =
   | "IN_PROGRESS"
   | "COMPLETED"
   | "DISPUTED"
-  | "APPROVED";
+  | "APPROVED"
+  | "CANCELLED";
 
 export type JobTicket = {
   id: string;
@@ -120,6 +121,9 @@ export type JobTicket = {
   is_emergency: boolean;
   booking_latitude: number | null;
   booking_longitude: number | null;
+  cancelled_at: string | null;
+  cancellation_reason: string | null;
+  cancellation_fee_applied: boolean;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;

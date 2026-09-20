@@ -163,6 +163,18 @@ export async function submitBooking(params: {
   if (error) throw new Error(error.message);
 }
 
+/** Free before a technician arrives on-site; once they've arrived
+ * (status ESTIMATE_PENDING) the shop's standard call-out fee applies
+ * automatically — the caller doesn't choose that, it's enforced
+ * server-side by client_cancel_booking. */
+export async function cancelBooking(ticketId: string, reason?: string) {
+  const { error } = await supabase.rpc("client_cancel_booking", {
+    p_ticket_id: ticketId,
+    p_reason: reason || null,
+  });
+  if (error) throw new Error(error.message);
+}
+
 /** Reuses the "job-photos" storage bucket (its INSERT policy already
  * allows any authenticated user, not just staff) rather than a new
  * bucket, for both the customer's booking-request photo and their
