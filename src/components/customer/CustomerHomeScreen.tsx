@@ -339,8 +339,13 @@ export default function CustomerHomeScreen({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-4 text-center">
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-4 text-center">
                     <p className="text-sm font-bold text-white">{promo.title}</p>
+                    {promo.description && (
+                      <p className="mt-1 line-clamp-2 text-[10px] text-white/70">
+                        {promo.description}
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className="absolute inset-x-0 bottom-0 bg-black/40 px-3 py-1.5">

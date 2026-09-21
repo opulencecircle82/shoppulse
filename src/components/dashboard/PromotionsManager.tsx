@@ -35,7 +35,13 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 
 async function renderPromotionImage(
   canvas: HTMLCanvasElement,
-  params: { shopName: string; logoUrl: string | null; title: string; discountCode: string | null }
+  params: {
+    shopName: string;
+    logoUrl: string | null;
+    title: string;
+    description: string | null;
+    discountCode: string | null;
+  }
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -70,7 +76,13 @@ async function renderPromotionImage(
   ctx.fillText(params.shopName, params.logoUrl ? 148 : 56, 90);
 
   ctx.font = "700 40px system-ui, sans-serif";
-  wrapText(ctx, params.title, 56, 190, CANVAS_W - 112, 46);
+  const titleEndY = wrapText(ctx, params.title, 56, 190, CANVAS_W - 112, 46);
+
+  if (params.description) {
+    ctx.fillStyle = "#CBD5E1";
+    ctx.font = "400 18px system-ui, sans-serif";
+    wrapText(ctx, params.description, 56, titleEndY + 34, CANVAS_W - 112, 24);
+  }
 
   if (params.discountCode) {
     ctx.fillStyle = "#F97316";
@@ -82,6 +94,9 @@ async function renderPromotionImage(
   }
 }
 
+/** Returns the y-position of the last line drawn, so a caller can position
+ * whatever comes next (e.g. a caption below a wrapped title) without
+ * re-measuring the text itself. */
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -89,7 +104,7 @@ function wrapText(
   y: number,
   maxWidth: number,
   lineHeight: number
-) {
+): number {
   const words = text.split(" ");
   let line = "";
   let lineY = y;
@@ -105,6 +120,7 @@ function wrapText(
     }
   }
   ctx.fillText(line, x, lineY);
+  return lineY;
 }
 
 function PromotionCard({
@@ -149,6 +165,7 @@ function PromotionCard({
         shopName: shop.shop_name,
         logoUrl: shop.logo_url,
         title: promotion.title,
+        description: promotion.description,
         discountCode: promotion.discount_code,
       });
       setPreviewReady(true);
