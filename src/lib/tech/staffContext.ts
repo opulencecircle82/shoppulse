@@ -10,32 +10,83 @@ export type StaffContext = {
   phone: string | null;
 };
 
+const SESSION_TIMEOUT_MS = 8000;
+
+/** Races a promise against a timeout so a stalled Supabase auth call can't
+ * leave the app stuck on the loading screen forever. */
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timed out")), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
+/** Supabase's internal session lock can deadlock forever if a previous
+ * refresh attempt never settled — e.g. the app was backgrounded mid-refresh,
+ * or the staff account behind the session was deleted — and every later
+ * getSession() call then hangs too. Clearing the raw storage key breaks the
+ * app out of that state so the next load falls through to the login screen
+ * instead of spinning forever. */
+function clearStaleLocalSession() {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // localStorage unavailable (e.g. private mode) — nothing to clear
+  }
+}
+
 /** Looks up the staff_members row linked to the signed-in auth user. */
 export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  let session;
+  try {
+    const result = await withTimeout(supabase.auth.getSession(), SESSION_TIMEOUT_MS);
+    session = result.data.session;
+  } catch {
+    clearStaleLocalSession();
+    return null;
+  }
 
   const user = session?.user;
   if (!user) return null;
 
-  const { data } = await supabase
-    .from("staff_members")
-    .select("id, shop_id, role, location_token, full_name, email, phone")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
+  try {
+    const { data } = await withTimeout(
+      supabase
+        .from("staff_members")
+        .select("id, shop_id, role, location_token, full_name, email, phone")
+        .eq("auth_user_id", user.id)
+        .maybeSingle(),
+      SESSION_TIMEOUT_MS
+    );
 
-  if (!data) return null;
+    if (!data) return null;
 
-  return {
-    staffId: data.id,
-    shopId: data.shop_id,
-    role: data.role,
-    locationToken: data.location_token,
-    fullName: data.full_name,
-    email: data.email,
-    phone: data.phone,
-  };
+    return {
+      staffId: data.id,
+      shopId: data.shop_id,
+      role: data.role,
+      locationToken: data.location_token,
+      fullName: data.full_name,
+      email: data.email,
+      phone: data.phone,
+    };
+  } catch {
+    clearStaleLocalSession();
+    return null;
+  }
 }
 
 /** Reads the `session_id` claim out of a Supabase access token (JWT) —

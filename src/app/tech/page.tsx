@@ -46,13 +46,21 @@ export default function TechAppPage() {
   }, []);
 
   const resolveSession = useCallback(async () => {
-    const context = await fetchCurrentStaffContext();
-    if (!context) {
+    try {
+      const context = await fetchCurrentStaffContext();
+      if (!context) {
+        setScreen("login");
+        return;
+      }
+      setStaffContext(context);
+      await loadHome(context);
+    } catch {
+      // Any failure while resolving the session or loading the home data
+      // (e.g. a stale session left over from a deleted staff account) should
+      // fall back to the login screen instead of leaving the app stuck on
+      // the loading spinner forever.
       setScreen("login");
-      return;
     }
-    setStaffContext(context);
-    await loadHome(context);
   }, [loadHome]);
 
   useEffect(() => {
