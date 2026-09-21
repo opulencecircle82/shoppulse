@@ -10,11 +10,11 @@ export type StaffContext = {
   phone: string | null;
 };
 
-const SESSION_TIMEOUT_MS = 8000;
+export const SESSION_TIMEOUT_MS = 8000;
 
-/** Races a promise against a timeout so a stalled Supabase auth call can't
- * leave the app stuck on the loading screen forever. */
-function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
+/** Races a promise against a timeout so a stalled Supabase call can't leave
+ * the app stuck on a screen forever. */
+export function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("timed out")), ms);
     promise.then(
@@ -36,7 +36,7 @@ function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
  * getSession() call then hangs too. Clearing the raw storage key breaks the
  * app out of that state so the next load falls through to the login screen
  * instead of spinning forever. */
-function clearStaleLocalSession() {
+export function clearStaleLocalSession() {
   try {
     for (const key of Object.keys(localStorage)) {
       if (key.startsWith("sb-") && key.endsWith("-auth-token")) {

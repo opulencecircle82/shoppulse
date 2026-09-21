@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
-import { fetchCurrentStaffContext, type StaffContext } from "@/lib/tech/staffContext";
+import {
+  fetchCurrentStaffContext,
+  withTimeout,
+  clearStaleLocalSession,
+  SESSION_TIMEOUT_MS,
+  type StaffContext,
+} from "@/lib/tech/staffContext";
 import { fetchAssignedJobs } from "@/lib/tech/jobActions";
 import { pickTodayTask, pickJobQueue, computeTechStats, type TechStats } from "@/lib/tech/todayTask";
 import { startWatchingLocation } from "@/lib/tech/liveLocation";
@@ -31,18 +37,36 @@ export default function TechAppPage() {
   const [selectedTicket, setSelectedTicket] = useState<JobTicket | null>(null);
 
   const loadHome = useCallback(async (context: StaffContext) => {
-    const [{ data: shopRow }, tickets] = await Promise.all([
-      supabase.from("shops").select("*").eq("id", context.shopId).maybeSingle(),
-      fetchAssignedJobs(context.staffId),
-    ]);
+    try {
+      const [{ data: shopRow }, tickets] = await withTimeout(
+        Promise.all([
+          supabase.from("shops").select("*").eq("id", context.shopId).maybeSingle(),
+          fetchAssignedJobs(context.staffId),
+        ]),
+        SESSION_TIMEOUT_MS
+      );
 
-    const activeTask = pickTodayTask(tickets);
-    setShop(shopRow as Shop);
-    setTask(activeTask);
-    setQueue(pickJobQueue(tickets, activeTask));
-    setAllTickets(tickets);
-    setStats(computeTechStats(tickets));
-    setScreen("tab");
+      if (!shopRow) {
+        throw new Error("shop not found");
+      }
+
+      const activeTask = pickTodayTask(tickets);
+      setShop(shopRow as Shop);
+      setTask(activeTask);
+      setQueue(pickJobQueue(tickets, activeTask));
+      setAllTickets(tickets);
+      setStats(computeTechStats(tickets));
+      setScreen("tab");
+    } catch {
+      // The shop/job data couldn't be loaded — e.g. this technician was
+      // removed from the shop while the app was open (this runs every 20s
+      // on the "tab" screen), or the request stalled. Falling back to login
+      // instead of leaving the screen stuck mid-refresh is what stops the
+      // app from silently freezing on what looks like the loading spinner.
+      clearStaleLocalSession();
+      setStaffContext(null);
+      setScreen("login");
+    }
   }, []);
 
   const resolveSession = useCallback(async () => {
