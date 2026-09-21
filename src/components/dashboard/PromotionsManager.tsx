@@ -5,6 +5,7 @@ import { Plus, X, Megaphone } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, ShopPromotion } from "@/lib/supabase/types";
+import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import PhoneFrame from "./PhoneFrame";
 import BusinessWebsiteCard from "./BusinessWebsiteCard";
 
@@ -38,6 +39,7 @@ async function renderPromotionImage(
   params: {
     shopName: string;
     logoUrl: string | null;
+    category: string | null;
     title: string;
     description: string | null;
     discountCode: string | null;
@@ -49,10 +51,30 @@ async function renderPromotionImage(
   canvas.width = CANVAS_W;
   canvas.height = CANVAS_H;
 
-  const gradient = ctx.createLinearGradient(0, 0, CANVAS_W, CANVAS_H);
-  gradient.addColorStop(0, "#2563EB");
-  gradient.addColorStop(1, "#0F172A");
-  ctx.fillStyle = gradient;
+  // Background: a real photo matching the shop's service category (the
+  // same hand-picked, license-clear photo set already used for the public
+  // website header), cover-fit, so the ad reads as "electrical work" /
+  // "plumbing" / etc. at a glance instead of a plain color block.
+  try {
+    const bg = await loadImage(stockPhotoForCategory(params.category));
+    const scale = Math.max(CANVAS_W / bg.width, CANVAS_H / bg.height);
+    const w = bg.width * scale;
+    const h = bg.height * scale;
+    ctx.drawImage(bg, (CANVAS_W - w) / 2, (CANVAS_H - h) / 2, w, h);
+  } catch {
+    // Photo failed to load (e.g. offline) — flat gradient fallback.
+    const gradient = ctx.createLinearGradient(0, 0, CANVAS_W, CANVAS_H);
+    gradient.addColorStop(0, "#2563EB");
+    gradient.addColorStop(1, "#0F172A");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  }
+
+  // Dark overlay so white text stays legible over any photo.
+  const overlay = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+  overlay.addColorStop(0, "rgba(15, 23, 42, 0.55)");
+  overlay.addColorStop(1, "rgba(15, 23, 42, 0.88)");
+  ctx.fillStyle = overlay;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
   if (params.logoUrl) {
@@ -123,6 +145,48 @@ function wrapText(
   return lineY;
 }
 
+/** Renders and uploads a promotion's ad image in one shot, then marks it
+ * active — used right after a new promotion is created so it never sits
+ * with the plain text-only fallback a customer would see otherwise. */
+async function generateAndApplyPromotionImage(params: {
+  shopId: string;
+  shopName: string;
+  logoUrl: string | null;
+  category: string | null;
+  promotionId: string;
+  title: string;
+  description: string | null;
+  discountCode: string | null;
+}): Promise<void> {
+  const canvas = document.createElement("canvas");
+  await renderPromotionImage(canvas, {
+    shopName: params.shopName,
+    logoUrl: params.logoUrl,
+    category: params.category,
+    title: params.title,
+    description: params.description,
+    discountCode: params.discountCode,
+  });
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) return;
+
+  const path = `${params.shopId}/promotions/${params.promotionId}-${Date.now()}.png`;
+  const { error } = await supabase.storage
+    .from("shop-logos")
+    .upload(path, blob, { contentType: "image/png" });
+  if (error) return;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("shop-logos").getPublicUrl(path);
+
+  await supabase
+    .from("shop_promotions")
+    .update({ image_url: publicUrl, is_active: true })
+    .eq("id", params.promotionId);
+}
+
 function PromotionCard({
   promotion,
   shop,
@@ -164,6 +228,7 @@ function PromotionCard({
       await renderPromotionImage(canvas, {
         shopName: shop.shop_name,
         logoUrl: shop.logo_url,
+        category: shop.business_category,
         title: promotion.title,
         description: promotion.description,
         discountCode: promotion.discount_code,
@@ -489,11 +554,11 @@ function PromotionsExplainer() {
 }
 
 function AddPromotionModal({
-  shopId,
+  shop,
   onClose,
   onAdded,
 }: {
-  shopId: string;
+  shop: Shop;
   onClose: () => void;
   onAdded: () => void;
 }) {
@@ -511,12 +576,32 @@ function AddPromotionModal({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
-    await supabase.from("shop_promotions").insert({
-      shop_id: shopId,
-      title,
-      description: description || null,
-      discount_code: includeDiscountCode ? discountCode : null,
-    });
+    const { data } = await supabase
+      .from("shop_promotions")
+      .insert({
+        shop_id: shop.id,
+        title,
+        description: description || null,
+        discount_code: includeDiscountCode ? discountCode : null,
+      })
+      .select()
+      .single();
+
+    if (data) {
+      // Best-effort — if this fails (e.g. offline), the promotion still
+      // exists and the owner can generate the image manually from its card.
+      await generateAndApplyPromotionImage({
+        shopId: shop.id,
+        shopName: shop.shop_name,
+        logoUrl: shop.logo_url,
+        category: shop.business_category,
+        promotionId: data.id,
+        title: data.title,
+        description: data.description,
+        discountCode: data.discount_code,
+      }).catch(() => {});
+    }
+
     setSaving(false);
     onAdded();
   }
@@ -671,7 +756,7 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
 
       {showModal && (
         <AddPromotionModal
-          shopId={shop.id}
+          shop={shop}
           onClose={() => setShowModal(false)}
           onAdded={() => {
             setShowModal(false);
