@@ -13,10 +13,11 @@ import {
   MessageSquare,
   Wrench,
   Quote,
+  Clock,
 } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
-import type { StaffContext } from "@/lib/tech/staffContext";
+import { clockIn, clockOut, type StaffContext } from "@/lib/tech/staffContext";
 import { listStaffConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
 import { supabase } from "@/lib/supabase/client";
@@ -60,6 +61,8 @@ export default function TechHomeScreen({
   const [emergencyJobs, setEmergencyJobs] = useState<NearbyEmergencyJob[]>([]);
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [isClockedIn, setIsClockedIn] = useState(staffContext.isClockedIn);
+  const [clockLoading, setClockLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -113,6 +116,21 @@ export default function TechHomeScreen({
     }
   }
 
+  async function handleToggleClock() {
+    setClockLoading(true);
+    try {
+      if (isClockedIn) {
+        await clockOut();
+        setIsClockedIn(false);
+      } else {
+        await clockIn();
+        setIsClockedIn(true);
+      }
+    } finally {
+      setClockLoading(false);
+    }
+  }
+
   async function handleAcceptJob() {
     if (!task) return;
     setResponding(true);
@@ -139,17 +157,32 @@ export default function TechHomeScreen({
       <div className="mx-auto max-w-lg">
         <header className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-orange text-base font-bold text-white">
-              {staffContext.fullName.slice(0, 1).toUpperCase() || "?"}
-            </span>
+            {staffContext.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={staffContext.avatarUrl}
+                alt=""
+                className="h-11 w-11 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-orange text-base font-bold text-white">
+                {staffContext.fullName.slice(0, 1).toUpperCase() || "?"}
+              </span>
+            )}
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <p className="truncate text-sm font-bold text-white">
                   {staffContext.fullName}
                 </p>
                 <span className="shrink-0 rounded-full bg-brand-blue/15 px-1.5 py-0.5 text-[9px] font-bold text-brand-blue">
                   {staffContext.role}
                 </span>
+                {isClockedIn && (
+                  <span className="flex shrink-0 items-center gap-1 rounded-full bg-brand-emerald/15 px-1.5 py-0.5 text-[9px] font-bold text-brand-emerald">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-emerald" />
+                    Clocked In
+                  </span>
+                )}
               </div>
               <p className="truncate text-xs text-slate-400">{shop.shop_name}</p>
             </div>
@@ -172,6 +205,20 @@ export default function TechHomeScreen({
             <TechNotificationBell staffId={staffContext.staffId} onOpenTicket={onOpenTicket} />
           </div>
         </header>
+
+        <button
+          type="button"
+          onClick={handleToggleClock}
+          disabled={clockLoading}
+          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+            isClockedIn
+              ? "border border-white/20 text-slate-300 hover:bg-white/5"
+              : "bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]"
+          }`}
+        >
+          <Clock className="h-4 w-4" />
+          {clockLoading ? "Please wait..." : isClockedIn ? "Clock Out" : "Clock In"}
+        </button>
 
         <div className="pb-24">
           <div className="mt-6 grid grid-cols-2 gap-3">
@@ -319,14 +366,21 @@ export default function TechHomeScreen({
 
                 {activeChecklist.length > 0 && (
                   <div className="mt-3 rounded-xl bg-black/20 p-3">
-                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                      <Wrench className="h-3 w-3" />
-                      {isInProgress ? "End Task Checklist" : "Start Task Checklist"} (
-                      {activeChecklist.length})
-                    </p>
-                    <ul className="mt-2 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                        <Wrench className="h-3 w-3 text-brand-orange" />
+                        {isInProgress ? "End Task Checklist" : "Start Task Checklist"}
+                      </p>
+                      <span className="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-bold text-slate-300">
+                        0/{activeChecklist.length} Ready
+                      </span>
+                    </div>
+                    <ul className="mt-2 space-y-1.5">
                       {activeChecklist.map((item, i) => (
-                        <li key={i} className="flex items-center gap-2 text-xs text-slate-300">
+                        <li
+                          key={i}
+                          className="flex items-center gap-2 rounded-lg bg-white/5 px-2.5 py-2 text-xs text-slate-300"
+                        >
                           <span className="h-3 w-3 shrink-0 rounded-sm border border-slate-500" />
                           {item}
                         </li>
@@ -396,24 +450,32 @@ export default function TechHomeScreen({
                 </div>
                 <div className="mt-3 space-y-2">
                   {queue.map((job, index) => (
-                    <div key={job.id} className="rounded-xl bg-white/5 px-4 py-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-sm font-semibold text-white">
-                          {job.client_name}
+                    <div
+                      key={job.id}
+                      className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange">
+                        <Wrench className="h-3.5 w-3.5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-sm font-semibold text-white">
+                            {job.client_name}
+                          </p>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                              index === 0
+                                ? "bg-brand-orange/15 text-brand-orange"
+                                : "bg-white/10 text-slate-400"
+                            }`}
+                          >
+                            {index === 0 ? "NEXT" : "LATER"}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-slate-400">
+                          {job.service_type} · {job.service_address}
                         </p>
-                        <span
-                          className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                            index === 0
-                              ? "bg-brand-orange/15 text-brand-orange"
-                              : "bg-white/10 text-slate-400"
-                          }`}
-                        >
-                          {index === 0 ? "NEXT" : "LATER"}
-                        </span>
                       </div>
-                      <p className="mt-0.5 truncate text-xs text-slate-400">
-                        {job.service_type} · {job.service_address}
-                      </p>
                     </div>
                   ))}
                 </div>

@@ -136,6 +136,11 @@ happen ("Sign in to see your jobs and book new ones") not what the product
 generally does ("ShopPulse helps you manage your business"). If a string
 could be pasted into a generic SaaS landing page unchanged, rewrite it.
 
+All product UI text is English only — no Tagalog or bilingual labels, even
+if a shared mockup or reference image shows Tagalog. The target market is
+US-based. This applies to every surface: staff app, customer app, owner
+dashboard, booking link.
+
 ## Before calling a screen done
 
 1. Find the closest existing screen doing something similar and match its

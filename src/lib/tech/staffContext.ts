@@ -8,6 +8,8 @@ export type StaffContext = {
   fullName: string;
   email: string;
   phone: string | null;
+  avatarUrl: string | null;
+  isClockedIn: boolean;
 };
 
 export const SESSION_TIMEOUT_MS = 8000;
@@ -66,7 +68,9 @@ export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
     const { data } = await withTimeout(
       supabase
         .from("staff_members")
-        .select("id, shop_id, role, location_token, full_name, email, phone")
+        .select(
+          "id, shop_id, role, location_token, full_name, email, phone, avatar_url, is_clocked_in"
+        )
         .eq("auth_user_id", user.id)
         .maybeSingle(),
       SESSION_TIMEOUT_MS
@@ -82,11 +86,47 @@ export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
       fullName: data.full_name,
       email: data.email,
       phone: data.phone,
+      avatarUrl: data.avatar_url,
+      isClockedIn: data.is_clocked_in,
     };
   } catch {
     clearStaleLocalSession();
     return null;
   }
+}
+
+/** Marks the signed-in technician as clocked in / out for their shift. */
+export async function clockIn() {
+  const { error } = await supabase.rpc("clock_in");
+  if (error) throw new Error(error.message);
+}
+
+export async function clockOut() {
+  const { error } = await supabase.rpc("clock_out");
+  if (error) throw new Error(error.message);
+}
+
+/** Uploads a new profile photo for the signed-in technician and returns its
+ * public URL. */
+export async function uploadStaffAvatar(staffId: string, file: File): Promise<string> {
+  const extension = file.name.split(".").pop() ?? "jpg";
+  const path = `${staffId}/avatar-${Date.now()}.${extension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("staff-avatars")
+    .upload(path, file, { contentType: file.type || "image/jpeg" });
+  if (uploadError) throw new Error(uploadError.message);
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("staff-avatars").getPublicUrl(path);
+
+  const { error: rpcError } = await supabase.rpc("update_staff_avatar", {
+    p_avatar_url: publicUrl,
+  });
+  if (rpcError) throw new Error(rpcError.message);
+
+  return publicUrl;
 }
 
 /** Reads the `session_id` claim out of a Supabase access token (JWT) —
