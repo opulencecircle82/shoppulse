@@ -33,6 +33,7 @@ import {
   type TicketTechnician,
 } from "@/lib/customer/bookings";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import { listCustomerConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
 import CustomerNotificationBell from "./CustomerNotificationBell";
@@ -324,37 +325,81 @@ export default function CustomerHomeScreen({
 
         {promotions.length > 0 && (
           <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
-            {promotions.slice(0, 6).map((promo) => (
-              <Link
-                key={promo.id}
-                href={`/customer/book/${promo.shop_slug}`}
-                onClick={() => recordPromotionEvent(promo.id, "click")}
-                className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-md shadow-black/20"
-              >
-                {promo.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+            {promotions.slice(0, 6).map((promo) =>
+              promo.image_url ? (
+                // The owner generated and applied a custom ad image (logo,
+                // category photo, caption and code already baked in by the
+                // dashboard's canvas renderer) — show it as-is.
+                <Link
+                  key={promo.id}
+                  href={`/customer/book/${promo.shop_slug}`}
+                  onClick={() => recordPromotionEvent(promo.id, "click")}
+                  className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-md shadow-black/20"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={promo.image_url}
                     alt={promo.title}
                     className="h-full w-full object-cover"
                   />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-brand-blue to-slate-900 p-4 text-center">
-                    <p className="text-sm font-bold text-white">{promo.title}</p>
-                    {promo.description && (
-                      <p className="mt-1 line-clamp-2 text-[10px] text-white/70">
-                        {promo.description}
-                      </p>
-                    )}
+                  <div className="absolute inset-x-0 bottom-0 bg-black/40 px-3 py-1.5">
+                    <p className="truncate text-xs font-semibold text-white">
+                      {promo.shop_name}
+                    </p>
                   </div>
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-black/40 px-3 py-1.5">
-                  <p className="truncate text-xs font-semibold text-white">
-                    {promo.shop_name}
-                  </p>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ) : (
+                // No custom image yet — build the same look live from the
+                // shop's category photo, logo and name, so every promotion
+                // reads as a real ad immediately, with nothing for the
+                // owner to generate or apply first.
+                <Link
+                  key={promo.id}
+                  href={`/customer/book/${promo.shop_slug}`}
+                  onClick={() => recordPromotionEvent(promo.id, "click")}
+                  className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl bg-cover bg-center p-3 shadow-md shadow-black/20"
+                  style={{
+                    backgroundImage: `url(${stockPhotoForCategory(promo.shop_category)})`,
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/85" />
+                  <div className="relative flex h-full flex-col justify-between">
+                    <div className="flex items-center gap-1.5">
+                      {promo.shop_logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={promo.shop_logo_url}
+                          alt=""
+                          className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-white/40"
+                        />
+                      ) : (
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white">
+                          {promo.shop_name.slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <p className="truncate text-[10px] font-semibold text-white/90">
+                        {promo.shop_name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold leading-tight text-white">
+                        {promo.title}
+                      </p>
+                      {promo.description && (
+                        <p className="mt-0.5 line-clamp-2 text-[10px] text-white/75">
+                          {promo.description}
+                        </p>
+                      )}
+                      {promo.discount_code && (
+                        <span className="mt-1 inline-block rounded bg-brand-orange px-1.5 py-0.5 text-[9px] font-bold text-white">
+                          CODE: {promo.discount_code}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              )
+            )}
           </div>
         )}
 

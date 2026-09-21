@@ -277,6 +277,8 @@ export type NearbyPromotion = {
   shop_name: string;
   shop_slug: string;
   shop_city: string | null;
+  shop_logo_url: string | null;
+  shop_category: string | null;
 };
 
 export async function listNearbyPromotions(city?: string | null): Promise<NearbyPromotion[]> {
