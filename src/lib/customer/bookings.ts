@@ -330,6 +330,7 @@ export type FeaturedService = {
   price: number;
   shop_name: string;
   shop_slug: string;
+  shop_logo_url: string | null;
   avg_rating: number | null;
   review_count: number;
 };
@@ -350,7 +351,7 @@ export type NearbyService = FeaturedService & { distance_km: number };
 export async function listNearbyShopServices(
   lat: number,
   lng: number,
-  radiusKm = 10
+  radiusKm = 20
 ): Promise<NearbyService[]> {
   const { data, error } = await supabase.rpc("list_nearby_shop_services", {
     p_lat: lat,

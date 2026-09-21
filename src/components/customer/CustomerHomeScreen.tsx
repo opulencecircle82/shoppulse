@@ -128,7 +128,7 @@ export default function CustomerHomeScreen({
   useEffect(() => {
     let active = true;
     if (pin) {
-      listNearbyShopServices(pin.lat, pin.lng, 10).then((rows) => {
+      listNearbyShopServices(pin.lat, pin.lng, 20).then((rows) => {
         if (!active) return;
         setNearbyServices(rows);
         setNearbyIsDistanceBased(true);
@@ -356,7 +356,7 @@ export default function CustomerHomeScreen({
         {nearbyServices.length > 0 && (
           <div className="mt-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {nearbyIsDistanceBased ? "Services Near You (within 10 km)" : "Featured Services"}
+              {nearbyIsDistanceBased ? "Services Near You (within 20 km)" : "Featured Services"}
             </p>
             <div className="mt-3 space-y-3">
               {nearbyServices.map((service) => (
@@ -365,24 +365,38 @@ export default function CustomerHomeScreen({
                   className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">
-                        {service.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-slate-400">{service.shop_name}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        {service.avg_rating !== null && (
-                          <p className="flex items-center gap-1 text-xs text-amber-400">
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                            {service.avg_rating.toFixed(1)} ({service.review_count})
-                          </p>
-                        )}
-                        {"distance_km" in service && (
-                          <p className="flex items-center gap-1 text-xs text-slate-400">
-                            <Navigation className="h-3 w-3" />
-                            {formatDistance(service.distance_km)}
-                          </p>
-                        )}
+                    <div className="flex min-w-0 items-start gap-3">
+                      {service.shop_logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={service.shop_logo_url}
+                          alt=""
+                          className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-blue/15 text-sm font-bold text-brand-blue">
+                          {service.shop_name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">
+                          {service.name}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-400">{service.shop_name}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                          {service.avg_rating !== null && (
+                            <p className="flex items-center gap-1 text-xs text-amber-400">
+                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                              {service.avg_rating.toFixed(1)} ({service.review_count})
+                            </p>
+                          )}
+                          {"distance_km" in service && (
+                            <p className="flex items-center gap-1 text-xs text-slate-400">
+                              <Navigation className="h-3 w-3" />
+                              {formatDistance(service.distance_km)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <p className="shrink-0 text-sm font-bold text-white">
