@@ -229,20 +229,68 @@ function drawDashedLine(ctx: CanvasRenderingContext2D, y: number) {
   ctx.restore();
 }
 
-/** Renders then triggers a browser download of the invoice PNG.
+declare global {
+  interface Window {
+    // Present only inside the ShopPulse customer app's WebView wrapper
+    // (see shoppulse-customer/lib/screens/webview_screen.dart) — absent
+    // in a normal browser tab.
+    ShopPulseNative?: { postMessage: (message: string) => void };
+  }
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/** Renders then triggers a download (or native share sheet) of the
+ * invoice PNG.
  *
- * Rendering is async (loading the logo, encoding the canvas), so by the
- * time a blob URL is ready, the click that started this is no longer
- * "fresh" — many mobile browsers (iOS Safari especially, and some Android
- * WebViews) only allow opening a tab or download as a direct, synchronous
- * result of a user gesture, and silently drop it once real work has
- * happened in between. Opening a blank tab synchronously first, then
- * pointing it at the finished image once ready, keeps it inside that
- * original gesture instead of losing it. */
+ * A `blob:` URL only resolves inside the exact browsing context that
+ * created it. That's fine in a real browser tab, but the ShopPulse
+ * customer app's WebView doesn't implement multi-window support, so
+ * `window.open` there either returns nothing or navigates to a `blob:`
+ * URL the new context can't resolve, failing with
+ * net::ERR_FILE_NOT_FOUND and breaking the whole page. Inside that app,
+ * hand the image to the native side instead (as a data URL, which
+ * doesn't have this context problem) and let it show the OS share sheet. */
 export async function downloadInvoicePng(data: InvoiceData, filename: string) {
-  const preOpenedTab = typeof window !== "undefined" ? window.open("", "_blank") : null;
+  const isNativeApp = typeof window !== "undefined" && !!window.ShopPulseNative;
+
+  // Rendering is async (loading the logo, encoding the canvas), so by the
+  // time a blob URL is ready, the click that started this is no longer
+  // "fresh" — many mobile browsers (iOS Safari especially) only allow
+  // opening a tab or download as a direct, synchronous result of a user
+  // gesture, and silently drop it once real work has happened in
+  // between. Opening a blank tab synchronously first, then pointing it
+  // at the finished image once ready, keeps it inside that original
+  // gesture instead of losing it. Skipped entirely in the native app,
+  // which hands the image to a share sheet instead and has no such
+  // gesture-freshness requirement.
+  const preOpenedTab =
+    !isNativeApp && typeof window !== "undefined" ? window.open("", "_blank") : null;
 
   const blob = await renderInvoicePng(data);
+
+  if (isNativeApp) {
+    // A `blob:` URL only resolves inside the exact browsing context that
+    // created it, and the app's WebView doesn't implement multi-window
+    // support — `window.open` there either returns nothing or navigates
+    // to a `blob:` URL the new context can't resolve, failing with
+    // net::ERR_FILE_NOT_FOUND and breaking the whole page. A data URL
+    // has no such context restriction, so hand that to the native side
+    // instead and let it show the OS share sheet.
+    const dataUrl = await blobToDataUrl(blob);
+    window.ShopPulseNative!.postMessage(
+      JSON.stringify({ type: "downloadFile", filename, dataUrl })
+    );
+    return;
+  }
+
   const url = URL.createObjectURL(blob);
 
   if (preOpenedTab && !preOpenedTab.closed) {
