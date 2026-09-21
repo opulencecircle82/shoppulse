@@ -8,12 +8,18 @@ import {
   Award,
   MessageCircle,
   Siren,
+  Navigation as NavigationIcon,
+  Phone,
+  MessageSquare,
+  Wrench,
+  Quote,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
+import type { StaffContext } from "@/lib/tech/staffContext";
 import { listStaffConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
+import { supabase } from "@/lib/supabase/client";
 import {
   listNearbyEmergencyJobs,
   claimEmergencyJob,
@@ -29,25 +35,23 @@ function mapsUrl(address: string) {
 
 export default function TechHomeScreen({
   shop,
-  staffId,
+  staffContext,
   task,
   queue,
   stats,
   onOpenTask,
   onOpenTicket,
   onOpenMessages,
-  onSignedOut,
   onRefresh,
 }: {
   shop: Shop;
-  staffId: string;
+  staffContext: StaffContext;
   task: JobTicket | null;
   queue: JobTicket[];
   stats: TechStats;
   onOpenTask: (ticket: JobTicket) => void;
   onOpenTicket: (jobTicketId: string) => void;
   onOpenMessages: () => void;
-  onSignedOut: () => void;
   onRefresh: () => void;
 }) {
   const [responding, setResponding] = useState(false);
@@ -109,11 +113,6 @@ export default function TechHomeScreen({
     }
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    onSignedOut();
-  }
-
   async function handleAcceptJob() {
     if (!task) return;
     setResponding(true);
@@ -133,18 +132,27 @@ export default function TechHomeScreen({
   const isInProgress = task?.status === "IN_PROGRESS";
   const needsAcceptance =
     task?.status === "SCHEDULED" && !task.staff_accepted_at;
+  const activeChecklist = task ? (isInProgress ? task.end_checklist : task.start_checklist) : [];
 
   return (
     <main className="min-h-screen bg-brand-navy px-5 py-6">
       <div className="mx-auto max-w-lg">
-        <header className="flex items-center justify-between">
-          <div className="min-w-0">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-medium text-brand-orange">
-              ShopPulse Staff
+        <header className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-orange text-base font-bold text-white">
+              {staffContext.fullName.slice(0, 1).toUpperCase() || "?"}
             </span>
-            <h1 className="mt-1.5 truncate text-lg font-bold text-white">
-              {shop.shop_name}
-            </h1>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="truncate text-sm font-bold text-white">
+                  {staffContext.fullName}
+                </p>
+                <span className="shrink-0 rounded-full bg-brand-blue/15 px-1.5 py-0.5 text-[9px] font-bold text-brand-blue">
+                  {staffContext.role}
+                </span>
+              </div>
+              <p className="truncate text-xs text-slate-400">{shop.shop_name}</p>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <button
@@ -161,19 +169,11 @@ export default function TechHomeScreen({
               )}
             </button>
 
-            <TechNotificationBell staffId={staffId} onOpenTicket={onOpenTicket} />
-
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="ml-1 text-sm font-medium text-white/70 hover:text-white"
-            >
-              Sign Out
-            </button>
+            <TechNotificationBell staffId={staffContext.staffId} onOpenTicket={onOpenTicket} />
           </div>
         </header>
 
-        <div className="pb-10">
+        <div className="pb-24">
           <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/5 p-4">
                 <div className="flex items-center gap-1.5 text-brand-emerald">
@@ -294,57 +294,122 @@ export default function TechHomeScreen({
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
                     {isInProgress ? "IN PROGRESS" : "SCHEDULED"}
                   </span>
-                  <a
-                    href={mapsUrl(task.service_address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1 text-xs font-medium text-brand-blue"
-                  >
-                    <MapPin className="h-3 w-3" /> Maps
-                  </a>
+                  {task.is_emergency && (
+                    <span className="flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-400">
+                      <Siren className="h-3 w-3" /> EMERGENCY
+                    </span>
+                  )}
                 </div>
+
                 <button
                   type="button"
                   onClick={() => onOpenTask(task)}
                   className="mt-3 block w-full text-left"
                 >
-                  <p className="text-lg font-bold text-white">
-                    {task.client_name}
-                  </p>
-                  <p className="mt-0.5 text-sm text-slate-300">
-                    {task.service_type}
-                  </p>
-                  <p className="mt-2 text-xs text-slate-500">
-                    {task.service_address}
-                  </p>
-                  <span className="mt-4 inline-block rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-2 text-xs font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]">
-                    {isInProgress ? "Complete Job" : "Start Job"}
-                  </span>
+                  <p className="text-lg font-bold text-white">{task.client_name}</p>
+                  <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
+                </button>
+
+                {task.description && (
+                  <div className="mt-3 flex gap-2 rounded-xl bg-black/20 p-3">
+                    <Quote className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                    <p className="text-xs italic text-slate-300">{task.description}</p>
+                  </div>
+                )}
+
+                {activeChecklist.length > 0 && (
+                  <div className="mt-3 rounded-xl bg-black/20 p-3">
+                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                      <Wrench className="h-3 w-3" />
+                      {isInProgress ? "End Task Checklist" : "Start Task Checklist"} (
+                      {activeChecklist.length})
+                    </p>
+                    <ul className="mt-2 space-y-1">
+                      {activeChecklist.map((item, i) => (
+                        <li key={i} className="flex items-center gap-2 text-xs text-slate-300">
+                          <span className="h-3 w-3 shrink-0 rounded-sm border border-slate-500" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {task.client_phone && (
+                  <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-black/20 px-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        Customer
+                      </p>
+                      <p className="truncate text-sm text-white">{task.client_name}</p>
+                    </div>
+                    <div className="flex shrink-0 gap-1.5">
+                      <a
+                        href={`tel:${task.client_phone}`}
+                        className="flex items-center gap-1 rounded-full bg-brand-emerald/15 px-3 py-1.5 text-xs font-semibold text-brand-emerald"
+                      >
+                        <Phone className="h-3 w-3" /> Call
+                      </a>
+                      <a
+                        href={`sms:${task.client_phone}`}
+                        className="flex items-center gap-1 rounded-full bg-brand-blue/15 px-3 py-1.5 text-xs font-semibold text-brand-blue"
+                      >
+                        <MessageSquare className="h-3 w-3" /> Text
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                <p className="mt-3 flex items-center gap-1 text-xs text-slate-500">
+                  <MapPin className="h-3 w-3 shrink-0" />
+                  {task.service_address}
+                </p>
+
+                <a
+                  href={mapsUrl(task.service_address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)]"
+                >
+                  <NavigationIcon className="h-4 w-4" /> Start Navigation
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => onOpenTask(task)}
+                  className="mt-2 flex w-full items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]"
+                >
+                  {isInProgress ? "Complete Job" : "Start Job"}
                 </button>
               </div>
             )}
 
             {queue.length > 0 && (
               <div className="mt-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Next Up ({queue.length})
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Other Schedule Today
+                  </p>
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-300">
+                    {queue.length} task{queue.length > 1 ? "s" : ""} remaining
+                  </span>
+                </div>
                 <div className="mt-3 space-y-2">
-                  {queue.map((job) => (
-                    <div
-                      key={job.id}
-                      className="rounded-xl bg-white/5 px-4 py-3"
-                    >
+                  {queue.map((job, index) => (
+                    <div key={job.id} className="rounded-xl bg-white/5 px-4 py-3">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-semibold text-white">
                           {job.client_name}
                         </p>
-                        {job.preferred_date && (
-                          <span className="shrink-0 text-[10px] text-slate-500">
-                            {new Date(job.preferred_date).toLocaleDateString()}
-                          </span>
-                        )}
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                            index === 0
+                              ? "bg-brand-orange/15 text-brand-orange"
+                              : "bg-white/10 text-slate-400"
+                          }`}
+                        >
+                          {index === 0 ? "NEXT" : "LATER"}
+                        </span>
                       </div>
                       <p className="mt-0.5 truncate text-xs text-slate-400">
                         {job.service_type} · {job.service_address}

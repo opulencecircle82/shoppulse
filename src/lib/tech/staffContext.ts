@@ -5,6 +5,9 @@ export type StaffContext = {
   shopId: string;
   role: string;
   locationToken: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
 };
 
 /** Looks up the staff_members row linked to the signed-in auth user. */
@@ -18,7 +21,7 @@ export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
 
   const { data } = await supabase
     .from("staff_members")
-    .select("id, shop_id, role, location_token")
+    .select("id, shop_id, role, location_token, full_name, email, phone")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
@@ -29,6 +32,9 @@ export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
     shopId: data.shop_id,
     role: data.role,
     locationToken: data.location_token,
+    fullName: data.full_name,
+    email: data.email,
+    phone: data.phone,
   };
 }
 

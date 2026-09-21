@@ -12,11 +12,16 @@ import TechLoginScreen from "@/components/tech/TechLoginScreen";
 import TechHomeScreen from "@/components/tech/TechHomeScreen";
 import TechJobScreen from "@/components/tech/TechJobScreen";
 import TechMessagesScreen from "@/components/tech/TechMessagesScreen";
+import TechRouteScreen from "@/components/tech/TechRouteScreen";
+import TechHistoryScreen from "@/components/tech/TechHistoryScreen";
+import TechProfileScreen from "@/components/tech/TechProfileScreen";
+import TechBottomNav, { type TechTab } from "@/components/tech/TechBottomNav";
 
-type Screen = "loading" | "login" | "home" | "job" | "messages";
+type Screen = "loading" | "login" | "tab" | "job" | "messages";
 
 export default function TechAppPage() {
   const [screen, setScreen] = useState<Screen>("loading");
+  const [tab, setTab] = useState<TechTab>("jobs");
   const [staffContext, setStaffContext] = useState<StaffContext | null>(null);
   const [shop, setShop] = useState<Shop | null>(null);
   const [task, setTask] = useState<JobTicket | null>(null);
@@ -37,7 +42,7 @@ export default function TechAppPage() {
     setQueue(pickJobQueue(tickets, activeTask));
     setAllTickets(tickets);
     setStats(computeTechStats(tickets));
-    setScreen("home");
+    setScreen("tab");
   }, []);
 
   const resolveSession = useCallback(async () => {
@@ -71,15 +76,30 @@ export default function TechAppPage() {
   // submitting a job, or when the technician taps Accept/Decline — so a
   // newly assigned job just sat in the notification bell without ever
   // showing up in "Today's Task" until the technician did something else
-  // that happened to reload. Only polls while actually on the home screen,
+  // that happened to reload. Only polls while actually on a main tab,
   // never mid-job, so it can't disturb an in-progress checklist/photo.
   useEffect(() => {
-    if (screen !== "home" || !staffContext) return;
+    if (screen !== "tab" || !staffContext) return;
     const interval = setInterval(() => {
       loadHome(staffContext);
     }, 20000);
     return () => clearInterval(interval);
   }, [screen, staffContext, loadHome]);
+
+  function openTask(ticket: JobTicket) {
+    setSelectedTicket(ticket);
+    setScreen("job");
+  }
+
+  function handleSignedOut() {
+    setStaffContext(null);
+    setShop(null);
+    setTask(null);
+    setQueue([]);
+    setAllTickets([]);
+    setStats({ completedToday: 0, completedTotal: 0 });
+    setScreen("login");
+  }
 
   if (screen === "loading") {
     return (
@@ -98,9 +118,9 @@ export default function TechAppPage() {
       <TechJobScreen
         shop={shop}
         ticket={selectedTicket}
-        onBack={() => setScreen("home")}
+        onBack={() => setScreen("tab")}
         onSubmitted={async () => {
-          setScreen("home");
+          setScreen("tab");
           if (staffContext) await loadHome(staffContext);
         }}
       />
@@ -108,42 +128,43 @@ export default function TechAppPage() {
   }
 
   if (screen === "messages" && shop) {
-    return <TechMessagesScreen shop={shop} onBack={() => setScreen("home")} />;
+    return <TechMessagesScreen shop={shop} onBack={() => setScreen("tab")} />;
   }
 
-  if (screen === "home" && shop) {
+  if (screen === "tab" && shop && staffContext) {
     return (
-      <TechHomeScreen
-        shop={shop}
-        staffId={staffContext!.staffId}
-        task={task}
-        queue={queue}
-        stats={stats}
-        onRefresh={() => {
-          if (staffContext) loadHome(staffContext);
-        }}
-        onOpenTask={(ticket) => {
-          setSelectedTicket(ticket);
-          setScreen("job");
-        }}
-        onOpenMessages={() => setScreen("messages")}
-        onOpenTicket={(ticketId) => {
-          const ticket = allTickets.find((t) => t.id === ticketId);
-          if (ticket && (ticket.status === "SCHEDULED" || ticket.status === "IN_PROGRESS")) {
-            setSelectedTicket(ticket);
-            setScreen("job");
-          }
-        }}
-        onSignedOut={() => {
-          setStaffContext(null);
-          setShop(null);
-          setTask(null);
-          setQueue([]);
-          setAllTickets([]);
-          setStats({ completedToday: 0, completedTotal: 0 });
-          setScreen("login");
-        }}
-      />
+      <>
+        {tab === "jobs" && (
+          <TechHomeScreen
+            shop={shop}
+            staffContext={staffContext}
+            task={task}
+            queue={queue}
+            stats={stats}
+            onRefresh={() => loadHome(staffContext)}
+            onOpenTask={openTask}
+            onOpenMessages={() => setScreen("messages")}
+            onOpenTicket={(ticketId) => {
+              const ticket = allTickets.find((t) => t.id === ticketId);
+              if (ticket && (ticket.status === "SCHEDULED" || ticket.status === "IN_PROGRESS")) {
+                openTask(ticket);
+              }
+            }}
+          />
+        )}
+        {tab === "route" && (
+          <TechRouteScreen task={task} queue={queue} onOpenTask={openTask} />
+        )}
+        {tab === "history" && <TechHistoryScreen shop={shop} allTickets={allTickets} />}
+        {tab === "profile" && (
+          <TechProfileScreen
+            shop={shop}
+            staffContext={staffContext}
+            onSignedOut={handleSignedOut}
+          />
+        )}
+        <TechBottomNav active={tab} onSelect={setTab} />
+      </>
     );
   }
 
