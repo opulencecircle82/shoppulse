@@ -8,8 +8,10 @@ import {
   type AppNotification,
 } from "@/lib/notifications";
 import type { JobTicket } from "@/lib/supabase/types";
+import { playBookingAlert } from "@/lib/chat/chime";
 
 const POLL_MS = 20000;
+const BOOKING_TYPES = new Set(["new_booking", "emergency_booking"]);
 
 export default function NotificationBell({
   staffId,
@@ -23,9 +25,13 @@ export default function NotificationBell({
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const unreadBookingsRef = useRef(0);
 
   const load = useCallback(async () => {
     const rows = await fetchStaffNotifications(staffId);
+    const unreadBookings = rows.filter((n) => !n.readAt && BOOKING_TYPES.has(n.type)).length;
+    if (unreadBookings > unreadBookingsRef.current) playBookingAlert();
+    unreadBookingsRef.current = unreadBookings;
     setNotifications(rows);
   }, [staffId]);
 

@@ -39,3 +39,30 @@ export function playMessageChime() {
     osc.stop(now + start + duration + 0.02);
   });
 }
+
+/**
+ * Three sharp, loud beeps — deliberately louder and more insistent than
+ * the message chime above, so a new booking request cuts through even if
+ * the owner has the dashboard open in a background tab. Same
+ * "safe to call from a background poll" reasoning as playMessageChime.
+ */
+export function playBookingAlert() {
+  const ctx = getContext();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+
+  const now = ctx.currentTime;
+  [0, 0.25, 0.5].forEach((start) => {
+    const osc = ctx!.createOscillator();
+    const gain = ctx!.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 1046.5; // C6
+    gain.gain.setValueAtTime(0, now + start);
+    gain.gain.linearRampToValueAtTime(0.55, now + start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + start + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx!.destination);
+    osc.start(now + start);
+    osc.stop(now + start + 0.22);
+  });
+}
