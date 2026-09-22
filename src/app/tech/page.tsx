@@ -36,9 +36,9 @@ export default function TechAppPage() {
   const [stats, setStats] = useState<TechStats>({ completedToday: 0, completedTotal: 0 });
   const [selectedTicket, setSelectedTicket] = useState<JobTicket | null>(null);
 
-  const loadHome = useCallback(async (context: StaffContext) => {
+  const loadHome = useCallback(async (context: StaffContext, opts?: { isInitialLoad?: boolean }) => {
     try {
-      const [{ data: shopRow }, tickets] = await withTimeout(
+      const [{ data: shopRow, error: shopError }, tickets] = await withTimeout(
         Promise.all([
           supabase.from("shops").select("*").eq("id", context.shopId).maybeSingle(),
           fetchAssignedJobs(context.staffId),
@@ -46,8 +46,16 @@ export default function TechAppPage() {
         SESSION_TIMEOUT_MS
       );
 
+      if (shopError) throw shopError;
+
       if (!shopRow) {
-        throw new Error("shop not found");
+        // A successful query that found no row — this technician really was
+        // removed from the shop, not a network hiccup. This is the only
+        // case that should force a logout and clear the session.
+        clearStaleLocalSession();
+        setStaffContext(null);
+        setScreen("login");
+        return;
       }
 
       const activeTask = pickTodayTask(tickets);
@@ -58,14 +66,19 @@ export default function TechAppPage() {
       setStats(computeTechStats(tickets));
       setScreen("tab");
     } catch {
-      // The shop/job data couldn't be loaded — e.g. this technician was
-      // removed from the shop while the app was open (this runs every 20s
-      // on the "tab" screen), or the request stalled. Falling back to login
-      // instead of leaving the screen stuck mid-refresh is what stops the
-      // app from silently freezing on what looks like the loading spinner.
-      clearStaleLocalSession();
-      setStaffContext(null);
-      setScreen("login");
+      // A timeout or transient fetch error is not proof the technician was
+      // deauthorized — just that the network/backend hiccuped. Forcing a
+      // full logout here would repeatedly kick a field technician on flaky
+      // signal, since this also runs on the 20s background poll. Only the
+      // very first load (nothing on screen yet) falls back to the login
+      // screen, and even then the session token is left intact so a retry
+      // (e.g. reopening the app) can succeed without re-entering
+      // credentials. A poll/refresh on an already-loaded screen just leaves
+      // things as they are and tries again next cycle.
+      if (opts?.isInitialLoad) {
+        setStaffContext(null);
+        setScreen("login");
+      }
     }
   }, []);
 
@@ -77,12 +90,12 @@ export default function TechAppPage() {
         return;
       }
       setStaffContext(context);
-      await loadHome(context);
+      await loadHome(context, { isInitialLoad: true });
     } catch {
-      // Any failure while resolving the session or loading the home data
-      // (e.g. a stale session left over from a deleted staff account) should
-      // fall back to the login screen instead of leaving the app stuck on
-      // the loading spinner forever.
+      // Any failure while resolving the session (e.g. a stale session left
+      // over from a deleted staff account) should fall back to the login
+      // screen instead of leaving the app stuck on the loading spinner
+      // forever.
       setScreen("login");
     }
   }, [loadHome]);
