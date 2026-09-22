@@ -15,15 +15,6 @@ type Totals = { total_views: number; total_clicks: number };
 const CANVAS_W = 600;
 const CANVAS_H = 400;
 
-function generateDiscountCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "SAVE-";
-  for (let i = 0; i < 5; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
-
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -42,7 +33,7 @@ async function renderPromotionImage(
     category: string | null;
     title: string;
     description: string | null;
-    discountCode: string | null;
+    discountPercent: number | null;
   }
 ) {
   const ctx = canvas.getContext("2d");
@@ -106,13 +97,13 @@ async function renderPromotionImage(
     wrapText(ctx, params.description, 56, titleEndY + 34, CANVAS_W - 112, 24);
   }
 
-  if (params.discountCode) {
+  if (params.discountPercent) {
     ctx.fillStyle = "#F97316";
     const badgeY = CANVAS_H - 90;
-    ctx.fillRect(56, badgeY, 260, 48);
+    ctx.fillRect(56, badgeY, 180, 48);
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "700 20px system-ui, sans-serif";
-    ctx.fillText(`CODE: ${params.discountCode}`, 72, badgeY + 32);
+    ctx.fillText(`${params.discountPercent}% OFF`, 72, badgeY + 32);
   }
 }
 
@@ -156,7 +147,7 @@ async function generateAndApplyPromotionImage(params: {
   promotionId: string;
   title: string;
   description: string | null;
-  discountCode: string | null;
+  discountPercent: number | null;
 }): Promise<void> {
   const canvas = document.createElement("canvas");
   await renderPromotionImage(canvas, {
@@ -165,7 +156,7 @@ async function generateAndApplyPromotionImage(params: {
     category: params.category,
     title: params.title,
     description: params.description,
-    discountCode: params.discountCode,
+    discountPercent: params.discountPercent,
   });
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
@@ -231,7 +222,7 @@ function PromotionCard({
         category: shop.business_category,
         title: promotion.title,
         description: promotion.description,
-        discountCode: promotion.discount_code,
+        discountPercent: promotion.discount_percent,
       });
       setPreviewReady(true);
     }
@@ -287,8 +278,8 @@ function PromotionCard({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-white">{promotion.title}</p>
-          {promotion.discount_code && (
-            <p className="text-xs text-brand-orange">Code: {promotion.discount_code}</p>
+          {promotion.discount_percent && (
+            <p className="text-xs text-brand-orange">{promotion.discount_percent}% off service fee</p>
           )}
         </div>
         <span
@@ -546,7 +537,7 @@ function PromotionsExplainer() {
         <ul className="mt-1.5 space-y-1 text-[11px] text-slate-400">
           <li>• Libre, awtomatikong nakikita ng malapit na customer</li>
           <li>• Nakakaakit ng bagong customer na hindi pa ka-alam</li>
-          <li>• May discount code kaya nakikita mo kung ilan gumamit</li>
+          <li>• Pwedeng maglagay ng % discount na awtomatikong ma-a-apply</li>
         </ul>
       </div>
     </div>
@@ -564,28 +555,32 @@ function AddPromotionModal({
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [includeDiscountCode, setIncludeDiscountCode] = useState(false);
-  const [discountCode, setDiscountCode] = useState("");
+  const [discountEnabled, setDiscountEnabled] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState("20");
   const [saving, setSaving] = useState(false);
-
-  function toggleDiscountCode(checked: boolean) {
-    setIncludeDiscountCode(checked);
-    setDiscountCode(checked ? generateDiscountCode() : "");
-  }
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
-    const { data } = await supabase
+    setError(null);
+
+    const { data, error: insertError } = await supabase
       .from("shop_promotions")
       .insert({
         shop_id: shop.id,
         title,
         description: description || null,
-        discount_code: includeDiscountCode ? discountCode : null,
+        discount_percent: discountEnabled ? Number(discountPercent) : null,
       })
       .select()
       .single();
+
+    if (insertError) {
+      setError(insertError.message);
+      setSaving(false);
+      return;
+    }
 
     if (data) {
       // Best-effort — if this fails (e.g. offline), the promotion still
@@ -598,7 +593,7 @@ function AddPromotionModal({
         promotionId: data.id,
         title: data.title,
         description: data.description,
-        discountCode: data.discount_code,
+        discountPercent: data.discount_percent,
       }).catch(() => {});
     }
 
@@ -647,27 +642,34 @@ function AddPromotionModal({
             <label className="flex items-center gap-2.5 text-sm text-slate-300">
               <input
                 type="checkbox"
-                checked={includeDiscountCode}
-                onChange={(e) => toggleDiscountCode(e.target.checked)}
+                checked={discountEnabled}
+                onChange={(e) => setDiscountEnabled(e.target.checked)}
                 className="accent-brand-blue"
               />
-              Include a discount code
+              Enable a discount
             </label>
-            {includeDiscountCode && (
-              <div className="mt-2 flex items-center justify-between rounded-xl bg-white/5 px-3 py-2">
-                <span className="font-mono text-sm font-semibold text-brand-blue">
-                  {discountCode}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setDiscountCode(generateDiscountCode())}
-                  className="text-xs font-medium text-slate-400 hover:text-brand-blue"
-                >
-                  Regenerate
-                </button>
+            {discountEnabled && (
+              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={100}
+                  step={1}
+                  value={discountPercent}
+                  onChange={(e) => setDiscountPercent(e.target.value)}
+                  className="w-16 bg-transparent text-sm font-semibold text-brand-blue focus:outline-none"
+                />
+                <span className="text-sm text-slate-400">% off the service fee</span>
               </div>
             )}
           </div>
+
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"

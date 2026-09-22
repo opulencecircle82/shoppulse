@@ -63,7 +63,11 @@ export default function TechJobScreen({
     ticket.payment_verified_amount
   );
 
-  const [diagnosticFee, setDiagnosticFee] = useState(shop.default_service_fee);
+  const [diagnosticFee, setDiagnosticFee] = useState(
+    ticket.discount_percent
+      ? Math.round(shop.default_service_fee * (1 - ticket.discount_percent / 100) * 100) / 100
+      : shop.default_service_fee
+  );
   const [laborFee, setLaborFee] = useState(0);
   const [quoteProducts, setQuoteProducts] = useState<SelectedProduct[]>(
     ticket.selected_products
@@ -307,6 +311,12 @@ export default function TechJobScreen({
                 Diagnose the issue, then send the customer a quote. They&apos;ll need to
                 approve it before you can start the repair.
               </p>
+
+              {ticket.discount_percent && (
+                <p className="mt-3 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange">
+                  {ticket.discount_percent}% promo discount already applied to the Diagnostic Fee below.
+                </p>
+              )}
 
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div>

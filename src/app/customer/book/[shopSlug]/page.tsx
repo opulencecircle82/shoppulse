@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { MapPin, Plus } from "lucide-react";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
 import {
@@ -22,11 +22,28 @@ import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
 import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import AddressFormModal from "@/components/customer/AddressFormModal";
+import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 export default function BookJobPage() {
+  return (
+    <Suspense fallback={null}>
+      <BookJobPageContent />
+    </Suspense>
+  );
+}
+
+function BookJobPageContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const goBack = useSmartBack("/customer");
   const shopSlug = params.shopSlug as string;
+  const promotionId = searchParams.get("promo");
+  const promoPercentParam = Number(searchParams.get("pct"));
+  // pct is display-only, carried along from the ad link so this banner can
+  // render without a network round-trip — the real discount is always
+  // resolved server-side from promotionId, never trusted from the URL.
+  const promoDiscountPercent = promotionId && promoPercentParam > 0 ? promoPercentParam : null;
 
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -131,6 +148,7 @@ export default function BookJobPage() {
         isEmergency,
         latitude: selectedAddress?.latitude ?? null,
         longitude: selectedAddress?.longitude ?? null,
+        promotionId,
       });
       setSubmitted(true);
     } catch (e) {
@@ -184,7 +202,15 @@ export default function BookJobPage() {
   return (
     <main className="min-h-screen bg-brand-navy px-6 py-10">
       <div className="mx-auto max-w-md">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={goBack}
+          className="text-sm font-medium text-slate-400 hover:text-white"
+        >
+          ← Back
+        </button>
+
+        <div className="mt-4 flex items-center gap-3">
           {shop?.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={shop.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
@@ -238,6 +264,12 @@ export default function BookJobPage() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-2xl bg-white/5 p-6 shadow-md shadow-black/20">
+          {promoDiscountPercent && (
+            <p className="rounded-xl bg-brand-emerald/10 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
+              ✓ {promoDiscountPercent}% off this booking&apos;s service fee will be applied.
+            </p>
+          )}
+
           <div>
             <label className="block text-xs font-medium text-slate-400">
               What do you need done?

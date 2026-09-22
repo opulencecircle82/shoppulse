@@ -76,6 +76,11 @@ export default function BookingRequestCard({
       {ticket.description && (
         <p className="mt-1 text-xs text-slate-400">{ticket.description}</p>
       )}
+      {ticket.discount_percent && (
+        <span className="mt-1.5 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange">
+          {ticket.discount_percent}% discount applied
+        </span>
+      )}
       {ticket.request_photo_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img

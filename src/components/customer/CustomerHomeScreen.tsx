@@ -332,7 +332,11 @@ export default function CustomerHomeScreen({
                 // dashboard's canvas renderer) — show it as-is.
                 <Link
                   key={promo.id}
-                  href={`/customer/book/${promo.shop_slug}`}
+                  href={
+                    promo.discount_percent
+                      ? `/customer/book/${promo.shop_slug}?promo=${promo.id}&pct=${promo.discount_percent}`
+                      : `/customer/book/${promo.shop_slug}`
+                  }
                   onClick={() => recordPromotionEvent(promo.id, "click")}
                   className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl shadow-md shadow-black/20"
                 >
@@ -355,7 +359,11 @@ export default function CustomerHomeScreen({
                 // owner to generate or apply first.
                 <Link
                   key={promo.id}
-                  href={`/customer/book/${promo.shop_slug}`}
+                  href={
+                    promo.discount_percent
+                      ? `/customer/book/${promo.shop_slug}?promo=${promo.id}&pct=${promo.discount_percent}`
+                      : `/customer/book/${promo.shop_slug}`
+                  }
                   onClick={() => recordPromotionEvent(promo.id, "click")}
                   className="relative block h-32 w-64 shrink-0 snap-start overflow-hidden rounded-2xl bg-cover bg-center p-3 shadow-md shadow-black/20"
                   style={{
@@ -390,9 +398,9 @@ export default function CustomerHomeScreen({
                           {promo.description}
                         </p>
                       )}
-                      {promo.discount_code && (
+                      {promo.discount_percent && (
                         <span className="mt-1 inline-block rounded bg-brand-orange px-1.5 py-0.5 text-[9px] font-bold text-white">
-                          CODE: {promo.discount_code}
+                          {promo.discount_percent}% OFF
                         </span>
                       )}
                     </div>

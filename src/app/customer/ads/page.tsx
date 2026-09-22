@@ -77,7 +77,11 @@ export default function CustomerAdsPage() {
               {promotions.map((promo) => (
                 <li key={promo.id}>
                   <Link
-                    href={`/customer/book/${promo.shop_slug}`}
+                    href={
+                      promo.discount_percent
+                        ? `/customer/book/${promo.shop_slug}?promo=${promo.id}&pct=${promo.discount_percent}`
+                        : `/customer/book/${promo.shop_slug}`
+                    }
                     onClick={() => recordPromotionEvent(promo.id, "click")}
                     className="block overflow-hidden rounded-2xl bg-white/5 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
                   >
@@ -102,9 +106,9 @@ export default function CustomerAdsPage() {
                       {promo.description && (
                         <p className="mt-1.5 text-xs text-slate-300">{promo.description}</p>
                       )}
-                      {promo.discount_code && (
+                      {promo.discount_percent && (
                         <span className="mt-2 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange">
-                          Code: {promo.discount_code}
+                          {promo.discount_percent}% OFF
                         </span>
                       )}
                     </div>

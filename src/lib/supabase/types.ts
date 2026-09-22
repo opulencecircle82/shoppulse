@@ -134,6 +134,7 @@ export type JobTicket = {
   preferred_date: string | null;
   description: string | null;
   request_photo_url: string | null;
+  discount_percent: number | null;
   selected_products: { product_id: string; name: string; price: number; quantity: number }[];
   payment_method: string | null;
   signature_url: string | null;
@@ -201,7 +202,7 @@ export type ShopPromotion = {
   shop_id: string;
   title: string;
   description: string | null;
-  discount_code: string | null;
+  discount_percent: number | null;
   image_url: string | null;
   is_active: boolean;
   created_at: string;

@@ -144,6 +144,7 @@ export async function submitBooking(params: {
   isEmergency?: boolean;
   latitude?: number | null;
   longitude?: number | null;
+  promotionId?: string | null;
 }) {
   const { error } = await supabase.rpc("submit_job_booking", {
     p_shop_slug: params.shopSlug,
@@ -158,6 +159,7 @@ export async function submitBooking(params: {
     p_is_emergency: params.isEmergency || false,
     p_latitude: params.latitude ?? null,
     p_longitude: params.longitude ?? null,
+    p_promotion_id: params.promotionId || null,
   });
 
   if (error) throw new Error(error.message);
@@ -272,7 +274,7 @@ export type NearbyPromotion = {
   id: string;
   title: string;
   description: string | null;
-  discount_code: string | null;
+  discount_percent: number | null;
   image_url: string | null;
   shop_name: string;
   shop_slug: string;
