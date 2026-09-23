@@ -15,11 +15,26 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const LIVE_DOT_ICON = L.divIcon({
-  className: "",
-  html: '<span style="display:block;width:16px;height:16px;border-radius:9999px;background:#F97316;border:3px solid white;box-shadow:0 0 0 2px rgba(249,115,22,0.4)"></span>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+// The same cartoon engineer-head design, in a green circle (no pin tail,
+// since a live position is a moving point, not a placed pin) instead of
+// a plain orange dot — still visually distinct from the blue job pins
+// below via color/shape, but recognizably "a technician" either way.
+const LIVE_DOT_ICON = L.icon({
+  iconUrl: "/images/technician-marker-live.svg",
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18],
+});
+
+// A friendly cartoon engineer-head pin instead of the generic default
+// Leaflet marker, so both the owner (here) and the customer (see
+// ShopLocationMap's technician mode) recognize a job pin as "a
+// technician was here" at a glance.
+const TECH_MARKER_ICON = L.icon({
+  iconUrl: "/images/technician-marker.svg",
+  iconSize: [40, 48],
+  iconAnchor: [20, 48],
+  popupAnchor: [0, -46],
 });
 
 // Live positions older than this are treated as stale (app closed/
@@ -226,8 +241,8 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
         />
         {pins.map((pin) => (
           <Fragment key={pin.id}>
-            <Marker position={[pin.lat, pin.lng]}>
-              <Tooltip permanent direction="top" offset={[0, -38]}>
+            <Marker position={[pin.lat, pin.lng]} icon={TECH_MARKER_ICON}>
+              <Tooltip permanent direction="top" offset={[0, -46]}>
                 Client: {pin.client_name || "Unnamed"}
                 {pin.staff_name ? ` · Tech: ${pin.staff_name}` : ""}
               </Tooltip>
@@ -250,8 +265,8 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
 
         {livePins.map((live) => (
           <Marker key={live.staffId} position={[live.lat, live.lng]} icon={LIVE_DOT_ICON}>
-            <Tooltip permanent direction="right" offset={[10, 0]}>
-              🟠 Tech: {live.staffName} (live)
+            <Tooltip permanent direction="right" offset={[20, 0]}>
+              🟢 Tech: {live.staffName} (live)
             </Tooltip>
             <Popup>
               <p className="font-semibold">Tech: {live.staffName}</p>

@@ -429,7 +429,11 @@ export default function ClientTicketPage() {
                   : "Your technician is on the way"}
               </p>
               <div className="mt-2">
-                <ShopLocationMap latitude={staffLocation.lat} longitude={staffLocation.lng} />
+                <ShopLocationMap
+                  latitude={staffLocation.lat}
+                  longitude={staffLocation.lng}
+                  variant="technician"
+                />
               </div>
             </div>
           )}
