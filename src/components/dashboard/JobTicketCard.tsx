@@ -278,6 +278,24 @@ export default function JobTicketCard({
               to submit completion proof from the mobile app.
             </p>
 
+            {ticket.payment_receipt_url && (
+              <a
+                href={ticket.payment_receipt_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 flex items-center gap-2 text-xs text-slate-400 hover:text-brand-blue"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={ticket.payment_receipt_url}
+                  alt="Client-uploaded payment receipt"
+                  className="h-10 w-10 rounded-lg object-cover"
+                />
+                Client uploaded a payment receipt
+                {ticket.payment_method ? ` (${ticket.payment_method})` : ""} — view full size
+              </a>
+            )}
+
             {ticket.payment_verified_at ? (
               <p className="mt-2 text-xs font-semibold text-brand-emerald">
                 Payment Verified: {currency} {ticket.payment_verified_amount.toFixed(2)}
@@ -313,7 +331,12 @@ export default function JobTicketCard({
             ) : (
               <button
                 type="button"
-                onClick={() => setShowPaymentForm(true)}
+                onClick={() => {
+                  setPaymentAmount(
+                    ticket.total_invoice_amount > 0 ? ticket.total_invoice_amount.toFixed(2) : ""
+                  );
+                  setShowPaymentForm(true);
+                }}
                 className="mt-2 rounded-full border border-brand-emerald/40 px-3 py-1.5 text-xs font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/10"
               >
                 Confirm Payment Received
