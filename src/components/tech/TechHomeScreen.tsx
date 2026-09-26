@@ -148,6 +148,7 @@ export default function TechHomeScreen({
   }
 
   const isInProgress = task?.status === "IN_PROGRESS";
+  const isEstimatePending = task?.status === "ESTIMATE_PENDING";
   const needsAcceptance =
     task?.status === "SCHEDULED" && !task.staff_accepted_at;
   const activeChecklist = task ? (isInProgress ? task.end_checklist : task.start_checklist) : [];
@@ -339,7 +340,7 @@ export default function TechHomeScreen({
               <div className="mt-3 rounded-2xl bg-white/5 p-5">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
-                    {isInProgress ? "IN PROGRESS" : "SCHEDULED"}
+                    {isInProgress ? "IN PROGRESS" : isEstimatePending ? "ON-SITE — QUOTING" : "SCHEDULED"}
                   </span>
                   {task.is_emergency && (
                     <span className="flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-400">
@@ -433,7 +434,7 @@ export default function TechHomeScreen({
                   onClick={() => onOpenTask(task)}
                   className="mt-2 flex w-full items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]"
                 >
-                  {isInProgress ? "Complete Job" : "Start Job"}
+                  {isInProgress ? "Complete Job" : isEstimatePending ? "Continue Job" : "Start Job"}
                 </button>
               </div>
             )}

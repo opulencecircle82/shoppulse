@@ -1,13 +1,19 @@
 import type { JobTicket } from "@/lib/supabase/types";
 
 /**
- * Picks the technician's one task for today: whichever job is currently
- * IN_PROGRESS, or else the earliest SCHEDULED one. Mirrors the mobile
- * app's HomeScreen._pickTodayTask so both surfaces behave identically.
+ * Picks the technician's one task for today: whichever job they're
+ * currently on-site for (IN_PROGRESS, or ESTIMATE_PENDING while they're
+ * diagnosing/quoting before the customer approves), or else the earliest
+ * SCHEDULED one. ESTIMATE_PENDING has to count as "active" here too -
+ * otherwise a technician who just arrived and is filling out the on-site
+ * estimate sees "No job assigned" until the customer approves the quote,
+ * even though they're standing at the job with unfinished work.
  */
 export function pickTodayTask(tickets: JobTicket[]): JobTicket | null {
-  const inProgress = tickets.find((t) => t.status === "IN_PROGRESS");
-  if (inProgress) return inProgress;
+  const active = tickets.find(
+    (t) => t.status === "IN_PROGRESS" || t.status === "ESTIMATE_PENDING"
+  );
+  if (active) return active;
 
   const scheduled = [...tickets]
     .reverse()

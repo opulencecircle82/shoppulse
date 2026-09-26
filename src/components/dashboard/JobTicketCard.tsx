@@ -8,7 +8,13 @@ import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
-const PRODUCTS_EDITABLE_STATUSES = new Set(["UNASSIGNED", "SCHEDULED", "IN_PROGRESS", "COMPLETED"]);
+const PRODUCTS_EDITABLE_STATUSES = new Set([
+  "UNASSIGNED",
+  "SCHEDULED",
+  "ESTIMATE_PENDING",
+  "IN_PROGRESS",
+  "COMPLETED",
+]);
 
 export default function JobTicketCard({
   ticket,

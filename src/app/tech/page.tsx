@@ -191,7 +191,12 @@ export default function TechAppPage() {
             onOpenMessages={() => setScreen("messages")}
             onOpenTicket={(ticketId) => {
               const ticket = allTickets.find((t) => t.id === ticketId);
-              if (ticket && (ticket.status === "SCHEDULED" || ticket.status === "IN_PROGRESS")) {
+              if (
+                ticket &&
+                (ticket.status === "SCHEDULED" ||
+                  ticket.status === "ESTIMATE_PENDING" ||
+                  ticket.status === "IN_PROGRESS")
+              ) {
                 openTask(ticket);
               }
             }}

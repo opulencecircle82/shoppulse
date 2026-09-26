@@ -94,7 +94,7 @@ export default function CustomerHomeScreen({
   const viewedRef = useRef(new Set<string>());
 
   const activeJob =
-    jobs.find((j) => j.status === "IN_PROGRESS") ??
+    jobs.find((j) => j.status === "IN_PROGRESS" || j.status === "ESTIMATE_PENDING") ??
     jobs.find((j) => j.status === "SCHEDULED" && j.staff_accepted_at) ??
     null;
 
@@ -298,7 +298,11 @@ export default function CustomerHomeScreen({
             className="mt-4 block rounded-2xl bg-gradient-to-br from-brand-blue to-slate-900 p-5 shadow-md shadow-blue-500/20"
           >
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white">
-              {activeJob.status === "IN_PROGRESS" ? "IN PROGRESS" : "TECHNICIAN CONFIRMED"}
+              {activeJob.status === "IN_PROGRESS"
+                ? "IN PROGRESS"
+                : activeJob.status === "ESTIMATE_PENDING"
+                  ? "TECHNICIAN ON-SITE"
+                  : "TECHNICIAN CONFIRMED"}
             </span>
             <p className="mt-2 text-sm font-bold text-white">{activeJob.service_type}</p>
             {techDistance && (

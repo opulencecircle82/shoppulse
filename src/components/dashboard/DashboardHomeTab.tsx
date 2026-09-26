@@ -22,7 +22,7 @@ function initials(name: string): string {
 
 const STATUS_GROUPS: { label: string; color: string; statuses: JobStatus[] }[] = [
   { label: "Needs Attention", color: "#F97316", statuses: ["PENDING", "UNASSIGNED", "DISPUTED"] },
-  { label: "In Progress", color: "#2563EB", statuses: ["SCHEDULED", "IN_PROGRESS"] },
+  { label: "In Progress", color: "#2563EB", statuses: ["SCHEDULED", "ESTIMATE_PENDING", "IN_PROGRESS"] },
   { label: "Completed", color: "#10B981", statuses: ["COMPLETED", "APPROVED"] },
 ];
 
