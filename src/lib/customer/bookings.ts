@@ -384,6 +384,17 @@ export async function uploadPaymentReceipt(ticketId: string, receiptUrl: string)
   if (error) throw new Error(error.message);
 }
 
+/** An explicit "I've paid" from the client — distinct from the optional
+ * receipt upload, since a cash payment has no screenshot to attach.
+ * Notifies the shop's owner(s) so they know to verify and confirm it,
+ * which is what actually unlocks the technician's signature step. */
+export async function confirmClientPayment(ticketId: string) {
+  const { error } = await supabase.rpc("client_confirm_payment", {
+    p_ticket_id: ticketId,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchTicketTechnician(
   ticketId: string
 ): Promise<TicketTechnician | null> {

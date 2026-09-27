@@ -278,6 +278,12 @@ export default function JobTicketCard({
               to submit completion proof from the mobile app.
             </p>
 
+            {ticket.client_payment_confirmed_at && !ticket.payment_verified_at && (
+              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[11px] font-semibold text-brand-emerald">
+                ✓ Customer confirmed they paid — review and confirm below
+              </p>
+            )}
+
             {ticket.payment_receipt_url && (
               <a
                 href={ticket.payment_receipt_url}

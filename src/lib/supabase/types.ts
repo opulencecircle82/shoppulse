@@ -116,6 +116,7 @@ export type JobTicket = {
   payment_verified_amount: number;
   payment_verified_by: string | null;
   payment_receipt_url: string | null;
+  client_payment_confirmed_at: string | null;
   invoice_paid_at: string | null;
   invoice_paid_by: string | null;
   quote_submitted_at: string | null;

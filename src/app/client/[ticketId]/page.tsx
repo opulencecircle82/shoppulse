@@ -11,6 +11,7 @@ import {
   fetchTicketReview,
   submitShopReview,
   uploadPaymentReceipt,
+  confirmClientPayment,
   cancelBooking,
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
@@ -65,6 +66,7 @@ type ClientTicket = {
   cancelled_at: string | null;
   cancellation_reason: string | null;
   cancellation_fee_applied: boolean;
+  client_payment_confirmed_at: string | null;
 };
 
 function ProofPhoto({
@@ -130,6 +132,8 @@ export default function ClientTicketPage() {
   const [selectingPayment, setSelectingPayment] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [confirmPaymentError, setConfirmPaymentError] = useState<string | null>(null);
   const [approvingQuote, setApprovingQuote] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
   const [claimingWarranty, setClaimingWarranty] = useState(false);
@@ -269,6 +273,19 @@ export default function ClientTicketPage() {
       await load();
     } finally {
       setUploadingReceipt(false);
+    }
+  }
+
+  async function handleConfirmPayment() {
+    setConfirmingPayment(true);
+    setConfirmPaymentError(null);
+    try {
+      await confirmClientPayment(ticketId);
+      await load();
+    } catch (e) {
+      setConfirmPaymentError(e instanceof Error ? e.message : "Could not confirm payment.");
+    } finally {
+      setConfirmingPayment(false);
     }
   }
 
@@ -722,10 +739,29 @@ export default function ClientTicketPage() {
                   <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
                     Payment confirmed — thank you!
                   </p>
+                ) : ticket.client_payment_confirmed_at ? (
+                  <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
+                    ✓ You confirmed payment — {ticket.shop_name} will verify it shortly.
+                  </p>
                 ) : (
                   <>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Paid already? Upload your receipt
+                      Already paid?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleConfirmPayment}
+                      disabled={confirmingPayment}
+                      className="mt-2 w-full rounded-full bg-brand-emerald px-4 py-2.5 text-sm font-bold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {confirmingPayment ? "Confirming..." : "Confirm I've Paid"}
+                    </button>
+                    {confirmPaymentError && (
+                      <p className="mt-1.5 text-xs text-red-400">{confirmPaymentError}</p>
+                    )}
+
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Optional: upload your receipt
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
                       A screenshot of your bank transfer or payment confirmation helps
