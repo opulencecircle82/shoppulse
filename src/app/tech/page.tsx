@@ -28,6 +28,20 @@ import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
 type Screen = "loading" | "login" | "tab" | "job" | "messages";
 
+/**
+ * A job the technician had already set off for that the customer then cancelled — shown on their home
+ * screen for a few hours so they don't drive there. A job cancelled before they set off simply drops out
+ * of their list.
+ */
+function recentEnRouteCancellation(tickets: JobTicket[]): JobTicket | null {
+  const cutoff = Date.now() - 3 * 60 * 60 * 1000;
+  return (
+    tickets.find(
+      (t) => t.status === "CANCELLED" && t.en_route_at && t.cancelled_at && Date.parse(t.cancelled_at) > cutoff
+    ) ?? null
+  );
+}
+
 export default function TechAppPage() {
   const [screen, setScreen] = useState<Screen>("loading");
   const [tab, setTab] = useState<TechTab>("jobs");
@@ -207,6 +221,7 @@ export default function TechAppPage() {
             onRefresh={() => loadHome(staffContext)}
             onOpenTask={openTask}
             onOpenMessages={() => setScreen("messages")}
+            cancelledJob={recentEnRouteCancellation(allTickets)}
             onOpenTicket={(ticketId) => {
               const ticket = allTickets.find((t) => t.id === ticketId);
               if (

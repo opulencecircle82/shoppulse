@@ -53,20 +53,31 @@ export default function JobMasterTable({
     return [...tickets].sort((a, b) => score(b) - score(a));
   }, [tickets]);
 
+  // "All Jobs" is the working list: cancelled and declined requests live under their own tab.
+  const active = useMemo(() => sorted.filter((t) => jobFilterOf(t) !== "CANCELLED"), [sorted]);
+
   const counts = useMemo(() => {
-    const result = { ALL: sorted.length } as Record<JobFilterId, number>;
+    const result = { ALL: active.length } as Record<JobFilterId, number>;
     for (const f of JOB_FILTERS) {
       if (f.id !== "ALL") result[f.id] = sorted.filter((t) => jobFilterOf(t) === f.id).length;
     }
     return result;
-  }, [sorted]);
+  }, [sorted, active]);
 
   // A red dot on a tab that isn't open means something in it is waiting for the owner.
   const waitingOnOwner = (id: JobFilterId) =>
     id !== "ALL" && sorted.some((t) => jobFilterOf(t) === id && needsOwnerAction(t));
 
   const activeFilter = JOB_FILTERS.find((f) => f.id === filter) ?? JOB_FILTERS[0];
-  const filtered = filter === "ALL" ? sorted : sorted.filter((t) => jobFilterOf(t) === filter);
+  // Newest cancellation first, so the one the owner just heard about is on top.
+  const filtered =
+    filter === "ALL"
+      ? active
+      : filter === "CANCELLED"
+        ? sorted
+            .filter((t) => jobFilterOf(t) === "CANCELLED")
+            .sort((a, b) => Date.parse(b.cancelled_at ?? b.created_at) - Date.parse(a.cancelled_at ?? a.created_at))
+        : sorted.filter((t) => jobFilterOf(t) === filter);
   const visible = filtered.slice(0, pageSize);
   const remaining = filtered.length - visible.length;
 

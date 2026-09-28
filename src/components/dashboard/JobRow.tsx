@@ -45,6 +45,8 @@ export default function JobRow({
   const phase = describeJob(ticket);
   const tone = TONE_CLASSES[phase.tone];
   const technician = staff.find((member) => member.id === ticket.assigned_staff_id);
+  const cancelled = ticket.status === "CANCELLED";
+  const declined = ticket.status === "REJECTED";
   const hasProof = Boolean(ticket.start_photo_url || ticket.end_photo_url);
   const proofIsPrimary = ticket.status === "COMPLETED" || ticket.status === "DISPUTED";
   // A finished job always opens its proof pack — that's where it gets approved —
@@ -95,6 +97,20 @@ export default function JobRow({
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
             <span className="min-w-0 break-words">{ticket.service_address}</span>
           </p>
+          {cancelled && (
+            <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+              <p>
+                <span className="font-semibold text-slate-700">Reason:</span>{" "}
+                {ticket.cancellation_reason?.trim() || "No reason was given."}
+              </p>
+              {ticket.en_route_at && (
+                <p className="mt-1 font-medium text-amber-700">The technician had already set off.</p>
+              )}
+              {ticket.cancellation_fee_applied && (
+                <p className="mt-1 font-medium text-amber-700">Call-out fee applies.</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
@@ -112,6 +128,10 @@ export default function JobRow({
                 {technician ? firstName(technician.full_name) : "Technician"} - {phase.techStatus}
               </span>
             </span>
+          ) : cancelled || declined ? (
+            technician ? (
+              <span className="text-xs text-slate-400">Was assigned to {firstName(technician.full_name)}</span>
+            ) : null
           ) : (
             <span className="text-xs text-slate-400">No technician yet</span>
           )}

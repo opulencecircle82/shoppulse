@@ -33,6 +33,7 @@ const UPCOMING_EXCLUDED_STATUSES = new Set<JobStatus>([
   "APPROVED",
   "REJECTED",
   "DISPUTED",
+  "CANCELLED",
 ]);
 
 function monthKey(date: Date) {

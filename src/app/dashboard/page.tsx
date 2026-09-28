@@ -37,7 +37,7 @@ import DashboardSidebarNav, {
 // instead of taking up header space on every visit.
 const TAB_HELP: Partial<Record<DashboardTabId, string>> = {
   board:
-    "Filter your jobs with the tabs: All Jobs, Pending (new requests, jobs that need a technician, technician not yet confirmed), In Progress (technician preparing, on the way, on site or working), Disputed and Completed. A red dot on a tab means a job in it is waiting for you. Each row shows the technician's live status — for example \"Juan - En Route\" — and refreshes by itself every few seconds. Use Manage Job for payment, invoice and products.",
+    "Filter your jobs with the tabs: All Jobs, Pending (new requests, jobs that need a technician, technician not yet confirmed), In Progress (technician preparing, on the way, on site or working), Disputed, Completed and Cancelled (requests a customer cancelled or you declined, with the reason they gave). A red dot on a tab means a job in it is waiting for you. Each row shows the technician's live status — for example \"Juan - En Route\" — and refreshes by itself every few seconds. Use Manage Job for payment, invoice and products.",
 };
 
 const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {

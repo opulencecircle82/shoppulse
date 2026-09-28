@@ -15,6 +15,7 @@ import {
   Wrench,
   Quote,
   Clock,
+  XCircle,
 } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import type { TechStats } from "@/lib/tech/todayTask";
@@ -49,6 +50,7 @@ export default function TechHomeScreen({
   onOpenTicket,
   onOpenMessages,
   onRefresh,
+  cancelledJob = null,
   preview = false,
 }: {
   shop: Shop;
@@ -60,6 +62,8 @@ export default function TechHomeScreen({
   onOpenTicket: (jobTicketId: string) => void;
   onOpenMessages: () => void;
   onRefresh: () => void;
+  /** A job the technician had set off for that the customer has since cancelled. */
+  cancelledJob?: JobTicket | null;
   /** The App Builder shows this real screen with sample data: no polling, no chimes, nothing live. */
   preview?: boolean;
 }) {
@@ -327,6 +331,21 @@ export default function TechHomeScreen({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {cancelledJob && (
+              <div className="mt-6 rounded-2xl border border-red-500/40 bg-red-500/10 p-4">
+                <p className="flex items-center gap-1.5 text-sm font-bold text-red-300">
+                  <XCircle className="h-4 w-4" /> Job cancelled — no need to go
+                </p>
+                <p className="mt-1.5 text-xs text-slate-300">
+                  <span className="font-mono font-bold text-slate-400">{formatJobNumber(cancelledJob.job_number, cancelledJob.id)}</span>{" "}
+                  {cancelledJob.client_name} cancelled {cancelledJob.service_type}.
+                </p>
+                {cancelledJob.cancellation_reason && (
+                  <p className="mt-1 text-xs text-slate-400">Reason: {cancelledJob.cancellation_reason}</p>
+                )}
               </div>
             )}
 

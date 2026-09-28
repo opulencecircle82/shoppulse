@@ -141,7 +141,7 @@ export function describeJob(ticket: JobTicket): JobPhase {
         stage: "Cancelled",
         tone: "slate",
         techStatus: null,
-        detail: ticket.cancelled_at ? `Cancelled ${timeAgo(ticket.cancelled_at)}` : null,
+        detail: ticket.cancelled_at ? `Cancelled by customer · ${timeAgo(ticket.cancelled_at)}` : "Cancelled by customer",
         gpsVerified: false,
       };
     case "REJECTED":
@@ -149,7 +149,7 @@ export function describeJob(ticket: JobTicket): JobPhase {
   }
 }
 
-export type JobFilterId = "ALL" | "PENDING" | "IN_PROGRESS" | "DISPUTED" | "COMPLETED";
+export type JobFilterId = "ALL" | "PENDING" | "IN_PROGRESS" | "DISPUTED" | "COMPLETED" | "CANCELLED";
 
 export type JobFilter = {
   id: JobFilterId;
@@ -163,11 +163,12 @@ export const JOB_FILTERS: JobFilter[] = [
   { id: "IN_PROGRESS", label: "In Progress", empty: "No technician is out on a job right now" },
   { id: "DISPUTED", label: "Disputed", empty: "No disputes" },
   { id: "COMPLETED", label: "Completed", empty: "No completed jobs yet" },
+  { id: "CANCELLED", label: "Cancelled", empty: "No cancelled requests" },
 ];
 
 /**
- * Which filter tab a job lives under. Cancelled and declined jobs belong to
- * none of them — they only show under "All Jobs".
+ * Which filter tab a job lives under. Cancelled requests (and ones the shop declined) have their
+ * own "Cancelled" tab and are kept out of "All Jobs", so the working list only holds live work.
  */
 export function jobFilterOf(ticket: JobTicket): Exclude<JobFilterId, "ALL"> | null {
   switch (ticket.status) {
@@ -186,6 +187,9 @@ export function jobFilterOf(ticket: JobTicket): Exclude<JobFilterId, "ALL"> | nu
     case "COMPLETED":
     case "APPROVED":
       return "COMPLETED";
+    case "CANCELLED":
+    case "REJECTED":
+      return "CANCELLED";
     default:
       return null;
   }

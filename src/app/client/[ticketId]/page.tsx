@@ -36,6 +36,16 @@ const ShopLocationMap = dynamic(
 );
 
 const LIVE_POLL_MS = 15000;
+
+// What a customer picks from when cancelling; the shop reads this on its Cancelled tab.
+const CANCEL_REASONS = [
+  "Found another provider",
+  "Changed my mind",
+  "Booked by mistake",
+  "It's taking too long",
+  "The schedule no longer works",
+  "Other",
+] as const;
 const TICKET_POLL_MS = 8000;
 const TRACKED_STATUSES = ["SCHEDULED", "ESTIMATE_PENDING", "IN_PROGRESS"];
 
@@ -196,6 +206,8 @@ export default function ClientTicketPage() {
   const lastTicketRef = useRef("");
   const [claimedTicketId, setClaimedTicketId] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState<string>("");
+  const [cancelDetails, setCancelDetails] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -377,10 +389,21 @@ export default function ClientTicketPage() {
   }
 
   async function handleCancelBooking() {
+    const details = cancelDetails.trim();
+    if (!cancelReason) {
+      setCancelError("Please choose why you're cancelling.");
+      return;
+    }
+    if (cancelReason === "Other" && details.length < 3) {
+      setCancelError("Please tell us a little more.");
+      return;
+    }
+    const reason = cancelReason === "Other" ? details : details ? `${cancelReason} — ${details}` : cancelReason;
+
     setCancelling(true);
     setCancelError(null);
     try {
-      await cancelBooking(ticketId);
+      await cancelBooking(ticketId, reason);
       setShowCancelConfirm(false);
       await load();
     } catch (e) {
@@ -570,8 +593,38 @@ export default function ClientTicketPage() {
                   <p className="text-xs text-red-300">
                     {ticket.status === "ESTIMATE_PENDING"
                       ? "Your technician has already arrived on site, so the shop's standard call-out fee will apply if you cancel now."
-                      : "Cancelling now is free."}
+                      : ticket.status === "SCHEDULED" && ticket.en_route_at
+                        ? "Your technician has already set off. Cancelling is still free, but their trip will be wasted."
+                        : "Cancelling now is free."}
                   </p>
+                  <p className="mt-3 text-xs font-semibold text-slate-200">Why are you cancelling?</p>
+                  <div className="mt-2 space-y-1.5">
+                    {CANCEL_REASONS.map((reason) => (
+                      <label
+                        key={reason}
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-xs ${
+                          cancelReason === reason ? "bg-red-500/20 text-white" : "bg-white/5 text-slate-300"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="cancel-reason"
+                          checked={cancelReason === reason}
+                          onChange={() => setCancelReason(reason)}
+                          className="accent-red-500"
+                        />
+                        {reason}
+                      </label>
+                    ))}
+                  </div>
+                  <textarea
+                    value={cancelDetails}
+                    onChange={(e) => setCancelDetails(e.target.value)}
+                    maxLength={300}
+                    rows={2}
+                    placeholder={cancelReason === "Other" ? "Tell the shop why (required)" : "Anything else the shop should know? (optional)"}
+                    className="mt-2 w-full rounded-lg bg-white/5 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                  />
                   {cancelError && (
                     <p className="mt-2 text-xs text-red-400">{cancelError}</p>
                   )}

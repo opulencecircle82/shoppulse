@@ -293,8 +293,12 @@ export default function JobTicketCard({
               Cancelled by the customer
               {ticket.cancelled_at && ` on ${new Date(ticket.cancelled_at).toLocaleDateString()}`}.
             </p>
-            {ticket.cancellation_reason && (
-              <p className="mt-1 text-xs text-slate-500">{ticket.cancellation_reason}</p>
+            <p className="mt-1 text-xs text-slate-600">
+              <span className="font-semibold text-slate-700">Reason:</span>{" "}
+              {ticket.cancellation_reason?.trim() || "No reason was given."}
+            </p>
+            {ticket.en_route_at && (
+              <p className="mt-1 text-xs font-medium text-amber-700">The technician had already set off.</p>
             )}
             {ticket.cancellation_fee_applied && (
               <p className="mt-1.5 text-xs font-semibold text-amber-600">
