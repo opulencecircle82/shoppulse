@@ -5,6 +5,7 @@ import { CalendarDays, Clock, Download, MapPin, Receipt, UserRound } from "lucid
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
+import JobProgress from "./JobProgress";
 import { formatDateOnly, initials, timeAgo } from "@/lib/dashboard/format";
 import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
@@ -176,6 +177,8 @@ export default function JobTicketCard({
           </span>
         )}
       </div>
+
+      <JobProgress status={ticket.status} />
 
       {ticket.is_emergency && (
         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-600">

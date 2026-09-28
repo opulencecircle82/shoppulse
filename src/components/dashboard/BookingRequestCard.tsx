@@ -5,6 +5,7 @@ import { CalendarDays, Clock, Mail, MapPin, Navigation, Phone } from "lucide-rea
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import JobProgress from "./JobProgress";
 import { formatDateOnly, initials, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
@@ -82,6 +83,8 @@ export default function BookingRequestCard({
           <p className="truncate text-xs text-slate-500">{ticket.service_type}</p>
         </div>
       </div>
+
+      <JobProgress status={ticket.status} />
 
       {ticket.description && (
         <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">

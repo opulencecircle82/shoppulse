@@ -1,28 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { JobStatus, JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import JobTicketCard from "./JobTicketCard";
 import BookingRequestCard from "./BookingRequestCard";
-
-const COLUMNS: {
-  status: JobStatus;
-  label: string;
-  dot: string;
-  accent: string;
-  badge: string;
-  empty: string;
-}[] = [
-  { status: "PENDING", label: "Booking Requests", dot: "bg-brand-orange", accent: "border-t-brand-orange", badge: "bg-brand-orange/15 text-brand-orange-dark", empty: "No new booking requests" },
-  { status: "UNASSIGNED", label: "Unassigned", dot: "bg-amber-500", accent: "border-t-amber-500", badge: "bg-brand-orange/15 text-brand-orange-dark", empty: "Every job has a technician" },
-  { status: "SCHEDULED", label: "Scheduled", dot: "bg-brand-sky", accent: "border-t-brand-sky", badge: "bg-brand-sky/15 text-sky-700", empty: "Nothing scheduled" },
-  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval", dot: "bg-brand-blue-dark", accent: "border-t-brand-blue-dark", badge: "bg-brand-blue-dark/15 text-brand-blue-dark", empty: "No quotes waiting on a customer" },
-  { status: "IN_PROGRESS", label: "In Progress", dot: "bg-brand-blue", accent: "border-t-brand-blue", badge: "bg-brand-blue/15 text-brand-blue", empty: "No jobs in progress" },
-  { status: "COMPLETED", label: "Completed", dot: "bg-brand-emerald", accent: "border-t-brand-emerald", badge: "bg-brand-emerald/15 text-brand-emerald-dark", empty: "No jobs waiting for your review" },
-  { status: "DISPUTED", label: "Disputed", dot: "bg-red-500", accent: "border-t-red-500", badge: "bg-red-500/15 text-red-600", empty: "No disputes" },
-  { status: "APPROVED", label: "Approved", dot: "bg-brand-emerald-dark", accent: "border-t-brand-emerald-dark", badge: "bg-brand-emerald-dark/15 text-brand-emerald-dark", empty: "No approved jobs yet" },
-  { status: "CANCELLED", label: "Cancelled", dot: "bg-slate-400", accent: "border-t-slate-400", badge: "bg-slate-200 text-slate-600", empty: "No cancelled jobs" },
-];
+import { STAGES, STAGE_BY_STATUS } from "./stages";
 
 export default function KanbanBoard({
   shop,
@@ -41,102 +23,123 @@ export default function KanbanBoard({
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer: (ticket: JobTicket) => void;
 }) {
+  const [selected, setSelected] = useState<JobStatus | null>(null);
+
   const byStatus = useMemo(() => {
     const groups = new Map<JobStatus, JobTicket[]>();
-    for (const column of COLUMNS) groups.set(column.status, []);
+    for (const stage of STAGES) groups.set(stage.status, []);
     for (const ticket of tickets) groups.get(ticket.status)?.push(ticket);
-    // Emergencies float to the top of their lane; the rest keep the
-    // newest-first order the tickets already arrive in.
+    // Emergencies float to the top; the rest keep the newest-first order
+    // the tickets already arrive in.
     for (const list of groups.values()) {
       list.sort((a, b) => Number(b.is_emergency) - Number(a.is_emergency));
     }
     return groups;
   }, [tickets]);
 
-  function jumpTo(status: JobStatus) {
-    document
-      .getElementById(`kanban-col-${status}`)
-      ?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-  }
+  // Until the owner picks a stage, open the first one that has jobs in it.
+  const firstBusy = STAGES.find((stage) => (byStatus.get(stage.status)?.length ?? 0) > 0)?.status;
+  const activeStatus = selected ?? firstBusy ?? "PENDING";
+  const activeStage = STAGE_BY_STATUS.get(activeStatus)!;
+  const activeTickets = byStatus.get(activeStatus) ?? [];
 
   return (
     <div>
-      {/* One lane per stage, side by side. Nine lanes never fit on screen
-          at once, so this row lists every stage with its count and jumps
-          the board to it — nothing sits off-screen without a visible hint. */}
-      <div className="flex flex-wrap gap-2">
-        {COLUMNS.map((column) => (
-          <button
-            key={column.status}
-            type="button"
-            onClick={() => jumpTo(column.status)}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm shadow-slate-900/5 transition-colors hover:border-brand-blue hover:text-brand-blue"
-          >
-            <span className={`h-2 w-2 rounded-full ${column.dot}`} />
-            {column.label}
-            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
-              {byStatus.get(column.status)?.length ?? 0}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-4 flex gap-4 overflow-x-auto pb-4 [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin]">
-        {COLUMNS.map((column) => {
-          const columnTickets = byStatus.get(column.status) ?? [];
+      {/* One stage at a time, full width, normal page scroll. The tabs carry
+          a count for every stage plus a red dot on the ones waiting on the
+          owner, so nothing hides behind the tab that isn't selected. */}
+      <div role="tablist" aria-label="Job stages" className="flex flex-wrap gap-2">
+        {STAGES.map((stage) => {
+          const count = byStatus.get(stage.status)?.length ?? 0;
+          const isActive = stage.status === activeStatus;
+          const needsAttention = stage.needsAttention && count > 0 && !isActive;
           return (
-            <section
-              key={column.status}
-              id={`kanban-col-${column.status}`}
-              className={`flex max-h-[75vh] min-h-[360px] w-[320px] shrink-0 flex-col rounded-2xl border border-t-[3px] border-slate-200/70 bg-slate-100/70 ${column.accent}`}
+            <button
+              key={stage.status}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setSelected(stage.status)}
+              className={`relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
+                isActive
+                  ? "bg-brand-blue text-white shadow-md shadow-brand-blue/25"
+                  : "border border-slate-200 bg-white text-slate-600 shadow-sm shadow-slate-900/5 hover:border-brand-blue hover:text-brand-blue"
+              }`}
             >
-              <header className="flex items-center justify-between gap-2 px-4 pb-3 pt-3.5">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${column.dot}`} />
-                  <h3 className="truncate text-sm font-semibold text-slate-900">{column.label}</h3>
-                </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${column.badge}`}>
-                  {columnTickets.length}
+              <span className={`h-2 w-2 rounded-full ${isActive ? "bg-white" : stage.dot}`} />
+              {stage.label}
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                  isActive
+                    ? "bg-white/25 text-white"
+                    : count > 0
+                      ? stage.badge
+                      : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {count}
+              </span>
+              {needsAttention && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
+                  <span className="relative h-3 w-3 rounded-full bg-red-500" />
                 </span>
-              </header>
-
-              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-3">
-                {columnTickets.length === 0 && (
-                  <div className="rounded-xl border border-dashed border-slate-300 px-3 py-8 text-center text-xs text-slate-500">
-                    {column.empty}
-                  </div>
-                )}
-
-                {columnTickets.map((ticket) =>
-                  column.status === "PENDING" ? (
-                    <BookingRequestCard
-                      key={ticket.id}
-                      ticket={ticket}
-                      shop={shop}
-                      onChanged={onChanged}
-                    />
-                  ) : (
-                    <JobTicketCard
-                      key={ticket.id}
-                      ticket={ticket}
-                      staff={staff}
-                      defaultTasks={shop.default_tasks}
-                      shop={shop}
-                      currentStaffId={currentStaffId}
-                      onChanged={onChanged}
-                      onOpenInvoice={onOpenInvoice}
-                      onOpenProofDrawer={
-                        ticket.status === "COMPLETED" || ticket.status === "DISPUTED"
-                          ? onOpenProofDrawer
-                          : undefined
-                      }
-                    />
-                  )
-                )}
-              </div>
-            </section>
+              )}
+            </button>
           );
         })}
+      </div>
+
+      <div role="tabpanel" className="mt-5">
+        <div
+          className={`flex items-center justify-between gap-3 rounded-2xl border border-t-[3px] border-slate-200/70 bg-white px-4 py-3 shadow-sm shadow-slate-900/5 ${activeStage.accent}`}
+        >
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${activeStage.dot}`} />
+              <h3 className="text-sm font-semibold text-slate-900">{activeStage.label}</h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">{activeStage.hint}</p>
+          </div>
+          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${activeStage.badge}`}>
+            {activeTickets.length}
+          </span>
+        </div>
+
+        {activeTickets.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+            {activeStage.empty}
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3">
+            {activeTickets.map((ticket) =>
+              activeStatus === "PENDING" ? (
+                <BookingRequestCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  shop={shop}
+                  onChanged={onChanged}
+                />
+              ) : (
+                <JobTicketCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  staff={staff}
+                  defaultTasks={shop.default_tasks}
+                  shop={shop}
+                  currentStaffId={currentStaffId}
+                  onChanged={onChanged}
+                  onOpenInvoice={onOpenInvoice}
+                  onOpenProofDrawer={
+                    ticket.status === "COMPLETED" || ticket.status === "DISPUTED"
+                      ? onOpenProofDrawer
+                      : undefined
+                  }
+                />
+              )
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
