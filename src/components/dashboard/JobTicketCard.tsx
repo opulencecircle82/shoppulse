@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CalendarDays, Download, MapPin, Receipt, UserRound } from "lucide-react";
+import { CalendarDays, Clock, Download, MapPin, Receipt, UserRound } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
-import { formatDateOnly, initials } from "@/lib/dashboard/format";
+import { formatDateOnly, initials, timeAgo } from "@/lib/dashboard/format";
 import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
@@ -16,6 +16,29 @@ const PRODUCTS_EDITABLE_STATUSES = new Set([
   "IN_PROGRESS",
   "COMPLETED",
 ]);
+
+function stageTimeLabel(ticket: JobTicket): string | null {
+  switch (ticket.status) {
+    case "UNASSIGNED":
+      return `Requested ${timeAgo(ticket.created_at)}`;
+    case "SCHEDULED":
+      return ticket.staff_accepted_at
+        ? `Technician confirmed ${timeAgo(ticket.staff_accepted_at)}`
+        : `Requested ${timeAgo(ticket.created_at)}`;
+    case "ESTIMATE_PENDING":
+      return ticket.started_at ? `On site since ${timeAgo(ticket.started_at)}` : null;
+    case "IN_PROGRESS":
+      return ticket.started_at ? `Started ${timeAgo(ticket.started_at)}` : null;
+    case "COMPLETED":
+    case "DISPUTED":
+    case "APPROVED":
+      return ticket.completed_at ? `Completed ${timeAgo(ticket.completed_at)}` : null;
+    case "CANCELLED":
+      return ticket.cancelled_at ? `Cancelled ${timeAgo(ticket.cancelled_at)}` : null;
+    default:
+      return null;
+  }
+}
 
 export default function JobTicketCard({
   ticket,
@@ -46,6 +69,7 @@ export default function JobTicketCard({
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
+  const timeInStage = stageTimeLabel(ticket);
 
   async function handleProductsChange(next: { product_id: string; name: string; price: number; quantity: number }[]) {
     await supabase.from("job_tickets").update({ selected_products: next }).eq("id", ticket.id);
@@ -173,10 +197,16 @@ export default function JobTicketCard({
         {ticket.status !== "UNASSIGNED" && (
           <p className="flex items-center gap-2">
             <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-            <span>
-              Technician:{" "}
-              <span className="font-medium text-slate-900">{assignedStaff?.full_name ?? "—"}</span>
+            <span className="text-slate-500">Technician</span>
+            <span className="inline-flex items-center rounded-full bg-brand-blue/10 px-2 py-0.5 text-[11px] font-semibold text-brand-blue">
+              {assignedStaff?.full_name ?? "Unassigned"}
             </span>
+          </p>
+        )}
+        {timeInStage && (
+          <p className="flex items-center gap-2">
+            <Clock className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            {timeInStage}
           </p>
         )}
       </div>
@@ -191,7 +221,7 @@ export default function JobTicketCard({
           onClick={(e) => e.stopPropagation()}
           className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
         >
-          <option value="">Assign technician...</option>
+          <option value="">Assign Tech...</option>
           {staff.map((member) => (
             <option key={member.id} value={member.id}>
               {member.full_name}
@@ -230,10 +260,21 @@ export default function JobTicketCard({
         </div>
       )}
 
-      {(ticket.status === "COMPLETED" || ticket.status === "DISPUTED") && (
-        <p className="mt-3 text-xs font-medium text-brand-blue">
-          Click card to review proof →
-        </p>
+      {onOpenProofDrawer && (ticket.status === "COMPLETED" || ticket.status === "DISPUTED") && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenProofDrawer(ticket);
+          }}
+          className={`mt-3 w-full rounded-full px-4 py-2 text-xs font-semibold transition-opacity ${
+            ticket.status === "COMPLETED"
+              ? "bg-gradient-to-r from-brand-sky to-brand-blue-dark text-white hover:opacity-90"
+              : "border border-slate-300 text-slate-700 hover:border-brand-blue hover:text-brand-blue"
+          }`}
+        >
+          {ticket.status === "COMPLETED" ? "Review & Approve" : "View Proof Pack"}
+        </button>
       )}
 
       <div

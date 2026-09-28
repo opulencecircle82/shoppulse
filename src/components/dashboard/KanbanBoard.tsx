@@ -10,17 +10,18 @@ const COLUMNS: {
   label: string;
   dot: string;
   accent: string;
+  badge: string;
   empty: string;
 }[] = [
-  { status: "PENDING", label: "Booking Requests", dot: "bg-brand-orange", accent: "border-t-brand-orange", empty: "No new booking requests" },
-  { status: "UNASSIGNED", label: "Unassigned", dot: "bg-amber-500", accent: "border-t-amber-500", empty: "Every job has a technician" },
-  { status: "SCHEDULED", label: "Scheduled", dot: "bg-brand-sky", accent: "border-t-brand-sky", empty: "Nothing scheduled" },
-  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval", dot: "bg-brand-blue-dark", accent: "border-t-brand-blue-dark", empty: "No quotes waiting on a customer" },
-  { status: "IN_PROGRESS", label: "In Progress", dot: "bg-brand-blue", accent: "border-t-brand-blue", empty: "No jobs in progress" },
-  { status: "COMPLETED", label: "Completed", dot: "bg-brand-emerald", accent: "border-t-brand-emerald", empty: "No jobs waiting for your review" },
-  { status: "DISPUTED", label: "Disputed", dot: "bg-red-500", accent: "border-t-red-500", empty: "No disputes" },
-  { status: "APPROVED", label: "Approved", dot: "bg-brand-emerald-dark", accent: "border-t-brand-emerald-dark", empty: "No approved jobs yet" },
-  { status: "CANCELLED", label: "Cancelled", dot: "bg-slate-400", accent: "border-t-slate-400", empty: "No cancelled jobs" },
+  { status: "PENDING", label: "Booking Requests", dot: "bg-brand-orange", accent: "border-t-brand-orange", badge: "bg-brand-orange/15 text-brand-orange-dark", empty: "No new booking requests" },
+  { status: "UNASSIGNED", label: "Unassigned", dot: "bg-amber-500", accent: "border-t-amber-500", badge: "bg-brand-orange/15 text-brand-orange-dark", empty: "Every job has a technician" },
+  { status: "SCHEDULED", label: "Scheduled", dot: "bg-brand-sky", accent: "border-t-brand-sky", badge: "bg-brand-sky/15 text-sky-700", empty: "Nothing scheduled" },
+  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval", dot: "bg-brand-blue-dark", accent: "border-t-brand-blue-dark", badge: "bg-brand-blue-dark/15 text-brand-blue-dark", empty: "No quotes waiting on a customer" },
+  { status: "IN_PROGRESS", label: "In Progress", dot: "bg-brand-blue", accent: "border-t-brand-blue", badge: "bg-brand-blue/15 text-brand-blue", empty: "No jobs in progress" },
+  { status: "COMPLETED", label: "Completed", dot: "bg-brand-emerald", accent: "border-t-brand-emerald", badge: "bg-brand-emerald/15 text-brand-emerald-dark", empty: "No jobs waiting for your review" },
+  { status: "DISPUTED", label: "Disputed", dot: "bg-red-500", accent: "border-t-red-500", badge: "bg-red-500/15 text-red-600", empty: "No disputes" },
+  { status: "APPROVED", label: "Approved", dot: "bg-brand-emerald-dark", accent: "border-t-brand-emerald-dark", badge: "bg-brand-emerald-dark/15 text-brand-emerald-dark", empty: "No approved jobs yet" },
+  { status: "CANCELLED", label: "Cancelled", dot: "bg-slate-400", accent: "border-t-slate-400", badge: "bg-slate-200 text-slate-600", empty: "No cancelled jobs" },
 ];
 
 export default function KanbanBoard({
@@ -94,7 +95,7 @@ export default function KanbanBoard({
                   <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${column.dot}`} />
                   <h3 className="truncate text-sm font-semibold text-slate-900">{column.label}</h3>
                 </div>
-                <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-slate-600 shadow-sm shadow-slate-900/5">
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${column.badge}`}>
                   {columnTickets.length}
                 </span>
               </header>

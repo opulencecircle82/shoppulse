@@ -23,6 +23,7 @@ import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab"
 import ReviewsTab from "@/components/dashboard/ReviewsTab";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import LiveMapPanel from "@/components/dashboard/LiveMapPanel";
+import HelpTip from "@/components/ui/HelpTip";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
@@ -31,9 +32,15 @@ import DashboardSidebarNav, {
 // Shown once at the top of every tab except Home (which has its own
 // welcome header) — title on the left, a one-line explainer on the
 // right, so a non-technical owner always knows what a section is for.
-const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
+// The longer "how does this work" copy lives behind a (?) next to the title
+// instead of taking up header space on every visit.
+const TAB_HELP: Partial<Record<DashboardTabId, string>> = {
   board:
     "Jobs move through stages: Booking Requests → Unassigned → Scheduled → Awaiting Quote Approval → In Progress → Completed → Approved (or Disputed). Example: a customer books (Booking Requests), you assign a tech (→ Scheduled), the tech arrives and sends an on-site quote (→ Awaiting Quote Approval), the customer approves it (→ In Progress → Completed), then you approve payment (→ Approved).",
+};
+
+const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
+  board: "Track every job from booking request to approved payment.",
   proof: "Review photo proof from completed jobs before approving payment.",
   staff: "Add your team, manage their mobile app logins, and see who's active.",
   services: "List what you offer and track the parts and inventory you use.",
@@ -47,6 +54,8 @@ import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
 
+const MAP_COLLAPSED_KEY = "shoppulse.dashboard.mapCollapsed";
+
 export default function DashboardPage() {
   const router = useRouter();
   const { checked } = useRequireAuth();
@@ -58,6 +67,13 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<DashboardTabId>("home");
   const [showNewTicket, setShowNewTicket] = useState(false);
+  const [mapCollapsed, setMapCollapsed] = useState(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem(MAP_COLLAPSED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
   const [invoiceTicket, setInvoiceTicket] = useState<JobTicket | null>(null);
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -98,6 +114,16 @@ export default function DashboardPage() {
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
+  }
+
+  function toggleMap() {
+    const next = !mapCollapsed;
+    setMapCollapsed(next);
+    try {
+      window.localStorage.setItem(MAP_COLLAPSED_KEY, next ? "1" : "0");
+    } catch {
+      // Storage unavailable (private mode) — the choice just won't persist.
+    }
   }
 
   async function handleSignOut() {
@@ -232,9 +258,18 @@ export default function DashboardPage() {
 
             {TAB_DESCRIPTIONS[activeTab] && (
               <div className="mt-6 text-center">
-                <h2 className="text-lg font-bold text-slate-900">
-                  {DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label}
-                </h2>
+                <div className="flex items-center justify-center gap-1.5">
+                  <h2 className="text-lg font-bold text-slate-900">
+                    {DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label}
+                  </h2>
+                  {TAB_HELP[activeTab] && (
+                    <HelpTip
+                      label={`How ${DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label} works`}
+                    >
+                      {TAB_HELP[activeTab]}
+                    </HelpTip>
+                  )}
+                </div>
                 <p className="mx-auto mt-1.5 max-w-2xl text-xs leading-relaxed text-slate-500">
                   {TAB_DESCRIPTIONS[activeTab]}
                 </p>
@@ -340,8 +375,12 @@ export default function DashboardPage() {
 
           {/* The live map stays on the right for every tab. Below xl there is
               no room beside the content, so it drops underneath instead. */}
-          <aside className="w-full shrink-0 lg:basis-full xl:w-[360px] xl:basis-auto xl:self-start xl:sticky xl:top-6 2xl:w-[420px]">
-            <LiveMapPanel shop={shop} />
+          <aside
+            className={`w-full shrink-0 lg:basis-full xl:basis-auto xl:self-start xl:sticky xl:top-6 ${
+              mapCollapsed ? "xl:w-14" : "xl:w-[360px] 2xl:w-[420px]"
+            }`}
+          >
+            <LiveMapPanel shop={shop} collapsed={mapCollapsed} onToggle={toggleMap} />
           </aside>
         </div>
       </div>

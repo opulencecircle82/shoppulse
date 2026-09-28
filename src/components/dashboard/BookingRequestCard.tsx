@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarDays, Mail, MapPin, Navigation, Phone } from "lucide-react";
+import { CalendarDays, Clock, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
-import { formatDateOnly, initials } from "@/lib/dashboard/format";
+import { formatDateOnly, initials, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
 export default function BookingRequestCard({
@@ -115,6 +115,10 @@ export default function BookingRequestCard({
             Preferred: {formatDateOnly(ticket.preferred_date)}
           </p>
         )}
+        <p className="flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+          Requested {timeAgo(ticket.created_at)}
+        </p>
         {distance && (
           <p className="flex items-center gap-2 font-medium text-brand-blue">
             <Navigation className="h-3.5 w-3.5 shrink-0" />
