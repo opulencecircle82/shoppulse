@@ -22,6 +22,7 @@ import MessagesTab from "@/components/dashboard/MessagesTab";
 import PromotionsManager from "@/components/dashboard/PromotionsManager";
 import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
 import ReviewsTab from "@/components/dashboard/ReviewsTab";
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
@@ -143,8 +144,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-brand-page">
-      <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
+    <main className="flex min-h-screen flex-col bg-brand-page">
+      <div className="mx-auto w-full max-w-[1600px] flex-1 px-6 py-10 lg:px-8">
         <div className="relative flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-6 sm:px-8">
           {/* Clipped in its own layer, not on the header itself — the
               header needs to stay overflow-visible so the notification
@@ -350,6 +351,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <DashboardFooter onSelectTab={setActiveTab} />
 
       {showNewTicket && (
         <NewJobTicketModal

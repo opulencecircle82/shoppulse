@@ -58,7 +58,7 @@ adding it here first.
 
 | Token | Hex | Use for |
 |---|---|---|
-| `brand-navy` | `#0f172a` | Dark screen backgrounds of the **tech and customer apps**; the dark phone mockups shown inside the owner dashboard. Not used as a background on the owner dashboard itself |
+| `brand-navy` | `#0f172a` | Dark screen backgrounds of the **tech and customer apps**; the dark phone mockups shown inside the owner dashboard. On the owner dashboard, used only for the footer |
 | `brand-page` | `#eef3fb` | **Owner dashboard** page background — pale blue, with white cards on top |
 | `brand-blue` | `#2563eb` | **Primary color of the owner dashboard**: active nav pill, primary buttons, links, focus rings. Secondary actions/links on the dark apps |
 | `brand-blue-dark` | `#1d4ed8` | Deep end of the blue gradients (welcome banner, primary button) |
@@ -103,7 +103,8 @@ you touch a dashboard screen, use these rules and nothing else:
 | Warning / attention panel | `border-amber-200 bg-amber-50` (solid tints — translucent tints look muddy over the pale page) |
 | Error / danger | `text-red-600`, `border-red-500/30 bg-red-500/10`; unread/alert rows `bg-red-50` |
 | Modal overlay | `bg-slate-900/40` |
-| Text on a colored surface | stays `text-white` (gradient buttons, blue/red/emerald chips, banners, and captions over photos). White text is **only** allowed on those — never on a white or pale surface |
+| Footer (`DashboardFooter`) | The one dark block on the dashboard: full-width `bg-brand-navy`, brand mark + tagline on the left, three link columns (Dashboard, Your Business, Contact), and a `border-t border-white/10` bar with legal links and the copyright. Headings `text-white`, links `text-slate-400 hover:text-white`. Only real links and the real support email — no placeholder socials or invented contact details |
+| Text on a colored surface | stays `text-white` (gradient buttons, blue/red/emerald chips, banners, and captions over photos). White text is **only** allowed on those (and on the navy footer) — never on a white or pale surface |
 
 Never use `bg-white/5`, `bg-white/10`, `border-white/10`, `text-slate-300`, or
 a bare `text-white` on a dashboard screen — those are the dark-theme
