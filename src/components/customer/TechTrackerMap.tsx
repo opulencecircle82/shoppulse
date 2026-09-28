@@ -42,7 +42,7 @@ function FitToPoints({ points }: { points: Point[] }) {
     } else {
       map.fitBounds(
         L.latLngBounds(points.map((p): [number, number] => [p.lat, p.lng])),
-        { padding: [44, 44], maxZoom: 18 }
+        { padding: [64, 44], maxZoom: 18 }
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,17 +62,28 @@ export default function TechTrackerMap({
   shop = null,
   fitShop = true,
 }: {
-  technician: Point;
+  /** Null until the technician's app has shared a position — the shop and the address are still drawn. */
+  technician: Point | null;
   destination: Point | null;
   shop?: (Point & { name: string }) | null;
   fitShop?: boolean;
 }) {
-  const points = [technician, ...(destination ? [destination] : []), ...(shop && fitShop ? [shop] : [])];
+  const points = [
+    ...(technician ? [technician] : []),
+    ...(destination ? [destination] : []),
+    ...(shop && (fitShop || (!technician && !destination)) ? [shop] : []),
+  ];
+  if (points.length === 0) return null;
+
+  // The address label opens towards the middle of the picture, so it never runs off the edge of the map.
+  const lngs = points.map((p) => p.lng);
+  const midLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+  const addressLabelSide = destination && destination.lng > midLng ? "left" : "right";
 
   return (
     <div className="overflow-hidden rounded-xl shadow-md shadow-black/30">
       <MapContainer
-        center={[technician.lat, technician.lng]}
+        center={[points[0].lat, points[0].lng]}
         zoom={15}
         dragging={false}
         scrollWheelZoom={false}
@@ -96,16 +107,23 @@ export default function TechTrackerMap({
         )}
         {destination && (
           <Marker position={[destination.lat, destination.lng]}>
-            <Tooltip permanent direction="right" offset={[2, -14]}>
+            <Tooltip
+              key={addressLabelSide}
+              permanent
+              direction={addressLabelSide}
+              offset={[addressLabelSide === "left" ? -2 : 2, -14]}
+            >
               Your address
             </Tooltip>
           </Marker>
         )}
-        <Marker position={[technician.lat, technician.lng]} icon={TECH_DOT_ICON}>
-          <Tooltip direction="top" offset={[0, -18]}>
-            Your technician
-          </Tooltip>
-        </Marker>
+        {technician && (
+          <Marker position={[technician.lat, technician.lng]} icon={TECH_DOT_ICON}>
+            <Tooltip direction="top" offset={[0, -18]}>
+              Your technician
+            </Tooltip>
+          </Marker>
+        )}
       </MapContainer>
     </div>
   );

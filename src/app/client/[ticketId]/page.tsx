@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { CalendarClock, Download, MessageCircle, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -19,7 +18,7 @@ import {
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import PaymentDetails from "@/components/customer/PaymentDetails";
 import RequestProgress from "@/components/customer/RequestProgress";
-import TechLiveCard from "@/components/customer/TechLiveCard";
+import TechLiveCard, { type TrackPhase } from "@/components/customer/TechLiveCard";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import { ensureCustomerConversation } from "@/lib/chat/chat";
 import { requestProgress } from "@/lib/customer/jobStages";
@@ -29,11 +28,6 @@ import { useSmartBack } from "@/lib/hooks/useSmartBack";
 import { formatPreferred } from "@/lib/dashboard/format";
 import { useAppTheme, type AppTheme } from "@/lib/hooks/useAppTheme";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
-
-const ShopLocationMap = dynamic(
-  () => import("@/components/customer/ShopLocationMap"),
-  { ssr: false, loading: () => <div className="h-[180px] rounded-xl bg-white/5" /> }
-);
 
 const LIVE_POLL_MS = 15000;
 
@@ -552,7 +546,23 @@ export default function ClientTicketPage() {
 
           {(() => {
             const progress = requestProgress(ticket);
-            const enRoute = ticket.status === "SCHEDULED" && Boolean(ticket.en_route_at);
+            // The map card is there from the moment a technician has confirmed the job until it is done.
+            const trackPhase: TrackPhase | null =
+              ticket.status === "SCHEDULED"
+                ? ticket.en_route_at
+                  ? "en_route"
+                  : ticket.staff_accepted_at
+                    ? "preparing"
+                    : null
+                : ticket.status === "ESTIMATE_PENDING" || ticket.status === "IN_PROGRESS"
+                  ? "on_site"
+                  : null;
+            const onSiteDetail =
+              ticket.status === "IN_PROGRESS"
+                ? "Work on your request is in progress."
+                : ticket.quote_submitted_at && !ticket.quote_approved_at
+                  ? "Your quote is ready — please review it below."
+                  : "Diagnosing the issue — a quote is on its way.";
             const destination =
               ticket.booking_latitude !== null && ticket.booking_longitude !== null
                 ? { lat: ticket.booking_latitude, lng: ticket.booking_longitude }
@@ -577,21 +587,28 @@ export default function ClientTicketPage() {
             );
             return (
               <>
-                {enRoute && (
+                {trackPhase && (
                   <TechLiveCard
+                    phase={trackPhase}
+                    detail={onSiteDetail}
                     location={staffLocation}
                     destination={destination}
                     shop={
                       ticket.shop_latitude !== null && ticket.shop_longitude !== null
-                        ? { lat: ticket.shop_latitude, lng: ticket.shop_longitude, name: ticket.shop_name }
+                        ? {
+                            lat: ticket.shop_latitude,
+                            lng: ticket.shop_longitude,
+                            name: ticket.shop_name,
+                            address: ticket.shop_address,
+                          }
                         : null
                     }
                   >
                     {messageButton}
                   </TechLiveCard>
                 )}
-                {progress && <RequestProgress progress={progress} compact={enRoute} />}
-                {progress && !enRoute && <div className="mt-3">{messageButton}</div>}
+                {progress && <RequestProgress progress={progress} compact={trackPhase !== null} />}
+                {progress && !trackPhase && <div className="mt-3">{messageButton}</div>}
               </>
             );
           })()}
@@ -684,25 +701,6 @@ export default function ClientTicketPage() {
                   className="mt-2 h-24 w-24 rounded-lg object-cover"
                 />
               )}
-            </div>
-          )}
-
-          {staffLocation && !(ticket.status === "SCHEDULED" && ticket.en_route_at) && (
-            <div className="mt-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {ticket.status === "IN_PROGRESS" || ticket.status === "ESTIMATE_PENDING"
-                  ? "Your technician is on site"
-                  : ticket.en_route_at
-                    ? "Your technician is on the way"
-                    : "Your technician is getting ready"}
-              </p>
-              <div className="mt-2">
-                <ShopLocationMap
-                  latitude={staffLocation.lat}
-                  longitude={staffLocation.lng}
-                  variant="technician"
-                />
-              </div>
             </div>
           )}
 
