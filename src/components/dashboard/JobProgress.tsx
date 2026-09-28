@@ -8,7 +8,17 @@ import { PROCESS_STEPS, STAGE_BY_STATUS, processStepIndex } from "./stages";
 export default function JobProgress({ status }: { status: JobStatus }) {
   const index = processStepIndex(status);
   const stage = STAGE_BY_STATUS.get(status);
-  if (index === null || !stage) return null;
+  if (!stage) return null;
+
+  // Cancelled jobs aren't on the path, so they get a plain label instead of a bar.
+  if (index === null) {
+    return (
+      <p className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
+        <span className={`h-1.5 w-1.5 rounded-full ${stage.dot}`} />
+        <span className="text-slate-700">{stage.label}</span>
+      </p>
+    );
+  }
 
   return (
     <div

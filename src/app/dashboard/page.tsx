@@ -36,7 +36,7 @@ import DashboardSidebarNav, {
 // instead of taking up header space on every visit.
 const TAB_HELP: Partial<Record<DashboardTabId, string>> = {
   board:
-    "Jobs move through stages: Booking Requests → Unassigned → Scheduled → Awaiting Quote Approval → In Progress → Completed → Approved (or Disputed). Example: a customer books (Booking Requests), you assign a tech (→ Scheduled), the tech arrives and sends an on-site quote (→ Awaiting Quote Approval), the customer approves it (→ In Progress → Completed), then you approve payment (→ Approved).",
+    "Use the tabs to filter your jobs: Pending (new requests, jobs that need a technician, scheduled visits), In Progress (the technician is quoting or repairing), Completed (review the proof, approve, mark paid) and Flagged (disputes and cancellations). A red dot on a tab means something in it is waiting for you. Each job card has a progress bar showing its exact step — Booking Requests → Unassigned → Scheduled → Awaiting Quote Approval → In Progress → Completed → Approved.",
 };
 
 const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {

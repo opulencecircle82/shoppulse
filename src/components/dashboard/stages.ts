@@ -126,3 +126,77 @@ export function processStepIndex(status: JobStatus): number | null {
   const index = PROCESS_STEPS.indexOf(status);
   return index === -1 ? null : index;
 }
+
+export type JobFilterId = "ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FLAGGED";
+
+export type JobFilter = {
+  id: JobFilterId;
+  label: string;
+  hint: string;
+  empty: string;
+  /** Statuses this tab shows; null means every job. */
+  statuses: JobStatus[] | null;
+  dot: string;
+  accent: string;
+  badge: string;
+};
+
+/**
+ * The five tabs the owner actually sees. Each one groups several of the
+ * finer stages above, and every card still names its exact stage through
+ * its progress bar, so grouping never hides where a job really is.
+ */
+export const FILTERS: JobFilter[] = [
+  {
+    id: "ALL",
+    label: "All",
+    hint: "Every job, from booking request to approved payment.",
+    empty: "No jobs yet",
+    statuses: null,
+    dot: "bg-slate-400",
+    accent: "border-t-slate-400",
+    badge: "bg-slate-200 text-slate-600",
+  },
+  {
+    id: "PENDING",
+    label: "Pending",
+    hint: "Not started yet — new requests to accept, jobs that need a technician, and scheduled visits.",
+    empty: "Nothing pending — every request is handled",
+    statuses: ["PENDING", "UNASSIGNED", "SCHEDULED"],
+    dot: "bg-brand-orange",
+    accent: "border-t-brand-orange",
+    badge: "bg-brand-orange/15 text-brand-orange-dark",
+  },
+  {
+    id: "IN_PROGRESS",
+    label: "In Progress",
+    hint: "The technician is on the job — quoting, waiting on the customer's approval, or repairing.",
+    empty: "No jobs in progress",
+    statuses: ["ESTIMATE_PENDING", "IN_PROGRESS"],
+    dot: "bg-brand-blue",
+    accent: "border-t-brand-blue",
+    badge: "bg-brand-blue/15 text-brand-blue",
+  },
+  {
+    id: "COMPLETED",
+    label: "Completed",
+    hint: "Work is done — review the proof and approve it, then mark it paid.",
+    empty: "No completed jobs yet",
+    statuses: ["COMPLETED", "APPROVED"],
+    dot: "bg-brand-emerald",
+    accent: "border-t-brand-emerald",
+    badge: "bg-brand-emerald/15 text-brand-emerald-dark",
+  },
+  {
+    id: "FLAGGED",
+    label: "Flagged",
+    hint: "Needs a closer look — disputes raised by the customer and cancelled jobs.",
+    empty: "Nothing flagged",
+    statuses: ["DISPUTED", "CANCELLED"],
+    dot: "bg-red-500",
+    accent: "border-t-red-500",
+    badge: "bg-red-500/15 text-red-600",
+  },
+];
+
+export const FILTER_BY_ID = new Map(FILTERS.map((filter) => [filter.id, filter]));
