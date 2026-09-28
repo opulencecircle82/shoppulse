@@ -12,7 +12,6 @@ import {
   Sparkles,
   Star,
   Navigation,
-  ClipboardList,
   MessageCircle,
   Settings,
 } from "lucide-react";
@@ -25,40 +24,18 @@ import {
   recordPromotionEvent,
   listFeaturedServices,
   listNearbyShopServices,
-  fetchTicketTechnician,
-  fetchTicketStaffLocation,
   type NearbyPromotion,
   type FeaturedService,
   type NearbyService,
-  type TicketTechnician,
 } from "@/lib/customer/bookings";
-import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import { formatDistance } from "@/lib/geo/distance";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import { listCustomerConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
-
-const STATUS_STYLES: Record<string, string> = {
-  PENDING: "bg-amber-500/15 text-amber-400",
-  REJECTED: "bg-red-500/15 text-red-400",
-  UNASSIGNED: "bg-white/10 text-slate-400",
-  SCHEDULED: "bg-brand-blue/15 text-brand-blue",
-  ESTIMATE_PENDING: "bg-amber-500/15 text-amber-400",
-  IN_PROGRESS: "bg-brand-blue/15 text-brand-blue",
-  COMPLETED: "bg-brand-blue/15 text-brand-blue",
-  APPROVED: "bg-brand-emerald/15 text-brand-emerald",
-  DISPUTED: "bg-red-500/15 text-red-400",
-  CANCELLED: "bg-white/10 text-slate-400",
-};
-
-// The business hasn't accepted this yet, so it isn't a real job on the
-// books — showing the raw "PENDING" status here reads like it already
-// is one. Every other status keeps its plain label.
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Request Sent",
-  ESTIMATE_PENDING: "Quote Ready",
-};
+import LiveStatusBanner from "./LiveStatusBanner";
+import ServiceBookingsHub from "./ServiceBookingsHub";
 
 const QUICK_CATEGORIES = [
   { label: "Electrical", icon: Zap, color: "text-amber-500" },
@@ -88,15 +65,8 @@ export default function CustomerHomeScreen({
       ? { lat: customer.latitude, lng: customer.longitude }
       : null
   );
-  const [technician, setTechnician] = useState<TicketTechnician | null>(null);
-  const [techDistance, setTechDistance] = useState<string | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const viewedRef = useRef(new Set<string>());
-
-  const activeJob =
-    jobs.find((j) => j.status === "IN_PROGRESS" || j.status === "ESTIMATE_PENDING") ??
-    jobs.find((j) => j.status === "SCHEDULED" && j.staff_accepted_at) ??
-    null;
 
   useEffect(() => {
     let active = true;
@@ -164,29 +134,6 @@ export default function CustomerHomeScreen({
       clearInterval(interval);
     };
   }, []);
-
-  useEffect(() => {
-    if (!activeJob) {
-      const id = setTimeout(() => {
-        setTechnician(null);
-        setTechDistance(null);
-      }, 0);
-      return () => clearTimeout(id);
-    }
-    let active = true;
-    fetchTicketTechnician(activeJob.id).then((tech) => {
-      if (active) setTechnician(tech);
-    });
-    fetchTicketStaffLocation(activeJob.id).then((loc) => {
-      if (!active || !loc || !pin) return;
-      const km = distanceKm(pin, { lat: loc.lat, lng: loc.lng });
-      setTechDistance(formatDistance(km));
-    });
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeJob?.id, pin]);
 
   async function handleSignOut() {
     await signOutCustomer();
@@ -275,7 +222,11 @@ export default function CustomerHomeScreen({
           />
         </form>
 
-        <div className="mt-4 grid grid-cols-5 gap-2">
+        <LiveStatusBanner jobs={jobs} pin={pin} />
+
+        <ServiceBookingsHub jobs={jobs} />
+
+        <div className="mt-6 grid grid-cols-5 gap-2">
           {QUICK_CATEGORIES.map(({ label, icon: Icon, color }) => (
             <Link
               key={label}
@@ -291,41 +242,6 @@ export default function CustomerHomeScreen({
             </Link>
           ))}
         </div>
-
-        {activeJob && (
-          <Link
-            href={`/client/${activeJob.id}`}
-            className="mt-4 block rounded-2xl bg-gradient-to-br from-brand-blue to-slate-900 p-5 shadow-md shadow-blue-500/20"
-          >
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white">
-              {activeJob.status === "IN_PROGRESS"
-                ? "IN PROGRESS"
-                : activeJob.status === "ESTIMATE_PENDING"
-                  ? "TECHNICIAN ON-SITE"
-                  : "TECHNICIAN CONFIRMED"}
-            </span>
-            <p className="mt-2 text-sm font-bold text-white">{activeJob.service_type}</p>
-            {techDistance && (
-              <p className="mt-0.5 flex items-center gap-1 text-xs text-white/80">
-                <Navigation className="h-3 w-3" /> Technician {techDistance}
-              </p>
-            )}
-            {technician && (
-              <p className="mt-2 flex items-center gap-1.5 text-xs text-white/90">
-                <span>Tech: {technician.full_name}</span>
-                {technician.avg_rating !== null && (
-                  <span className="flex items-center gap-0.5">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    {technician.avg_rating.toFixed(1)}
-                  </span>
-                )}
-              </p>
-            )}
-            <span className="mt-3 inline-block text-xs font-semibold text-white underline underline-offset-2">
-              View Live Proof &amp; GPS Map →
-            </span>
-          </Link>
-        )}
 
         {promotions.length > 0 && (
           <div className="-mx-5 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
@@ -506,45 +422,6 @@ export default function CustomerHomeScreen({
             Don&apos;t have a code? Browse services near you →
           </Link>
         </div>
-
-        <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Your Jobs
-        </p>
-
-        {jobs.length === 0 ? (
-          <div className="mt-3 rounded-2xl bg-white/5 p-8 text-center shadow-md shadow-black/20">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
-              <ClipboardList className="h-5 w-5 text-brand-blue" />
-            </div>
-            <p className="mt-3 text-sm text-slate-400">
-              No jobs yet. Use the booking link your service provider shared
-              with you, or enter their business code above.
-            </p>
-          </div>
-        ) : (
-          <ul className="mt-3 space-y-3">
-            {jobs.map((job) => (
-              <li key={job.id}>
-                <Link
-                  href={`/client/${job.id}`}
-                  className="block rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
-                >
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                      STATUS_STYLES[job.status] ?? "bg-white/10 text-slate-400"
-                    }`}
-                  >
-                    {STATUS_LABELS[job.status] ?? job.status.replace("_", " ")}
-                  </span>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {job.service_type}
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-400">{job.service_address}</p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </main>
   );

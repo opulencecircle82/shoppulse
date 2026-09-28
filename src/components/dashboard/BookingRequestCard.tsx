@@ -5,11 +5,15 @@ import { CalendarDays, Clock, Mail, MapPin, Navigation, Phone } from "lucide-rea
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
-import JobCardShell from "./JobCardShell";
 import JobProgress from "./JobProgress";
 import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
+/**
+ * The details behind a booking request row's "Manage Job" button: what the
+ * customer asked for, how far away they are, how to reach them and the parts
+ * they'll need. Accept / Reject sit on the row itself.
+ */
 export default function BookingRequestCard({
   ticket,
   shop,
@@ -20,7 +24,6 @@ export default function BookingRequestCard({
   onChanged: () => void;
 }) {
   const [distance, setDistance] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (shop.latitude === null || shop.longitude === null) return;
@@ -44,27 +47,13 @@ export default function BookingRequestCard({
     };
   }, [ticket.id, shop.latitude, shop.longitude]);
 
-  async function handleAccept() {
-    setBusy(true);
-    await supabase.rpc("accept_booking_request", { p_ticket_id: ticket.id });
-    setBusy(false);
-    onChanged();
-  }
-
-  async function handleReject() {
-    setBusy(true);
-    await supabase.rpc("reject_booking_request", { p_ticket_id: ticket.id });
-    setBusy(false);
-    onChanged();
-  }
-
   async function handleProductsChange(next: { product_id: string; name: string; price: number; quantity: number }[]) {
     await supabase.from("job_tickets").update({ selected_products: next }).eq("id", ticket.id);
     onChanged();
   }
 
   return (
-    <JobCardShell ticket={ticket}>
+    <div>
       <JobProgress status={ticket.status} />
 
       {ticket.description && (
@@ -138,25 +127,6 @@ export default function BookingRequestCard({
           onChange={handleProductsChange}
         />
       </div>
-
-      <div className="mt-3 flex gap-2">
-        <button
-          type="button"
-          onClick={handleAccept}
-          disabled={busy}
-          className="flex-1 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-        >
-          Accept
-        </button>
-        <button
-          type="button"
-          onClick={handleReject}
-          disabled={busy}
-          className="flex-1 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-red-400 hover:text-red-600 disabled:opacity-60"
-        >
-          Reject
-        </button>
-      </div>
-    </JobCardShell>
+    </div>
   );
 }

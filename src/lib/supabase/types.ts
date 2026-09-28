@@ -140,6 +140,10 @@ export type JobTicket = {
   payment_method: string | null;
   signature_url: string | null;
   created_at: string;
+  /** When the technician tapped "I'm on my way"; cleared if the job is re-assigned. */
+  en_route_at: string | null;
+  /** Short per-shop job number shown as #201. */
+  job_number: number;
 };
 
 export type StaffLiveLocation = {

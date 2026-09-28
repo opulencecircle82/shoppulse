@@ -24,7 +24,8 @@ export default function JobProgress({ status }: { status: JobStatus }) {
         ))}
       </div>
       <p className="mt-1.5 text-[10px] font-medium text-slate-500">
-        Step {index + 1} of {PROCESS_STEPS.length}
+        Step {index + 1} of {PROCESS_STEPS.length} ·{" "}
+        <span className="text-slate-700">{stage.label}</span>
       </p>
     </div>
   );

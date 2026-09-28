@@ -24,6 +24,7 @@ import { supabase } from "@/lib/supabase/client";
 import {
   listNearbyEmergencyJobs,
   claimEmergencyJob,
+  markEnRoute,
   type NearbyEmergencyJob,
 } from "@/lib/tech/jobActions";
 import TechNotificationBell from "./TechNotificationBell";
@@ -145,6 +146,15 @@ export default function TechHomeScreen({
     await supabase.rpc("decline_job_assignment", { p_ticket_id: task.id });
     setResponding(false);
     onRefresh();
+  }
+
+  // Tapping either button tells the owner and the customer the technician has
+  // set off. Failing to record it must never get in the way of the trip itself.
+  function handleOnMyWay() {
+    if (!task || task.status !== "SCHEDULED" || task.en_route_at) return;
+    markEnRoute(task.id)
+      .catch(() => {})
+      .finally(onRefresh);
   }
 
   const isInProgress = task?.status === "IN_PROGRESS";
@@ -340,7 +350,13 @@ export default function TechHomeScreen({
               <div className="mt-3 rounded-2xl bg-white/5 p-5">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[10px] font-bold text-brand-emerald">
-                    {isInProgress ? "IN PROGRESS" : isEstimatePending ? "ON-SITE — QUOTING" : "SCHEDULED"}
+                    {isInProgress
+                      ? "IN PROGRESS"
+                      : isEstimatePending
+                        ? "ON-SITE — QUOTING"
+                        : task.en_route_at
+                          ? "EN ROUTE"
+                          : "SCHEDULED"}
                   </span>
                   {task.is_emergency && (
                     <span className="flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-400">
@@ -420,10 +436,21 @@ export default function TechHomeScreen({
                   {task.service_address}
                 </p>
 
+                {task.status === "SCHEDULED" && !task.en_route_at && (
+                  <button
+                    type="button"
+                    onClick={handleOnMyWay}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-emerald to-brand-emerald-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+                  >
+                    <NavigationIcon className="h-4 w-4" /> I&apos;m On My Way
+                  </button>
+                )}
+
                 <a
                   href={mapsUrl(task.service_address)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={handleOnMyWay}
                   className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)]"
                 >
                   <NavigationIcon className="h-4 w-4" /> Start Navigation

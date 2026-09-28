@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -24,6 +24,8 @@ const ShopLocationMap = dynamic(
 );
 
 const LIVE_POLL_MS = 15000;
+const TICKET_POLL_MS = 8000;
+const TRACKED_STATUSES = ["SCHEDULED", "ESTIMATE_PENDING", "IN_PROGRESS"];
 
 type ClientTicket = {
   id: string;
@@ -67,7 +69,31 @@ type ClientTicket = {
   cancellation_reason: string | null;
   cancellation_fee_applied: boolean;
   client_payment_confirmed_at: string | null;
+  en_route_at: string | null;
+  job_number: number | null;
 };
+
+/** The same wording the customer sees on their bookings list, so the two never disagree. */
+function clientStatusLabel(ticket: ClientTicket): string {
+  switch (ticket.status) {
+    case "PENDING":
+      return "Request Sent";
+    case "UNASSIGNED":
+      return "Booking Confirmed";
+    case "SCHEDULED":
+      return ticket.en_route_at ? "Technician On The Way" : "Technician Assigned";
+    case "ESTIMATE_PENDING":
+      return ticket.quote_submitted_at && !ticket.quote_approved_at
+        ? "Quote Ready"
+        : "Technician On Site";
+    case "IN_PROGRESS":
+      return "Work In Progress";
+    case "COMPLETED":
+      return "Completed";
+    default:
+      return ticket.status.replace("_", " ");
+  }
+}
 
 function ProofPhoto({
   label,
@@ -138,6 +164,7 @@ export default function ClientTicketPage() {
   const [approveError, setApproveError] = useState<string | null>(null);
   const [claimingWarranty, setClaimingWarranty] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const lastTicketRef = useRef("");
   const [claimedTicketId, setClaimedTicketId] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -154,10 +181,42 @@ export default function ClientTicketPage() {
       return;
     }
 
+    lastTicketRef.current = JSON.stringify(data);
     setTicket(data as ClientTicket);
     setLoading(false);
     supabase.rpc("client_mark_viewed", { p_ticket_id: ticketId });
   }, [ticketId]);
+
+  // The technician and the shop keep moving this job along (on the way,
+  // arrived, quote ready, done...). Pick that up without the customer having
+  // to reload — and only redraw when something actually changed.
+  const refreshQuietly = useCallback(async () => {
+    if (document.hidden) return;
+    try {
+      const { data } = await supabase
+        .rpc("get_client_ticket", { p_ticket_id: ticketId })
+        .maybeSingle();
+      if (!data) return;
+      const snapshot = JSON.stringify(data);
+      if (snapshot === lastTicketRef.current) return;
+      lastTicketRef.current = snapshot;
+      setTicket(data as ClientTicket);
+    } catch {
+      // A dropped connection just skips this check; the next one retries.
+    }
+  }, [ticketId]);
+
+  useEffect(() => {
+    const interval = setInterval(refreshQuietly, TICKET_POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden) refreshQuietly();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [refreshQuietly]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -166,12 +225,10 @@ export default function ClientTicketPage() {
     return () => clearTimeout(id);
   }, [load]);
 
+  const ticketStatus = ticket?.status;
+
   useEffect(() => {
-    if (
-      !ticket ||
-      !["SCHEDULED", "ESTIMATE_PENDING", "IN_PROGRESS"].includes(ticket.status)
-    )
-      return;
+    if (!ticketStatus || !TRACKED_STATUSES.includes(ticketStatus)) return;
 
     let active = true;
     async function poll() {
@@ -184,7 +241,7 @@ export default function ClientTicketPage() {
       active = false;
       clearInterval(interval);
     };
-  }, [ticket, ticketId]);
+  }, [ticketStatus, ticketId]);
 
   useEffect(() => {
     if (!ticket || !["COMPLETED", "APPROVED", "DISPUTED"].includes(ticket.status)) return;
@@ -370,10 +427,13 @@ export default function ClientTicketPage() {
                   : "bg-brand-blue/15 text-brand-blue"
             }`}
           >
-            {ticket.status === "PENDING" ? "Request Sent" : ticket.status.replace("_", " ")}
+            {clientStatusLabel(ticket)}
           </span>
 
           <h1 className="mt-3 text-xl font-bold text-white">{ticket.service_type}</h1>
+          {ticket.job_number !== null && (
+            <p className="mt-0.5 text-xs font-semibold text-slate-500">Job #{ticket.job_number}</p>
+          )}
           <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-400">For: {ticket.client_name}</p>
 
@@ -443,7 +503,9 @@ export default function ClientTicketPage() {
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 {ticket.status === "IN_PROGRESS" || ticket.status === "ESTIMATE_PENDING"
                   ? "Your technician is on site"
-                  : "Your technician is on the way"}
+                  : ticket.en_route_at
+                    ? "Your technician is on the way"
+                    : "Your technician is getting ready"}
               </p>
               <div className="mt-2">
                 <ShopLocationMap

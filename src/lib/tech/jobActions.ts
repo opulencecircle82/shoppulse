@@ -47,6 +47,16 @@ export async function claimEmergencyJob(ticketId: string) {
   if (error) throw new Error(error.message);
 }
 
+/** "I'm on my way" — lets the owner and the customer see the technician has
+ * set off. Safe to call twice; only works on the technician's own confirmed,
+ * scheduled job. */
+export async function markEnRoute(ticketId: string) {
+  const { error } = await supabase.rpc("technician_mark_en_route", {
+    p_ticket_id: ticketId,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchAssignedJobs(staffId: string): Promise<JobTicket[]> {
   const { data, error } = await supabase
     .from("job_tickets")

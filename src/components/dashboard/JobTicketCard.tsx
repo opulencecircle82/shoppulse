@@ -5,10 +5,8 @@ import { CalendarDays, Clock, Download, MapPin, Receipt, UserRound } from "lucid
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
-import JobCardShell from "./JobCardShell";
 import JobProgress from "./JobProgress";
 import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
-import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
 const PRODUCTS_EDITABLE_STATUSES = new Set([
@@ -42,29 +40,30 @@ function stageTimeLabel(ticket: JobTicket): string | null {
   }
 }
 
+/**
+ * The details behind a row's "Manage Job" button: progress, contact and
+ * payment info, products, and the stage-specific actions (confirm payment,
+ * edit invoice, mark paid...). Who the job is for, where it is and what stage
+ * it's at already sit on the row itself.
+ */
 export default function JobTicketCard({
   ticket,
   staff,
-  defaultTasks,
   shop,
   currentStaffId,
   onChanged,
   onOpenInvoice,
-  onOpenProofDrawer,
 }: {
   ticket: JobTicket;
   staff: StaffMember[];
-  defaultTasks: string[];
   shop: Shop;
   currentStaffId: string | null;
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
-  onOpenProofDrawer?: (ticket: JobTicket) => void;
 }) {
   const shopId = shop.id;
   const currency = shop.currency;
   const [linkCopied, setLinkCopied] = useState(false);
-  const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [confirmingPayment, setConfirmingPayment] = useState(false);
@@ -158,10 +157,7 @@ export default function JobTicketCard({
   }
 
   return (
-    <JobCardShell
-      ticket={ticket}
-      onClick={onOpenProofDrawer ? () => onOpenProofDrawer(ticket) : undefined}
-    >
+    <div>
       <JobProgress status={ticket.status} />
 
       <div className="mt-3 space-y-1.5 text-xs text-slate-600">
@@ -192,25 +188,6 @@ export default function JobTicketCard({
         )}
       </div>
 
-      {ticket.status === "UNASSIGNED" && (
-        <select
-          value=""
-          onChange={(e) => {
-            const member = staff.find((s) => s.id === e.target.value);
-            if (member) setPendingAssignee(member);
-          }}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
-        >
-          <option value="">Assign Tech...</option>
-          {staff.map((member) => (
-            <option key={member.id} value={member.id}>
-              {member.full_name}
-            </option>
-          ))}
-        </select>
-      )}
-
       {ticket.total_invoice_amount > 0 && (
         <div className="mt-3 flex items-center justify-between rounded-xl bg-brand-emerald/10 px-3 py-2">
           <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
@@ -239,23 +216,6 @@ export default function JobTicketCard({
             label="Products Used"
           />
         </div>
-      )}
-
-      {onOpenProofDrawer && (ticket.status === "COMPLETED" || ticket.status === "DISPUTED") && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenProofDrawer(ticket);
-          }}
-          className={`mt-3 w-full rounded-full px-4 py-2 text-xs font-semibold transition-opacity ${
-            ticket.status === "COMPLETED"
-              ? "bg-gradient-to-r from-brand-sky to-brand-blue-dark text-white hover:opacity-90"
-              : "border border-slate-300 text-slate-700 hover:border-brand-blue hover:text-brand-blue"
-          }`}
-        >
-          {ticket.status === "COMPLETED" ? "Review & Approve" : "View Proof Pack"}
-        </button>
       )}
 
       <div
@@ -477,20 +437,6 @@ export default function JobTicketCard({
         )}
       </div>
 
-      {pendingAssignee && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <AssignTaskingModal
-            ticket={ticket}
-            staffMember={pendingAssignee}
-            defaultTasks={defaultTasks}
-            onClose={() => setPendingAssignee(null)}
-            onAssigned={() => {
-              setPendingAssignee(null);
-              onChanged();
-            }}
-          />
-        </div>
-      )}
-    </JobCardShell>
+    </div>
   );
 }

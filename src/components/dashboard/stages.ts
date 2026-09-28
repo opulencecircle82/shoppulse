@@ -3,134 +3,25 @@ import type { JobStatus } from "@/lib/supabase/types";
 export type Stage = {
   status: JobStatus;
   label: string;
-  /** One line telling the owner what a job in this stage is waiting on. */
-  hint: string;
-  empty: string;
+  /** Fill color of the progress bar segments for a job at this stage. */
   dot: string;
-  accent: string;
-  badge: string;
-  /** Header band of a job card in this stage (background + bottom border). */
-  header: string;
-  /** Text color for the avatar initials and stage pill on that header. */
-  tint: string;
-  /** Jobs in this stage are waiting on the owner, so the tab gets an alert dot. */
-  needsAttention: boolean;
 };
 
 export const STAGES: Stage[] = [
-  {
-    status: "PENDING",
-    label: "Booking Requests",
-    hint: "New requests waiting for you to accept or reject.",
-    empty: "No new booking requests",
-    dot: "bg-brand-orange",
-    accent: "border-t-brand-orange",
-    badge: "bg-brand-orange/15 text-brand-orange-dark",
-    header: "bg-brand-orange/15 border-brand-orange/25",
-    tint: "text-brand-orange-dark",
-    needsAttention: true,
-  },
-  {
-    status: "UNASSIGNED",
-    label: "Unassigned",
-    hint: "Accepted jobs that still need a technician.",
-    empty: "Every job has a technician",
-    dot: "bg-brand-orange",
-    accent: "border-t-brand-orange",
-    badge: "bg-brand-orange/15 text-brand-orange-dark",
-    header: "bg-brand-orange/15 border-brand-orange/25",
-    tint: "text-brand-orange-dark",
-    needsAttention: true,
-  },
-  {
-    status: "SCHEDULED",
-    label: "Scheduled",
-    hint: "A technician is assigned and getting ready to head out.",
-    empty: "Nothing scheduled",
-    dot: "bg-brand-sky",
-    accent: "border-t-brand-sky",
-    badge: "bg-brand-sky/15 text-sky-700",
-    header: "bg-brand-sky/15 border-brand-sky/30",
-    tint: "text-sky-700",
-    needsAttention: false,
-  },
-  {
-    status: "ESTIMATE_PENDING",
-    label: "Awaiting Quote Approval",
-    hint: "The technician is on site — waiting on their quote or the customer's approval.",
-    empty: "No quotes waiting on a customer",
-    dot: "bg-brand-blue-dark",
-    accent: "border-t-brand-blue-dark",
-    badge: "bg-brand-blue-dark/15 text-brand-blue-dark",
-    header: "bg-brand-blue-dark/10 border-brand-blue-dark/20",
-    tint: "text-brand-blue-dark",
-    needsAttention: false,
-  },
-  {
-    status: "IN_PROGRESS",
-    label: "In Progress",
-    hint: "Repair under way. Confirm payment once the customer has paid.",
-    empty: "No jobs in progress",
-    dot: "bg-brand-blue",
-    accent: "border-t-brand-blue",
-    badge: "bg-brand-blue/15 text-brand-blue",
-    header: "bg-brand-blue/10 border-brand-blue/20",
-    tint: "text-brand-blue",
-    needsAttention: false,
-  },
-  {
-    status: "COMPLETED",
-    label: "Completed",
-    hint: "Work is done — review the proof and approve it.",
-    empty: "No jobs waiting for your review",
-    dot: "bg-brand-emerald",
-    accent: "border-t-brand-emerald",
-    badge: "bg-brand-emerald/15 text-brand-emerald-dark",
-    header: "bg-brand-emerald/15 border-brand-emerald/30",
-    tint: "text-brand-emerald-dark",
-    needsAttention: true,
-  },
-  {
-    status: "DISPUTED",
-    label: "Disputed",
-    hint: "The customer raised a problem — review the proof pack.",
-    empty: "No disputes",
-    dot: "bg-red-500",
-    accent: "border-t-red-500",
-    badge: "bg-red-500/15 text-red-600",
-    header: "bg-red-500/10 border-red-500/20",
-    tint: "text-red-600",
-    needsAttention: true,
-  },
-  {
-    status: "APPROVED",
-    label: "Approved",
-    hint: "Approved and invoiced. Mark it paid once the money is in.",
-    empty: "No approved jobs yet",
-    dot: "bg-brand-emerald-dark",
-    accent: "border-t-brand-emerald-dark",
-    badge: "bg-brand-emerald-dark/15 text-brand-emerald-dark",
-    header: "bg-brand-emerald-dark/10 border-brand-emerald-dark/20",
-    tint: "text-brand-emerald-dark",
-    needsAttention: false,
-  },
-  {
-    status: "CANCELLED",
-    label: "Cancelled",
-    hint: "Cancelled by the customer.",
-    empty: "No cancelled jobs",
-    dot: "bg-slate-400",
-    accent: "border-t-slate-400",
-    badge: "bg-slate-200 text-slate-600",
-    header: "bg-slate-100 border-slate-200",
-    tint: "text-slate-600",
-    needsAttention: false,
-  },
+  { status: "PENDING", label: "Booking Requests", dot: "bg-brand-orange" },
+  { status: "UNASSIGNED", label: "Unassigned", dot: "bg-brand-orange" },
+  { status: "SCHEDULED", label: "Scheduled", dot: "bg-brand-sky" },
+  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval", dot: "bg-brand-blue-dark" },
+  { status: "IN_PROGRESS", label: "In Progress", dot: "bg-brand-blue" },
+  { status: "COMPLETED", label: "Completed", dot: "bg-brand-emerald" },
+  { status: "DISPUTED", label: "Disputed", dot: "bg-red-500" },
+  { status: "APPROVED", label: "Approved", dot: "bg-brand-emerald-dark" },
+  { status: "CANCELLED", label: "Cancelled", dot: "bg-slate-400" },
 ];
 
 export const STAGE_BY_STATUS = new Map(STAGES.map((stage) => [stage.status, stage]));
 
-/** The happy path a job walks through, used for the per-card progress bar. */
+/** The happy path a job walks through, used for the per-job progress bar. */
 export const PROCESS_STEPS: JobStatus[] = [
   "PENDING",
   "UNASSIGNED",
@@ -148,77 +39,3 @@ export function processStepIndex(status: JobStatus): number | null {
   const index = PROCESS_STEPS.indexOf(status);
   return index === -1 ? null : index;
 }
-
-export type JobFilterId = "ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FLAGGED";
-
-export type JobFilter = {
-  id: JobFilterId;
-  label: string;
-  hint: string;
-  empty: string;
-  /** Statuses this tab shows; null means every job. */
-  statuses: JobStatus[] | null;
-  dot: string;
-  accent: string;
-  badge: string;
-};
-
-/**
- * The five tabs the owner actually sees. Each one groups several of the
- * finer stages above, and every card still names its exact stage through
- * its progress bar, so grouping never hides where a job really is.
- */
-export const FILTERS: JobFilter[] = [
-  {
-    id: "ALL",
-    label: "All",
-    hint: "Every job, from booking request to approved payment.",
-    empty: "No jobs yet",
-    statuses: null,
-    dot: "bg-slate-400",
-    accent: "border-t-slate-400",
-    badge: "bg-slate-200 text-slate-600",
-  },
-  {
-    id: "PENDING",
-    label: "Pending",
-    hint: "Not started yet — new requests to accept, jobs that need a technician, and scheduled visits.",
-    empty: "Nothing pending — every request is handled",
-    statuses: ["PENDING", "UNASSIGNED", "SCHEDULED"],
-    dot: "bg-brand-orange",
-    accent: "border-t-brand-orange",
-    badge: "bg-brand-orange/15 text-brand-orange-dark",
-  },
-  {
-    id: "IN_PROGRESS",
-    label: "In Progress",
-    hint: "The technician is on the job — quoting, waiting on the customer's approval, or repairing.",
-    empty: "No jobs in progress",
-    statuses: ["ESTIMATE_PENDING", "IN_PROGRESS"],
-    dot: "bg-brand-blue",
-    accent: "border-t-brand-blue",
-    badge: "bg-brand-blue/15 text-brand-blue",
-  },
-  {
-    id: "COMPLETED",
-    label: "Completed",
-    hint: "Work is done — review the proof and approve it, then mark it paid.",
-    empty: "No completed jobs yet",
-    statuses: ["COMPLETED", "APPROVED"],
-    dot: "bg-brand-emerald",
-    accent: "border-t-brand-emerald",
-    badge: "bg-brand-emerald/15 text-brand-emerald-dark",
-  },
-  {
-    id: "FLAGGED",
-    label: "Flagged",
-    hint: "Needs a closer look — disputes raised by the customer and cancelled jobs.",
-    empty: "Nothing flagged",
-    statuses: ["DISPUTED", "CANCELLED"],
-    dot: "bg-red-500",
-    accent: "border-t-red-500",
-    badge: "bg-red-500/15 text-red-600",
-  },
-];
-
-export const FILTER_BY_ID = new Map(FILTERS.map((filter) => [filter.id, filter]));

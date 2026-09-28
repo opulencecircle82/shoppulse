@@ -10,7 +10,8 @@ import { useStaffMembers } from "@/lib/hooks/useStaffMembers";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket } from "@/lib/supabase/types";
 import DashboardHomeTab from "@/components/dashboard/DashboardHomeTab";
-import KanbanBoard from "@/components/dashboard/KanbanBoard";
+import JobMasterTable from "@/components/dashboard/JobMasterTable";
+import { jobFilterOf, type JobFilterId } from "@/lib/dashboard/jobStatus";
 import NewJobTicketModal from "@/components/dashboard/NewJobTicketModal";
 import InvoiceGeneratorModal from "@/components/dashboard/InvoiceGeneratorModal";
 import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
@@ -36,11 +37,11 @@ import DashboardSidebarNav, {
 // instead of taking up header space on every visit.
 const TAB_HELP: Partial<Record<DashboardTabId, string>> = {
   board:
-    "Use the tabs to filter your jobs: Pending (new requests, jobs that need a technician, scheduled visits), In Progress (the technician is quoting or repairing), Completed (review the proof, approve, mark paid) and Flagged (disputes and cancellations). A red dot on a tab means something in it is waiting for you. Each job card has a progress bar showing its exact step — Booking Requests → Unassigned → Scheduled → Awaiting Quote Approval → In Progress → Completed → Approved.",
+    "Filter your jobs with the tabs: All Jobs, Pending (new requests, jobs that need a technician, technician not yet confirmed), In Progress (technician preparing, on the way, on site or working), Disputed and Completed. A red dot on a tab means a job in it is waiting for you. Each row shows the technician's live status — for example \"Juan - En Route\" — and refreshes by itself every few seconds. Use Manage Job for payment, invoice and products.",
 };
 
 const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
-  board: "Track every job from booking request to approved payment.",
+  board: "Every job in one list — who's on it, where they are and what stage it's at.",
   proof: "Review photo proof from completed jobs before approving payment.",
   staff: "Add your team, manage their mobile app logins, and see who's active.",
   services: "List what you offer and track the parts and inventory you use.",
@@ -68,8 +69,9 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<DashboardTabId>("home");
   const [showNewTicket, setShowNewTicket] = useState(false);
-  // Bumped to send the job board back to the tab that needs the owner.
-  const [boardKey, setBoardKey] = useState(0);
+  // Which tab of the job board is open. It lives here (not in the board) so a
+  // booking popup or a notification can send the owner straight to the right one.
+  const [boardFilter, setBoardFilter] = useState<JobFilterId>("ALL");
   const [mapCollapsed, setMapCollapsed] = useState(() => {
     try {
       return typeof window !== "undefined" && window.localStorage.getItem(MAP_COLLAPSED_KEY) === "1";
@@ -196,6 +198,7 @@ export default function DashboardPage() {
                   if (ticket.status === "COMPLETED" || ticket.status === "DISPUTED") {
                     setProofTicket(ticket);
                   } else {
+                    setBoardFilter(jobFilterOf(ticket) ?? "ALL");
                     setActiveTab("board");
                   }
                 }}
@@ -313,12 +316,13 @@ export default function DashboardPage() {
                 {boardLoading && <p className="text-sm text-slate-500">Loading job board...</p>}
 
                 {!boardLoading && (
-                  <KanbanBoard
-                    key={boardKey}
+                  <JobMasterTable
                     shop={shop}
                     tickets={tickets}
                     staff={staff}
                     currentStaffId={staffMember?.id ?? null}
+                    filter={boardFilter}
+                    onFilterChange={setBoardFilter}
                     onChanged={refreshTickets}
                     onOpenInvoice={setInvoiceTicket}
                     onOpenProofDrawer={setProofTicket}
@@ -400,8 +404,8 @@ export default function DashboardPage() {
           tickets={tickets}
           onNewBooking={refreshTickets}
           onOpenBooking={() => {
+            setBoardFilter("PENDING");
             setActiveTab("board");
-            setBoardKey((key) => key + 1);
             refreshTickets();
           }}
         />

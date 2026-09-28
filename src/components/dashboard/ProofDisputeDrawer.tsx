@@ -158,6 +158,9 @@ export default function ProofDisputeDrawer({
     0
   );
   const hasBothProofs = ticket.start_photo_url !== null && ticket.end_photo_url !== null;
+  // The proof pack can be opened for any job that has photos, but only a
+  // finished (or disputed) one can be approved or rejected from here.
+  const canDecide = ticket.status === "COMPLETED" || ticket.status === "DISPUTED";
   const geofenceBreached =
     (ticket.start_geofence_distance_m !== null &&
       ticket.start_geofence_distance_m > shop.geofence_radius_meters) ||
@@ -418,48 +421,56 @@ export default function ProofDisputeDrawer({
 
         <ActivityLog ticketId={ticket.id} />
 
-        <div className="mt-5">
-          <label className="block text-xs font-medium text-slate-500">
-            Dispute Notes
-          </label>
-          <textarea
-            rows={3}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="What did the client say was wrong with this job?"
-            className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-          />
-        </div>
+        {canDecide ? (
+          <>
+          <div className="mt-5">
+            <label className="block text-xs font-medium text-slate-500">
+              Dispute Notes
+            </label>
+            <textarea
+              rows={3}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="What did the client say was wrong with this job?"
+              className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
 
-        {error && (
-          <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
-            {error}
-          </p>
-        )}
-
-        <div className="mt-6 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={handleApprove}
-            disabled={saving !== null}
-            className="w-full rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving === "approve" ? "Approving..." : "Approve & Invoice"}
-          </button>
-          <button
-            type="button"
-            onClick={handleReject}
-            disabled={saving !== null || !notes.trim()}
-            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving === "reject" ? "Rejecting..." : "Reject Dispute"}
-          </button>
-          {!notes.trim() && (
-            <p className="text-center text-xs text-slate-500">
-              Add dispute notes above to reject this job.
+          {error && (
+            <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
+              {error}
             </p>
           )}
-        </div>
+
+          <div className="mt-6 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={handleApprove}
+              disabled={saving !== null}
+              className="w-full rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-brand-slate shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-shadow hover:shadow-[0_0_30px_rgba(16,185,129,0.75)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving === "approve" ? "Approving..." : "Approve & Invoice"}
+            </button>
+            <button
+              type="button"
+              onClick={handleReject}
+              disabled={saving !== null || !notes.trim()}
+              className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving === "reject" ? "Rejecting..." : "Reject Dispute"}
+            </button>
+            {!notes.trim() && (
+              <p className="text-center text-xs text-slate-500">
+                Add dispute notes above to reject this job.
+              </p>
+            )}
+          </div>
+          </>
+        ) : (
+          <p className="mt-6 rounded-xl bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">
+            View only — this job can be approved once the technician submits the completion proof.
+          </p>
+        )}
       </div>
     </div>
   );
