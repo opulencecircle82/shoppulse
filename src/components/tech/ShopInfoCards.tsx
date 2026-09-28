@@ -1,3 +1,4 @@
+import { guardExternalLink } from "@/lib/tech/externalLinks";
 import { ClipboardCheck, Megaphone, Phone } from "lucide-react";
 import type { Shop } from "@/lib/supabase/types";
 
@@ -53,6 +54,7 @@ export function HomeInfo({ shop }: { shop: ShopInfo }) {
       {phone && (
         <a
           href={`tel:${phone}`}
+          onClick={guardExternalLink}
           className="flex items-center justify-between gap-3 rounded-2xl bg-white/5 px-4 py-3"
         >
           <span className="min-w-0">
@@ -90,6 +92,7 @@ export function JobReminder({ shop }: { shop: ShopInfo }) {
       {phone && (
         <a
           href={`tel:${phone}`}
+          onClick={guardExternalLink}
           className="inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-3.5 py-1.5 text-xs font-semibold text-brand-emerald"
         >
           <Phone className="h-3.5 w-3.5" /> Call the office · {phone}

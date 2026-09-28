@@ -33,6 +33,7 @@ import TechNotificationBell from "./TechNotificationBell";
 import TicketNumber from "@/components/ui/TicketNumber";
 import { HomeInfo } from "./ShopInfoCards";
 import { formatJobNumber } from "@/lib/jobNumber";
+import { guardExternalLink } from "@/lib/tech/externalLinks";
 
 const EMERGENCY_POLL_MS = 15000;
 
@@ -468,12 +469,14 @@ export default function TechHomeScreen({
                     <div className="flex shrink-0 gap-1.5">
                       <a
                         href={`tel:${task.client_phone}`}
+                        onClick={guardExternalLink}
                         className="flex items-center gap-1 rounded-full bg-brand-emerald/15 px-3 py-1.5 text-xs font-semibold text-brand-emerald"
                       >
                         <Phone className="h-3 w-3" /> Call
                       </a>
                       <a
                         href={`sms:${task.client_phone}`}
+                        onClick={guardExternalLink}
                         className="flex items-center gap-1 rounded-full bg-brand-blue/15 px-3 py-1.5 text-xs font-semibold text-brand-blue"
                       >
                         <MessageSquare className="h-3 w-3" /> Text
@@ -493,7 +496,10 @@ export default function TechHomeScreen({
                     href={mapsUrl(task.service_address)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={handleOnMyWay}
+                    onClick={(event) => {
+                      guardExternalLink(event);
+                      handleOnMyWay();
+                    }}
                     className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-emerald to-brand-emerald-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]"
                   >
                     <NavigationIcon className="h-4 w-4" /> I&apos;m On My Way
@@ -523,6 +529,7 @@ export default function TechHomeScreen({
                     href={mapsUrl(task.service_address)}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={guardExternalLink}
                     className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-brand-sky"
                   >
                     <NavigationIcon className="h-3.5 w-3.5" /> Open navigation again

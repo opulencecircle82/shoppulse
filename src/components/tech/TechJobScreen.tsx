@@ -1,5 +1,6 @@
 "use client";
 
+import { guardExternalLink } from "@/lib/tech/externalLinks";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { MapPin, ShieldCheck, ShieldAlert } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
@@ -298,6 +299,7 @@ export default function TechJobScreen({
           href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={guardExternalLink}
           className="flex items-center gap-1.5 rounded-full border border-brand-blue/40 px-3.5 py-1.5 text-xs font-semibold text-brand-blue"
         >
           <MapPin className="h-3.5 w-3.5" /> Go to Maps

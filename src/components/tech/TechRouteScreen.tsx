@@ -1,6 +1,7 @@
 "use client";
 
 import { formatJobNumber } from "@/lib/jobNumber";
+import { guardExternalLink } from "@/lib/tech/externalLinks";
 import { MapPin, Navigation as NavigationIcon } from "lucide-react";
 import type { JobTicket } from "@/lib/supabase/types";
 
@@ -84,7 +85,10 @@ export default function TechRouteScreen({
                   href={mapsUrl(stop.service_address)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    guardExternalLink(e);
+                  }}
                   className="flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full bg-brand-blue/15 text-brand-blue"
                   aria-label="Navigate"
                 >
