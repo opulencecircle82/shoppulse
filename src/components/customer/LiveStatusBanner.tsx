@@ -128,11 +128,19 @@ function Banner({
         cta = "Pay Now";
       }
       break;
-    case "REVIEW":
+    case "REVIEW": {
+      // Says only what is still left to do: pay, rate, or both.
+      const owes = paymentDue(job);
+      const rated = Boolean(job.customer_reviewed_at);
       headline = "Your job is complete";
-      subline = "Review the proof, pay and rate the service.";
-      cta = "Review & Pay";
+      subline = owes
+        ? rated
+          ? "Review the proof and pay for the service."
+          : "Review the proof, pay and rate the service."
+        : "Review the proof and rate the service.";
+      cta = owes ? "Review & Pay" : "Review & Rate";
       break;
+    }
     case "PREPARING":
       headline = `${name} confirmed your job`;
       subline = "Getting ready to head to you.";

@@ -40,7 +40,15 @@ export const PIPELINE: { id: PipelineStageId; label: string; empty: string }[] =
 // receipt and the rating are easy to find, then moves to Past bookings.
 const RECENT_JOB_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** The pipeline stage a booking sits in, or null for past bookings (cancelled, declined, old). */
+/** A finished job with nothing left for the customer to do: they have rated it and there is nothing to pay. */
+function isWrappedUp(job: JobTicket): boolean {
+  return Boolean(job.customer_reviewed_at) && !paymentDue(job);
+}
+
+/**
+ * The pipeline stage a booking sits in, or null for past bookings (cancelled, declined, old — and finished jobs the
+ * customer has already rated and paid, so "To Review / Complete" and its counter only hold what still needs them).
+ */
 export function pipelineStageOf(job: JobTicket): PipelineStageId | null {
   switch (job.status) {
     case "PENDING":
@@ -52,9 +60,11 @@ export function pipelineStageOf(job: JobTicket): PipelineStageId | null {
     case "IN_PROGRESS":
       return "IN_PROGRESS";
     case "COMPLETED":
+      return isWrappedUp(job) ? null : "REVIEW";
     case "DISPUTED":
       return "REVIEW";
     case "APPROVED": {
+      if (isWrappedUp(job)) return null;
       const finishedAt = Date.parse(job.completed_at ?? job.created_at);
       return Date.now() - finishedAt < RECENT_JOB_MS ? "REVIEW" : null;
     }
@@ -163,20 +173,26 @@ export function customerJobStatus(job: JobTicket): CustomerJobStatus {
     }
     case "COMPLETED": {
       const settled = job.payment_status === "PAID" || Boolean(job.invoice_paid_at);
+      const rated = Boolean(job.customer_reviewed_at);
       return {
-        label: settled ? "Completed — please rate it" : "Completed — review & pay",
+        label: settled
+          ? rated
+            ? "Completed — thanks for rating"
+            : "Completed — please rate it"
+          : "Completed — review & pay",
         tone: "blue",
         detail: job.completed_at ? `Finished ${timeAgo(job.completed_at)}` : null,
-        action: settled ? "Review & Rate" : "Review & Pay",
+        action: settled ? (rated ? "View Details" : "Review & Rate") : "Review & Pay",
       };
     }
     case "APPROVED": {
       const settled = job.payment_status === "PAID" || Boolean(job.invoice_paid_at);
+      const rated = Boolean(job.customer_reviewed_at);
       return {
         label: settled ? "Paid — thank you" : "Approved — payment due",
         tone: settled ? "emerald" : "blue",
         detail: job.completed_at ? `Finished ${timeAgo(job.completed_at)}` : null,
-        action: settled ? "View Receipt" : "Pay & Rate",
+        action: settled ? (rated ? "View Receipt" : "Rate & View Receipt") : rated ? "Pay Now" : "Pay & Rate",
       };
     }
     case "DISPUTED":
@@ -319,7 +335,8 @@ function bannerKindOf(job: JobTicket): BannerKind | null {
     case "IN_PROGRESS":
       return "WORKING";
     case "COMPLETED":
-      return "REVIEW";
+      // Once it is rated and paid there is nothing left to ask the customer for.
+      return isWrappedUp(job) ? null : "REVIEW";
     default:
       return null;
   }

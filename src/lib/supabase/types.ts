@@ -149,6 +149,8 @@ export type JobTicket = {
   is_emergency: boolean;
   /** An emergency that came in while the shop was closed and had a night shift — the night shift's to answer. */
   after_hours: boolean;
+  /** When the customer rated the finished job (set by the database when the review is saved). */
+  customer_reviewed_at: string | null;
   booking_latitude: number | null;
   booking_longitude: number | null;
   cancelled_at: string | null;
