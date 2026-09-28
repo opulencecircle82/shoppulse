@@ -1,7 +1,7 @@
 /** Proof photos are shrunk on the phone before they are uploaded: a camera photo is several megabytes,
- * this keeps them around 100–200 KB — still plenty to see the work — so the server holds far less. */
-const PROOF_MAX_EDGE = 1280;
-const PROOF_JPEG_QUALITY = 0.72;
+ * this keeps them around 80–120 KB — still plenty to see the work, and quick to send on a weak signal. */
+const PROOF_MAX_EDGE = 1024;
+const PROOF_JPEG_QUALITY = 0.68;
 
 /**
  * Fetches the logo as a bitmap. Returns null when it can't be loaded (offline,

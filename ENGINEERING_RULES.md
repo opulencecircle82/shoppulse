@@ -41,6 +41,8 @@ that enum, don't invent a parallel one.
 
 - **Photos are shrunk before upload and leave the server on a schedule.** Any new image upload goes through `compressImage()` (or `renderWatermarkedPhoto` for proof photos) first. A photo tied to a job is registered in `job_photos` (address code + SHA-256 fingerprint) by the trigger on `job_tickets`; if a new job-photo column is added, extend `register_job_photos_on_insert/update` and `mark_photo_purged` with it. Files are removed only by `/api/cron/purge-photos` through the Storage API — never delete from `storage.objects` with SQL (the file would stay behind).
 
+- **Field actions must survive no signal.** A technician submission that carries a photo goes through `lib/tech/proofOutbox.ts`: build everything on the phone first, try to send, and on a network failure (`isOfflineError`) keep it and let `useProofOutbox` send it later, with a status guard so a stale proof can't move a job backwards. A new field submission should follow the same save-then-send-when-online pattern.
+
 ## Code quality
 
 - **Zero placeholder logic.** No `// TODO`, no mock/fake data standing in

@@ -2,17 +2,20 @@
 
 import { guardExternalLink } from "@/lib/tech/externalLinks";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { MapPin, ShieldCheck, ShieldAlert } from "lucide-react";
+import { CloudUpload, MapPin, ShieldCheck, ShieldAlert } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { getCurrentPosition, haversineDistanceMeters } from "@/lib/tech/gps";
-import { uploadJobPhoto, uploadSignature } from "@/lib/tech/uploadJobPhoto";
 import { renderWatermarkedPhoto, sha256Hex } from "@/lib/tech/photoProof";
+import { submitEstimate, fetchTicketLive } from "@/lib/tech/jobActions";
 import {
-  submitStartProof,
-  submitCompletionProof,
-  submitEstimate,
-  fetchTicketLive,
-} from "@/lib/tech/jobActions";
+  isOfflineError,
+  loadPendingProofs,
+  newPendingProof,
+  savePendingProof,
+  sendProof,
+  subscribeOutbox,
+  type PendingProof,
+} from "@/lib/tech/proofOutbox";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 import SignaturePad from "@/components/shared/SignaturePad";
 import TicketNumber from "@/components/ui/TicketNumber";
@@ -61,6 +64,8 @@ export default function TechJobScreen({
   const [capturing, setCapturing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [synced, setSynced] = useState(false);
+  // Set while this job's proof is saved on the phone waiting for signal (see proofOutbox.ts).
+  const [queuedKey, setQueuedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputId = useId();
 
@@ -117,6 +122,39 @@ export default function TechJobScreen({
       stopRealtime();
     };
   }, [listening, refreshLive, ticket.id]);
+
+  // Proof for this job may already be waiting on the phone (submitted earlier without signal). When it goes
+  // through — the outbox sends it by itself — leave for the job list, which reloads with the new stage.
+  const onSubmittedRef = useRef(onSubmitted);
+  const wasWaitingRef = useRef(false);
+  useEffect(() => {
+    onSubmittedRef.current = onSubmitted;
+  }, [onSubmitted]);
+  useEffect(() => {
+    if (preview) return;
+    let active = true;
+    const check = () => {
+      loadPendingProofs()
+        .then((all) => {
+          if (!active) return;
+          const waiting = all.find((proof) => proof.ticketId === ticket.id);
+          setQueuedKey(waiting?.key ?? null);
+          if (waiting) wasWaitingRef.current = true;
+          else if (wasWaitingRef.current) {
+            wasWaitingRef.current = false;
+            onSubmittedRef.current();
+          }
+        })
+        .catch(() => undefined);
+    };
+    const first = setTimeout(check, 0);
+    const stop = subscribeOutbox(check);
+    return () => {
+      active = false;
+      clearTimeout(first);
+      stop();
+    };
+  }, [preview, ticket.id]);
 
   // When payment lands, bring the signature pad into view.
   useEffect(() => {
@@ -230,48 +268,45 @@ export default function TechJobScreen({
     setSubmitting(true);
     setError(null);
 
+    // Prepared on the phone first (nothing here needs signal), so if the send below fails for lack of signal
+    // it is all still there to keep and send later.
+    let proof: PendingProof | null = null;
     try {
-      let photoUrl: string | null = null;
+      const capturedAt = new Date();
+      let photo: Blob | null = null;
       let photoHash: string | null = null;
       if (capturedFile && position) {
-        const watermarked = await renderWatermarkedPhoto(capturedFile, {
+        photo = await renderWatermarkedPhoto(capturedFile, {
           shopName: shop.shop_name,
           logoUrl: shop.logo_url,
           showLogo: shop.watermark_show_logo,
           showTimestamp: shop.watermark_show_timestamp,
           showGps: shop.watermark_show_gps,
-          timestamp: new Date(),
+          timestamp: capturedAt,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
-        photoHash = await sha256Hex(watermarked);
-        photoUrl = await uploadJobPhoto(shop.id, ticket.id, watermarked);
+        photoHash = await sha256Hex(photo);
       }
-      const latitude = position?.coords.latitude ?? null;
-      const longitude = position?.coords.longitude ?? null;
+      proof = newPendingProof({
+        ticketId: ticket.id,
+        shopId: shop.id,
+        staffId: ticket.assigned_staff_id ?? "",
+        jobNumber: ticket.job_number,
+        stage: isStartStage ? "START" : "COMPLETE",
+        photo,
+        photoHash,
+        signatureDataUrl: isStartStage ? null : signatureDataUrl,
+        geofenceDistanceM,
+        latitude: position?.coords.latitude ?? null,
+        longitude: position?.coords.longitude ?? null,
+        capturedAt,
+      });
 
-      if (isStartStage) {
-        await submitStartProof({
-          ticketId: ticket.id,
-          photoUrl,
-          photoHash,
-          geofenceDistanceM,
-          latitude,
-          longitude,
-        });
-      } else {
-        const signatureUrl = signatureDataUrl
-          ? await uploadSignature(shop.id, ticket.id, signatureDataUrl)
-          : null;
-        await submitCompletionProof({
-          ticketId: ticket.id,
-          photoUrl,
-          photoHash,
-          geofenceDistanceM,
-          latitude,
-          longitude,
-          signatureUrl,
-        });
+      if ((await sendProof(proof)) === "skipped") {
+        setError("This job was changed by someone else (cancelled or already updated). Go back to refresh it.");
+        setSubmitting(false);
+        return;
       }
 
       setSynced(true);
@@ -280,6 +315,13 @@ export default function TechJobScreen({
       // already opened the next job and pull them out of it.
       if (isStartStage) setTimeout(onSubmitted, 900);
     } catch (e) {
+      // No signal: keep the proof on the phone — it goes out by itself when the phone is back online.
+      if (proof && isOfflineError(e) && (await savePendingProof(proof))) {
+        setQueuedKey(proof.key);
+        setSubmitting(false);
+        if (isStartStage) setTimeout(onSubmitted, 1500);
+        return;
+      }
       setError(e instanceof Error ? e.message : "Submission failed.");
       setSubmitting(false);
     }
@@ -730,7 +772,26 @@ export default function TechJobScreen({
               </p>
             )}
 
-            {synced ? (
+            {queuedKey && !synced ? (
+              <div className="mt-6 space-y-3">
+                <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
+                  <p className="flex items-center gap-2 text-sm font-bold text-white">
+                    <CloudUpload className="h-4 w-4 text-amber-300" /> Saved on your phone
+                  </p>
+                  <p className="mt-1 text-xs text-slate-300">
+                    There&apos;s no signal right now. Your photo, location and time are kept, and they are sent
+                    automatically as soon as you&apos;re online — you don&apos;t need to do anything.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onSubmitted}
+                  className="w-full rounded-full border border-white/20 px-6 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-white/5"
+                >
+                  Back to my jobs
+                </button>
+              </div>
+            ) : synced ? (
               isStartStage ? (
                 <div className="mt-6 flex items-center justify-center gap-2 rounded-full bg-brand-emerald/15 px-6 py-3.5 text-sm font-bold text-brand-emerald">
                   <ShieldCheck className="h-4 w-4" /> Proof Synced to Owner Dashboard

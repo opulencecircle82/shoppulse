@@ -74,6 +74,11 @@ export async function fetchAssignedJobs(staffId: string): Promise<JobTicket[]> {
   return (data ?? []) as JobTicket[];
 }
 
+/**
+ * Records the start proof. `capturedAt` is when the technician actually took it (a proof sent late from a dead
+ * zone keeps its real time). `onlyIfStatus` makes the write a no-op when the job has moved on — cancelled by the
+ * customer, or already started — so an old proof can never push it backwards. Returns whether it was applied.
+ */
 export async function submitStartProof(params: {
   ticketId: string;
   photoUrl: string | null;
@@ -81,26 +86,31 @@ export async function submitStartProof(params: {
   geofenceDistanceM: number | null;
   latitude: number | null;
   longitude: number | null;
-}) {
+  capturedAt?: string;
+  onlyIfStatus?: string;
+}): Promise<boolean> {
   // Arrival no longer drops straight into IN_PROGRESS — the technician
   // has to diagnose and submit a quote first, which the client must
   // approve before real work (and billable time) begins.
-  const { error } = await supabase
+  let query = supabase
     .from("job_tickets")
     .update({
       status: "ESTIMATE_PENDING",
       start_photo_url: params.photoUrl,
       start_photo_hash: params.photoHash,
       start_geofence_distance_m: params.geofenceDistanceM,
-      started_at: new Date().toISOString(),
+      started_at: params.capturedAt ?? new Date().toISOString(),
       start_gps_location:
         params.latitude !== null && params.longitude !== null
           ? toGeographyPoint(params.latitude, params.longitude)
           : null,
     })
     .eq("id", params.ticketId);
+  if (params.onlyIfStatus) query = query.eq("status", params.onlyIfStatus);
 
+  const { data, error } = await query.select("id");
   if (error) throw error;
+  return (data?.length ?? 0) > 0;
 }
 
 export async function submitEstimate(params: {
@@ -157,6 +167,7 @@ export async function fetchTicketLive(ticketId: string): Promise<{
   };
 }
 
+/** Same as `submitStartProof`, for finishing the job. Returns whether it was applied. */
 export async function submitCompletionProof(params: {
   ticketId: string;
   photoUrl: string | null;
@@ -165,15 +176,17 @@ export async function submitCompletionProof(params: {
   latitude: number | null;
   longitude: number | null;
   signatureUrl: string | null;
-}) {
-  const { error } = await supabase
+  capturedAt?: string;
+  onlyIfStatus?: string;
+}): Promise<boolean> {
+  let query = supabase
     .from("job_tickets")
     .update({
       status: "COMPLETED",
       end_photo_url: params.photoUrl,
       end_photo_hash: params.photoHash,
       end_geofence_distance_m: params.geofenceDistanceM,
-      completed_at: new Date().toISOString(),
+      completed_at: params.capturedAt ?? new Date().toISOString(),
       end_gps_location:
         params.latitude !== null && params.longitude !== null
           ? toGeographyPoint(params.latitude, params.longitude)
@@ -181,6 +194,9 @@ export async function submitCompletionProof(params: {
       signature_url: params.signatureUrl,
     })
     .eq("id", params.ticketId);
+  if (params.onlyIfStatus) query = query.eq("status", params.onlyIfStatus);
 
+  const { data, error } = await query.select("id");
   if (error) throw error;
+  return (data?.length ?? 0) > 0;
 }

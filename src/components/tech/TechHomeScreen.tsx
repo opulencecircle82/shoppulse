@@ -15,6 +15,7 @@ import {
   Wrench,
   Quote,
   Clock,
+  CloudUpload,
   Moon,
   XCircle,
 } from "lucide-react";
@@ -36,6 +37,7 @@ import { HomeInfo } from "./ShopInfoCards";
 import { formatJobNumber } from "@/lib/jobNumber";
 import { keepsTechnicianBusy } from "@/lib/dashboard/techBusy";
 import { guardExternalLink } from "@/lib/tech/externalLinks";
+import type { PendingProof } from "@/lib/tech/proofOutbox";
 
 const EMERGENCY_POLL_MS = 15000;
 
@@ -54,6 +56,10 @@ export default function TechHomeScreen({
   onOpenMessages,
   onRefresh,
   cancelledJob = null,
+  pendingProofs = [],
+  outboxNotice = null,
+  onDismissOutboxNotice,
+  onRetryProofs,
   preview = false,
 }: {
   shop: Shop;
@@ -67,6 +73,12 @@ export default function TechHomeScreen({
   onRefresh: () => void;
   /** A job the technician had set off for that the customer has since cancelled. */
   cancelledJob?: JobTicket | null;
+  /** Proof saved on the phone while there was no signal; it sends itself when the phone is back online. */
+  pendingProofs?: PendingProof[];
+  /** Said once when a saved proof was dropped because its job had changed in the meantime. */
+  outboxNotice?: string | null;
+  onDismissOutboxNotice?: () => void;
+  onRetryProofs?: () => void;
   /** The App Builder shows this real screen with sample data: no polling, no chimes, nothing live. */
   preview?: boolean;
 }) {
@@ -181,6 +193,7 @@ export default function TechHomeScreen({
       .finally(onRefresh);
   }
 
+  const waitingProof = task ? (pendingProofs.find((proof) => proof.ticketId === task.id) ?? null) : null;
   const isInProgress = task?.status === "IN_PROGRESS";
   // Still on (or heading to) a job: another one can't be claimed until it is finished.
   const stillWorkingOn = task && keepsTechnicianBusy(task) ? formatJobNumber(task.job_number, task.id) : null;
@@ -392,6 +405,21 @@ export default function TechHomeScreen({
               </div>
             )}
 
+            {outboxNotice && (
+              <div className="mt-6 flex items-start justify-between gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4">
+                <p className="text-xs text-slate-200">{outboxNotice}</p>
+                {onDismissOutboxNotice && (
+                  <button
+                    type="button"
+                    onClick={onDismissOutboxNotice}
+                    className="shrink-0 text-xs font-bold text-amber-300"
+                  >
+                    OK
+                  </button>
+                )}
+              </div>
+            )}
+
             <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Active Task
             </p>
@@ -537,6 +565,30 @@ export default function TechHomeScreen({
                   {task.service_address}
                 </p>
 
+                {waitingProof ? (
+                  <div className="mt-3 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3.5">
+                    <p className="flex items-center gap-2 text-sm font-bold text-white">
+                      <CloudUpload className="h-4 w-4 text-amber-300" />
+                      {waitingProof.stage === "START" ? "Start proof" : "Completion proof"} saved on your phone
+                    </p>
+                    <p className="mt-1 text-xs text-slate-300">
+                      It is sent automatically as soon as you have signal — you don&apos;t need to do anything.
+                    </p>
+                    {waitingProof.lastError && (
+                      <p className="mt-1 text-xs text-red-300">Couldn&apos;t send yet: {waitingProof.lastError}</p>
+                    )}
+                    {onRetryProofs && (
+                      <button
+                        type="button"
+                        onClick={onRetryProofs}
+                        className="mt-2.5 rounded-full border border-amber-300/40 px-3.5 py-1.5 text-xs font-bold text-amber-200"
+                      >
+                        Send now
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <>
                 {/* One button at a time, following the job: leave -> arrive -> finish. */}
                 {task.status === "SCHEDULED" && !task.en_route_at ? (
                   <a
@@ -581,6 +633,8 @@ export default function TechHomeScreen({
                   >
                     <NavigationIcon className="h-3.5 w-3.5" /> Open navigation again
                   </a>
+                )}
+                  </>
                 )}
               </div>
             )}

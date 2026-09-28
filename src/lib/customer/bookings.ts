@@ -198,7 +198,7 @@ export async function uploadCustomerPhoto(
   // Receipts are mostly text, so they keep a little more detail.
   const body = await compressImage(
     file,
-    folder === "receipts" ? { maxEdge: 1600, quality: 0.8 } : { maxEdge: 1280, quality: 0.72 }
+    folder === "receipts" ? { maxEdge: 1280, quality: 0.75 } : { maxEdge: 1024, quality: 0.68 }
   );
   const shrunk = body !== file;
   const extension = shrunk ? "jpg" : (file.name.split(".").pop() ?? "jpg");

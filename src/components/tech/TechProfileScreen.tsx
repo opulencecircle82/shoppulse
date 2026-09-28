@@ -5,6 +5,7 @@ import { Camera, LogOut, Mail, Phone, Store } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
 import { uploadStaffAvatar, type StaffContext } from "@/lib/tech/staffContext";
+import { loadPendingProofs } from "@/lib/tech/proofOutbox";
 
 export default function TechProfileScreen({
   shop,
@@ -21,6 +22,20 @@ export default function TechProfileScreen({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSignOut() {
+    // Proof saved for lack of signal is only sent while this technician is signed in on this phone.
+    const waiting = await loadPendingProofs(staffContext.staffId).catch(() => []);
+    if (
+      waiting.length > 0 &&
+      !window.confirm(
+        `You have ${waiting.length} proof${waiting.length === 1 ? "" : "s"} saved on this phone that ${
+          waiting.length === 1 ? "hasn't" : "haven't"
+        } been sent yet. If you sign out now, ${
+          waiting.length === 1 ? "it" : "they"
+        } will only be sent once you sign in again on this phone. Sign out anyway?`
+      )
+    ) {
+      return;
+    }
     await supabase.auth.signOut();
     onSignedOut();
   }

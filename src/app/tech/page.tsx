@@ -24,6 +24,7 @@ import TechProfileScreen from "@/components/tech/TechProfileScreen";
 import TechBottomNav, { type TechTab } from "@/components/tech/TechBottomNav";
 import { useAppTheme } from "@/lib/hooks/useAppTheme";
 import { useAppBranding } from "@/lib/hooks/useAppBranding";
+import { useProofOutbox } from "@/lib/hooks/useProofOutbox";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
 type Screen = "loading" | "login" | "tab" | "job" | "messages";
@@ -163,6 +164,15 @@ export default function TechAppPage() {
     };
   }, [screen, staffContext, loadHome]);
 
+  // Proof saved on the phone while there was no signal is sent by itself once the phone is online again;
+  // the job list reloads when something went through.
+  const proofOutbox = useProofOutbox({
+    staffId: staffContext?.staffId ?? null,
+    onSent: () => {
+      if (staffContext) loadHome(staffContext);
+    },
+  });
+
   function openTask(ticket: JobTicket) {
     setSelectedTicket(ticket);
     setScreen("job");
@@ -222,6 +232,10 @@ export default function TechAppPage() {
             onOpenTask={openTask}
             onOpenMessages={() => setScreen("messages")}
             cancelledJob={recentEnRouteCancellation(allTickets)}
+            pendingProofs={proofOutbox.pending}
+            outboxNotice={proofOutbox.notice}
+            onDismissOutboxNotice={proofOutbox.dismissNotice}
+            onRetryProofs={proofOutbox.sendNow}
             onOpenTicket={(ticketId) => {
               const ticket = allTickets.find((t) => t.id === ticketId);
               if (
