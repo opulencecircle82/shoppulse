@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/shared/imageCompress";
 import type { JobTicket } from "@/lib/supabase/types";
 
 /** RLS (client_email = current_customer_email()) scopes this to the
@@ -193,14 +194,21 @@ export async function uploadCustomerPhoto(
   folder: "requests" | "reviews" | "receipts",
   file: File
 ): Promise<string> {
-  const extension = file.name.split(".").pop() ?? "jpg";
+  // Shrunk on the phone first — a camera photo is several megabytes, the server only needs to show it.
+  // Receipts are mostly text, so they keep a little more detail.
+  const body = await compressImage(
+    file,
+    folder === "receipts" ? { maxEdge: 1600, quality: 0.8 } : { maxEdge: 1280, quality: 0.72 }
+  );
+  const shrunk = body !== file;
+  const extension = shrunk ? "jpg" : (file.name.split(".").pop() ?? "jpg");
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
 
   const bucket = folder === "receipts" ? "payment-receipts" : "job-photos";
 
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(path, file, { contentType: file.type || "image/jpeg" });
+    .upload(path, body, { contentType: shrunk ? "image/jpeg" : file.type || "image/jpeg" });
 
   if (error) throw error;
 

@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ShieldCheck, ChevronDown, ChevronUp, History } from "lucide-react";
+import { useEffect, useId, useState, type ChangeEvent } from "react";
+import { ShieldCheck, ChevronDown, ChevronUp, History, Download, ScanSearch } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
+import {
+  PHOTO_RETENTION_DAYS,
+  checkPhotoCopy,
+  fetchJobPhotos,
+  savePhotoCopy,
+  type CopyCheck,
+} from "@/lib/dashboard/jobPhotos";
+import { formatJobNumber } from "@/lib/jobNumber";
+import type { JobPhoto, JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 
 type JobTicketLog = {
   id: string;
@@ -79,10 +87,18 @@ function ActivityLog({ ticketId }: { ticketId: string }) {
   );
 }
 
+const COPY_CHECK_TEXT: Record<CopyCheck, { text: string; tone: string }> = {
+  MATCH: { text: "This file is the original — its fingerprint matches.", tone: "text-brand-emerald-dark" },
+  DIFFERENT: { text: "This is NOT the original — the fingerprint does not match.", tone: "text-red-600" },
+  NO_FINGERPRINT: { text: "No fingerprint was recorded for this older photo, so it can't be checked.", tone: "text-slate-500" },
+};
+
 function ProofPhoto({
   label,
   url,
   hash,
+  photo,
+  saveName,
   distanceM,
   geofenceRadiusM,
   geofenceEnforced,
@@ -91,11 +107,41 @@ function ProofPhoto({
   label: string;
   url: string | null;
   hash: string | null;
+  /** The photo's registry row: its address (code) and fingerprint, which stay after the file is removed. */
+  photo: JobPhoto | null;
+  saveName: string;
   distanceM: number | null;
   geofenceRadiusM: number;
   geofenceEnforced: boolean;
   photoOptional: boolean;
 }) {
+  const checkInputId = useId();
+  const [saving, setSaving] = useState(false);
+  const [checkResult, setCheckResult] = useState<CopyCheck | null>(null);
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const removed = !url && photo?.purged_at;
+  const fingerprint = photo?.sha256 ?? hash;
+
+  async function handleSave() {
+    if (!url) return;
+    setSaving(true);
+    await savePhotoCopy(url, saveName);
+    setSaving(false);
+  }
+
+  async function handleCheck(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !photo) return;
+    setCheckError(null);
+    try {
+      setCheckResult(await checkPhotoCopy(file, photo));
+    } catch {
+      setCheckResult(null);
+      setCheckError("Couldn't read that file. Try again.");
+    }
+  }
+
   // The GPS/timestamp/logo badges are burned into the photo's pixels
   // at capture time now (see renderWatermarkedPhoto), so this just
   // displays the file as-is instead of stacking a second CSS overlay
@@ -110,29 +156,84 @@ function ProofPhoto({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={label} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center px-4 text-center">
             <span className="text-xs text-slate-500">
-              {photoOptional
-                ? "No photo attached — photos are optional for this shop"
-                : "No photo yet — appears once submitted via mobile app"}
+              {removed
+                ? `Removed from the server on ${new Date(photo.purged_at!).toLocaleDateString()} to save space. Its address and fingerprint are kept below.`
+                : photoOptional
+                  ? "No photo attached — photos are optional for this shop"
+                  : "No photo yet — appears once submitted via mobile app"}
             </span>
           </div>
         )}
       </div>
       {url && (
-        <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
-          <span>
-            {distanceM !== null
-              ? !geofenceEnforced
-                ? `${Math.round(distanceM)}m from site`
-                : distanceM <= geofenceRadiusM
-                  ? `✓ ${Math.round(distanceM)}m from site`
-                  : `⚠ ${Math.round(distanceM)}m from site (outside ${geofenceRadiusM}m)`
-              : "Site coordinates unavailable"}
-          </span>
-          {hash && <span className="font-mono">#{hash.slice(0, 10)}</span>}
+        <p className="mt-1 text-[10px] text-slate-500">
+          {distanceM !== null
+            ? !geofenceEnforced
+              ? `${Math.round(distanceM)}m from site`
+              : distanceM <= geofenceRadiusM
+                ? `✓ ${Math.round(distanceM)}m from site`
+                : `⚠ ${Math.round(distanceM)}m from site (outside ${geofenceRadiusM}m)`
+            : "Site coordinates unavailable"}
+        </p>
+      )}
+      {(photo || fingerprint) && (
+        <p className="mt-0.5 text-[10px] text-slate-500">
+          {photo && (
+            <>
+              Photo ID <span className="font-mono font-semibold text-slate-700">{photo.code}</span>
+              {" · "}
+            </>
+          )}
+          {fingerprint ? (
+            <>
+              fingerprint <span className="font-mono">#{fingerprint.slice(0, 10)}</span>
+            </>
+          ) : (
+            "no fingerprint (older photo)"
+          )}
+        </p>
+      )}
+      {photo?.sha256_mismatch && (
+        <p className="mt-1 text-[10px] font-semibold text-red-600">
+          The stored file did not match its capture fingerprint when it was removed.
+        </p>
+      )}
+      {(url || (photo && fingerprint)) && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {url && (
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Download className="h-3.5 w-3.5" />
+              {saving ? "Saving..." : "Save a copy"}
+            </button>
+          )}
+          {photo && fingerprint && (
+            <>
+              <input id={checkInputId} type="file" accept="image/*" onChange={handleCheck} className="hidden" />
+              {/* A real <label for=...> opens the picker straight from the tap — no JS click that some Android WebViews drop. */}
+              <label
+                htmlFor={checkInputId}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-brand-blue hover:text-brand-blue"
+              >
+                <ScanSearch className="h-3.5 w-3.5" />
+                Check a copy
+              </label>
+            </>
+          )}
         </div>
       )}
+      {checkResult && (
+        <p className={`mt-1.5 text-xs font-semibold ${COPY_CHECK_TEXT[checkResult].tone}`}>
+          {COPY_CHECK_TEXT[checkResult].text}
+        </p>
+      )}
+      {checkError && <p className="mt-1.5 text-xs text-red-600">{checkError}</p>}
     </div>
   );
 }
@@ -155,6 +256,26 @@ export default function ProofDisputeDrawer({
   const [notes, setNotes] = useState(ticket.dispute_notes ?? "");
   const [saving, setSaving] = useState<"approve" | "reject" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<JobPhoto[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    fetchJobPhotos(ticket.id)
+      .then((rows) => {
+        if (active) setPhotos(rows);
+      })
+      .catch(() => {
+        // The photos still show from the job itself; only their address and fingerprint go missing.
+      });
+    return () => {
+      active = false;
+    };
+  }, [ticket.id]);
+
+  const latestPhoto = (kind: JobPhoto["kind"]) => photos.filter((photo) => photo.kind === kind).at(-1) ?? null;
+  const startPhoto = latestPhoto("START");
+  const endPhoto = latestPhoto("END");
+  const jobLabel = formatJobNumber(ticket.job_number, ticket.id).replace("#", "");
 
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
   const timeSpent =
@@ -325,11 +446,20 @@ export default function ProofDisputeDrawer({
           Live Snapshot Enforced &mdash; Gallery Disabled
         </div>
 
+        <p className="mt-3 text-xs text-slate-500">
+          Each photo has its own address (Photo ID) and fingerprint on record. The photo file stays on our server for{" "}
+          {PHOTO_RETENTION_DAYS} days after a job is finished (once its warranty is over) — tap{" "}
+          <span className="font-semibold text-slate-700">Save a copy</span> to keep it. A saved copy can always be
+          verified with <span className="font-semibold text-slate-700">Check a copy</span>.
+        </p>
+
         <div className="mt-5 space-y-4">
           <ProofPhoto
             label="Job Start Proof"
             url={ticket.start_photo_url}
             hash={ticket.start_photo_hash}
+            photo={startPhoto}
+            saveName={`${jobLabel}-start-${startPhoto?.code ?? "photo"}.jpg`}
             distanceM={ticket.start_geofence_distance_m}
             geofenceRadiusM={shop.geofence_radius_meters}
             geofenceEnforced={shop.geofence_enforced}
@@ -339,6 +469,8 @@ export default function ProofDisputeDrawer({
             label="Job Completion Proof"
             url={ticket.end_photo_url}
             hash={ticket.end_photo_hash}
+            photo={endPhoto}
+            saveName={`${jobLabel}-completion-${endPhoto?.code ?? "photo"}.jpg`}
             distanceM={ticket.end_geofence_distance_m}
             geofenceRadiusM={shop.geofence_radius_meters}
             geofenceEnforced={shop.geofence_enforced}

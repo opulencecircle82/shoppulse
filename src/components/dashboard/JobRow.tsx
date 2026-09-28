@@ -49,7 +49,10 @@ export default function JobRow({
   const technician = staff.find((member) => member.id === ticket.assigned_staff_id);
   const cancelled = ticket.status === "CANCELLED";
   const declined = ticket.status === "REJECTED";
-  const hasProof = Boolean(ticket.start_photo_url || ticket.end_photo_url);
+  // A photo removed from the server to save space still leaves its fingerprint, so the Proof Pack stays reachable.
+  const hasProof = Boolean(
+    ticket.start_photo_url || ticket.end_photo_url || ticket.start_photo_hash || ticket.end_photo_hash
+  );
   const proofIsPrimary = ticket.status === "COMPLETED" || ticket.status === "DISPUTED";
   // A finished job always opens its proof pack — that's where it gets approved —
   // even when the shop lets technicians skip photos and there are none.

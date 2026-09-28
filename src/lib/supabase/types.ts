@@ -175,6 +175,23 @@ export type JobTicket = {
   payment_status: "UNPAID" | "PAID";
 };
 
+/** One row of the photo registry: the photo's address and fingerprint outlive the file on the server. */
+export type JobPhoto = {
+  id: string;
+  /** "PH-7K3Q9X2M" — the photo's address. */
+  code: string;
+  job_ticket_id: string;
+  kind: "START" | "END" | "REQUEST" | "RECEIPT";
+  /** SHA-256 of the exact bytes; null for a photo from before fingerprints were recorded. */
+  sha256: string | null;
+  bytes: number | null;
+  taken_at: string;
+  /** When the file was removed from the server (the code and fingerprint stay). */
+  purged_at: string | null;
+  /** The stored bytes no longer matched the fingerprint taken at capture. */
+  sha256_mismatch: boolean;
+};
+
 export type StaffLiveLocation = {
   staff_id: string;
   shop_id: string;

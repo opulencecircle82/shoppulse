@@ -1,3 +1,8 @@
+/** Proof photos are shrunk on the phone before they are uploaded: a camera photo is several megabytes,
+ * this keeps them around 100–200 KB — still plenty to see the work — so the server holds far less. */
+const PROOF_MAX_EDGE = 1280;
+const PROOF_JPEG_QUALITY = 0.72;
+
 /**
  * Fetches the logo as a bitmap. Returns null when it can't be loaded (offline,
  * or a host that doesn't allow the canvas to use it) so the photo still gets
@@ -34,13 +39,15 @@ export async function renderWatermarkedPhoto(
   }
 ): Promise<Blob> {
   const bitmap = await createImageBitmap(source);
+  const ratio = Math.min(1, PROOF_MAX_EDGE / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
+  canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
+  canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas not supported on this device.");
 
-  ctx.drawImage(bitmap, 0, 0);
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
   const scale = Math.max(1, canvas.width / 900);
   const pad = 10 * scale;
@@ -102,7 +109,7 @@ export async function renderWatermarkedPhoto(
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("Could not encode photo."))),
       "image/jpeg",
-      0.92
+      PROOF_JPEG_QUALITY
     );
   });
 }
