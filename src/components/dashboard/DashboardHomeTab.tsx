@@ -15,6 +15,7 @@ import { Calendar, TrendingUp, TrendingDown, Megaphone, BellRing } from "lucide-
 import type { JobTicket, JobStatus, Shop, StaffMember } from "@/lib/supabase/types";
 import type { DashboardTabId } from "./DashboardSidebarNav";
 import { formatDateOnly } from "@/lib/dashboard/format";
+import GetFoundChecklist from "./GetFoundChecklist";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -169,6 +170,8 @@ export default function DashboardHomeTab({
           Open Job Board
         </button>
       </div>
+
+      <GetFoundChecklist shop={shop} onSelectTab={onSelectTab} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-2">

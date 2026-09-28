@@ -372,6 +372,21 @@ export async function listNearbyShopServices(
   return (data ?? []) as NearbyService[];
 }
 
+export type NearbyShop = PublicShop & { distance_km: number };
+
+/** Every publicly listed business with a pinned location within radiusKm of the customer, nearest first —
+ * whether or not it has added services yet. */
+export async function listNearbyShops(lat: number, lng: number, radiusKm = 20): Promise<NearbyShop[]> {
+  const { data, error } = await supabase.rpc("list_nearby_shops", {
+    p_lat: lat,
+    p_lng: lng,
+    p_radius_km: radiusKm,
+    p_limit: 20,
+  });
+  if (error) throw error;
+  return (data ?? []) as NearbyShop[];
+}
+
 export type TicketTechnician = {
   full_name: string;
   avg_rating: number | null;

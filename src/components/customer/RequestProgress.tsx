@@ -5,16 +5,20 @@ import type { RequestProgress as Progress } from "@/lib/customer/jobStages";
  * "Where is my request?" — the steps a booking goes through before the
  * technician arrives, with the current one lit and a plain-words line on what
  * the customer is waiting for (the shop, a technician, or the technician to
- * get ready).
+ * get ready). `compact` drops that wording when a live tracking card above already says it.
  */
-export default function RequestProgress({ progress }: { progress: Progress }) {
+export default function RequestProgress({ progress, compact = false }: { progress: Progress; compact?: boolean }) {
   return (
     <div className="mt-5 rounded-xl bg-white/5 p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Request status</p>
-      <p className="mt-1.5 text-base font-bold text-white">{progress.headline}</p>
-      <p className="mt-0.5 text-sm text-slate-400">{progress.detail}</p>
+      {!compact && (
+        <>
+          <p className="mt-1.5 text-base font-bold text-white">{progress.headline}</p>
+          <p className="mt-0.5 text-sm text-slate-400">{progress.detail}</p>
+        </>
+      )}
 
-      <ol className="mt-4 space-y-0">
+      <ol className={`${compact ? "mt-3" : "mt-4"} space-y-0`}>
         {progress.steps.map((step, index) => {
           const isLast = index === progress.steps.length - 1;
           return (

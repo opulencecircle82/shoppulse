@@ -358,6 +358,22 @@ export function estimateEta(
   return { minutes: Math.max(1, Math.round((km / AVERAGE_SPEED_KMH) * 60)), stale: false };
 }
 
+// Within this straight-line distance of the door the technician counts as "almost there"
+// (the database sends the matching notification from the same 500 m).
+export const NEARBY_KM = 0.5;
+
+export type Proximity = { eta: Eta; near: boolean };
+
+/** ETA plus whether the technician is close enough to say "almost there". Never claims either from a stale position. */
+export function techProximity(
+  location: { lat: number; lng: number; updated_at: string } | null,
+  destination: { lat: number; lng: number } | null
+): Proximity {
+  const eta = estimateEta(location, destination);
+  const near = Boolean(location && destination && !eta.stale && distanceKm(location, destination) <= NEARBY_KM);
+  return { eta, near };
+}
+
 export function formatEta(minutes: number): string {
   if (minutes < 60) return `about ${minutes} min${minutes === 1 ? "" : "s"}`;
   const hours = Math.floor(minutes / 60);

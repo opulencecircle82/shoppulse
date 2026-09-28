@@ -24,6 +24,9 @@ import {
   recordPromotionEvent,
   listFeaturedServices,
   listNearbyShopServices,
+  listNearbyShops,
+  isShopOpenNow,
+  type NearbyShop,
   type NearbyPromotion,
   type FeaturedService,
   type NearbyService,
@@ -36,6 +39,9 @@ import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import LiveStatusBanner from "./LiveStatusBanner";
 import ServiceBookingsHub from "./ServiceBookingsHub";
+
+// How far around the customer "near you" reaches, for both businesses and services.
+const NEARBY_RADIUS_KM = 20;
 
 const QUICK_CATEGORIES = [
   { label: "Electrical", icon: Zap, color: "text-amber-500" },
@@ -60,6 +66,7 @@ export default function CustomerHomeScreen({
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
   const [nearbyServices, setNearbyServices] = useState<(NearbyService | FeaturedService)[]>([]);
   const [nearbyIsDistanceBased, setNearbyIsDistanceBased] = useState(false);
+  const [nearbyShops, setNearbyShops] = useState<NearbyShop[]>([]);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(
     customer.latitude !== null && customer.longitude !== null
       ? { lat: customer.latitude, lng: customer.longitude }
@@ -99,11 +106,17 @@ export default function CustomerHomeScreen({
   useEffect(() => {
     let active = true;
     if (pin) {
-      listNearbyShopServices(pin.lat, pin.lng, 20).then((rows) => {
+      listNearbyShopServices(pin.lat, pin.lng, NEARBY_RADIUS_KM).then((rows) => {
         if (!active) return;
         setNearbyServices(rows);
         setNearbyIsDistanceBased(true);
       });
+      // Every listed business around the customer, even one that hasn't added services yet.
+      listNearbyShops(pin.lat, pin.lng, NEARBY_RADIUS_KM)
+        .then((rows) => {
+          if (active) setNearbyShops(rows);
+        })
+        .catch(() => {});
     } else {
       listFeaturedServices(customer.city).then((rows) => {
         if (active) setNearbyServices(rows);
@@ -331,10 +344,64 @@ export default function CustomerHomeScreen({
           </div>
         )}
 
+        {nearbyShops.length > 0 && (
+          <div className="mt-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Businesses Near You (within {NEARBY_RADIUS_KM} km)
+            </p>
+            <ul className="mt-3 space-y-2">
+              {nearbyShops.map((shop) => {
+                const open = isShopOpenNow(shop);
+                return (
+                  <li key={shop.id}>
+                    <Link
+                      href={`/customer/shop/${shop.slug}`}
+                      className="flex items-center gap-3 rounded-2xl bg-white/5 p-3.5 shadow-md shadow-black/20"
+                    >
+                      {shop.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={shop.logo_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
+                      ) : (
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-blue/15 text-sm font-bold text-brand-blue">
+                          {shop.shop_name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-semibold text-white">{shop.shop_name}</p>
+                          {shop.business_hours_open && (
+                            <span
+                              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                open ? "bg-brand-emerald/15 text-brand-emerald" : "bg-white/10 text-slate-400"
+                              }`}
+                            >
+                              {open ? "Open Now" : "Closed"}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-400">
+                          <span>{[shop.business_category, shop.city].filter(Boolean).join(" · ") || "Service provider"}</span>
+                          <span className="flex items-center gap-1">
+                            <Navigation className="h-3 w-3" />
+                            {formatDistance(shop.distance_km)}
+                          </span>
+                        </p>
+                        <p className={`mt-0.5 text-[11px] font-medium ${shop.avg_rating !== null ? "text-amber-400" : "text-slate-500"}`}>
+                          {shop.avg_rating !== null ? `★ ${Number(shop.avg_rating).toFixed(1)} (${shop.review_count})` : "★ No rating yet"}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         {nearbyServices.length > 0 && (
           <div className="mt-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {nearbyIsDistanceBased ? "Services Near You (within 20 km)" : "Featured Services"}
+              {nearbyIsDistanceBased ? `Services Near You (within ${NEARBY_RADIUS_KM} km)` : "Featured Services"}
             </p>
             <div className="mt-3 space-y-3">
               {nearbyServices.map((service) => (

@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Download, Star } from "lucide-react";
+import { Download, MessageCircle, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
   fetchTicketStaffLocation,
@@ -19,6 +19,9 @@ import {
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import PaymentDetails from "@/components/customer/PaymentDetails";
 import RequestProgress from "@/components/customer/RequestProgress";
+import TechLiveCard from "@/components/customer/TechLiveCard";
+import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
+import { ensureCustomerConversation } from "@/lib/chat/chat";
 import { requestProgress } from "@/lib/customer/jobStages";
 import { formatJobNumber } from "@/lib/jobNumber";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
@@ -80,6 +83,9 @@ type ClientTicket = {
   en_route_at: string | null;
   staff_accepted_at: string | null;
   created_at: string;
+  shop_slug: string;
+  booking_latitude: number | null;
+  booking_longitude: number | null;
   job_number: number | null;
   mobile_app_theme: AppTheme;
   payment_status: "UNPAID" | "PAID";
@@ -152,6 +158,7 @@ function ProofPhoto({
 
 export default function ClientTicketPage() {
   const params = useParams();
+  const router = useRouter();
   const goBack = useSmartBack("/customer");
   const ticketId = params.ticketId as string;
 
@@ -160,7 +167,9 @@ export default function ClientTicketPage() {
   useAppTheme(ticket?.mobile_app_theme);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [staffLocation, setStaffLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [staffLocation, setStaffLocation] = useState<{ lat: number; lng: number; updated_at: string } | null>(null);
+  const [openingChat, setOpeningChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [review, setReview] = useState<{
     rating: number;
     comment: string | null;
@@ -278,7 +287,7 @@ export default function ClientTicketPage() {
     let active = true;
     async function poll() {
       const loc = await fetchTicketStaffLocation(ticketId).catch(() => null);
-      if (active) setStaffLocation(loc ? { lat: loc.lat, lng: loc.lng } : null);
+      if (active) setStaffLocation(loc);
     }
     poll();
     const interval = setInterval(poll, LIVE_POLL_MS);
@@ -341,6 +350,27 @@ export default function ClientTicketPage() {
       return;
     }
     setClaimedTicketId(data as string);
+  }
+
+  // "Message us": the customer's own chat with the shop. Someone who only has the link (not signed in)
+  // is sent to the customer app's sign-in first.
+  async function handleMessageShop() {
+    if (!ticket) return;
+    setOpeningChat(true);
+    setChatError(null);
+    try {
+      const customer = await fetchCurrentCustomer();
+      if (!customer) {
+        router.push("/customer");
+        return;
+      }
+      const conversationId = await ensureCustomerConversation(ticket.shop_slug);
+      router.push(`/customer/messages/${conversationId}`);
+    } catch (e) {
+      setChatError(e instanceof Error ? e.message : "Couldn't open the chat. Try again.");
+    } finally {
+      setOpeningChat(false);
+    }
   }
 
   async function handleCancelBooking() {
@@ -488,7 +518,40 @@ export default function ClientTicketPage() {
 
           {(() => {
             const progress = requestProgress(ticket);
-            return progress ? <RequestProgress progress={progress} /> : null;
+            const enRoute = ticket.status === "SCHEDULED" && Boolean(ticket.en_route_at);
+            const destination =
+              ticket.booking_latitude !== null && ticket.booking_longitude !== null
+                ? { lat: ticket.booking_latitude, lng: ticket.booking_longitude }
+                : null;
+            const messageButton = (
+              <div>
+                <button
+                  type="button"
+                  onClick={handleMessageShop}
+                  disabled={openingChat}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {openingChat ? "Opening chat..." : "Message us"}
+                </button>
+                {chatError && (
+                  <p role="alert" className="mt-2 text-xs text-red-400">
+                    {chatError}
+                  </p>
+                )}
+              </div>
+            );
+            return (
+              <>
+                {enRoute && (
+                  <TechLiveCard location={staffLocation} destination={destination}>
+                    {messageButton}
+                  </TechLiveCard>
+                )}
+                {progress && <RequestProgress progress={progress} compact={enRoute} />}
+                {progress && !enRoute && <div className="mt-3">{messageButton}</div>}
+              </>
+            );
           })()}
 
           {["PENDING", "UNASSIGNED", "SCHEDULED", "ESTIMATE_PENDING"].includes(ticket.status) && (
@@ -552,7 +615,7 @@ export default function ClientTicketPage() {
             </div>
           )}
 
-          {staffLocation && (
+          {staffLocation && !(ticket.status === "SCHEDULED" && ticket.en_route_at) && (
             <div className="mt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 {ticket.status === "IN_PROGRESS" || ticket.status === "ESTIMATE_PENDING"
