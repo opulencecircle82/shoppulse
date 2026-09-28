@@ -7,7 +7,7 @@ import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import { formatJobNumber } from "@/lib/jobNumber";
 import JobProgress from "./JobProgress";
-import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
+import { formatPreferred, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
 const PRODUCTS_EDITABLE_STATUSES = new Set([
@@ -196,7 +196,7 @@ export default function JobTicketCard({
         {ticket.preferred_date && (
           <p className="flex items-center gap-2">
             <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-            Preferred: {formatDateOnly(ticket.preferred_date)}
+            Preferred: {formatPreferred(ticket.preferred_date, ticket.preferred_time)}
           </p>
         )}
         {ticket.status !== "UNASSIGNED" && (

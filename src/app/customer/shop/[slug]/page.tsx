@@ -17,6 +17,7 @@ import {
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import { ensureCustomerConversation } from "@/lib/chat/chat";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
+import ScheduleTomorrowLink from "@/components/customer/ScheduleTomorrowLink";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -149,17 +150,15 @@ export default function ShopDetailsPage() {
               </div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-2">
-              {hasHours && (
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                    open
-                      ? "bg-brand-emerald/15 text-brand-emerald"
-                      : "bg-white/10 text-slate-400"
-                  }`}
-                >
-                  {open ? "Open Now" : "Closed"}
-                </span>
-              )}
+              <span
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                  open
+                    ? "bg-brand-emerald/15 text-brand-emerald"
+                    : "bg-white/10 text-slate-400"
+                }`}
+              >
+                {open ? "Open Now" : "Closed"}
+              </span>
               <button
                 type="button"
                 onClick={() => handleChat()}
@@ -300,9 +299,11 @@ export default function ShopDetailsPage() {
             )}
           </div>
 
+          {!open && <ScheduleTomorrowLink slug={shop.slug} className="mt-6" />}
+
           <Link
             href={`/customer/book/${shop.slug}`}
-            className="mt-6 block w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3.5 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+            className="mt-3 block w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3.5 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
           >
             Book Now
           </Link>

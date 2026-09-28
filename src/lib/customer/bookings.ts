@@ -140,6 +140,8 @@ export async function submitBooking(params: {
   serviceType: string;
   serviceAddress: string;
   preferredDate?: string | null;
+  /** The hour picked for a scheduled request, "HH:MM:SS". Needs preferredDate. */
+  preferredTime?: string | null;
   description?: string;
   requestPhotoUrl?: string | null;
   isEmergency?: boolean;
@@ -161,6 +163,7 @@ export async function submitBooking(params: {
     p_latitude: params.latitude ?? null,
     p_longitude: params.longitude ?? null,
     p_promotion_id: params.promotionId || null,
+    p_preferred_time: params.preferredTime || null,
   });
 
   if (error) throw new Error(error.message);
@@ -224,6 +227,21 @@ export async function checkDateAvailability(
 
   if (error) throw error;
   return data as DateAvailability | null;
+}
+
+export type SlotAvailability = {
+  slot: string;
+  booked_count: number;
+  capacity: number;
+  is_business_day: boolean;
+};
+
+/** For every hour of the day: how many requests already hold it and how many the shop can take at once
+ * (its active technicians, at least one). A slot is vacant while booked_count < capacity. */
+export async function getSlotAvailability(shopSlug: string, date: string): Promise<SlotAvailability[]> {
+  const { data, error } = await supabase.rpc("get_slot_availability", { p_shop_slug: shopSlug, p_date: date });
+  if (error) throw error;
+  return (data ?? []) as SlotAvailability[];
 }
 
 export type ShopReview = {
@@ -372,16 +390,26 @@ export async function listNearbyShopServices(
   return (data ?? []) as NearbyService[];
 }
 
-export type NearbyShop = PublicShop & { distance_km: number };
+/** distance_km is null for a business that hasn't pinned its location but is in the customer's area. */
+export type NearbyShop = PublicShop & { distance_km: number | null };
 
-/** Every publicly listed business with a pinned location within radiusKm of the customer, nearest first —
- * whether or not it has added services yet. */
-export async function listNearbyShops(lat: number, lng: number, radiusKm = 20): Promise<NearbyShop[]> {
+/** Publicly listed businesses within radiusKm of the customer's pin, nearest first — whether or not they have
+ * added services — followed by businesses that haven't pinned a location yet but are in the customer's city
+ * (or, when they have no city either, region). */
+export async function listNearbyShops(params: {
+  lat: number | null;
+  lng: number | null;
+  city: string | null;
+  region: string | null;
+  radiusKm?: number;
+}): Promise<NearbyShop[]> {
   const { data, error } = await supabase.rpc("list_nearby_shops", {
-    p_lat: lat,
-    p_lng: lng,
-    p_radius_km: radiusKm,
+    p_lat: params.lat,
+    p_lng: params.lng,
+    p_radius_km: params.radiusKm ?? 20,
     p_limit: 20,
+    p_city: params.city,
+    p_region: params.region,
   });
   if (error) throw error;
   return (data ?? []) as NearbyShop[];

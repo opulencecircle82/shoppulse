@@ -22,6 +22,7 @@ type TicketInfo = Pick<
   | "service_type"
   | "service_address"
   | "preferred_date"
+  | "preferred_time"
   | "created_at"
   | "is_emergency"
 >;
@@ -88,7 +89,7 @@ export default function BookingAlertHost({
         const { data } = await supabase
           .from("job_tickets")
           .select(
-            "id, status, client_name, service_type, service_address, preferred_date, created_at, is_emergency"
+            "id, status, client_name, service_type, service_address, preferred_date, preferred_time, created_at, is_emergency"
           )
           .in("id", ticketIds);
         for (const row of (data ?? []) as TicketInfo[]) infoById[row.id] = row;
@@ -227,6 +228,7 @@ export default function BookingAlertHost({
           service={alert.info.service_type}
           address={alert.info.service_address}
           preferredDate={alert.info.preferred_date}
+          preferredTime={alert.info.preferred_time}
           requestedAt={alert.info.created_at}
           ringing={!silenced.includes(alert.id)}
           onSilence={handleSilence}

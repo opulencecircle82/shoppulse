@@ -39,6 +39,7 @@ import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import LiveStatusBanner from "./LiveStatusBanner";
 import ServiceBookingsHub from "./ServiceBookingsHub";
+import ScheduleTomorrowLink from "./ScheduleTomorrowLink";
 
 // How far around the customer "near you" reaches, for both businesses and services.
 const NEARBY_RADIUS_KM = 20;
@@ -111,12 +112,6 @@ export default function CustomerHomeScreen({
         setNearbyServices(rows);
         setNearbyIsDistanceBased(true);
       });
-      // Every listed business around the customer, even one that hasn't added services yet.
-      listNearbyShops(pin.lat, pin.lng, NEARBY_RADIUS_KM)
-        .then((rows) => {
-          if (active) setNearbyShops(rows);
-        })
-        .catch(() => {});
     } else {
       listFeaturedServices(customer.city).then((rows) => {
         if (active) setNearbyServices(rows);
@@ -126,6 +121,27 @@ export default function CustomerHomeScreen({
       active = false;
     };
   }, [pin, customer.city]);
+
+  // Every listed business around the customer — even one with no services yet, and one that hasn't
+  // pinned its location but is in the customer's city or region.
+  useEffect(() => {
+    if (!pin && !customer.city && !customer.region) return;
+    let active = true;
+    listNearbyShops({
+      lat: pin?.lat ?? null,
+      lng: pin?.lng ?? null,
+      city: customer.city,
+      region: customer.region,
+      radiusKm: NEARBY_RADIUS_KM,
+    })
+      .then((rows) => {
+        if (active) setNearbyShops(rows);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [pin, customer.city, customer.region]);
 
   const unreadRef = useRef(0);
 
@@ -346,18 +362,16 @@ export default function CustomerHomeScreen({
 
         {nearbyShops.length > 0 && (
           <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Businesses Near You (within {NEARBY_RADIUS_KM} km)
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Businesses Near You</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              Within {NEARBY_RADIUS_KM} km of you, plus businesses in your area that haven&apos;t pinned their location yet.
             </p>
             <ul className="mt-3 space-y-2">
               {nearbyShops.map((shop) => {
                 const open = isShopOpenNow(shop);
                 return (
-                  <li key={shop.id}>
-                    <Link
-                      href={`/customer/shop/${shop.slug}`}
-                      className="flex items-center gap-3 rounded-2xl bg-white/5 p-3.5 shadow-md shadow-black/20"
-                    >
+                  <li key={shop.id} className="overflow-hidden rounded-2xl bg-white/5 shadow-md shadow-black/20">
+                    <Link href={`/customer/shop/${shop.slug}`} className="flex items-center gap-3 p-3.5">
                       {shop.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={shop.logo_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
@@ -369,21 +383,20 @@ export default function CustomerHomeScreen({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="truncate text-sm font-semibold text-white">{shop.shop_name}</p>
-                          {shop.business_hours_open && (
-                            <span
-                              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                open ? "bg-brand-emerald/15 text-brand-emerald" : "bg-white/10 text-slate-400"
-                              }`}
-                            >
-                              {open ? "Open Now" : "Closed"}
-                            </span>
-                          )}
+                          {/* A business with no working hours yet counts as closed — but can still take requests. */}
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              open ? "bg-brand-emerald/15 text-brand-emerald" : "bg-white/10 text-slate-400"
+                            }`}
+                          >
+                            {open ? "Open Now" : "Closed"}
+                          </span>
                         </div>
                         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-400">
                           <span>{[shop.business_category, shop.city].filter(Boolean).join(" · ") || "Service provider"}</span>
                           <span className="flex items-center gap-1">
                             <Navigation className="h-3 w-3" />
-                            {formatDistance(shop.distance_km)}
+                            {shop.distance_km !== null ? formatDistance(shop.distance_km) : "In your area"}
                           </span>
                         </p>
                         <p className={`mt-0.5 text-[11px] font-medium ${shop.avg_rating !== null ? "text-amber-400" : "text-slate-500"}`}>
@@ -391,6 +404,11 @@ export default function CustomerHomeScreen({
                         </p>
                       </div>
                     </Link>
+                    {!open && (
+                      <div className="px-3.5 pb-3.5">
+                        <ScheduleTomorrowLink slug={shop.slug} />
+                      </div>
+                    )}
                   </li>
                 );
               })}

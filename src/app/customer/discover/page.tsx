@@ -11,6 +11,7 @@ import {
   type PublicShop,
 } from "@/lib/customer/bookings";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
+import ScheduleTomorrowLink from "@/components/customer/ScheduleTomorrowLink";
 
 export default function DiscoverShopsPage() {
   return (
@@ -143,10 +144,10 @@ function DiscoverShopsContent() {
               {shops.map((shop) => {
                 const open = isShopOpenNow(shop);
                 return (
-                  <li key={shop.id}>
+                  <li key={shop.id} className="overflow-hidden rounded-2xl bg-white/5 shadow-md shadow-black/20 transition-shadow hover:shadow-lg">
                     <Link
                       href={`/customer/shop/${shop.slug}`}
-                      className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
+                      className="flex items-center gap-3 p-4"
                     >
                       {shop.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -165,17 +166,15 @@ function DiscoverShopsContent() {
                           <p className="truncate text-sm font-semibold text-white">
                             {shop.shop_name}
                           </p>
-                          {shop.business_hours_open && (
-                            <span
-                              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                open
-                                  ? "bg-brand-emerald/15 text-brand-emerald"
-                                  : "bg-white/10 text-slate-400"
-                              }`}
-                            >
-                              {open ? "Open Now" : "Closed"}
-                            </span>
-                          )}
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              open
+                                ? "bg-brand-emerald/15 text-brand-emerald"
+                                : "bg-white/10 text-slate-400"
+                            }`}
+                          >
+                            {open ? "Open Now" : "Closed"}
+                          </span>
                         </div>
                         <p className="mt-0.5 text-xs text-slate-400">
                           {[shop.business_category, shop.city].filter(Boolean).join(" · ") ||
@@ -192,6 +191,11 @@ function DiscoverShopsContent() {
                         </p>
                       </div>
                     </Link>
+                    {!open && (
+                      <div className="px-4 pb-4">
+                        <ScheduleTomorrowLink slug={shop.slug} />
+                      </div>
+                    )}
                   </li>
                 );
               })}

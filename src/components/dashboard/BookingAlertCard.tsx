@@ -1,5 +1,5 @@
 import { BellRing, CalendarDays, Clock, MapPin, Siren, VolumeX } from "lucide-react";
-import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
+import { formatPreferred, timeAgo } from "@/lib/dashboard/format";
 
 export type BookingAlertCardProps = {
   /** An emergency booking — louder look, red instead of orange. */
@@ -8,6 +8,8 @@ export type BookingAlertCardProps = {
   service: string;
   address: string | null;
   preferredDate: string | null;
+  /** The hour the customer picked for a scheduled request, if any. */
+  preferredTime?: string | null;
   requestedAt: string;
   /** The alert is currently ringing, so show the animation and the silence button. */
   ringing?: boolean;
@@ -29,6 +31,7 @@ export default function BookingAlertCard({
   service,
   address,
   preferredDate,
+  preferredTime = null,
   requestedAt,
   ringing = false,
   onSilence,
@@ -115,7 +118,7 @@ export default function BookingAlertCard({
           {preferredDate && (
             <p className="flex items-center gap-2">
               <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-              Preferred: {formatDateOnly(preferredDate)}
+              Preferred: {formatPreferred(preferredDate, preferredTime)}
             </p>
           )}
           {urgent && (

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Download, MessageCircle, Star } from "lucide-react";
+import { CalendarClock, Download, MessageCircle, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
   fetchTicketStaffLocation,
@@ -26,6 +26,7 @@ import { requestProgress } from "@/lib/customer/jobStages";
 import { formatJobNumber } from "@/lib/jobNumber";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
+import { formatPreferred } from "@/lib/dashboard/format";
 import { useAppTheme, type AppTheme } from "@/lib/hooks/useAppTheme";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
@@ -86,6 +87,8 @@ type ClientTicket = {
   shop_slug: string;
   booking_latitude: number | null;
   booking_longitude: number | null;
+  preferred_date: string | null;
+  preferred_time: string | null;
   job_number: number | null;
   mobile_app_theme: AppTheme;
   payment_status: "UNPAID" | "PAID";
@@ -515,6 +518,12 @@ export default function ClientTicketPage() {
           </p>
           <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-400">For: {ticket.client_name}</p>
+          {ticket.preferred_date && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-orange/15 px-3 py-1 text-xs font-bold text-brand-orange">
+              <CalendarClock className="h-3.5 w-3.5" />
+              Scheduled for {formatPreferred(ticket.preferred_date, ticket.preferred_time)}
+            </p>
+          )}
 
           {(() => {
             const progress = requestProgress(ticket);

@@ -14,6 +14,18 @@ export function formatDateOnly(value: string): string {
   return new Date(year, month - 1, day).toLocaleDateString();
 }
 
+/** "9/29/2026 at 9:00 AM" — the day a customer asked for, plus the hour if they picked one. */
+export function formatPreferred(date: string, time: string | null | undefined): string {
+  return time ? `${formatDateOnly(date)} at ${formatTimeOfDay(time)}` : formatDateOnly(date);
+}
+
+/** Formats a Postgres `time` ("09:00:00") as the reader's clock would: "9:00 AM". */
+export function formatTimeOfDay(value: string): string {
+  const [hour, minute] = value.split(":").map(Number);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return value;
+  return new Date(2000, 0, 1, hour, minute).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 /** "just now", "12m ago", "3h ago", "2d ago" — how long a job has been in its current stage. */
 export function timeAgo(iso: string, now: number = Date.now()): string {
   const diffMs = now - new Date(iso).getTime();

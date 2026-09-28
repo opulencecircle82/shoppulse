@@ -148,6 +148,8 @@ export type JobTicket = {
   client_viewed_at: string | null;
   staff_accepted_at: string | null;
   preferred_date: string | null;
+  /** Hour the customer picked for a scheduled request ("09:00:00"), if any. */
+  preferred_time: string | null;
   description: string | null;
   request_photo_url: string | null;
   discount_percent: number | null;

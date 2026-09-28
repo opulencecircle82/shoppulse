@@ -33,6 +33,8 @@ export default function AvailabilityCalendar({
   onSelect: (isoDate: string) => void;
 }) {
   const [viewMonth, setViewMonth] = useState(() => {
+    const [year, month] = selectedDate ? selectedDate.split("-").map(Number) : [];
+    if (year && month) return new Date(year, month - 1, 1);
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });

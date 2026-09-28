@@ -14,7 +14,7 @@ import {
 import { Calendar, TrendingUp, TrendingDown, Megaphone, BellRing } from "lucide-react";
 import type { JobTicket, JobStatus, Shop, StaffMember } from "@/lib/supabase/types";
 import type { DashboardTabId } from "./DashboardSidebarNav";
-import { formatDateOnly } from "@/lib/dashboard/format";
+import { formatPreferred } from "@/lib/dashboard/format";
 import GetFoundChecklist from "./GetFoundChecklist";
 
 function initials(name: string): string {
@@ -329,7 +329,7 @@ export default function DashboardHomeTab({
                       </span>
                     </span>
                     <span className="shrink-0 text-[11px] font-medium text-slate-500">
-                      {t.preferred_date ? formatDateOnly(t.preferred_date) : ""}
+                      {t.preferred_date ? formatPreferred(t.preferred_date, t.preferred_time) : ""}
                     </span>
                   </button>
                 ))}

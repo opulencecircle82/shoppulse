@@ -20,6 +20,13 @@ import {
 } from "@/lib/customer/bookings";
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
 import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
+import TimeSlotPicker from "@/components/customer/TimeSlotPicker";
+import {
+  formatDayLong,
+  formatTimeOfDay,
+  nextOpenDay,
+  toIsoDate,
+} from "@/lib/customer/slots";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import AddressFormModal from "@/components/customer/AddressFormModal";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
@@ -40,6 +47,8 @@ function BookJobPageContent() {
   const goBack = useSmartBack("/customer");
   const shopSlug = params.shopSlug as string;
   const promotionId = searchParams.get("promo");
+  // Arrived from "Click to schedule your request for tomorrow" on a business that is closed right now.
+  const scheduleMode = searchParams.get("schedule") === "1";
   const promoPercentParam = Number(searchParams.get("pct"));
   // pct is display-only, carried along from the ad link so this banner can
   // render without a network round-trip — the real discount is always
@@ -61,11 +70,15 @@ function BookJobPageContent() {
   const [manualAddress, setManualAddress] = useState("");
   const [isEmergency, setIsEmergency] = useState(false);
   const [preferredDate, setPreferredDate] = useState("");
+  const [preferredTime, setPreferredTime] = useState("");
+  const [slotRefresh, setSlotRefresh] = useState(0);
   const [availability, setAvailability] = useState<DateAvailability | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   // Set once the request is sent — the id of the new ticket, for the "View My Request Status" link.
   const [submittedTicketId, setSubmittedTicketId] = useState<string | null>(null);
+  // "Tue, Sep 29 at 9:00 AM" for a scheduled request, shown on the confirmation.
+  const [submittedWhen, setSubmittedWhen] = useState<string | null>(null);
   const [openingChat, setOpeningChat] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +98,10 @@ function BookJobPageContent() {
     setShop(shopRow);
     setCustomer(current);
     setLoading(false);
+    if (scheduleMode) {
+      const firstDay = nextOpenDay(toIsoDate(new Date()), shopRow.business_days);
+      if (firstDay) setPreferredDate(firstDay);
+    }
     listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
 
     if (current) {
@@ -96,7 +113,7 @@ function BookJobPageContent() {
         })
         .catch(() => {});
     }
-  }, [shopSlug]);
+  }, [shopSlug, scheduleMode]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -135,6 +152,11 @@ function BookJobPageContent() {
       return;
     }
 
+    if (scheduleMode && !isEmergency && (!preferredDate || !preferredTime)) {
+      setError("Pick a day and a time for your request.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -147,6 +169,7 @@ function BookJobPageContent() {
         serviceType,
         serviceAddress,
         preferredDate: isEmergency ? null : preferredDate || null,
+        preferredTime: isEmergency || !preferredDate ? null : preferredTime || null,
         description,
         requestPhotoUrl,
         isEmergency,
@@ -154,9 +177,20 @@ function BookJobPageContent() {
         longitude: selectedAddress?.longitude ?? null,
         promotionId,
       });
+      setSubmittedWhen(
+        !isEmergency && preferredDate
+          ? `${formatDayLong(preferredDate)}${preferredTime ? ` at ${formatTimeOfDay(preferredTime)}` : ""}`
+          : null
+      );
       setSubmittedTicketId(ticketId);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not submit booking.");
+      const message = e instanceof Error ? e.message : "Could not submit booking.";
+      setError(message);
+      if (message.includes("just taken")) {
+        // Somebody else got that hour first — let the customer see what is still open.
+        setPreferredTime("");
+        setSlotRefresh((n) => n + 1);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -204,6 +238,11 @@ function BookJobPageContent() {
           {shop?.shop_name} will review your request and assign a technician
           soon.
         </p>
+        {submittedWhen && (
+          <p className="mt-3 rounded-full bg-brand-orange/15 px-4 py-1.5 text-xs font-bold text-brand-orange">
+            Scheduled for {submittedWhen}
+          </p>
+        )}
         <button
           type="button"
           onClick={() => router.push(`/client/${submittedTicketId}`)}
@@ -293,6 +332,15 @@ function BookJobPageContent() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3 rounded-2xl bg-white/5 p-6 shadow-md shadow-black/20">
+          {scheduleMode && (
+            <div className="rounded-xl bg-brand-orange/10 px-3.5 py-3">
+              <p className="text-sm font-semibold text-brand-orange">Schedule your request</p>
+              <p className="mt-0.5 text-xs text-slate-300">
+                Pick the day and time you&apos;d like. If that time is taken, choose another hour or try the next day —
+                {shop?.shop_name ? ` ${shop.shop_name}` : " the business"} will confirm it.
+              </p>
+            </div>
+          )}
           {promoDiscountPercent && (
             <p className="rounded-xl bg-brand-emerald/10 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
               ✓ {promoDiscountPercent}% off this booking&apos;s service fee will be applied.
@@ -426,15 +474,19 @@ function BookJobPageContent() {
           {shop && !isEmergency && (
             <div>
               <label className="block text-xs font-medium text-slate-400">
-                Preferred Date (optional)
+                {scheduleMode ? "Day and time" : "Preferred Date (optional)"}
               </label>
               <div className="mt-1">
                 <AvailabilityCalendar
+                  key={preferredDate.slice(0, 7)}
                   businessDays={shop.business_days}
                   businessHoursOpen={shop.business_hours_open}
                   businessHoursClose={shop.business_hours_close}
                   selectedDate={preferredDate}
-                  onSelect={setPreferredDate}
+                  onSelect={(day) => {
+                    setPreferredDate(day);
+                    setPreferredTime("");
+                  }}
                 />
               </div>
               {checkingAvailability && (
@@ -454,6 +506,26 @@ function BookJobPageContent() {
                     ? "This day looks fully booked — the business may still fit you in."
                     : "Looks available on this day."}
                 </p>
+              )}
+              {preferredDate && (
+                <TimeSlotPicker
+                  shopSlug={shopSlug}
+                  date={preferredDate}
+                  hoursOpen={shop.business_hours_open}
+                  hoursClose={shop.business_hours_close}
+                  value={preferredTime}
+                  onChange={setPreferredTime}
+                  onNextDay={(() => {
+                    const next = nextOpenDay(preferredDate, shop.business_days);
+                    return next
+                      ? () => {
+                          setPreferredDate(next);
+                          setPreferredTime("");
+                        }
+                      : null;
+                  })()}
+                  refreshKey={slotRefresh}
+                />
               )}
             </div>
           )}

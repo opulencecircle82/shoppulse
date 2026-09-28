@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
 import JobProgress from "./JobProgress";
-import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
+import { formatPreferred, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
 /**
@@ -85,7 +85,7 @@ export default function BookingRequestCard({
         {ticket.preferred_date && (
           <p className="flex items-center gap-2">
             <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-            Preferred: {formatDateOnly(ticket.preferred_date)}
+            Preferred: {formatPreferred(ticket.preferred_date, ticket.preferred_time)}
           </p>
         )}
         <p className="flex items-center gap-2">
