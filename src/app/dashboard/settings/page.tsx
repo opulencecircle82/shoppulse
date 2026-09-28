@@ -15,10 +15,13 @@ import DefaultTasksPanel from "@/components/dashboard/settings/DefaultTasksPanel
 import PaymentMethodsPanel from "@/components/dashboard/settings/PaymentMethodsPanel";
 import BookingAlertsPanel from "@/components/dashboard/settings/BookingAlertsPanel";
 import ReceivingPaymentsPanel from "@/components/dashboard/settings/ReceivingPaymentsPanel";
+import NightShiftPanel from "@/components/dashboard/settings/NightShiftPanel";
+import { hasWorkingSchedule } from "@/components/dashboard/GoLiveButton";
 
 const TABS = [
   { id: "profile", label: "Company Profile" },
   { id: "hours", label: "Working Hours" },
+  { id: "nightshift", label: "Night Shift" },
   { id: "tasks", label: "Default Tasks" },
   { id: "payments", label: "Payment Methods" },
   { id: "receiving", label: "Receiving Payments" },
@@ -31,7 +34,8 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-const ONBOARDING_ORDER: TabId[] = ["profile", "geofence", "staff", "watermark"];
+// Address + pin (Company Profile) and working hours are required; the steps after them are set once and can be revisited.
+const ONBOARDING_ORDER: TabId[] = ["profile", "hours", "geofence", "staff", "watermark"];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -83,6 +87,12 @@ export default function SettingsPage() {
       setOnboardingStep(1);
       setActiveTab(ONBOARDING_ORDER[1]);
     }
+  }
+
+  // Working hours are a required step: saving them moves the setup on (only when that is the step being done).
+  async function handleHoursSaved() {
+    await refresh();
+    if (onboardingStep !== null && ONBOARDING_ORDER[onboardingStep] === "hours") handleOnboardingContinue();
   }
 
   function handleOnboardingContinue() {
@@ -138,26 +148,46 @@ export default function SettingsPage() {
           </div>
         )}
 
+        {shop && !isOnboarding && activeTab !== "hours" && !hasWorkingSchedule(shop) && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-sm font-medium text-amber-900">
+              Your working days and hours aren&apos;t set yet — they&apos;re required so customers can see when you&apos;re open.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveTab("hours")}
+              className="shrink-0 rounded-full bg-amber-500 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-600"
+            >
+              Set working hours
+            </button>
+          </div>
+        )}
+
         <div className="mt-6 grid gap-5 sm:mt-8 sm:gap-8 lg:grid-cols-[220px_1fr]">
           <nav
             ref={navRef}
             className="relative flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] lg:flex-col lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden"
           >
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                data-active={activeTab === tab.id}
-                className={`whitespace-nowrap rounded-lg px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-brand-blue/15 text-brand-blue"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              // During setup the steps that come later stay locked until the current one is done.
+              const locked = isOnboarding && ONBOARDING_ORDER.indexOf(tab.id) > onboardingStep!;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  disabled={locked}
+                  data-active={activeTab === tab.id}
+                  className={`whitespace-nowrap rounded-lg px-4 py-2.5 text-left text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                    activeTab === tab.id
+                      ? "bg-brand-blue/15 text-brand-blue"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:hover:bg-transparent disabled:hover:text-slate-500"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </nav>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8">
@@ -165,8 +195,13 @@ export default function SettingsPage() {
               <CompanyProfilePanel shop={shop} onSaved={handleProfileSaved} />
             )}
             {activeTab === "hours" && (
-              <WorkingHoursPanel shop={shop} onSaved={refresh} />
+              <WorkingHoursPanel
+                shop={shop}
+                onSaved={handleHoursSaved}
+                submitLabel={isOnboarding ? "Save & Continue" : "Save Changes"}
+              />
             )}
+            {activeTab === "nightshift" && <NightShiftPanel shop={shop} onSaved={refresh} />}
             {activeTab === "tasks" && (
               <DefaultTasksPanel shop={shop} onSaved={refresh} />
             )}

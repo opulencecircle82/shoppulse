@@ -9,6 +9,7 @@ import type { Currency, Shop } from "@/lib/supabase/types";
 import { COUNTRIES } from "@/lib/location/countries";
 import { SERVICE_CATEGORIES, SERVICE_CATEGORY_GROUPS } from "@/lib/location/serviceCategories";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
+import { deviceTimeZone } from "@/lib/shopTimezone";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
@@ -109,9 +110,20 @@ export default function CompanyProfilePanel({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaving(true);
     setError(null);
     setSuccess(false);
+
+    // Customers and technicians find the business by its address and its pin, so both are required.
+    if (!address.trim()) {
+      setError("Please enter your business address — customers see it, and it is how your pin is placed on the map.");
+      return;
+    }
+    if (latitude === null || longitude === null) {
+      setError("Please drop your business pin on the map (tap the map or use your current location).");
+      return;
+    }
+
+    setSaving(true);
 
     if (shop) {
       const { error: updateError } = await supabase
@@ -120,7 +132,7 @@ export default function CompanyProfilePanel({
           shop_name: shopName,
           logo_url: logoUrl || null,
           primary_color_hex: primaryColor,
-          address: address || null,
+          address: address.trim(),
           contact_phone: contactPhone || null,
           currency,
           city: city || null,
@@ -164,7 +176,7 @@ export default function CompanyProfilePanel({
         p_shop_name: shopName,
         p_slug: slugify(shopName),
         p_logo_url: logoUrl || null,
-        p_address: address || null,
+        p_address: address.trim(),
         p_currency: currency,
         p_owner_full_name:
           (user.user_metadata?.full_name as string | undefined) ??
@@ -178,13 +190,20 @@ export default function CompanyProfilePanel({
       }
     );
 
-    setSaving(false);
-
     if (rpcError || !newShop) {
+      setSaving(false);
       setError(rpcError?.message ?? "Failed to create shop.");
       return;
     }
 
+    // The create call doesn't take the pin, so it goes in right after. If that fails the shop still exists,
+    // so carry on — the Company Profile asks for the pin again on the next save.
+    await supabase
+      .from("shops")
+      .update({ latitude, longitude, timezone: deviceTimeZone() })
+      .eq("id", (newShop as { id: string }).id);
+
+    setSaving(false);
     setSuccess(true);
     onSaved(true);
   }
@@ -312,8 +331,12 @@ export default function CompanyProfilePanel({
         <label className="block text-sm font-medium text-slate-600">
           Business Address
         </label>
+        <p className="mt-1 text-xs text-slate-500">
+          Required — customers see it, and it is how your pin is placed on the map.
+        </p>
         <input
           type="text"
+          required
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
@@ -460,30 +483,29 @@ export default function CompanyProfilePanel({
       </div>
 
       {shop && (
-        <>
-          <label className="flex items-center gap-2.5 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              checked={isPubliclyListed}
-              onChange={(e) => setIsPubliclyListed(e.target.checked)}
-              className="accent-brand-blue"
-            />
-            List my business in the customer app&apos;s &quot;Find Services
-            Near You&quot; directory
-          </label>
-
-          <LocationPickerMap
-            tone="light"
-            latitude={latitude}
-            longitude={longitude}
-            onChange={(lat, lng) => {
-              setLatitude(lat);
-              setLongitude(lng);
-            }}
-            description="Tap anywhere on the map to drop a pin — useful when your address has no formal street or house number. Customers will see this exact spot."
+        <label className="flex items-center gap-2.5 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={isPubliclyListed}
+            onChange={(e) => setIsPubliclyListed(e.target.checked)}
+            className="accent-brand-blue"
           />
-        </>
+          List my business in the customer app&apos;s &quot;Find Services
+          Near You&quot; directory
+        </label>
       )}
+
+      <LocationPickerMap
+        tone="light"
+        label="Pin Your Business on the Map (required)"
+        latitude={latitude}
+        longitude={longitude}
+        onChange={(lat, lng) => {
+          setLatitude(lat);
+          setLongitude(lng);
+        }}
+        description="Tap anywhere on the map to drop a pin — useful when your address has no formal street or house number. Customers will see this exact spot."
+      />
 
       {error && (
         <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">

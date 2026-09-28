@@ -47,6 +47,10 @@ export type Shop = {
   is_publicly_listed: boolean;
   /** Test/demo accounts: no paid-seat prompts. Only the developer console can change it. */
   unlimited_tech_seats: boolean;
+  /** The owner has technicians on call for emergencies while the shop is closed. */
+  night_shift_enabled: boolean;
+  /** IANA name ("Asia/Manila") — what "closed right now" is measured in. Saved with the working hours. */
+  timezone: string;
   business_hours_open: string | null;
   business_hours_close: string | null;
   business_days: string[];
@@ -89,6 +93,8 @@ export type StaffMember = {
   role: StaffRole;
   created_at: string;
   location_token: string;
+  /** On call for after-hours emergencies. Only the owner or a manager can change it. */
+  is_night_shift: boolean;
 };
 
 export type JobStatus =
@@ -141,6 +147,8 @@ export type JobTicket = {
   warranty_expires_at: string | null;
   warranty_claim_of_ticket_id: string | null;
   is_emergency: boolean;
+  /** An emergency that came in while the shop was closed and had a night shift — the night shift's to answer. */
+  after_hours: boolean;
   booking_latitude: number | null;
   booking_longitude: number | null;
   cancelled_at: string | null;

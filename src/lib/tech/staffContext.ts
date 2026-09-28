@@ -10,6 +10,8 @@ export type StaffContext = {
   phone: string | null;
   avatarUrl: string | null;
   isClockedIn: boolean;
+  /** The owner has this technician on call for after-hours emergencies. */
+  isNightShift: boolean;
 };
 
 export const SESSION_TIMEOUT_MS = 8000;
@@ -69,7 +71,7 @@ export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
       supabase
         .from("staff_members")
         .select(
-          "id, shop_id, role, location_token, full_name, email, phone, avatar_url, is_clocked_in"
+          "id, shop_id, role, location_token, full_name, email, phone, avatar_url, is_clocked_in, is_night_shift"
         )
         .eq("auth_user_id", user.id)
         .maybeSingle(),
@@ -88,6 +90,7 @@ export async function fetchCurrentStaffContext(): Promise<StaffContext | null> {
       phone: data.phone,
       avatarUrl: data.avatar_url,
       isClockedIn: data.is_clocked_in,
+      isNightShift: data.is_night_shift === true,
     };
   } catch {
     clearStaleLocalSession();

@@ -13,6 +13,7 @@ import {
   fetchShopBySlug,
   submitBooking,
   checkDateAvailability,
+  isShopOpenNow,
   listPublicShopServices,
   type BookingShop,
   type DateAvailability,
@@ -379,8 +380,9 @@ function BookJobPageContent() {
                 🚨 This is an emergency
               </span>
               <span className="block text-xs text-slate-400">
-                Skips scheduling — we&apos;ll try to dispatch the nearest available
-                technician to you right away.
+                {shop?.night_shift_enabled && !isShopOpenNow(shop)
+                  ? `Skips scheduling — ${shop.shop_name} is closed right now, but its night-shift technician is on call and will be alerted right away.`
+                  : "Skips scheduling — we'll try to dispatch the nearest available technician to you right away."}
               </span>
             </span>
           </label>

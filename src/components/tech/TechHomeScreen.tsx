@@ -15,6 +15,7 @@ import {
   Wrench,
   Quote,
   Clock,
+  Moon,
   XCircle,
 } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
@@ -213,6 +214,12 @@ export default function TechHomeScreen({
                 <span className="shrink-0 rounded-full bg-brand-blue/15 px-1.5 py-0.5 text-[9px] font-bold text-brand-blue">
                   {staffContext.role}
                 </span>
+                {staffContext.isNightShift && (
+                  <span className="flex shrink-0 items-center gap-1 rounded-full bg-brand-sky/20 px-1.5 py-0.5 text-[9px] font-bold text-brand-sky">
+                    <Moon className="h-2.5 w-2.5" />
+                    Night Shift
+                  </span>
+                )}
                 {isClockedIn && (
                   <span className="flex shrink-0 items-center gap-1 rounded-full bg-brand-emerald/15 px-1.5 py-0.5 text-[9px] font-bold text-brand-emerald">
                     <span className="h-1.5 w-1.5 rounded-full bg-brand-emerald" />
@@ -279,6 +286,19 @@ export default function TechHomeScreen({
           {clockLoading ? "Please wait..." : isClockedIn ? "Clock Out" : "Clock In"}
         </button>
 
+        {staffContext.isNightShift && (
+          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-brand-sky/30 bg-brand-sky/10 p-3.5">
+            <Moon className="mt-0.5 h-4 w-4 shrink-0 text-brand-sky" />
+            <div>
+              <p className="text-sm font-bold text-white">You&apos;re on the night shift</p>
+              <p className="mt-0.5 text-xs text-slate-300">
+                Emergencies that come in while {shop.shop_name} is closed appear here, wherever you are. The first
+                night-shift technician to tap Claim takes the job — the owner sees it right away.
+              </p>
+            </div>
+          </div>
+        )}
+
         <HomeInfo shop={shop} />
 
         <div className="pb-24">
@@ -313,7 +333,7 @@ export default function TechHomeScreen({
               <div ref={emergencyRef} className="mt-6 scroll-mt-4">
                 <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-400">
                   <Siren className="h-3.5 w-3.5" />
-                  Emergency Jobs Nearby ({emergencyJobs.length})
+                  {emergencyJobs.some((job) => job.afterHours) ? "Emergency Jobs" : "Emergency Jobs Nearby"} ({emergencyJobs.length})
                 </p>
                 {claimError && (
                   <p className="mt-1.5 text-xs text-red-400">{claimError}</p>
@@ -324,13 +344,20 @@ export default function TechHomeScreen({
                       key={job.id}
                       className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4"
                     >
+                      {job.afterHours && (
+                        <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-brand-sky/20 px-2 py-0.5 text-[10px] font-bold text-brand-sky">
+                          <Moon className="h-3 w-3" /> NIGHT SHIFT
+                        </span>
+                      )}
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm font-bold text-white">{job.serviceType}</p>
-                        <span className="shrink-0 text-xs font-semibold text-red-300">
-                          {job.distanceKm < 1
-                            ? `${Math.round(job.distanceKm * 1000)}m away`
-                            : `${job.distanceKm.toFixed(1)}km away`}
-                        </span>
+                        {job.distanceKm !== null && (
+                          <span className="shrink-0 text-xs font-semibold text-red-300">
+                            {job.distanceKm < 1
+                              ? `${Math.round(job.distanceKm * 1000)}m away`
+                              : `${job.distanceKm.toFixed(1)}km away`}
+                          </span>
+                        )}
                       </div>
                       <p className="mt-0.5 text-xs text-slate-300">{job.serviceAddress}</p>
                       {job.description && (
@@ -427,6 +454,11 @@ export default function TechHomeScreen({
                   {task.is_emergency && (
                     <span className="flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-400">
                       <Siren className="h-3 w-3" /> EMERGENCY
+                    </span>
+                  )}
+                  {task.after_hours && (
+                    <span className="flex items-center gap-1 rounded-full bg-brand-sky/20 px-2.5 py-1 text-[10px] font-bold text-brand-sky">
+                      <Moon className="h-3 w-3" /> NIGHT SHIFT
                     </span>
                   )}
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Pencil, LogOut } from "lucide-react";
+import { Users, Pencil, LogOut, Moon } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, StaffMember } from "@/lib/supabase/types";
 import AddStaffModal from "./AddStaffModal";
@@ -9,6 +9,15 @@ import StaffJobHistoryModal from "./StaffJobHistoryModal";
 import EditStaffModal from "./EditStaffModal";
 
 const FREE_TECH_SEATS = 1;
+
+/** On call for after-hours emergencies (managed in Settings → Night Shift). */
+function NightShiftChip() {
+  return (
+    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-brand-blue/10 px-2 py-0.5 text-[10px] font-semibold text-brand-blue-dark">
+      <Moon className="h-3 w-3" /> Night shift
+    </span>
+  );
+}
 
 export default function StaffManagementTab({
   staff,
@@ -210,6 +219,7 @@ export default function StaffManagementTab({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-slate-900">{member.full_name}</p>
+                  {member.is_night_shift && <NightShiftChip />}
                   <p className="mt-0.5 text-xs text-slate-500">
                     {member.role} · ${member.hourly_rate.toFixed(2)}/hr
                   </p>
@@ -274,7 +284,8 @@ export default function StaffManagementTab({
               {nonOwnerStaff.map((member) => (
                 <tr key={member.id} className="hover:bg-slate-50">
                   <td className="px-3 py-3 font-medium text-slate-900">
-                    {member.full_name}
+                    <div>{member.full_name}</div>
+                    {member.is_night_shift && <NightShiftChip />}
                   </td>
                   <td className="px-3 py-3 text-slate-600">
                     {member.username ?? (

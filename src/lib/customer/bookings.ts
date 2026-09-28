@@ -46,6 +46,8 @@ export type BookingShop = {
   website_muted_color: string;
   website_headline: string | null;
   website_subheadline: string | null;
+  /** Technicians are on call for emergencies while the shop is closed. */
+  night_shift_enabled: boolean;
 };
 
 /** Uses a SECURITY DEFINER RPC rather than a direct table select — the

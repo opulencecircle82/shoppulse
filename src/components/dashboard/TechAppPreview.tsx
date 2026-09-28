@@ -37,6 +37,7 @@ const SAMPLE_STAFF: StaffContext = {
   phone: null,
   avatarUrl: null,
   isClockedIn: true,
+  isNightShift: false,
 };
 
 function sampleJob(overrides: Partial<JobTicket>): JobTicket {

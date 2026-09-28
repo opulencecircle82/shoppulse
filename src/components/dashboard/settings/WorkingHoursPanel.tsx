@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
+import { deviceTimeZone } from "@/lib/shopTimezone";
 
 const DAYS = [
   { id: "MON", label: "Mon" },
@@ -68,6 +69,7 @@ export default function WorkingHoursPanel({
         business_hours_open: openTime,
         business_hours_close: closeTime,
         business_days: days,
+        timezone: deviceTimeZone(),
       })
       .eq("id", shop!.id);
 

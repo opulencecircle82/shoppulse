@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, ChevronDown, MapPin, MessageCircle, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { BadgeCheck, ChevronDown, MapPin, MessageCircle, Moon, Phone, ShieldCheck, UserRound } from "lucide-react";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { openCustomerChatForEmail, type CustomerChatTarget } from "@/lib/chat/chat";
 import { describeJob, firstName, jobLabel, TONE_CLASSES } from "@/lib/dashboard/jobStatus";
@@ -90,6 +90,11 @@ export default function JobRow({
                 🚨 EMERGENCY
               </span>
             )}
+            {ticket.after_hours && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue-dark px-2 py-0.5 text-[10px] font-bold text-white">
+                <Moon className="h-3 w-3" /> NIGHT SHIFT
+              </span>
+            )}
           </div>
           <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-700">
             <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -99,6 +104,15 @@ export default function JobRow({
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
             <span className="min-w-0 break-words">{ticket.service_address}</span>
           </p>
+          {ticket.after_hours && (
+            <p className="mt-2 rounded-lg bg-brand-blue/10 px-3 py-2 text-xs text-brand-blue-dark">
+              {ticket.assigned_staff_id && ticket.staff_accepted_at
+                ? `Came in after hours — ${technician ? firstName(technician.full_name) : "a night-shift technician"} accepted it on the night shift (recorded, no approval needed).`
+                : ticket.status === "PENDING" || ticket.status === "UNASSIGNED"
+                  ? "Came in after hours — waiting for a night-shift technician to accept it."
+                  : "Came in after hours."}
+            </p>
+          )}
           {cancelled && (
             <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
               <p>

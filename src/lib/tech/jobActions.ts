@@ -10,12 +10,16 @@ export type NearbyEmergencyJob = {
   serviceAddress: string;
   description: string | null;
   createdAt: string;
-  distanceKm: number;
+  /** Null when the technician's own position isn't known (a night-shift technician's phone may have been asleep). */
+  distanceKm: number | null;
+  /** Came in while the shop was closed — the night shift's to answer. */
+  afterHours: boolean;
 };
 
 /** Unclaimed emergency bookings within 5km of this technician's own
  * last live-location ping — empty if they haven't pinged recently
- * (the RPC treats that as "not currently online"). */
+ * (the RPC treats that as "not currently online"). A technician on the night
+ * shift also gets every after-hours emergency, wherever they are. */
 export async function listNearbyEmergencyJobs(): Promise<NearbyEmergencyJob[]> {
   const { data, error } = await supabase.rpc("list_nearby_emergency_jobs");
   if (error) throw error;
@@ -26,7 +30,8 @@ export async function listNearbyEmergencyJobs(): Promise<NearbyEmergencyJob[]> {
     service_address: string;
     description: string | null;
     created_at: string;
-    distance_km: number;
+    distance_km: number | null;
+    after_hours: boolean;
   }[]).map((row) => ({
     id: row.id,
     clientName: row.client_name,
@@ -35,6 +40,7 @@ export async function listNearbyEmergencyJobs(): Promise<NearbyEmergencyJob[]> {
     description: row.description,
     createdAt: row.created_at,
     distanceKm: row.distance_km,
+    afterHours: row.after_hours === true,
   }));
 }
 
