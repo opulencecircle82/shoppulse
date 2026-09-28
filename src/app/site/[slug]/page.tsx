@@ -196,7 +196,7 @@ export default function ShopWebsitePage() {
                 </span>
               )}
               <h1
-                className="mt-1.5 truncate text-2xl font-bold sm:text-3xl"
+                className="mt-1.5 line-clamp-2 text-2xl font-bold leading-tight sm:text-3xl"
                 style={{ color: colors.heading }}
               >
                 {shop.shop_name}
@@ -260,15 +260,15 @@ export default function ShopWebsitePage() {
 
         <div className="mt-6 flex flex-wrap gap-4 text-sm" style={{ color: colors.body }}>
           {shop.address && (
-            <p className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4" style={{ color: displayShop.accent_color_hex }} />
+            <p className="flex items-start gap-1.5">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0" style={{ color: displayShop.accent_color_hex }} />
               {shop.address}
               {shop.city ? `, ${shop.city}` : ""}
             </p>
           )}
           {hasHours && (
             <p className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" style={{ color: displayShop.accent_color_hex }} />
+              <Clock className="h-4 w-4 shrink-0" style={{ color: displayShop.accent_color_hex }} />
               {shop.business_hours_open}–{shop.business_hours_close}
               <span
                 className={`ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ImageUp, Loader2 } from "lucide-react";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
+import BuilderPaneToggle, { type BuilderPane } from "@/components/dashboard/BuilderPaneToggle";
 import { supabase } from "@/lib/supabase/client";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import {
@@ -77,6 +78,7 @@ export default function WebsiteCustomizePage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
+  const [pane, setPane] = useState<BuilderPane>("edit");
 
   function loadFromShop() {
     if (!shop) return;
@@ -280,7 +282,7 @@ export default function WebsiteCustomizePage() {
     contrastRatio(primaryColor, "#FFFFFF") < 3 || contrastRatio(accentColor, "#FFFFFF") < 3;
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-white">
+    <main className="flex h-dvh flex-col overflow-hidden bg-white">
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <Link href="/dashboard" className="text-slate-500 transition-colors hover:text-slate-900">
@@ -290,7 +292,7 @@ export default function WebsiteCustomizePage() {
             SP
           </span>
           <h1 className="shrink-0 text-base font-bold text-slate-900">Customize Website</h1>
-          <span className="truncate text-sm text-slate-500">{shop.shop_name}</span>
+          <span className="hidden truncate text-sm text-slate-500 sm:inline">{shop.shop_name}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
@@ -319,11 +321,30 @@ export default function WebsiteCustomizePage() {
         </div>
       </header>
 
-      <div className="grid flex-1 overflow-hidden md:grid-cols-[300px_1fr]">
+      <BuilderPaneToggle pane={pane} onChange={setPane} />
+
+      {(error || success) && (
+        <div className="shrink-0 space-y-2 border-b border-slate-200 px-5 py-3">
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
+              {error}
+            </p>
+          )}
+          {success && (
+            <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
+              Saved — your website is now live with this design.
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="grid flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden md:grid-cols-[300px_1fr]">
         <form
           id="website-form"
           onSubmit={handleSubmit}
-          className="space-y-6 overflow-y-auto border-b border-slate-200 p-5 md:border-b-0 md:border-r"
+          className={`space-y-6 overflow-y-auto border-b border-slate-200 p-5 md:block md:border-b-0 md:border-r ${
+            pane === "edit" ? "" : "hidden"
+          }`}
         >
           <section>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -570,19 +591,9 @@ export default function WebsiteCustomizePage() {
             )}
           </section>
 
-          {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-          {success && (
-            <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
-              Saved — your website is now live with this design.
-            </p>
-          )}
         </form>
 
-        <div className="overflow-y-auto bg-slate-100 p-6">
+        <div className={`overflow-y-auto bg-slate-100 p-4 sm:p-6 md:block ${pane === "preview" ? "" : "hidden"}`}>
           <div className="mx-auto flex max-w-3xl items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               ● Live Preview

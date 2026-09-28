@@ -109,7 +109,7 @@ export default function EditStaffModal({
   if (savedPassword) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+        <div className="max-h-[90vh] overflow-y-auto w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900">Password reset</h2>
             <button

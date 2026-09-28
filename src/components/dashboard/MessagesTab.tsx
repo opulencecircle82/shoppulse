@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageCircle, Plus } from "lucide-react";
 import type { StaffMember } from "@/lib/supabase/types";
 import {
@@ -51,6 +51,16 @@ export default function MessagesTab({
   const [customerConvos, setCustomerConvos] = useState<ShopCustomerConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SelectedThread | null>(null);
+  // Phones show either the conversation list or one open chat (never both stacked);
+  // wide screens show them side by side and ignore this.
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const chatPanelRef = useRef<HTMLDivElement>(null);
+
+  // On a phone, bring the chat that just opened up under the pinned tab bar.
+  useEffect(() => {
+    if (!mobileChatOpen || !window.matchMedia("(max-width: 1023px)").matches) return;
+    chatPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [mobileChatOpen]);
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
 
@@ -129,6 +139,7 @@ export default function MessagesTab({
     const conversationId =
       row.conversationId ?? (await ensureStaffConversation(row.staffMemberId));
     setSelected({ kind: "staff", conversationId, name: row.name });
+    setMobileChatOpen(true);
   }
 
   async function handleSelectNewCustomer(customer: ShopCustomer) {
@@ -141,6 +152,7 @@ export default function MessagesTab({
         name: customer.fullName,
         customerId: customer.customerId,
       });
+      setMobileChatOpen(true);
       setShowNewMessage(false);
       load();
     } finally {
@@ -152,7 +164,7 @@ export default function MessagesTab({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
-      <div className="space-y-4">
+      <div className={`space-y-4 ${mobileChatOpen ? "hidden lg:block" : ""}`}>
         {loading ? (
           <p className="text-sm text-slate-500">Loading conversations...</p>
         ) : !hasAnyConversations && !isOwner ? (
@@ -235,14 +247,15 @@ export default function MessagesTab({
                     <button
                       key={c.conversationId}
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         setSelected({
                           kind: "customer",
                           conversationId: c.conversationId,
                           name: c.customerName,
                           customerId: c.customerId,
-                        })
-                      }
+                        });
+                        setMobileChatOpen(true);
+                      }}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
                         selected?.conversationId === c.conversationId
                           ? "bg-brand-blue/15"
@@ -279,9 +292,21 @@ export default function MessagesTab({
         )}
       </div>
 
-      <div className="flex h-[600px] flex-col">
+      <div
+        ref={chatPanelRef}
+        className={`h-[calc(100dvh-13rem)] min-h-[420px] scroll-mt-20 flex-col lg:h-[600px] ${
+          mobileChatOpen ? "flex" : "hidden lg:flex"
+        }`}
+      >
         {selected ? (
           <>
+            <button
+              type="button"
+              onClick={() => setMobileChatOpen(false)}
+              className="mb-2 shrink-0 self-start text-sm font-semibold text-brand-blue lg:hidden"
+            >
+              ← All conversations
+            </button>
             {selected.kind === "customer" && (
               <div className="shrink-0">
                 <CustomerProfilePanel key={selected.customerId} customerId={selected.customerId} />

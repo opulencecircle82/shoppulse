@@ -92,7 +92,7 @@ export default function CustomizeMobileAppTab({ shop }: { shop: Shop; onSaved?: 
             website, wherever).
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="flex max-w-full flex-wrap gap-2">
           <button
             type="button"
             onClick={copyBookingLink}

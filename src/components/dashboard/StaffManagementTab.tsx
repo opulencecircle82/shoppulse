@@ -98,8 +98,54 @@ export default function StaffManagementTab({
     onChanged();
   }
 
+  function renderActions(member: StaffMember, align: string) {
+    return (
+      <div className={`flex flex-wrap gap-2 ${align}`}>
+        <button
+          type="button"
+          onClick={() => setHistoryStaff(member)}
+          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          View Job History
+        </button>
+        <button
+          type="button"
+          onClick={() => setEditingStaff(member)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          <Pencil className="h-3 w-3" />
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => forceLogout(member)}
+          disabled={loggingOutId === member.id}
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-amber-400 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <LogOut className="h-3 w-3" />
+          {loggingOutId === member.id ? "Logging out..." : "Force Logout"}
+        </button>
+        <button
+          type="button"
+          onClick={() => toggleActive(member)}
+          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+        >
+          {member.is_active ? "Deactivate" : "Activate"}
+        </button>
+        <button
+          type="button"
+          onClick={() => deleteStaff(member)}
+          disabled={deletingId === member.id}
+          className="rounded-full border border-red-500/40 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:border-red-500 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {deletingId === member.id ? "Removing..." : "Delete"}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="@container">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="rounded-2xl bg-white border border-slate-200/70 px-5 py-3 shadow-md shadow-slate-900/5">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -144,8 +190,66 @@ export default function StaffManagementTab({
         </div>
       )}
 
+      {/* Phones get one card per person — a 7-column table would hide the
+          action buttons off-screen to the right. */}
       {!loading && nonOwnerStaff.length > 0 && (
-        <div className="mt-6 overflow-x-auto rounded-2xl shadow-md shadow-slate-900/5">
+        <div className="mt-6 space-y-3 @3xl:hidden">
+          {nonOwnerStaff.map((member) => (
+            <div
+              key={member.id}
+              className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-md shadow-slate-900/5"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-900">{member.full_name}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {member.role} · ${member.hourly_rate.toFixed(2)}/hr
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    member.is_active
+                      ? "bg-brand-emerald/15 text-brand-emerald-dark"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {member.is_active ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <dl className="mt-3 space-y-1.5 text-sm text-slate-600">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">App login</dt>
+                  <dd className="min-w-0 truncate font-medium text-slate-900">
+                    {member.username ?? "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Email</dt>
+                  <dd className="min-w-0 truncate">{member.email}</dd>
+                </div>
+                {member.phone && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-500">Phone</dt>
+                    <dd>{member.phone}</dd>
+                  </div>
+                )}
+                {member.address && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-500">Address</dt>
+                    <dd className="min-w-0 text-right">{member.address}</dd>
+                  </div>
+                )}
+              </dl>
+              <div className="mt-4 border-t border-slate-100 pt-3">
+                {renderActions(member, "justify-start")}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && nonOwnerStaff.length > 0 && (
+        <div className="mt-6 hidden overflow-x-auto rounded-2xl shadow-md shadow-slate-900/5 @3xl:block">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
@@ -194,49 +298,7 @@ export default function StaffManagementTab({
                     </span>
                   </td>
                   <td className="min-w-[200px] px-3 py-3 text-right">
-                    {member.role !== "OWNER" && (
-                      <div className="flex flex-wrap justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setHistoryStaff(member)}
-                          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
-                        >
-                          View Job History
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingStaff(member)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
-                        >
-                          <Pencil className="h-3 w-3" />
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => forceLogout(member)}
-                          disabled={loggingOutId === member.id}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-amber-400 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          <LogOut className="h-3 w-3" />
-                          {loggingOutId === member.id ? "Logging out..." : "Force Logout"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleActive(member)}
-                          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
-                        >
-                          {member.is_active ? "Deactivate" : "Activate"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteStaff(member)}
-                          disabled={deletingId === member.id}
-                          className="rounded-full border border-red-500/40 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:border-red-500 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {deletingId === member.id ? "Removing..." : "Delete"}
-                        </button>
-                      </div>
-                    )}
+                    {member.role !== "OWNER" && renderActions(member, "justify-end")}
                   </td>
                 </tr>
               ))}

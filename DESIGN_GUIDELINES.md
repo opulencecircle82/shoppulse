@@ -164,6 +164,41 @@ specifically for anything added to a header icon row or a dense list row.
 - Sub-screens (job detail, messages thread, settings) get their own
   `← Back` header — don't nest them inside the home screen's chrome.
 
+### Owner dashboard and shop website on a phone
+
+Owners run their business from a phone, so the dashboard, its sub-pages and
+the public shop site (`/site/[slug]`) must be checked at 390px too — no
+sideways page scroll, nothing cut off, nothing that needs a mouse. The rules
+that make it work:
+
+- **Page padding** shrinks on phones: `px-4 py-4 sm:px-6 sm:py-10 lg:px-8`.
+  Header buttons stay on one line (`whitespace-nowrap`; "Business Settings"
+  shortens to "Settings" below `sm`).
+- **Section tabs** (dashboard, Settings) are one horizontally scrolling pill
+  strip. The dashboard's strip is `sticky top-0 z-30` and scrolls the open tab
+  to the centre, so it is always reachable and never half off-screen.
+- **Wide tables become cards.** A table that needs more than ~600px (Staff)
+  renders one card per row and keeps every action button visible. Switch with
+  container queries (`@container` on the block, `@3xl:` on the table) — not
+  `md:` — because the live-map column changes how much room the block really has.
+- **Master/detail on phones.** Two-pane screens (Messages) show the list *or*
+  the open chat, with a `← All conversations` link; side by side from `lg`.
+- **Builder pages** (App Builder, Website Builder) are full-screen `h-dvh`
+  editors. On a phone an `Edit | Live Preview` switch
+  (`BuilderPaneToggle.tsx`) shows one pane at a time; from `md` both sit side by
+  side. Save / error messages sit under the header so they show in both panes.
+- **Modals** are `max-h-[90vh] overflow-y-auto` with `px-4` side margin, so a tall
+  form can always be scrolled to its submit button. Two-column field pairs
+  stack (`grid-cols-1 sm:grid-cols-2`) when the fields hold names, emails or
+  free text; short numeric pairs may stay side by side.
+- **Dropdowns** hang from the trigger's right edge on wide screens
+  (`sm:right-0`) but from its left edge on phones (`left-0 max-w-[calc(100vw-3rem)]`)
+  when the trigger sits at the left of a wrapped row (the notification bell).
+- **Leaflet maps** live inside an `isolate` container so their high z-indexes can
+  never paint over the sticky tab strip.
+- **Shop website**: shop name may wrap to two lines (never `truncate`), and
+  icons next to wrapping text are `shrink-0`.
+
 ## Components
 
 - **Primary CTA button (tech and customer apps)**: `rounded-full bg-gradient-to-r from-amber-400

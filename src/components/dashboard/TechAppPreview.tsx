@@ -146,7 +146,7 @@ function PhoneScreen({ shop, dark, children }: { shop: Shop; dark: boolean; chil
  */
 export default function TechAppPreview({ shop, dark }: { shop: Shop; dark: boolean }) {
   return (
-    <div className="flex flex-wrap gap-6">
+    <div className="flex flex-wrap justify-center gap-6 md:justify-start">
       <PhoneFrame label="Home">
         <PhoneScreen shop={shop} dark={dark}>
           <TechHomeScreen

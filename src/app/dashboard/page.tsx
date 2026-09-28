@@ -83,12 +83,25 @@ export default function DashboardPage() {
   const [proofTicket, setProofTicket] = useState<JobTicket | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const unreadRef = useRef(0);
+  const tabStripRef = useRef<HTMLDivElement>(null);
   const pendingBookingRequests = tickets.filter((t) => t.status === "PENDING").length;
   // Only the very first load hides the board. Later refreshes (after accepting
   // a request, a new booking arriving...) keep it on screen, so the tab the
   // owner is looking at doesn't snap back to the default.
   const boardLoading =
     (ticketsLoading && tickets.length === 0) || (staffLoading && staff.length === 0);
+
+  // The phone tab strip scrolls sideways — keep the open tab centered in view
+  // (otherwise tapping "Reviews" could leave it half off-screen).
+  useEffect(() => {
+    const strip = tabStripRef.current;
+    const current = strip?.querySelector<HTMLElement>('[data-active="true"]');
+    if (!strip || !current) return;
+    strip.scrollTo({
+      left: current.offsetLeft - (strip.clientWidth - current.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [activeTab]);
 
   useEffect(() => {
     if (!staffMember) return;
@@ -175,8 +188,8 @@ export default function DashboardPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-brand-page">
-      <div className="mx-auto w-full max-w-[1600px] flex-1 px-6 py-10 lg:px-8">
-        <div className="relative flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-6 sm:px-8">
+      <div className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-4 sm:px-6 sm:py-10 lg:px-8">
+        <div className="relative flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-slate-200 bg-white px-5 py-5 sm:gap-4 sm:px-8 sm:py-6">
           {/* Clipped in its own layer, not on the header itself — the
               header needs to stay overflow-visible so the notification
               dropdown below isn't cut off. */}
@@ -187,9 +200,9 @@ export default function DashboardPage() {
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange-dark">
               Owner Command Center
             </span>
-            <h1 className="mt-2 text-2xl font-bold text-slate-900">{shop.shop_name}</h1>
+            <h1 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">{shop.shop_name}</h1>
           </div>
-          <div className="relative flex items-center gap-3">
+          <div className="relative flex items-center gap-2 sm:gap-3">
             {staffMember && (
               <NotificationBell
                 staffId={staffMember.id}
@@ -206,14 +219,15 @@ export default function DashboardPage() {
             )}
             <Link
               href="/dashboard/settings"
-              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+              className="whitespace-nowrap rounded-full border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 sm:px-4"
             >
-              Business Settings
+              <span className="sm:hidden">Settings</span>
+              <span className="hidden sm:inline">Business Settings</span>
             </Link>
             <button
               type="button"
               onClick={handleSignOut}
-              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-red-400 hover:text-red-500"
+              className="whitespace-nowrap rounded-full border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-red-400 hover:text-red-500 sm:px-4"
             >
               Sign Out
             </button>
@@ -231,40 +245,48 @@ export default function DashboardPage() {
           {/* Every tab wrapper below opens with mt-6; pull the column up on
               desktop so the first visible block lines up with the sidebar. */}
           <div className="min-w-0 flex-1 lg:-mt-6">
-            <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
-              {DASHBOARD_TABS.map((tab) => {
-                const hasUnread =
-                  (tab.id === "messages" && unreadMessages > 0) ||
-                  (tab.id === "board" && pendingBookingRequests > 0);
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                      activeTab === tab.id
-                        ? "bg-brand-blue text-white shadow-md shadow-brand-blue/25"
-                        : hasUnread
-                          ? "bg-red-500/10 text-slate-900"
-                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                    }`}
-                  >
-                    {tab.label}
-                    {hasUnread && (
-                      <span className="absolute -right-1 -top-1 flex h-3 w-3">
-                        <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
-                        <span className="relative h-3 w-3 rounded-full bg-red-500" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-              <Link
-                href="/dashboard/settings"
-                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            {/* Phone/tablet tab strip: stays pinned while scrolling so the owner
+                can hop between sections without going back to the top. */}
+            <div className="sticky top-0 z-30 -mx-4 bg-brand-page/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+              <div
+                ref={tabStripRef}
+                className="relative flex gap-2 overflow-x-auto pb-1 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
-                Business Settings
-              </Link>
+                {DASHBOARD_TABS.map((tab) => {
+                  const hasUnread =
+                    (tab.id === "messages" && unreadMessages > 0) ||
+                    (tab.id === "board" && pendingBookingRequests > 0);
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      data-active={activeTab === tab.id}
+                      className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        activeTab === tab.id
+                          ? "bg-brand-blue text-white shadow-md shadow-brand-blue/25"
+                          : hasUnread
+                            ? "bg-red-500/10 text-slate-900"
+                            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
+                    >
+                      {tab.label}
+                      {hasUnread && (
+                        <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                          <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
+                          <span className="relative h-3 w-3 rounded-full bg-red-500" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                <Link
+                  href="/dashboard/settings"
+                  className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                >
+                  Business Settings
+                </Link>
+              </div>
             </div>
 
             {TAB_DESCRIPTIONS[activeTab] && (

@@ -17,7 +17,7 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10">
+      <div className="max-h-[90vh] overflow-y-auto w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10">
         <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-slate-900">{title}</p>
           <button type="button" onClick={onClose} className="text-slate-500 hover:text-slate-900">

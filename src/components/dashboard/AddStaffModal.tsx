@@ -79,12 +79,12 @@ export default function AddStaffModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 sm:px-6"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
+        className="max-h-[90vh] overflow-y-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
       >
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold text-slate-900">
@@ -186,7 +186,7 @@ export default function AddStaffModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-slate-500">
                 Username
@@ -216,7 +216,7 @@ export default function AddStaffModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-slate-500">
                 Email

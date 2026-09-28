@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
+import BuilderPaneToggle, { type BuilderPane } from "@/components/dashboard/BuilderPaneToggle";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
 import type { AppTheme } from "@/lib/hooks/useAppTheme";
@@ -225,6 +226,7 @@ function AppBuilder({ shop, onSaved }: { shop: Shop; onSaved: () => void }) {
   const [showPrices, setShowPrices] = useState(shop.show_job_prices_to_techs);
   const [allowAdditions, setAllowAdditions] = useState(shop.allow_onsite_quote_additions);
 
+  const [pane, setPane] = useState<BuilderPane>("edit");
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -382,7 +384,7 @@ function AppBuilder({ shop, onSaved }: { shop: Shop; onSaved: () => void }) {
     primaryColor.toUpperCase() === UNCHOSEN_PRIMARY && accentColor.toUpperCase() === UNCHOSEN_ACCENT;
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-white">
+    <main className="flex h-dvh flex-col overflow-hidden bg-white">
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <Link href="/dashboard" className="text-slate-500 transition-colors hover:text-slate-900" aria-label="Back to dashboard">
@@ -392,7 +394,7 @@ function AppBuilder({ shop, onSaved }: { shop: Shop; onSaved: () => void }) {
             SP
           </span>
           <h1 className="shrink-0 text-base font-bold text-slate-900">Customize Tech App</h1>
-          <span className="truncate text-sm text-slate-500">{shop.shop_name}</span>
+          <span className="hidden truncate text-sm text-slate-500 sm:inline">{shop.shop_name}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
@@ -421,11 +423,29 @@ function AppBuilder({ shop, onSaved }: { shop: Shop; onSaved: () => void }) {
         </div>
       </header>
 
-      <div className="grid flex-1 overflow-hidden md:grid-cols-[400px_1fr]">
+      <BuilderPaneToggle pane={pane} onChange={setPane} />
+
+      {(error || success) && (
+        <div className="shrink-0 space-y-2 border-b border-slate-200 px-5 py-3">
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">{error}</p>
+          )}
+          {success && (
+            <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
+              Saved — technicians get the changes within about 20 seconds while their app is open, or
+              the next time they open it.
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="grid flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden md:grid-cols-[400px_1fr]">
         <form
           id="app-builder-form"
           onSubmit={handleSubmit}
-          className="space-y-8 overflow-y-auto border-b border-slate-200 p-5 md:border-b-0 md:border-r"
+          className={`space-y-8 overflow-y-auto border-b border-slate-200 p-5 md:block md:border-b-0 md:border-r ${
+            pane === "edit" ? "" : "hidden"
+          }`}
         >
           <Section
             icon={Palette}
@@ -687,18 +707,9 @@ function AppBuilder({ shop, onSaved }: { shop: Shop; onSaved: () => void }) {
             />
           </Section>
 
-          {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">{error}</p>
-          )}
-          {success && (
-            <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
-              Saved — technicians get the changes within about 20 seconds while their app is open, or
-              the next time they open it.
-            </p>
-          )}
         </form>
 
-        <div className="overflow-y-auto bg-slate-100 p-6">
+        <div className={`overflow-y-auto bg-slate-100 p-4 sm:p-6 md:block ${pane === "preview" ? "" : "hidden"}`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Live Preview</p>
           <p className="mt-1 max-w-xl text-xs text-slate-500">
             These are the real technician screens with sample jobs, so what you see is what your team
