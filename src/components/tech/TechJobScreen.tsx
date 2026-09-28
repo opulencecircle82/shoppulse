@@ -349,6 +349,7 @@ export default function TechJobScreen({
 
               <div className="mt-4">
                 <SelectedProductsPicker
+                  theme="dark"
                   shopId={shop.id}
                   currency={shop.currency}
                   selectedProducts={quoteProducts}

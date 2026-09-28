@@ -118,16 +118,16 @@ export default function InvoiceGeneratorModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-6"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl border border-white/10 bg-brand-navy p-6 shadow-2xl shadow-black/40"
+        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-slate-900">
               Generate Invoice
             </h3>
             <p className="text-xs text-slate-500">{ticket.client_name}</p>
@@ -135,21 +135,21 @@ export default function InvoiceGeneratorModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-500 hover:text-slate-900"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        <div className="mt-5 inline-flex rounded-full border border-white/20 bg-white/5 p-1">
+        <div className="mt-5 inline-flex rounded-full border border-slate-300 bg-slate-50 p-1">
           <button
             type="button"
             onClick={() => setMode("hourly")}
             className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
               mode === "hourly"
                 ? "bg-brand-blue text-white"
-                : "text-slate-400 hover:text-white"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Hourly Rate Billing
@@ -160,7 +160,7 @@ export default function InvoiceGeneratorModal({
             className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
               mode === "flat"
                 ? "bg-brand-blue text-white"
-                : "text-slate-400 hover:text-white"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Flat-Rate Job Billing
@@ -171,7 +171,7 @@ export default function InvoiceGeneratorModal({
           <div className="mt-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Actual Hours
                 </label>
                 <input
@@ -180,11 +180,11 @@ export default function InvoiceGeneratorModal({
                   step={0.25}
                   value={actualHours}
                   onChange={(e) => setActualHours(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-medium text-slate-500">
                   Hourly Rate ({currency})
                 </label>
                 <input
@@ -193,14 +193,14 @@ export default function InvoiceGeneratorModal({
                   step={0.5}
                   value={hourlyRate}
                   onChange={(e) => setHourlyRate(Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
               </div>
             </div>
           </div>
         ) : (
           <div className="mt-5">
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Flat Rate Amount ({currency})
             </label>
             <input
@@ -209,16 +209,16 @@ export default function InvoiceGeneratorModal({
               step={1}
               value={flatAmount}
               onChange={(e) => setFlatAmount(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
         )}
 
         {ticket.selected_products.length > 0 && (
-          <div className="mt-4 space-y-1 rounded-lg bg-white/5 px-4 py-3">
-            <p className="text-xs font-medium text-slate-400">Products</p>
+          <div className="mt-4 space-y-1 rounded-lg bg-slate-50 px-4 py-3">
+            <p className="text-xs font-medium text-slate-500">Products</p>
             {ticket.selected_products.map((item, index) => (
-              <div key={index} className="flex justify-between text-xs text-slate-300">
+              <div key={index} className="flex justify-between text-xs text-slate-600">
                 <span>{item.name}</span>
                 <span>
                   {currency} {(item.price * item.quantity).toFixed(2)}
@@ -230,7 +230,7 @@ export default function InvoiceGeneratorModal({
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Service Fee ({currency})
             </label>
             <input
@@ -239,11 +239,11 @@ export default function InvoiceGeneratorModal({
               step={0.5}
               value={serviceFee}
               onChange={(e) => setServiceFee(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Tax ({currency})
             </label>
             <input
@@ -252,20 +252,20 @@ export default function InvoiceGeneratorModal({
               step={0.5}
               value={taxAmount}
               onChange={(e) => setTaxAmount(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between rounded-lg bg-white/5 px-4 py-3">
-          <span className="text-sm text-slate-400">Total Invoice</span>
-          <span className="text-lg font-bold text-brand-emerald">
+        <div className="mt-5 flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
+          <span className="text-sm text-slate-500">Total Invoice</span>
+          <span className="text-lg font-bold text-brand-emerald-dark">
             {currency} {total.toFixed(2)}
           </span>
         </div>
 
         {error && (
-          <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+          <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
             {error}
           </p>
         )}
@@ -275,7 +275,7 @@ export default function InvoiceGeneratorModal({
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-white/20 px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download className="h-4 w-4" />
             {downloading ? "..." : "PNG"}

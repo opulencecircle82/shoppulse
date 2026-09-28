@@ -66,12 +66,12 @@ export default function BusinessWebsiteCard({
   }
 
   return (
-    <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5">
       <div className="flex items-center gap-2">
         <Globe className="h-4 w-4 text-brand-blue" />
-        <h3 className="text-sm font-semibold text-white">Your Business Website</h3>
+        <h3 className="text-sm font-semibold text-slate-900">Your Business Website</h3>
       </div>
-      <p className="mt-1 text-xs text-slate-400">
+      <p className="mt-1 text-xs text-slate-500">
         A free public page for {shop.shop_name} — share it anywhere. Uses a
         stock photo matched to your category until you upload your own header.
       </p>
@@ -80,14 +80,14 @@ export default function BusinessWebsiteCard({
         href={siteUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 flex items-center gap-3 rounded-xl bg-white/5 p-2.5 transition-colors hover:bg-white/10"
+        className="mt-3 flex items-center gap-3 rounded-xl bg-slate-50 p-2.5 transition-colors hover:bg-slate-100"
       >
         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={previewUrl} alt="" className="h-full w-full object-cover" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{shop.shop_name}</p>
+          <p className="truncate text-sm font-semibold text-slate-900">{shop.shop_name}</p>
           <p className="truncate text-xs text-brand-blue">
             {siteUrl.replace(/^https?:\/\//, "")}
           </p>
@@ -108,7 +108,7 @@ export default function BusinessWebsiteCard({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <label
           htmlFor={headerInputId}
-          className={`inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue ${
+          className={`inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue ${
             uploading ? "pointer-events-none opacity-60" : "cursor-pointer"
           }`}
         >
@@ -126,22 +126,22 @@ export default function BusinessWebsiteCard({
 
         <Link
           href="/dashboard/website"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+          className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           <Palette className="h-3.5 w-3.5" />
           Customize
         </Link>
       </div>
 
-      {uploadError && <p className="mt-2 text-xs text-red-400">{uploadError}</p>}
+      {uploadError && <p className="mt-2 text-xs text-red-600">{uploadError}</p>}
 
       {!compact && (
-        <div className="mt-4 border-t border-white/10 pt-3">
+        <div className="mt-4 border-t border-slate-200 pt-3">
           <label className="flex items-center justify-between text-xs">
-            <span className="font-semibold uppercase tracking-wide text-slate-400">
+            <span className="font-semibold uppercase tracking-wide text-slate-500">
               Live Website Preview
             </span>
-            <span className="flex items-center gap-2 text-slate-400">
+            <span className="flex items-center gap-2 text-slate-500">
               {showPreview ? "Hide" : "Show"}
               <input
                 type="checkbox"
@@ -153,7 +153,7 @@ export default function BusinessWebsiteCard({
           </label>
 
           {showPreview && (
-            <div className="mt-2 overflow-hidden rounded-xl border border-white/10 bg-white">
+            <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white">
               {/* The real /site/[slug] page, not a mockup — always accurate,
                   can't drift out of sync with what a visitor actually sees.
                   Fixed height + overflow-hidden shows just the top, like a

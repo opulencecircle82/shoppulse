@@ -221,7 +221,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
     : DEFAULT_CENTER;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl shadow-md shadow-black/20">
+    <div className="relative overflow-hidden rounded-2xl shadow-md shadow-slate-900/5">
       <MapContainer
         center={center}
         zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
@@ -249,7 +249,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
               <Popup>
                 <p className="font-semibold">Client: {pin.client_name}</p>
                 {pin.staff_name && (
-                  <p className="text-xs text-slate-300">Tech: {pin.staff_name}</p>
+                  <p className="text-xs text-slate-600">Tech: {pin.staff_name}</p>
                 )}
                 <p className="text-xs">{pin.service_address}</p>
                 <p className="text-xs">{pin.status}</p>
@@ -270,11 +270,11 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
             </Tooltip>
             <Popup>
               <p className="font-semibold">Tech: {live.staffName}</p>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-600">
                 Live position — app currently open
               </p>
               {live.accuracy !== null && (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   Accuracy: ±{Math.round(live.accuracy)}m
                 </p>
               )}
@@ -290,7 +290,7 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
         <button
           type="button"
           onClick={() => setRecenterSignal((n) => n + 1)}
-          className="absolute right-3 top-3 z-[1000] rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md shadow-black/20 hover:text-brand-blue"
+          className="absolute right-3 top-3 z-[1000] rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-md shadow-slate-900/5 hover:text-brand-blue"
         >
           Recenter
         </button>
@@ -298,13 +298,13 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
 
       {!loading && !hasAnyPoint && (
         <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-slate-900/20">
-          <div className="pointer-events-auto mx-6 max-w-sm rounded-2xl bg-white px-6 py-5 text-center shadow-2xl shadow-black/40">
+          <div className="pointer-events-auto mx-6 max-w-sm rounded-2xl bg-white px-6 py-5 text-center shadow-2xl shadow-slate-900/10">
             <p className="text-sm font-semibold text-slate-900">
               No staff pins yet
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
               A pin appears here once a technician clocks in/out on a job
-              (live camera + GPS capture), or an orange live dot shows while
+              (live camera + GPS capture), or a green live marker shows while
               they have the mobile app open.
             </p>
           </div>

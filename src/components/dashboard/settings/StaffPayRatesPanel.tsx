@@ -39,9 +39,9 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-brand-blue/20 bg-white/5 p-5 shadow-md shadow-black/20"
+      className="rounded-2xl border border-brand-blue/20 bg-white p-5 shadow-md shadow-slate-900/5"
     >
-      <p className="text-sm font-semibold text-white">Default Billing Rate</p>
+      <p className="text-sm font-semibold text-slate-900">Default Billing Rate</p>
       <p className="mt-1 text-xs text-slate-500">
         What you charge customers by default &mdash; used to auto-compute the
         invoice when a job is approved. Separate from each technician&apos;s
@@ -49,7 +49,7 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
       </p>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Hourly Rate
           </label>
           <input
@@ -58,11 +58,11 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
             step={0.5}
             value={defaultHourlyRate}
             onChange={(e) => setDefaultHourlyRate(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Overtime Multiplier
           </label>
           <input
@@ -71,11 +71,11 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
             step={0.1}
             value={defaultOvertimeMultiplier}
             onChange={(e) => setDefaultOvertimeMultiplier(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Service Fee
           </label>
           <input
@@ -84,14 +84,14 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
             step={0.5}
             value={defaultServiceFee}
             onChange={(e) => setDefaultServiceFee(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <p className="mt-1 text-[11px] text-slate-500">
             Flat call-out charge added to every job.
           </p>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Warranty Period (days)
           </label>
           <input
@@ -100,7 +100,7 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
             step={1}
             value={warrantyDays}
             onChange={(e) => setWarrantyDays(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
           <p className="mt-1 text-[11px] text-slate-500">
             Starts once you approve a job. Set to 0 to turn off warranties.
@@ -115,7 +115,7 @@ function DefaultBillingRate({ shop, onSaved }: { shop: Shop; onSaved: () => void
         >
           {saving ? "Saving..." : "Save"}
         </button>
-        {saved && <span className="text-xs text-brand-emerald">Saved</span>}
+        {saved && <span className="text-xs text-brand-emerald-dark">Saved</span>}
       </div>
     </form>
   );
@@ -148,17 +148,17 @@ function StaffRow({ member }: { member: StaffMember }) {
   }
 
   return (
-    <div className="rounded-2xl bg-white/5 p-5 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white border border-slate-200/70 p-5 shadow-md shadow-slate-900/5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-slate-900">
             {member.full_name}
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             {member.email} &middot; {member.role}
           </p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className="flex items-center gap-2 text-xs text-slate-500">
           <input
             type="checkbox"
             checked={isActive}
@@ -171,7 +171,7 @@ function StaffRow({ member }: { member: StaffMember }) {
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Hourly Rate
           </label>
           <input
@@ -180,11 +180,11 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.5}
             value={hourlyRate}
             onChange={(e) => setHourlyRate(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Overtime Multiplier
           </label>
           <input
@@ -193,7 +193,7 @@ function StaffRow({ member }: { member: StaffMember }) {
             step={0.1}
             value={overtimeMultiplier}
             onChange={(e) => setOvertimeMultiplier(Number(e.target.value))}
-            className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
       </div>
@@ -208,7 +208,7 @@ function StaffRow({ member }: { member: StaffMember }) {
           {saving ? "Saving..." : "Save"}
         </button>
         {saved && (
-          <span className="text-xs text-brand-emerald">Saved</span>
+          <span className="text-xs text-brand-emerald-dark">Saved</span>
         )}
       </div>
     </div>
@@ -248,14 +248,14 @@ export default function StaffPayRatesPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first to manage staff pay rates.
       </p>
     );
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-400">Loading staff...</p>;
+    return <p className="text-sm text-slate-500">Loading staff...</p>;
   }
 
   return (

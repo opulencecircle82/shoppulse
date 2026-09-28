@@ -27,7 +27,7 @@ type ColorFieldProps = {
 function ColorField({ label, value, onChange }: ColorFieldProps) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400">{label}</label>
+      <label className="block text-xs font-medium text-slate-500">{label}</label>
       <div className="mt-1.5 flex items-center gap-2">
         <input
           type="color"
@@ -35,7 +35,7 @@ function ColorField({ label, value, onChange }: ColorFieldProps) {
           onChange={(e) => onChange(e.target.value)}
           className="h-9 w-11 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
-        <span className="truncate text-xs text-slate-400">{value}</span>
+        <span className="truncate text-xs text-slate-500">{value}</span>
       </div>
     </div>
   );
@@ -201,7 +201,7 @@ export default function WebsiteCustomizePage() {
 
   if (!checked || loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
+      <main className="flex min-h-screen items-center justify-center bg-brand-page">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
@@ -209,14 +209,14 @@ export default function WebsiteCustomizePage() {
 
   if (staffMember && !isOwner) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
-        <h1 className="text-xl font-semibold text-white">Owners only</h1>
-        <p className="mt-2 max-w-sm text-sm text-slate-400">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-page px-6 text-center">
+        <h1 className="text-xl font-semibold text-slate-900">Owners only</h1>
+        <p className="mt-2 max-w-sm text-sm text-slate-500">
           The business website can only be customized by the shop owner.
         </p>
         <Link
           href="/dashboard"
-          className="mt-6 text-sm font-medium text-brand-blue hover:text-blue-400"
+          className="mt-6 text-sm font-medium text-brand-blue hover:text-brand-blue-dark"
         >
           ← Back to dashboard
         </Link>
@@ -226,11 +226,11 @@ export default function WebsiteCustomizePage() {
 
   if (!shop) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
-        <h1 className="text-xl font-semibold text-white">Set up your shop first</h1>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-page px-6 text-center">
+        <h1 className="text-xl font-semibold text-slate-900">Set up your shop first</h1>
         <Link
           href="/dashboard/settings"
-          className="mt-6 text-sm font-medium text-brand-blue hover:text-blue-400"
+          className="mt-6 text-sm font-medium text-brand-blue hover:text-brand-blue-dark"
         >
           ← Business Settings
         </Link>
@@ -280,23 +280,23 @@ export default function WebsiteCustomizePage() {
     contrastRatio(primaryColor, "#FFFFFF") < 3 || contrastRatio(accentColor, "#FFFFFF") < 3;
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-brand-navy">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
+    <main className="flex h-screen flex-col overflow-hidden bg-white">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/dashboard" className="text-slate-400 transition-colors hover:text-white">
+          <Link href="/dashboard" className="text-slate-500 transition-colors hover:text-slate-900">
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-blue text-xs font-bold text-white">
             SP
           </span>
-          <h1 className="shrink-0 text-base font-bold text-white">Customize Website</h1>
+          <h1 className="shrink-0 text-base font-bold text-slate-900">Customize Website</h1>
           <span className="truncate text-sm text-slate-500">{shop.shop_name}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={loadFromShop}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-white/40 hover:text-white"
+            className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
           >
             Reset
           </button>
@@ -312,7 +312,7 @@ export default function WebsiteCustomizePage() {
             href={siteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-brand-emerald/15 px-5 py-2 text-xs font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/25"
+            className="rounded-full bg-brand-emerald/15 px-5 py-2 text-xs font-semibold text-brand-emerald-dark transition-colors hover:bg-brand-emerald/25"
           >
             View Website →
           </a>
@@ -323,7 +323,7 @@ export default function WebsiteCustomizePage() {
         <form
           id="website-form"
           onSubmit={handleSubmit}
-          className="space-y-6 overflow-y-auto border-b border-white/10 p-5 md:border-b-0 md:border-r"
+          className="space-y-6 overflow-y-auto border-b border-slate-200 p-5 md:border-b-0 md:border-r"
         >
           <section>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -348,10 +348,10 @@ export default function WebsiteCustomizePage() {
                       setMutedColor(template.defaultMuted);
                     }}
                     className={`rounded-xl p-2.5 text-left transition-colors ${
-                      isActive ? "bg-white/10 ring-2 ring-brand-blue" : "bg-white/5 hover:bg-white/10"
+                      isActive ? "bg-slate-100 ring-2 ring-brand-blue" : "bg-slate-50 hover:bg-slate-100"
                     }`}
                   >
-                    <p className="truncate text-xs font-semibold text-white">
+                    <p className="truncate text-xs font-semibold text-slate-900">
                       {template.name}
                     </p>
                     <div
@@ -371,7 +371,7 @@ export default function WebsiteCustomizePage() {
                       {templateTags(template).map((tag) => (
                         <span
                           key={tag}
-                          className="rounded bg-black/30 px-1.5 py-0.5 text-[8px] font-semibold tracking-wide text-slate-400"
+                          className="rounded bg-slate-100 px-1.5 py-0.5 text-[8px] font-semibold tracking-wide text-slate-400"
                         >
                           {tag}
                         </span>
@@ -388,7 +388,7 @@ export default function WebsiteCustomizePage() {
               Header Image
             </p>
             <div className="flex items-center gap-3">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white/5">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-50">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={headerUrl || stockPhotoForCategory(shop.business_category)}
@@ -409,7 +409,7 @@ export default function WebsiteCustomizePage() {
                 />
                 <label
                   htmlFor={headerInputId}
-                  className={`inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue ${
                     uploadingHeader ? "pointer-events-none opacity-60" : "cursor-pointer"
                   }`}
                 >
@@ -420,7 +420,7 @@ export default function WebsiteCustomizePage() {
               </div>
             </div>
             {headerUploadError && (
-              <p className="mt-2 text-xs text-red-400">{headerUploadError}</p>
+              <p className="mt-2 text-xs text-red-600">{headerUploadError}</p>
             )}
           </section>
 
@@ -428,7 +428,7 @@ export default function WebsiteCustomizePage() {
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Content
             </p>
-            <label className="block text-xs font-medium text-slate-400">Primary Headline</label>
+            <label className="block text-xs font-medium text-slate-500">Primary Headline</label>
             <p className="mt-0.5 text-[11px] text-slate-500">
               A catchy line, not your business name — shown big at the top of your site.
             </p>
@@ -438,22 +438,22 @@ export default function WebsiteCustomizePage() {
               onChange={(e) => setHeadline(e.target.value)}
               placeholder="e.g. Book Now — We're Quality Field Workers"
               maxLength={80}
-              className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
 
-            <label className="mt-4 block text-xs font-medium text-slate-400">Sub Headline</label>
+            <label className="mt-4 block text-xs font-medium text-slate-500">Sub Headline</label>
             <textarea
               value={subheadline}
               onChange={(e) => setSubheadline(e.target.value)}
               placeholder="e.g. Fast, reliable service you can count on — call us today"
               maxLength={160}
               rows={3}
-              className="mt-1.5 w-full resize-none rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1.5 w-full resize-none rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
 
             {(headline || subheadline) && (
               <div
-                className="mt-3 rounded-xl bg-black/20 px-3.5 py-3"
+                className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3"
                 style={{ fontFamily: `"${fontFamily}", sans-serif` }}
               >
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
@@ -479,11 +479,11 @@ export default function WebsiteCustomizePage() {
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
               Font
             </p>
-            <label className="block text-xs font-medium text-slate-400">Font Family</label>
+            <label className="block text-xs font-medium text-slate-500">Font Family</label>
             <select
               value={fontFamily}
               onChange={(e) => setFontFamily(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
+              className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
             >
               {WEBSITE_FONT_OPTIONS.map((font) => (
                 <option key={font} value={font} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
@@ -493,14 +493,14 @@ export default function WebsiteCustomizePage() {
             </select>
             <p
               style={{ fontFamily: `"${fontFamily}", sans-serif` }}
-              className="mt-2 truncate rounded-lg bg-black/20 px-3 py-2 text-sm text-white"
+              className="mt-2 truncate rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900"
             >
               The quick brown fox — {shop.currency} 1,234.56
             </p>
 
             <div className="mt-4 flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-400">Font Size Scale</label>
-              <span className="text-xs text-slate-400">{fontScale}%</span>
+              <label className="text-xs font-medium text-slate-500">Font Size Scale</label>
+              <span className="text-xs text-slate-500">{fontScale}%</span>
             </div>
             <input
               type="range"
@@ -527,7 +527,7 @@ export default function WebsiteCustomizePage() {
                     type="button"
                     onClick={() => setButtonStyle(style.key)}
                     className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-colors ${
-                      isActive ? "bg-white/10 ring-2 ring-brand-blue" : "hover:bg-white/5"
+                      isActive ? "bg-slate-100 ring-2 ring-brand-blue" : "hover:bg-slate-50"
                     }`}
                   >
                     <span
@@ -536,7 +536,7 @@ export default function WebsiteCustomizePage() {
                     >
                       Go
                     </span>
-                    <span className="text-[9px] font-medium text-slate-300">{style.name}</span>
+                    <span className="text-[9px] font-medium text-slate-600">{style.name}</span>
                   </button>
                 );
               })}
@@ -563,7 +563,7 @@ export default function WebsiteCustomizePage() {
             </div>
 
             {lowContrast && (
-              <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+              <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600">
                 ⚠️ These colors look too close to white — button text may be
                 hard to read.
               </p>
@@ -571,18 +571,18 @@ export default function WebsiteCustomizePage() {
           </section>
 
           {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
               {error}
             </p>
           )}
           {success && (
-            <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald">
+            <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
               Saved — your website is now live with this design.
             </p>
           )}
         </form>
 
-        <div className="overflow-y-auto bg-black/20 p-6">
+        <div className="overflow-y-auto bg-slate-100 p-6">
           <div className="mx-auto flex max-w-3xl items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               ● Live Preview
@@ -598,7 +598,7 @@ export default function WebsiteCustomizePage() {
             src={`${siteUrl}?preview=1`}
             onLoad={sendPreviewTheme}
             title="Website live preview"
-            className="mx-auto mt-3 block w-full max-w-3xl rounded-3xl border-0 shadow-2xl shadow-black/40"
+            className="mx-auto mt-3 block w-full max-w-3xl rounded-3xl border-0 shadow-2xl shadow-slate-900/10"
             style={{ height: 900 }}
           />
         </div>

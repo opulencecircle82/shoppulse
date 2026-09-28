@@ -20,7 +20,7 @@ export default function WhiteLabelPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first.
       </p>
     );
@@ -28,14 +28,14 @@ export default function WhiteLabelPanel({
 
   if (!shop.has_marketing_tier) {
     return (
-      <div className="rounded-2xl bg-white/5 p-8 text-center shadow-md shadow-black/20">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-slate-400">
+      <div className="rounded-2xl bg-white border border-slate-200/70 p-8 text-center shadow-md shadow-slate-900/5">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
           <Lock className="h-5 w-5" />
         </span>
-        <h3 className="mt-4 text-base font-semibold text-white">
+        <h3 className="mt-4 text-base font-semibold text-slate-900">
           Marketing Suite Add-on Required
         </h3>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-400">
+        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
           Unlock a whitelabel hosted business site and the Local Ad Network
           placement engine for +$50/month.
         </p>
@@ -74,25 +74,25 @@ export default function WhiteLabelPanel({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-600">
           Custom Domain
         </label>
         <input
           type="text"
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           placeholder="book.apexpropertyservices.com"
         />
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
           {error}
         </p>
       )}
       {success && (
-        <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald">
+        <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
           Saved.
         </p>
       )}

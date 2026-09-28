@@ -157,27 +157,34 @@ export default function DashboardHomeTab({
 
   return (
     <div className="mt-6 space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white">Welcome back, {firstName}!</h2>
-        <p className="mt-1 text-sm text-slate-400">Here&apos;s how your business is doing.</p>
+      <div className="rounded-3xl bg-gradient-to-r from-brand-blue-dark via-brand-blue to-brand-sky px-6 py-6 text-white shadow-lg shadow-brand-blue/25 sm:px-8">
+        <h2 className="text-xl font-bold">Welcome back, {firstName}!</h2>
+        <p className="mt-1 text-sm text-white/85">Here&apos;s how your business is doing.</p>
+        <button
+          type="button"
+          onClick={() => onSelectTab("board")}
+          className="mt-4 rounded-full bg-white px-4 py-2 text-xs font-bold text-brand-blue-dark shadow-md shadow-brand-blue-dark/20 transition-opacity hover:opacity-90"
+        >
+          Open Job Board
+        </button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-white">This is your FREE website</p>
-              <p className="text-xs text-slate-400">Live now — share it with customers.</p>
+              <p className="text-sm font-semibold text-slate-900">This is your FREE website</p>
+              <p className="text-xs text-slate-500">Live now — share it with customers.</p>
             </div>
             <Link
               href="/dashboard/website"
-              className="text-xs font-semibold text-brand-blue hover:text-blue-400"
+              className="text-xs font-semibold text-brand-blue hover:text-brand-blue-dark"
             >
               Customize →
             </Link>
           </div>
 
-          <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-white">
+          <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-100 px-3 py-2">
               <span className="h-2 w-2 rounded-full bg-red-400" />
               <span className="h-2 w-2 rounded-full bg-amber-400" />
@@ -208,7 +215,7 @@ export default function DashboardHomeTab({
             <button
               type="button"
               onClick={() => onSelectTab("ads")}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
             >
               <Megaphone className="h-3.5 w-3.5" />
               View Ads Preview
@@ -217,8 +224,8 @@ export default function DashboardHomeTab({
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm font-semibold text-white">Active Staff</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="text-sm font-semibold text-slate-900">Active Staff</p>
             {activeStaffList.length === 0 ? (
               <p className="mt-6 text-center text-sm text-slate-500">No active staff yet.</p>
             ) : (
@@ -230,11 +237,11 @@ export default function DashboardHomeTab({
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-blue/15 text-xs font-bold text-brand-blue">
                         {initials(s.full_name)}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-sm text-white">
+                      <span className="min-w-0 flex-1 truncate text-sm text-slate-900">
                         {s.full_name}
                       </span>
                       {onDuty && (
-                        <span className="shrink-0 rounded-full bg-brand-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-brand-emerald">
+                        <span className="shrink-0 rounded-full bg-brand-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-brand-emerald-dark">
                           On Duty
                         </span>
                       )}
@@ -248,13 +255,13 @@ export default function DashboardHomeTab({
           <div
             className={`rounded-2xl border p-5 ${
               tomorrowJobs.length > 0
-                ? "border-amber-500/30 bg-amber-500/10"
-                : "border-white/10 bg-white/5"
+                ? "border-amber-200 bg-amber-50"
+                : "border-slate-200 bg-slate-50"
             }`}
           >
             <div className="flex items-center gap-1.5">
-              {tomorrowJobs.length > 0 && <BellRing className="h-4 w-4 text-amber-400" />}
-              <p className="text-sm font-semibold text-white">Schedule — Tomorrow</p>
+              {tomorrowJobs.length > 0 && <BellRing className="h-4 w-4 text-amber-600" />}
+              <p className="text-sm font-semibold text-slate-900">Schedule — Tomorrow</p>
               {tomorrowJobs.length > 0 && (
                 <span className="ml-auto shrink-0 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-brand-navy">
                   {tomorrowJobs.length}
@@ -272,16 +279,16 @@ export default function DashboardHomeTab({
                     key={t.id}
                     type="button"
                     onClick={() => onSelectTab("board")}
-                    className="flex w-full items-center gap-3 rounded-xl bg-black/20 px-3 py-2.5 text-left transition-colors hover:bg-black/30"
+                    className="flex w-full items-center gap-3 rounded-xl bg-slate-50 px-3 py-2.5 text-left transition-colors hover:bg-slate-100"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
                       <BellRing className="h-4 w-4" />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-semibold text-white">
+                      <span className="block truncate text-xs font-semibold text-slate-900">
                         {t.client_name}
                       </span>
-                      <span className="block truncate text-[11px] text-slate-400">
+                      <span className="block truncate text-[11px] text-slate-500">
                         {t.service_type}
                       </span>
                     </span>
@@ -291,8 +298,8 @@ export default function DashboardHomeTab({
             )}
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-sm font-semibold text-white">Pending Jobs</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="text-sm font-semibold text-slate-900">Pending Jobs</p>
             {upcomingJobs.length === 0 ? (
               <p className="mt-6 text-center text-sm text-slate-500">
                 No upcoming jobs scheduled.
@@ -304,20 +311,20 @@ export default function DashboardHomeTab({
                     key={t.id}
                     type="button"
                     onClick={() => onSelectTab("board")}
-                    className="flex w-full items-center gap-3 rounded-xl bg-black/20 px-3 py-2.5 text-left transition-colors hover:bg-black/30"
+                    className="flex w-full items-center gap-3 rounded-xl bg-slate-50 px-3 py-2.5 text-left transition-colors hover:bg-slate-100"
                   >
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-blue/15 text-brand-blue">
                       <Calendar className="h-4 w-4" />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-semibold text-white">
+                      <span className="block truncate text-xs font-semibold text-slate-900">
                         {t.client_name}
                       </span>
-                      <span className="block truncate text-[11px] text-slate-400">
+                      <span className="block truncate text-[11px] text-slate-500">
                         {t.service_type}
                       </span>
                     </span>
-                    <span className="shrink-0 text-[11px] font-medium text-slate-400">
+                    <span className="shrink-0 text-[11px] font-medium text-slate-500">
                       {t.preferred_date ? new Date(t.preferred_date).toLocaleDateString() : ""}
                     </span>
                   </button>
@@ -329,8 +336,8 @@ export default function DashboardHomeTab({
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-          <p className="text-sm font-semibold text-white">Job Pipeline</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-sm font-semibold text-slate-900">Job Pipeline</p>
           {totalActiveJobs === 0 ? (
             <p className="mt-10 text-center text-sm text-slate-500">
               No jobs yet — create your first job ticket to see your pipeline here.
@@ -368,18 +375,18 @@ export default function DashboardHomeTab({
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <p className="text-2xl font-bold text-white">{totalActiveJobs}</p>
+                  <p className="text-2xl font-bold text-slate-900">{totalActiveJobs}</p>
                   <p className="text-[10px] uppercase tracking-wide text-slate-500">Jobs</p>
                 </div>
               </div>
               <div className="mt-4 space-y-1.5">
                 {pipelineData.map((d) => (
                   <div key={d.name} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1.5 text-slate-300">
+                    <span className="flex items-center gap-1.5 text-slate-600">
                       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: d.color }} />
                       {d.name}
                     </span>
-                    <span className="font-semibold text-white">{d.value}</span>
+                    <span className="font-semibold text-slate-900">{d.value}</span>
                   </div>
                 ))}
               </div>
@@ -387,14 +394,14 @@ export default function DashboardHomeTab({
           )}
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-          <p className="text-sm font-semibold text-white">Revenue This Month</p>
-          <p className="mt-3 text-3xl font-bold text-white">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-sm font-semibold text-slate-900">Revenue This Month</p>
+          <p className="mt-3 text-3xl font-bold text-slate-900">
             {currency} {revenue.thisMonth.toFixed(2)}
           </p>
           <p
             className={`mt-1 flex items-center gap-1 text-xs font-medium ${
-              revenue.changePct >= 0 ? "text-brand-emerald" : "text-red-400"
+              revenue.changePct >= 0 ? "text-brand-emerald-dark" : "text-red-600"
             }`}
           >
             {revenue.changePct >= 0 ? (

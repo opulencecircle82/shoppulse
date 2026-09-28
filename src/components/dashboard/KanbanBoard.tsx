@@ -58,13 +58,13 @@ export default function KanbanBoard({
               className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                 isActive
                   ? "bg-brand-blue text-white shadow-[0_0_20px_rgba(37,99,235,0.35)]"
-                  : "bg-white/5 text-slate-400 hover:text-white"
+                  : "bg-slate-50 text-slate-500 hover:text-slate-900"
               }`}
             >
               {column.label}
               <span
                 className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                  isActive ? "bg-white/20 text-white" : "bg-white/10 text-slate-300"
+                  isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-600"
                 }`}
               >
                 {count}
@@ -76,7 +76,7 @@ export default function KanbanBoard({
 
       <div className="mt-5">
         {activeTickets.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-white/20 p-8 text-center text-sm text-slate-500">
+          <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
             {activeStatus === "PENDING" ? "No pending requests" : "No jobs in this status"}
           </div>
         )}

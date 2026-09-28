@@ -15,12 +15,12 @@ export default function ProofDisputeGateTab({
 
   return (
     <div>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
         Awaiting Review ({reviewable.length})
       </h2>
 
       {reviewable.length === 0 && (
-        <p className="mt-4 text-sm text-slate-400">
+        <p className="mt-4 text-sm text-slate-500">
           No completed or disputed jobs need review right now.
         </p>
       )}
@@ -31,24 +31,24 @@ export default function ProofDisputeGateTab({
             key={ticket.id}
             type="button"
             onClick={() => onOpenProofDrawer(ticket)}
-            className="flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/5 p-4 text-left shadow-md shadow-black/20 transition-shadow hover:shadow-lg hover:shadow-brand-blue/10"
+            className="flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl bg-white border border-slate-200/70 p-4 text-left shadow-md shadow-slate-900/5 transition-shadow hover:shadow-lg hover:shadow-brand-blue/10"
           >
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold text-slate-900">
                   {ticket.client_name}
                 </p>
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                     ticket.status === "DISPUTED"
-                      ? "bg-red-500/15 text-red-400"
-                      : "bg-brand-emerald/15 text-brand-emerald"
+                      ? "bg-red-500/15 text-red-600"
+                      : "bg-brand-emerald/15 text-brand-emerald-dark"
                   }`}
                 >
                   {ticket.status}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500">
                 {ticket.service_type} &middot; {ticket.service_address}
               </p>
             </div>

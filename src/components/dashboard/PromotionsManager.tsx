@@ -274,26 +274,26 @@ function PromotionCard({
   }
 
   return (
-    <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-white">{promotion.title}</p>
+          <p className="text-sm font-semibold text-slate-900">{promotion.title}</p>
           {promotion.discount_percent && (
-            <p className="text-xs text-brand-orange">{promotion.discount_percent}% off service fee</p>
+            <p className="text-xs text-brand-orange-dark">{promotion.discount_percent}% off service fee</p>
           )}
         </div>
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
             promotion.is_active
-              ? "bg-brand-emerald/15 text-brand-emerald"
-              : "bg-white/10 text-slate-400"
+              ? "bg-brand-emerald/15 text-brand-emerald-dark"
+              : "bg-slate-100 text-slate-500"
           }`}
         >
           {promotion.is_active ? "Active" : "Inactive"}
         </span>
       </div>
       {promotion.description && (
-        <p className="mt-2 text-xs text-slate-400">{promotion.description}</p>
+        <p className="mt-2 text-xs text-slate-500">{promotion.description}</p>
       )}
 
       {promotion.image_url && (
@@ -330,36 +330,36 @@ function PromotionCard({
         <button
           type="button"
           onClick={toggleActive}
-          className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+          className="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           {promotion.is_active ? "Deactivate" : "Activate"}
         </button>
         <button
           type="button"
           onClick={handleToggleStats}
-          className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+          className="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           {showStats ? "Hide Stats" : "View Stats"}
         </button>
         <button
           type="button"
           onClick={handleDelete}
-          className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/10"
+          className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/10"
         >
           Delete
         </button>
       </div>
 
       {showStats && (
-        <div className="mt-3 rounded-xl bg-white/5 p-3">
+        <div className="mt-3 rounded-xl bg-slate-50 p-3">
           {loadingStats ? (
-            <p className="text-xs text-slate-400">Loading stats...</p>
+            <p className="text-xs text-slate-500">Loading stats...</p>
           ) : (
             <>
-              <p className="text-xs text-slate-400">
-                <span className="font-semibold text-white">{totals?.total_views ?? 0}</span>{" "}
+              <p className="text-xs text-slate-500">
+                <span className="font-semibold text-slate-900">{totals?.total_views ?? 0}</span>{" "}
                 views ·{" "}
-                <span className="font-semibold text-white">{totals?.total_clicks ?? 0}</span>{" "}
+                <span className="font-semibold text-slate-900">{totals?.total_clicks ?? 0}</span>{" "}
                 clicks
               </p>
               <div className="mt-2 h-32 w-full">
@@ -380,7 +380,7 @@ function PromotionCard({
               </div>
               <p className="mt-1 text-[10px] text-slate-500">
                 Last 14 days — <span className="text-brand-blue">blue = views</span>,{" "}
-                <span className="text-brand-orange">orange = clicks</span>
+                <span className="text-brand-orange-dark">orange = clicks</span>
               </p>
             </>
           )}
@@ -486,10 +486,10 @@ function PromotionsPhonePreview() {
 // captions instead of the whole point of the panel.
 function PromotionsExplainer() {
   return (
-    <div className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+    <div className="rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-white">Sample Business</h4>
-        <span className="rounded-full bg-brand-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-brand-emerald">
+        <h4 className="text-sm font-semibold text-slate-900">Sample Business</h4>
+        <span className="rounded-full bg-brand-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-brand-emerald-dark">
           Active
         </span>
       </div>
@@ -500,25 +500,25 @@ function PromotionsExplainer() {
       <dl className="mt-3 space-y-1.5 text-xs">
         <div className="flex justify-between gap-3">
           <dt className="shrink-0 text-slate-500">Owner</dt>
-          <dd className="truncate text-right text-white">Miguel Reyes</dd>
+          <dd className="truncate text-right text-slate-900">Miguel Reyes</dd>
         </div>
         <div className="flex justify-between gap-3">
           <dt className="shrink-0 text-slate-500">Business</dt>
-          <dd className="truncate text-right text-white">
+          <dd className="truncate text-right text-slate-900">
             Reyes Landscaping LLC
           </dd>
         </div>
         <div className="flex justify-between gap-3">
           <dt className="shrink-0 text-slate-500">Service Area</dt>
-          <dd className="truncate text-right text-white">Quezon City Metro</dd>
+          <dd className="truncate text-right text-slate-900">Quezon City Metro</dd>
         </div>
       </dl>
 
-      <div className="mt-3 border-t border-white/10 pt-3">
+      <div className="mt-3 border-t border-slate-200 pt-3">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
           Active Promotions
         </p>
-        <ul className="mt-1.5 space-y-1 text-xs text-slate-300">
+        <ul className="mt-1.5 space-y-1 text-xs text-slate-600">
           <li>
             15% Off Lawn Care{" "}
             <span className="text-slate-500">— ends Dec 30</span>
@@ -530,14 +530,14 @@ function PromotionsExplainer() {
         </ul>
       </div>
 
-      <div className="mt-3 border-t border-white/10 pt-3">
+      <div className="mt-3 border-t border-slate-200 pt-3">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
           Why bother?
         </p>
-        <ul className="mt-1.5 space-y-1 text-[11px] text-slate-400">
-          <li>• Libre, awtomatikong nakikita ng malapit na customer</li>
-          <li>• Nakakaakit ng bagong customer na hindi pa ka-alam</li>
-          <li>• Pwedeng maglagay ng % discount na awtomatikong ma-a-apply</li>
+        <ul className="mt-1.5 space-y-1 text-[11px] text-slate-500">
+          <li>• Free, and automatically shown to nearby customers</li>
+          <li>• Attracts new customers who do not know you yet</li>
+          <li>• Add a % discount that is applied to the service fee automatically</li>
         </ul>
       </div>
     </div>
@@ -602,11 +602,11 @@ function AddPromotionModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-navy p-5 shadow-2xl shadow-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-white">Add a Promotion</p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
+          <p className="text-sm font-bold text-slate-900">Add a Promotion</p>
+          <button type="button" onClick={onClose} className="text-slate-500 hover:text-slate-900">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -616,7 +616,7 @@ function AddPromotionModal({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-2">
           <div>
-            <label className="block text-xs font-medium text-slate-400">Title</label>
+            <label className="block text-xs font-medium text-slate-500">Title</label>
             <input
               type="text"
               required
@@ -624,22 +624,22 @@ function AddPromotionModal({
               placeholder="20% Off First Visit"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">Description</label>
+            <label className="block text-xs font-medium text-slate-500">Description</label>
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="flex items-center gap-2.5 text-sm text-slate-300">
+            <label className="flex items-center gap-2.5 text-sm text-slate-600">
               <input
                 type="checkbox"
                 checked={discountEnabled}
@@ -649,7 +649,7 @@ function AddPromotionModal({
               Enable a discount
             </label>
             {discountEnabled && (
-              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
+              <div className="mt-2 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
                 <input
                   type="number"
                   required
@@ -660,13 +660,13 @@ function AddPromotionModal({
                   onChange={(e) => setDiscountPercent(e.target.value)}
                   className="w-16 bg-transparent text-sm font-semibold text-brand-blue focus:outline-none"
                 />
-                <span className="text-sm text-slate-400">% off the service fee</span>
+                <span className="text-sm text-slate-500">% off the service fee</span>
               </div>
             )}
           </div>
 
           {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600">
               {error}
             </p>
           )}
@@ -722,7 +722,7 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">
+            <h3 className="text-sm font-semibold text-slate-900">
               Your Promotions ({promotions.length})
             </h3>
             <button
@@ -734,13 +734,13 @@ export default function PromotionsManager({ shop }: { shop: Shop }) {
             </button>
           </div>
 
-          {loading && <p className="mt-3 text-sm text-slate-400">Loading...</p>}
+          {loading && <p className="mt-3 text-sm text-slate-500">Loading...</p>}
           {!loading && promotions.length === 0 && (
-            <div className="mt-3 rounded-2xl bg-white/5 p-8 text-center">
+            <div className="mt-3 rounded-2xl bg-white border border-slate-200/70 p-8 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
                 <Megaphone className="h-5 w-5 text-brand-blue" />
               </div>
-              <p className="mt-3 text-sm text-slate-400">No promotions created yet.</p>
+              <p className="mt-3 text-sm text-slate-500">No promotions created yet.</p>
             </div>
           )}
           <div className="mt-3 space-y-3">

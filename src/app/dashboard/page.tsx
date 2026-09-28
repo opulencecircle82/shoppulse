@@ -50,7 +50,7 @@ import { playMessageChime } from "@/lib/chat/chime";
 
 const LiveFieldMap = dynamic(
   () => import("@/components/dashboard/LiveFieldMap"),
-  { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
+  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
 );
 
 export default function DashboardPage() {
@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
   if (!checked || shopLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-brand-navy">
+      <main className="flex min-h-screen items-center justify-center bg-brand-page">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
       </main>
     );
@@ -113,11 +113,11 @@ export default function DashboardPage() {
 
   if (!shop) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-page px-6 text-center">
         <span className="rounded-full bg-brand-blue/15 px-3 py-1 text-xs font-semibold text-brand-blue">
           You&apos;re in
         </span>
-        <h1 className="mt-4 text-3xl font-bold text-white">
+        <h1 className="mt-4 text-3xl font-bold text-slate-900">
           Set up your shop to get started
         </h1>
         <p className="mt-2 max-w-md text-sm text-slate-500">
@@ -134,7 +134,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+            className="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
           >
             Sign Out
           </button>
@@ -144,9 +144,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-brand-navy">
+    <main className="min-h-screen bg-brand-page">
       <div className="mx-auto max-w-[1600px] px-6 py-10 lg:px-8">
-        <div className="relative flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-6 sm:px-8">
+        <div className="relative flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-6 sm:px-8">
           {/* Clipped in its own layer, not on the header itself — the
               header needs to stay overflow-visible so the notification
               dropdown below isn't cut off. */}
@@ -154,10 +154,10 @@ export default function DashboardPage() {
             <CurvedLinesBackground />
           </div>
           <div className="relative">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-orange-500/10 px-3 py-1 text-xs font-medium text-brand-orange-dark">
               Owner Command Center
             </span>
-            <h1 className="mt-2 text-2xl font-bold text-white">{shop.shop_name}</h1>
+            <h1 className="mt-2 text-2xl font-bold text-slate-900">{shop.shop_name}</h1>
           </div>
           <div className="relative flex items-center gap-3">
             {staffMember && (
@@ -175,14 +175,14 @@ export default function DashboardPage() {
             )}
             <Link
               href="/dashboard/settings"
-              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:border-white/40 hover:text-white"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
             >
               Business Settings
             </Link>
             <button
               type="button"
               onClick={handleSignOut}
-              className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:border-red-400 hover:text-red-300"
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-red-400 hover:text-red-500"
             >
               Sign Out
             </button>
@@ -217,10 +217,10 @@ export default function DashboardPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                       activeTab === tab.id
-                        ? "bg-brand-blue/15 text-brand-blue"
+                        ? "bg-brand-blue text-white shadow-md shadow-brand-blue/25"
                         : hasUnread
-                          ? "bg-red-500/10 text-white"
-                          : "text-slate-400 hover:bg-white/10 hover:text-white"
+                          ? "bg-red-500/10 text-slate-900"
+                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
                     {tab.label}
@@ -235,7 +235,7 @@ export default function DashboardPage() {
               })}
               <Link
                 href="/dashboard/settings"
-                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
               >
                 Business Settings
               </Link>
@@ -243,10 +243,10 @@ export default function DashboardPage() {
 
             {TAB_DESCRIPTIONS[activeTab] && (
               <div className="mt-6 text-center">
-                <h2 className="text-lg font-bold text-white">
+                <h2 className="text-lg font-bold text-slate-900">
                   {DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.label}
                 </h2>
-                <p className="mx-auto mt-1.5 max-w-2xl text-xs leading-relaxed text-slate-400">
+                <p className="mx-auto mt-1.5 max-w-2xl text-xs leading-relaxed text-slate-500">
                   {TAB_DESCRIPTIONS[activeTab]}
                 </p>
               </div>
@@ -266,7 +266,7 @@ export default function DashboardPage() {
             {activeTab === "board" && (
               <div className="mt-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                     Job Tickets
                   </h2>
                   <button
@@ -279,7 +279,7 @@ export default function DashboardPage() {
                 </div>
 
                 {(ticketsLoading || staffLoading) && (
-                  <p className="text-sm text-slate-400">Loading job board...</p>
+                  <p className="text-sm text-slate-500">Loading job board...</p>
                 )}
 
                 {!ticketsLoading && !staffLoading && (

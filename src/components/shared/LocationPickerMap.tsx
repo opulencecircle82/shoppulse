@@ -42,13 +42,17 @@ export default function LocationPickerMap({
   onChange,
   label = "Pin Your Exact Location",
   description = "Tap anywhere on the map to drop a pin, or use your current location.",
+  tone = "dark",
 }: {
   latitude: number | null;
   longitude: number | null;
   onChange: (lat: number, lng: number) => void;
   label?: string;
   description?: string;
+  /** "light" for the owner dashboard, "dark" for the customer app. */
+  tone?: "dark" | "light";
 }) {
+  const light = tone === "light";
   const hasPin = latitude !== null && longitude !== null;
   const [locating, setLocating] = useState(false);
 
@@ -70,21 +74,21 @@ export default function LocationPickerMap({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-slate-300">
+        <label className={`block text-sm font-medium ${light ? "text-slate-700" : "text-slate-300"}`}>
           {label}
         </label>
         <button
           type="button"
           onClick={useMyLocation}
           disabled={locating}
-          className="text-xs font-medium text-brand-blue hover:text-blue-400 disabled:opacity-60"
+          className={`text-xs font-medium text-brand-blue disabled:opacity-60 ${light ? "hover:text-brand-blue-dark" : "hover:text-blue-400"}`}
         >
           {locating ? "Locating..." : "Use my current location"}
         </button>
       </div>
-      <p className="mt-1 text-xs text-slate-400">{description}</p>
+      <p className={`mt-1 text-xs ${light ? "text-slate-500" : "text-slate-400"}`}>{description}</p>
       <div
-        className="mt-2 overflow-hidden rounded-xl shadow-sm shadow-black/20"
+        className={`mt-2 overflow-hidden rounded-xl shadow-sm ${light ? "shadow-slate-900/10" : "shadow-black/20"}`}
         style={{ overscrollBehavior: "contain" }}
       >
         <MapContainer
@@ -113,7 +117,7 @@ export default function LocationPickerMap({
         </MapContainer>
       </div>
       {hasPin && (
-        <p className="mt-1.5 text-xs text-slate-400">
+        <p className={`mt-1.5 text-xs ${light ? "text-slate-500" : "text-slate-400"}`}>
           {latitude.toFixed(5)}, {longitude.toFixed(5)}
         </p>
       )}

@@ -31,7 +31,7 @@ export default function WatermarkPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first to customize photo watermarks.
       </p>
     );
@@ -71,9 +71,9 @@ export default function WatermarkPanel({
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
+        <label className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 shadow-sm shadow-slate-900/5">
           <div>
-            <span className="text-sm text-slate-300">Mandatory Live Camera</span>
+            <span className="text-sm text-slate-600">Mandatory Live Camera</span>
             <p className="text-xs text-slate-500">
               Disables phone gallery uploads in the tech app &mdash; live
               capture only.
@@ -87,8 +87,8 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-300">
+        <label className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 shadow-sm shadow-slate-900/5">
+          <span className="text-sm text-slate-600">
             Overlay company logo
           </span>
           <input
@@ -99,8 +99,8 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-300">Overlay timestamp</span>
+        <label className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 shadow-sm shadow-slate-900/5">
+          <span className="text-sm text-slate-600">Overlay timestamp</span>
           <input
             type="checkbox"
             checked={showTimestamp}
@@ -109,8 +109,8 @@ export default function WatermarkPanel({
           />
         </label>
 
-        <label className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 shadow-sm shadow-black/20">
-          <span className="text-sm text-slate-300">
+        <label className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 shadow-sm shadow-slate-900/5">
+          <span className="text-sm text-slate-600">
             Overlay GPS coordinates
           </span>
           <input
@@ -122,12 +122,12 @@ export default function WatermarkPanel({
         </label>
 
         {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
             {error}
           </p>
         )}
         {success && (
-          <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald">
+          <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
             Saved.
           </p>
         )}
@@ -142,16 +142,16 @@ export default function WatermarkPanel({
       </form>
 
       <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-400">
+        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-slate-500">
           Live Preview
         </p>
-        <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-md shadow-black/20">
+        <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-md shadow-slate-900/5">
           {showLogo && (
             <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md bg-black/50 px-2 py-1 backdrop-blur">
               <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
                 {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
               </span>
-              <span className="text-[10px] font-semibold text-white">
+              <span className="text-[10px] font-semibold text-slate-900">
                 {shop.shop_name}
               </span>
             </div>

@@ -154,13 +154,13 @@ export default function MessagesTab({
     <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
       <div className="space-y-4">
         {loading ? (
-          <p className="text-sm text-slate-400">Loading conversations...</p>
+          <p className="text-sm text-slate-500">Loading conversations...</p>
         ) : !hasAnyConversations && !isOwner ? (
-          <div className="rounded-2xl bg-white/5 p-6 text-center">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-              <MessageCircle className="h-4 w-4 text-slate-400" />
+          <div className="rounded-2xl bg-white border border-slate-200/70 p-6 text-center">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+              <MessageCircle className="h-4 w-4 text-slate-500" />
             </div>
-            <p className="mt-3 text-sm text-slate-400">
+            <p className="mt-3 text-sm text-slate-500">
               No conversation yet. Send the owner a message to get started.
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function MessagesTab({
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
                         selected?.conversationId === row.conversationId
                           ? "bg-brand-blue/15"
-                          : "hover:bg-white/5"
+                          : "hover:bg-slate-50"
                       }`}
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue/15 text-xs font-bold text-brand-blue">
@@ -188,14 +188,14 @@ export default function MessagesTab({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-medium text-white">
+                          <p className="truncate text-sm font-medium text-slate-900">
                             {row.name}
                           </p>
                           <span className="shrink-0 text-[10px] text-slate-500">
                             {timeLabel(row.lastMessageAt)}
                           </span>
                         </div>
-                        <p className="truncate text-xs text-slate-400">
+                        <p className="truncate text-xs text-slate-500">
                           {row.lastMessagePreview ?? "Say hello!"}
                         </p>
                       </div>
@@ -219,7 +219,7 @@ export default function MessagesTab({
                   <button
                     type="button"
                     onClick={() => setShowNewMessage(true)}
-                    className="flex items-center gap-1 text-xs font-semibold text-brand-blue hover:text-blue-400"
+                    className="flex items-center gap-1 text-xs font-semibold text-brand-blue hover:text-brand-blue-dark"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     New
@@ -246,22 +246,22 @@ export default function MessagesTab({
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
                         selected?.conversationId === c.conversationId
                           ? "bg-brand-blue/15"
-                          : "hover:bg-white/5"
+                          : "hover:bg-slate-50"
                       }`}
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-xs font-bold text-brand-orange">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-xs font-bold text-brand-orange-dark">
                         {c.customerName.slice(0, 1).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-medium text-white">
+                          <p className="truncate text-sm font-medium text-slate-900">
                             {c.customerName}
                           </p>
                           <span className="shrink-0 text-[10px] text-slate-500">
                             {timeLabel(c.lastMessageAt)}
                           </span>
                         </div>
-                        <p className="truncate text-xs text-slate-400">
+                        <p className="truncate text-xs text-slate-500">
                           {c.lastMessagePreview ?? "No messages yet"}
                         </p>
                       </div>
@@ -298,7 +298,7 @@ export default function MessagesTab({
             </div>
           </>
         ) : (
-          <div className="flex h-full items-center justify-center rounded-2xl bg-white/5 text-sm text-slate-400">
+          <div className="flex h-full items-center justify-center rounded-2xl bg-white border border-slate-200/70 text-sm text-slate-500">
             Select a conversation to start chatting.
           </div>
         )}
@@ -311,7 +311,7 @@ export default function MessagesTab({
         />
       )}
       {startingConversation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
         </div>
       )}

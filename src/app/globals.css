@@ -22,6 +22,11 @@
   --color-brand-navy: #0f172a;
   --color-brand-orange: #f97316;
   --color-brand-orange-dark: #ea580c;
+  /* Owner dashboard: pale blue page behind white cards, and a darker
+   * emerald for text/icons on white (brand-emerald itself is too pale to
+   * read as small text on a light surface). */
+  --color-brand-page: #eef3fb;
+  --color-brand-emerald-dark: #059669;
 }
 
 @theme inline {
@@ -36,6 +41,8 @@
   --color-brand-navy: var(--color-brand-navy);
   --color-brand-orange: var(--color-brand-orange);
   --color-brand-orange-dark: var(--color-brand-orange-dark);
+  --color-brand-page: var(--color-brand-page);
+  --color-brand-emerald-dark: var(--color-brand-emerald-dark);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

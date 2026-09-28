@@ -44,38 +44,28 @@ export default function MetricsBar({
     {
       label: "Wasted Dollars Saved",
       value: `${currency} ${metrics.wastedDollarsSaved.toFixed(2)}`,
-      accent: "text-brand-emerald",
-      iconBg: "bg-brand-emerald/15",
-      cardBg: "bg-gradient-to-br from-emerald-500/10 to-white/5",
-      borderAccent: "border-t-emerald-400",
+      iconBg: "bg-brand-emerald",
       icon: PiggyBank,
+      onClick: undefined as (() => void) | undefined,
     },
     {
       label: "Active Field Staff",
       value: metrics.activeFieldStaff.toString(),
-      accent: "text-brand-blue",
-      iconBg: "bg-brand-blue/15",
-      cardBg: "bg-gradient-to-br from-blue-500/10 to-white/5",
-      borderAccent: "border-t-brand-blue",
+      iconBg: "bg-brand-blue",
       icon: Users,
+      onClick: undefined as (() => void) | undefined,
     },
     {
       label: "Pending Job Approvals",
       value: metrics.pendingApprovals.toString(),
-      accent: "text-amber-500",
-      iconBg: "bg-amber-400/15",
-      cardBg: "bg-gradient-to-br from-amber-500/10 to-white/5",
-      borderAccent: "border-t-amber-400",
+      iconBg: "bg-amber-500",
       icon: ClipboardCheck,
       onClick: onOpenPendingApprovals,
     },
     {
       label: "Total Revenue",
       value: `${currency} ${metrics.totalRevenue.toFixed(2)}`,
-      accent: "text-white",
-      iconBg: "bg-brand-orange/15",
-      cardBg: "bg-gradient-to-br from-brand-orange/10 to-white/5",
-      borderAccent: "border-t-brand-orange",
+      iconBg: "bg-brand-orange",
       icon: TrendingUp,
       onClick: undefined as (() => void) | undefined,
     },
@@ -91,24 +81,28 @@ export default function MetricsBar({
             key={card.label}
             type={card.onClick ? "button" : undefined}
             onClick={card.onClick}
-            className={`rounded-2xl border border-white/10 border-t-4 ${card.borderAccent} ${card.cardBg} p-5 text-left shadow-md shadow-black/20 transition-shadow hover:shadow-lg ${
+            className={`flex items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-white p-5 text-left shadow-sm shadow-slate-900/5 transition-shadow hover:shadow-md ${
               card.onClick ? "cursor-pointer" : ""
             }`}
           >
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.iconBg}`}>
-              <Icon className={`h-5 w-5 ${card.accent}`} />
-            </div>
-            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-400">
-              {card.label}
-            </p>
-            <p className={`mt-1 text-2xl font-bold ${card.accent}`}>
-              {card.value}
-            </p>
-            {card.onClick && metrics.pendingApprovals > 0 && (
-              <p className="mt-1 text-[11px] font-medium text-amber-400">
-                Click to review →
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {card.label}
               </p>
-            )}
+              <p className="mt-1 truncate text-2xl font-bold text-slate-900">
+                {card.value}
+              </p>
+              {card.onClick && metrics.pendingApprovals > 0 && (
+                <p className="mt-1 text-[11px] font-medium text-amber-600">
+                  Click to review →
+                </p>
+              )}
+            </div>
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-slate-900/10 ${card.iconBg}`}
+            >
+              <Icon className="h-5 w-5" />
+            </div>
           </Wrapper>
         );
       })}

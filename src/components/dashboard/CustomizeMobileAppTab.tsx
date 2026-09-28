@@ -276,7 +276,7 @@ export default function CustomizeMobileAppTab({
 
   return (
     <div>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
         Customize Mobile App
       </h2>
       <p className="mt-1 text-sm text-slate-500">
@@ -284,12 +284,12 @@ export default function CustomizeMobileAppTab({
         client verification portal.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5">
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-slate-900">
             Technician App (Android)
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-0.5 text-xs text-slate-500">
             One shared app for every shop &mdash; it reads your saved theme
             below the moment a technician logs in. New app features and
             fixes ship as updates to this same link, no separate build per
@@ -305,12 +305,12 @@ export default function CustomizeMobileAppTab({
         </a>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5">
         <div>
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-slate-900">
             Customer App &amp; Booking Link
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-0.5 text-xs text-slate-500">
             Customers create an account, request jobs, and track everything
             they&apos;ve booked with you — either from the app, or straight
             from the link (post it on Facebook, your website, wherever).
@@ -337,7 +337,7 @@ export default function CustomizeMobileAppTab({
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div className="grid grid-cols-2 gap-4 sm:max-w-md">
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Primary Color
             </label>
             <div className="mt-1.5 flex items-center gap-2">
@@ -347,11 +347,11 @@ export default function CustomizeMobileAppTab({
                 onChange={(e) => setPrimaryColor(e.target.value)}
                 className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
-              <span className="text-xs text-slate-400">{primaryColor}</span>
+              <span className="text-xs text-slate-500">{primaryColor}</span>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Accent Color
             </label>
             <div className="mt-1.5 flex items-center gap-2">
@@ -361,19 +361,19 @@ export default function CustomizeMobileAppTab({
                 onChange={(e) => setAccentColor(e.target.value)}
                 className="h-9 w-12 cursor-pointer rounded-lg bg-transparent focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
-              <span className="text-xs text-slate-400">{accentColor}</span>
+              <span className="text-xs text-slate-500">{accentColor}</span>
             </div>
           </div>
         </div>
 
         <div className="sm:max-w-md">
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             App Font
           </label>
           <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value)}
-            className="mt-1.5 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
+            className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
           >
             {FONT_OPTIONS.map((font) => (
               <option key={font} value={font} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
@@ -384,12 +384,12 @@ export default function CustomizeMobileAppTab({
         </div>
 
         {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400 sm:max-w-md">
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600 sm:max-w-md">
             {error}
           </p>
         )}
         {success && (
-          <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald sm:max-w-md">
+          <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark sm:max-w-md">
             Saved &mdash; the technician app will pick this up on next
             launch.
           </p>
@@ -406,17 +406,17 @@ export default function CustomizeMobileAppTab({
 
       <div className="mt-10">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Live Preview
           </p>
-          <div className="inline-flex rounded-full border border-white/20 bg-white/5 p-1">
+          <div className="inline-flex rounded-full border border-slate-300 bg-slate-50 p-1">
             <button
               type="button"
               onClick={() => setPreviewTarget("staff")}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                 previewTarget === "staff"
                   ? "bg-brand-blue text-white"
-                  : "text-slate-400 hover:text-white"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Staff App
@@ -427,7 +427,7 @@ export default function CustomizeMobileAppTab({
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                 previewTarget === "customer"
                   ? "bg-brand-blue text-white"
-                  : "text-slate-400 hover:text-white"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Customer Portal

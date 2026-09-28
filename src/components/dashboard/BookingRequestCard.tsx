@@ -62,22 +62,22 @@ export default function BookingRequestCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-white/5 p-4 shadow-md shadow-black/20 ${
+      className={`rounded-2xl border bg-white p-4 shadow-md shadow-slate-900/5 ${
         ticket.is_emergency ? "border-red-500/50 ring-1 ring-red-500/30" : "border-brand-blue/20"
       }`}
     >
       {ticket.is_emergency && (
-        <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-400">
+        <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-600">
           🚨 EMERGENCY
         </span>
       )}
-      <p className="text-sm font-semibold text-white">{ticket.client_name}</p>
-      <p className="mt-0.5 text-xs text-slate-400">{ticket.service_type}</p>
+      <p className="text-sm font-semibold text-slate-900">{ticket.client_name}</p>
+      <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
       {ticket.description && (
-        <p className="mt-1 text-xs text-slate-400">{ticket.description}</p>
+        <p className="mt-1 text-xs text-slate-500">{ticket.description}</p>
       )}
       {ticket.discount_percent && (
-        <span className="mt-1.5 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange">
+        <span className="mt-1.5 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange-dark">
           {ticket.discount_percent}% discount applied
         </span>
       )}
@@ -91,7 +91,7 @@ export default function BookingRequestCard({
       )}
       <p className="mt-1 text-xs text-slate-500">{ticket.service_address}</p>
       {ticket.preferred_date && (
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           Preferred date: {new Date(ticket.preferred_date).toLocaleDateString()}
         </p>
       )}
@@ -103,7 +103,7 @@ export default function BookingRequestCard({
         {ticket.client_email && (
           <a
             href={`mailto:${ticket.client_email}`}
-            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-brand-blue"
+            className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-blue"
           >
             <Mail className="h-3 w-3" /> Email
           </a>
@@ -111,7 +111,7 @@ export default function BookingRequestCard({
         {ticket.client_phone && (
           <a
             href={`tel:${ticket.client_phone}`}
-            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-brand-blue"
+            className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-blue"
           >
             <Phone className="h-3 w-3" /> Call
           </a>
@@ -140,7 +140,7 @@ export default function BookingRequestCard({
           type="button"
           onClick={handleReject}
           disabled={busy}
-          className="flex-1 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-red-400 hover:text-red-400 disabled:opacity-60"
+          className="flex-1 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-red-400 hover:text-red-600 disabled:opacity-60"
         >
           Reject
         </button>

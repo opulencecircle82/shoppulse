@@ -79,21 +79,21 @@ export default function AddStaffModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-6"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl border border-white/10 bg-brand-navy p-6 shadow-2xl shadow-black/40"
+        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
       >
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-white">
+          <h3 className="text-lg font-semibold text-slate-900">
             {createdLogin ? "Staff Added" : "Add Staff"}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-500 hover:text-slate-900"
             aria-label="Close"
           >
             ✕
@@ -102,21 +102,21 @@ export default function AddStaffModal({
 
         {createdLogin ? (
           <div className="mt-4">
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-slate-600">
               Give these to the technician — this password won&apos;t be
               shown again, so copy it now.
             </p>
 
             <div className="mt-4 space-y-3">
-              <div className="rounded-xl bg-white/5 px-4 py-3">
-                <p className="text-xs font-medium text-slate-400">Username</p>
-                <p className="mt-0.5 font-mono text-sm text-white">
+              <div className="rounded-xl bg-slate-50 px-4 py-3">
+                <p className="text-xs font-medium text-slate-500">Username</p>
+                <p className="mt-0.5 font-mono text-sm text-slate-900">
                   {createdLogin.username}
                 </p>
               </div>
-              <div className="rounded-xl bg-white/5 px-4 py-3">
-                <p className="text-xs font-medium text-slate-400">Password</p>
-                <p className="mt-0.5 font-mono text-sm text-white">
+              <div className="rounded-xl bg-slate-50 px-4 py-3">
+                <p className="text-xs font-medium text-slate-500">Password</p>
+                <p className="mt-0.5 font-mono text-sm text-slate-900">
                   {createdLogin.password}
                 </p>
               </div>
@@ -129,7 +129,7 @@ export default function AddStaffModal({
                   `Username: ${createdLogin.username}\nPassword: ${createdLogin.password}`
                 )
               }
-              className="mt-4 w-full rounded-full border border-white/20 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+              className="mt-4 w-full rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
             >
               Copy to Clipboard
             </button>
@@ -144,11 +144,11 @@ export default function AddStaffModal({
           </div>
         ) : (
           <>
-            <div className="mt-4 flex items-center justify-between rounded-lg bg-white/5 px-4 py-2.5">
-              <span className="text-xs text-slate-400">Free Tech Seats</span>
+            <div className="mt-4 flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2.5">
+              <span className="text-xs text-slate-500">Free Tech Seats</span>
               <span
                 className={`text-xs font-semibold ${
-                  isPaidSeat ? "text-amber-400" : "text-brand-emerald"
+                  isPaidSeat ? "text-amber-600" : "text-brand-emerald-dark"
                 }`}
               >
                 {Math.min(seatsUsed, FREE_TECH_SEATS)}/{FREE_TECH_SEATS} Free Tech Seat Used
@@ -156,7 +156,7 @@ export default function AddStaffModal({
             </div>
 
         {isPaidSeat && (
-          <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+          <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
             You&apos;ve used your free tech seat. Adding this technician adds a{" "}
             <strong>$29 one-time activation + $25/mo</strong> additional seat
             charge to your subscription.
@@ -174,7 +174,7 @@ export default function AddStaffModal({
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Full Name
             </label>
             <input
@@ -182,13 +182,13 @@ export default function AddStaffModal({
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Username
               </label>
               <input
@@ -198,11 +198,11 @@ export default function AddStaffModal({
                 autoCorrect="off"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.trim())}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Mobile App Password
               </label>
               <input
@@ -211,14 +211,14 @@ export default function AddStaffModal({
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Email
               </label>
               <input
@@ -226,24 +226,24 @@ export default function AddStaffModal({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Phone
               </label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Base Hourly Rate ($/hr)
             </label>
             <input
@@ -253,12 +253,12 @@ export default function AddStaffModal({
               required
               value={hourlyRate}
               onChange={(e) => setHourlyRate(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
               {error}
             </p>
           )}

@@ -31,35 +31,35 @@ export default function ReviewsTab({ shopId }: { shopId: string }) {
       : null;
 
   if (loading) {
-    return <p className="text-sm text-slate-400">Loading reviews...</p>;
+    return <p className="text-sm text-slate-500">Loading reviews...</p>;
   }
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-white/5 px-5 py-4 shadow-md shadow-black/20">
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-white border border-slate-200/70 px-5 py-4 shadow-md shadow-slate-900/5">
         <div className="flex items-center gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
               className={`h-5 w-5 ${
                 avgRating !== null && i < Math.round(avgRating)
-                  ? "fill-amber-400 text-amber-400"
+                  ? "fill-amber-400 text-amber-600"
                   : "text-slate-600"
               }`}
             />
           ))}
         </div>
-        <p className="text-sm font-semibold text-white">
+        <p className="text-sm font-semibold text-slate-900">
           {avgRating !== null ? avgRating.toFixed(1) : "No rating yet"}
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           {reviews.length} review{reviews.length === 1 ? "" : "s"}
         </p>
       </div>
 
       {reviews.length === 0 ? (
-        <div className="mt-4 rounded-2xl bg-white/5 p-8 text-center shadow-md shadow-black/20">
-          <p className="text-sm text-slate-400">
+        <div className="mt-4 rounded-2xl bg-white border border-slate-200/70 p-8 text-center shadow-md shadow-slate-900/5">
+          <p className="text-sm text-slate-500">
             No reviews yet. They&apos;ll show up here once customers rate a
             completed job.
           </p>
@@ -67,7 +67,7 @@ export default function ReviewsTab({ shopId }: { shopId: string }) {
       ) : (
         <div className="mt-4 space-y-3">
           {reviews.map((review, index) => (
-            <div key={index} className="rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20">
+            <div key={index} className="rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -75,7 +75,7 @@ export default function ReviewsTab({ shopId }: { shopId: string }) {
                       key={i}
                       className={`h-4 w-4 ${
                         i < review.rating
-                          ? "fill-amber-400 text-amber-400"
+                          ? "fill-amber-400 text-amber-600"
                           : "text-slate-600"
                       }`}
                     />
@@ -85,11 +85,11 @@ export default function ReviewsTab({ shopId }: { shopId: string }) {
                   {new Date(review.created_at).toLocaleDateString()}
                 </span>
               </div>
-              <p className="mt-1.5 text-sm font-medium text-white">
+              <p className="mt-1.5 text-sm font-medium text-slate-900">
                 {review.client_name}
               </p>
               {review.comment && (
-                <p className="mt-1 text-sm text-slate-300">{review.comment}</p>
+                <p className="mt-1 text-sm text-slate-600">{review.comment}</p>
               )}
               {review.photo_url && (
                 // eslint-disable-next-line @next/next/no-img-element

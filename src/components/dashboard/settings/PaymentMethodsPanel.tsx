@@ -21,7 +21,7 @@ export default function PaymentMethodsPanel({
 
   if (!shop) {
     return (
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-slate-500">
         Set up your Company Profile first to configure payment methods.
       </p>
     );
@@ -49,7 +49,7 @@ export default function PaymentMethodsPanel({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium text-slate-300">Accepted Payment Methods</p>
+        <p className="text-sm font-medium text-slate-600">Accepted Payment Methods</p>
         <p className="mt-1 text-xs text-slate-500">
           Shown to customers when they choose how to pay — Cash is always
           accepted. This records the customer&apos;s choice only; it
@@ -70,7 +70,7 @@ export default function PaymentMethodsPanel({
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed ${
                 checked
                   ? "bg-brand-blue text-white"
-                  : "bg-white/5 text-slate-400 hover:text-white"
+                  : "bg-slate-50 text-slate-500 hover:text-slate-900"
               }`}
             >
               {method}
@@ -81,7 +81,7 @@ export default function PaymentMethodsPanel({
       </div>
 
       {success && (
-        <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald">
+        <p className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 px-3.5 py-2.5 text-sm text-brand-emerald-dark">
           Saved.
         </p>
       )}

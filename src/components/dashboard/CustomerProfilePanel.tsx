@@ -30,50 +30,50 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
   const hasEstimate = profile.jobs.some((job) => job.is_estimate);
 
   return (
-    <div className="mb-3 rounded-2xl bg-white/5 p-4">
+    <div className="mb-3 rounded-2xl bg-white border border-slate-200/70 p-4">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-center justify-between text-left"
       >
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Client Profile
         </p>
         {expanded ? (
-          <ChevronUp className="h-4 w-4 text-slate-400" />
+          <ChevronUp className="h-4 w-4 text-slate-500" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-slate-400" />
+          <ChevronDown className="h-4 w-4 text-slate-500" />
         )}
       </button>
 
       {expanded && (
         <div className="mt-3 space-y-2">
           {profile.email && (
-            <p className="flex items-center gap-2 text-sm text-slate-300">
+            <p className="flex items-center gap-2 text-sm text-slate-600">
               <Mail className="h-3.5 w-3.5 shrink-0 text-slate-500" />
               {profile.email}
             </p>
           )}
           {profile.phone && (
-            <p className="flex items-center gap-2 text-sm text-slate-300">
+            <p className="flex items-center gap-2 text-sm text-slate-600">
               <Phone className="h-3.5 w-3.5 shrink-0 text-slate-500" />
               {profile.phone}
             </p>
           )}
           {address && (
-            <p className="flex items-center gap-2 text-sm text-slate-300">
+            <p className="flex items-center gap-2 text-sm text-slate-600">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-500" />
               {address}
             </p>
           )}
 
           {profile.jobs.length > 0 && (
-            <div className="mt-3 border-t border-white/10 pt-3">
+            <div className="mt-3 border-t border-slate-200 pt-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Job History ({profile.jobs.length})
                 </p>
-                <p className="text-xs font-semibold text-brand-emerald">
+                <p className="text-xs font-semibold text-brand-emerald-dark">
                   Total: {profile.currency} {total.toFixed(2)}
                 </p>
               </div>
@@ -86,16 +86,16 @@ export default function CustomerProfilePanel({ customerId }: { customerId: strin
                 {profile.jobs.map((job) => (
                   <div
                     key={job.id}
-                    className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-2 text-xs"
+                    className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-white">{job.service_type}</p>
+                      <p className="truncate font-medium text-slate-900">{job.service_type}</p>
                       <p className="text-slate-500">
                         {new Date(job.created_at).toLocaleDateString()} · {job.status}
                       </p>
                     </div>
                     {job.effective_amount > 0 && (
-                      <span className="shrink-0 font-semibold text-brand-emerald">
+                      <span className="shrink-0 font-semibold text-brand-emerald-dark">
                         {job.effective_amount.toFixed(2)}
                         {job.is_estimate && <span className="text-slate-500"> (est.)</span>}
                       </span>

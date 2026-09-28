@@ -133,22 +133,22 @@ export default function JobTicketCard({
   return (
     <div
       onClick={() => onOpenProofDrawer?.(ticket)}
-      className={`rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20 ${
+      className={`rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5 ${
         onOpenProofDrawer ? "cursor-pointer transition-shadow hover:shadow-lg hover:shadow-brand-blue/10" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">
+          <p className="truncate text-sm font-semibold text-slate-900">
             {ticket.client_name}
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">{ticket.service_type}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
           <p className="mt-1 truncate text-xs text-slate-500">
             {ticket.service_address}
           </p>
         </div>
         {ticket.status === "DISPUTED" && (
-          <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-400">
+          <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-600">
             Disputed
           </span>
         )}
@@ -168,7 +168,7 @@ export default function JobTicketCard({
             if (member) setPendingAssignee(member);
           }}
           onClick={(e) => e.stopPropagation()}
-          className="mt-3 w-full rounded-xl bg-white/5 px-2.5 py-1.5 text-xs text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
+          className="mt-3 w-full rounded-xl bg-slate-50 border border-slate-200 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
         >
           <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
             Assign technician...
@@ -184,13 +184,13 @@ export default function JobTicketCard({
           ))}
         </select>
       ) : (
-        <p className="mt-3 text-xs text-slate-400">
-          Assigned: <span className="text-white">{assignedStaff?.full_name ?? "—"}</span>
+        <p className="mt-3 text-xs text-slate-500">
+          Assigned: <span className="text-slate-900">{assignedStaff?.full_name ?? "—"}</span>
         </p>
       )}
 
       {ticket.total_invoice_amount > 0 && (
-        <p className="mt-1 text-xs font-semibold text-brand-emerald">
+        <p className="mt-1 text-xs font-semibold text-brand-emerald-dark">
           Invoice: {ticket.total_invoice_amount.toFixed(2)}
         </p>
       )}
@@ -218,14 +218,14 @@ export default function JobTicketCard({
         onClick={(e) => e.stopPropagation()}
       >
         {ticket.status === "SCHEDULED" && !ticket.staff_accepted_at && (
-          <p className="text-xs text-amber-400">
+          <p className="text-xs text-amber-600">
             Waiting for {assignedStaff?.full_name ?? "the technician"} to
             confirm this job.
           </p>
         )}
 
         {ticket.status === "SCHEDULED" && ticket.staff_accepted_at && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Confirmed — waiting for {assignedStaff?.full_name ?? "the technician"} to
             start this job from the mobile app.
           </p>
@@ -235,18 +235,18 @@ export default function JobTicketCard({
           <div className="w-full">
             {ticket.quote_submitted_at ? (
               <>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   Quote sent — waiting for {ticket.client_name} to approve it before{" "}
                   {assignedStaff?.full_name ?? "the technician"} can start the repair.
                 </p>
                 {ticket.total_invoice_amount > 0 && (
-                  <p className="mt-1.5 text-xs font-semibold text-brand-orange">
+                  <p className="mt-1.5 text-xs font-semibold text-brand-orange-dark">
                     Proposed Total: {currency} {ticket.total_invoice_amount.toFixed(2)}
                   </p>
                 )}
               </>
             ) : (
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 {assignedStaff?.full_name ?? "The technician"} is on site diagnosing the
                 issue and preparing a quote.
               </p>
@@ -256,7 +256,7 @@ export default function JobTicketCard({
 
         {ticket.status === "CANCELLED" && (
           <div className="w-full">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Cancelled by the customer
               {ticket.cancelled_at && ` on ${new Date(ticket.cancelled_at).toLocaleDateString()}`}.
             </p>
@@ -264,7 +264,7 @@ export default function JobTicketCard({
               <p className="mt-1 text-xs text-slate-500">{ticket.cancellation_reason}</p>
             )}
             {ticket.cancellation_fee_applied && (
-              <p className="mt-1.5 text-xs font-semibold text-amber-400">
+              <p className="mt-1.5 text-xs font-semibold text-amber-600">
                 Call-out fee applies: {currency} {ticket.total_invoice_amount.toFixed(2)}
               </p>
             )}
@@ -273,13 +273,13 @@ export default function JobTicketCard({
 
         {ticket.status === "IN_PROGRESS" && (
           <div className="w-full">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               In progress — waiting for {assignedStaff?.full_name ?? "the technician"}{" "}
               to submit completion proof from the mobile app.
             </p>
 
             {ticket.client_payment_confirmed_at && !ticket.payment_verified_at && (
-              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[11px] font-semibold text-brand-emerald">
+              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[11px] font-semibold text-brand-emerald-dark">
                 ✓ Customer confirmed they paid — review and confirm below
               </p>
             )}
@@ -289,7 +289,7 @@ export default function JobTicketCard({
                 href={ticket.payment_receipt_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 flex items-center gap-2 text-xs text-slate-400 hover:text-brand-blue"
+                className="mt-2 flex items-center gap-2 text-xs text-slate-500 hover:text-brand-blue"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -303,7 +303,7 @@ export default function JobTicketCard({
             )}
 
             {ticket.payment_verified_at ? (
-              <p className="mt-2 text-xs font-semibold text-brand-emerald">
+              <p className="mt-2 text-xs font-semibold text-brand-emerald-dark">
                 Payment Verified: {currency} {ticket.payment_verified_amount.toFixed(2)}
               </p>
             ) : showPaymentForm ? (
@@ -317,7 +317,7 @@ export default function JobTicketCard({
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   placeholder={`Amount (${currency})`}
-                  className="w-28 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                  className="w-28 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                 />
                 <button
                   type="submit"
@@ -329,7 +329,7 @@ export default function JobTicketCard({
                 <button
                   type="button"
                   onClick={() => setShowPaymentForm(false)}
-                  className="text-xs text-slate-400 hover:text-white"
+                  className="text-xs text-slate-500 hover:text-slate-900"
                 >
                   Cancel
                 </button>
@@ -343,7 +343,7 @@ export default function JobTicketCard({
                   );
                   setShowPaymentForm(true);
                 }}
-                className="mt-2 rounded-full border border-brand-emerald/40 px-3 py-1.5 text-xs font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/10"
+                className="mt-2 rounded-full border border-brand-emerald/40 px-3 py-1.5 text-xs font-semibold text-brand-emerald-dark transition-colors hover:bg-brand-emerald/10"
               >
                 Confirm Payment Received
               </button>
@@ -367,7 +367,7 @@ export default function JobTicketCard({
                   type="button"
                   onClick={handleDownloadInvoice}
                   disabled={downloadingInvoice}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Download className="h-3 w-3" />
                   {downloadingInvoice ? "..." : "Invoice PNG"}
@@ -382,7 +382,7 @@ export default function JobTicketCard({
                     href={ticket.payment_receipt_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mb-2 flex items-center gap-2 text-xs text-slate-400 hover:text-brand-blue"
+                    className="mb-2 flex items-center gap-2 text-xs text-slate-500 hover:text-brand-blue"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -395,7 +395,7 @@ export default function JobTicketCard({
                 )}
 
                 {ticket.invoice_paid_at ? (
-                  <p className="text-xs font-semibold text-brand-emerald">
+                  <p className="text-xs font-semibold text-brand-emerald-dark">
                     Paid on {new Date(ticket.invoice_paid_at).toLocaleDateString()}
                   </p>
                 ) : (
@@ -425,7 +425,7 @@ export default function JobTicketCard({
           <button
             type="button"
             onClick={copyClientLink}
-            className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
           >
             {linkCopied ? "Link copied!" : "Copy Client Link"}
           </button>

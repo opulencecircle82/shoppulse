@@ -44,20 +44,20 @@ function ActivityLog({ ticketId }: { ticketId: string }) {
   if (loading || logs.length === 0) return null;
 
   return (
-    <div className="mt-5 rounded-xl bg-white/5 p-4">
+    <div className="mt-5 rounded-xl bg-slate-50 p-4">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-center justify-between text-left"
       >
-        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
           <History className="h-3.5 w-3.5" />
           Activity Log ({logs.length})
         </p>
         {expanded ? (
-          <ChevronUp className="h-4 w-4 text-slate-400" />
+          <ChevronUp className="h-4 w-4 text-slate-500" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-slate-400" />
+          <ChevronDown className="h-4 w-4 text-slate-500" />
         )}
       </button>
 
@@ -65,7 +65,7 @@ function ActivityLog({ ticketId }: { ticketId: string }) {
         <div className="mt-3 max-h-56 space-y-2.5 overflow-y-auto">
           {logs.map((log) => (
             <div key={log.id} className="text-xs">
-              <p className="text-slate-300">{log.detail}</p>
+              <p className="text-slate-600">{log.detail}</p>
               <p className="mt-0.5 text-slate-500">
                 {log.actor_name ?? "System"}
                 {log.actor_role && log.actor_role !== "system" ? ` (${log.actor_role})` : ""} ·{" "}
@@ -98,10 +98,10 @@ function ProofPhoto({
   // on top of one that's already there.
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-white/5 shadow-sm shadow-black/20">
+      <div className="relative mt-1.5 aspect-video overflow-hidden rounded-xl bg-slate-50 shadow-sm shadow-slate-900/5">
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={label} className="h-full w-full object-cover" />
@@ -283,14 +283,14 @@ export default function ProofDisputeDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-white/10 bg-brand-navy p-6 shadow-2xl shadow-black/40"
+        className="flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-slate-900">
               Proof &amp; Dispute Review
             </h3>
             <p className="text-xs text-slate-500">
@@ -300,14 +300,14 @@ export default function ProofDisputeDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-500 hover:text-slate-900"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        <div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-brand-emerald/30 bg-brand-emerald/10 px-3 py-1.5 text-xs font-semibold text-brand-emerald">
+        <div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-brand-emerald/30 bg-brand-emerald/10 px-3 py-1.5 text-xs font-semibold text-brand-emerald-dark">
           <ShieldCheck className="h-3.5 w-3.5" />
           Live Snapshot Enforced &mdash; Gallery Disabled
         </div>
@@ -329,34 +329,34 @@ export default function ProofDisputeDrawer({
           />
         </div>
 
-        <div className="mt-5 rounded-xl bg-white/5 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="mt-5 rounded-xl bg-slate-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Job Metrics &amp; Cost
           </p>
           <dl className="mt-2 space-y-1.5 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-slate-400">Tech</dt>
-              <dd className="font-medium text-white">
+              <dt className="text-slate-500">Tech</dt>
+              <dd className="font-medium text-slate-900">
                 {assignedStaff?.full_name ?? "—"}
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-400">Time</dt>
-              <dd className="font-medium text-white">
+              <dt className="text-slate-500">Time</dt>
+              <dd className="font-medium text-slate-900">
                 {timeSpent !== null
                   ? `${Math.floor(timeSpent / 60)}h ${Math.round(timeSpent % 60)}m`
                   : "—"}
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-400">Geofence</dt>
+              <dt className="text-slate-500">Geofence</dt>
               <dd
                 className={`font-medium ${
                   !hasBothProofs
                     ? "text-slate-500"
                     : geofenceBreached
-                      ? "text-red-400"
-                      : "text-brand-emerald"
+                      ? "text-red-600"
+                      : "text-brand-emerald-dark"
                 }`}
               >
                 {!hasBothProofs
@@ -368,8 +368,8 @@ export default function ProofDisputeDrawer({
             </div>
             {ticket.selected_products.length > 0 && (
               <div className="flex items-start justify-between">
-                <dt className="shrink-0 text-slate-400">Parts</dt>
-                <dd className="text-right font-medium text-white">
+                <dt className="shrink-0 text-slate-500">Parts</dt>
+                <dd className="text-right font-medium text-slate-900">
                   {ticket.selected_products.map((item, i) => (
                     <span key={i} className="block">
                       {item.quantity}x {item.name} ({shop.currency} {item.price.toFixed(2)})
@@ -380,15 +380,15 @@ export default function ProofDisputeDrawer({
             )}
             {shop.default_service_fee > 0 && (
               <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Service Fee</dt>
-                <dd className="font-medium text-white">
+                <dt className="text-slate-500">Service Fee</dt>
+                <dd className="font-medium text-slate-900">
                   {shop.currency} {shop.default_service_fee.toFixed(2)}
                 </dd>
               </div>
             )}
-            <div className="flex items-center justify-between border-t border-white/30 pt-1.5">
-              <dt className="text-slate-400">Labor + Parts + Fee Total</dt>
-              <dd className="font-semibold text-brand-emerald">
+            <div className="flex items-center justify-between border-t border-slate-300 pt-1.5">
+              <dt className="text-slate-500">Labor + Parts + Fee Total</dt>
+              <dd className="font-semibold text-brand-emerald-dark">
                 {shop.currency}{" "}
                 {(
                   (timeSpent !== null ? (timeSpent / 60) * shop.default_hourly_rate : 0) +
@@ -402,7 +402,7 @@ export default function ProofDisputeDrawer({
 
         {ticket.signature_url && (
           <div className="mt-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Customer Signature
             </p>
             <div className="mt-1.5 rounded-xl bg-white p-2">
@@ -419,7 +419,7 @@ export default function ProofDisputeDrawer({
         <ActivityLog ticketId={ticket.id} />
 
         <div className="mt-5">
-          <label className="block text-xs font-medium text-slate-400">
+          <label className="block text-xs font-medium text-slate-500">
             Dispute Notes
           </label>
           <textarea
@@ -427,12 +427,12 @@ export default function ProofDisputeDrawer({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="What did the client say was wrong with this job?"
-            className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
           />
         </div>
 
         {error && (
-          <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+          <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
             {error}
           </p>
         )}
@@ -450,7 +450,7 @@ export default function ProofDisputeDrawer({
             type="button"
             onClick={handleReject}
             disabled={saving !== null || !notes.trim()}
-            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full border border-red-500/40 px-6 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving === "reject" ? "Rejecting..." : "Reject Dispute"}
           </button>

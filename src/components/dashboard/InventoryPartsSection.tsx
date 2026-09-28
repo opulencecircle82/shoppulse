@@ -15,11 +15,11 @@ function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-navy p-5 shadow-2xl shadow-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-white">{title}</p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
+          <p className="text-sm font-bold text-slate-900">{title}</p>
+          <button type="button" onClick={onClose} className="text-slate-500 hover:text-slate-900">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -30,8 +30,8 @@ function Modal({
 }
 
 const inputClass =
-  "w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none";
-const labelClass = "block text-xs font-medium text-slate-400";
+  "w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none";
+const labelClass = "block text-xs font-medium text-slate-500";
 
 function ItemModal({
   shopId,
@@ -222,7 +222,7 @@ function RestockModal({
   return (
     <Modal title={`Adjust Stock — ${item.name}`} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-2">
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           Current stock: {item.quantity} {item.unit}
         </p>
         <div>
@@ -284,17 +284,17 @@ function HistoryModal({
 
   return (
     <Modal title={`Stock History — ${item.name}`} onClose={onClose}>
-      {loading && <p className="text-sm text-slate-400">Loading...</p>}
+      {loading && <p className="text-sm text-slate-500">Loading...</p>}
       {!loading && movements.length === 0 && (
-        <p className="text-sm text-slate-400">No stock adjustments recorded yet.</p>
+        <p className="text-sm text-slate-500">No stock adjustments recorded yet.</p>
       )}
       <div className="max-h-80 space-y-2 overflow-y-auto">
         {movements.map((m) => (
-          <div key={m.id} className="rounded-xl bg-white/5 px-3 py-2">
+          <div key={m.id} className="rounded-xl bg-slate-50 px-3 py-2">
             <div className="flex items-center justify-between">
               <span
                 className={`text-sm font-semibold ${
-                  m.change_qty >= 0 ? "text-brand-emerald" : "text-red-400"
+                  m.change_qty >= 0 ? "text-brand-emerald-dark" : "text-red-600"
                 }`}
               >
                 {m.change_qty >= 0 ? "+" : ""}
@@ -304,7 +304,7 @@ function HistoryModal({
                 {new Date(m.created_at).toLocaleString()}
               </span>
             </div>
-            {m.note && <p className="mt-0.5 text-xs text-slate-400">{m.note}</p>}
+            {m.note && <p className="mt-0.5 text-xs text-slate-500">{m.note}</p>}
           </div>
         ))}
       </div>
@@ -347,7 +347,7 @@ export default function InventoryPartsSection({ shopId }: { shopId: string }) {
     <div className="mt-8">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-white">Inventory &amp; Parts</h3>
+          <h3 className="text-sm font-semibold text-slate-900">Inventory &amp; Parts</h3>
           <p className="mt-1 text-xs text-slate-500">
             Physical items you sell, with cost and stock tracking.
           </p>
@@ -362,20 +362,20 @@ export default function InventoryPartsSection({ shopId }: { shopId: string }) {
       </div>
 
       <div className="mt-4">
-        {loading && <p className="text-sm text-slate-400">Loading...</p>}
+        {loading && <p className="text-sm text-slate-500">Loading...</p>}
         {!loading && products.length === 0 && (
-          <div className="rounded-2xl bg-white/5 p-8 text-center">
+          <div className="rounded-2xl bg-white border border-slate-200/70 p-8 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
               <Package className="h-5 w-5 text-brand-blue" />
             </div>
-            <p className="mt-3 text-sm text-slate-400">No inventory or parts added yet.</p>
+            <p className="mt-3 text-sm text-slate-500">No inventory or parts added yet.</p>
           </div>
         )}
         {!loading && products.length > 0 && (
-          <div className="overflow-x-auto rounded-2xl border border-white/10">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-[11px] uppercase tracking-wide text-slate-400">
+                <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
                   <th className="px-3 py-2 font-medium">SKU</th>
                   <th className="px-3 py-2 font-medium">Item Name</th>
                   <th className="px-3 py-2 font-medium">Category</th>
@@ -388,38 +388,38 @@ export default function InventoryPartsSection({ shopId }: { shopId: string }) {
                   <th className="px-3 py-2 font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-slate-200">
                 {products.map((product) => {
                   const outOfStock = product.quantity === 0;
                   return (
-                    <tr key={product.id} className="hover:bg-white/5">
+                    <tr key={product.id} className="hover:bg-slate-50">
                       <td className="px-3 py-2.5 text-xs text-slate-500">
                         {product.sku ?? "—"}
                       </td>
-                      <td className="px-3 py-2.5 font-semibold text-white">{product.name}</td>
-                      <td className="px-3 py-2.5 text-slate-300">{product.category ?? "—"}</td>
-                      <td className="px-3 py-2.5 text-slate-300">{product.unit}</td>
-                      <td className="px-3 py-2.5 text-slate-300">
+                      <td className="px-3 py-2.5 font-semibold text-slate-900">{product.name}</td>
+                      <td className="px-3 py-2.5 text-slate-600">{product.category ?? "—"}</td>
+                      <td className="px-3 py-2.5 text-slate-600">{product.unit}</td>
+                      <td className="px-3 py-2.5 text-slate-600">
                         {product.cost_price.toFixed(2)}
                       </td>
-                      <td className="px-3 py-2.5 font-semibold text-white">
+                      <td className="px-3 py-2.5 font-semibold text-slate-900">
                         {product.quantity}
                       </td>
-                      <td className="px-3 py-2.5 text-slate-300">
+                      <td className="px-3 py-2.5 text-slate-600">
                         {(product.cost_price * product.quantity).toFixed(2)}
                       </td>
                       <td className="px-3 py-2.5">
                         <span
                           className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                             outOfStock
-                              ? "bg-red-500/15 text-red-400"
-                              : "bg-brand-emerald/15 text-brand-emerald"
+                              ? "bg-red-500/15 text-red-600"
+                              : "bg-brand-emerald/15 text-brand-emerald-dark"
                           }`}
                         >
                           {outOfStock ? "Out of Stock" : "In Stock"}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-slate-400">
+                      <td className="px-3 py-2.5 text-slate-500">
                         {product.expiry_date
                           ? new Date(product.expiry_date).toLocaleDateString()
                           : "—"}
@@ -437,7 +437,7 @@ export default function InventoryPartsSection({ shopId }: { shopId: string }) {
                             type="button"
                             onClick={() => setHistoryItem(product)}
                             aria-label="Stock history"
-                            className="rounded-full p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
+                            className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                           >
                             <History className="h-3.5 w-3.5" />
                           </button>
@@ -445,7 +445,7 @@ export default function InventoryPartsSection({ shopId }: { shopId: string }) {
                             type="button"
                             onClick={() => setEditingItem(product)}
                             aria-label="Edit item"
-                            className="rounded-full p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
+                            className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
@@ -453,7 +453,7 @@ export default function InventoryPartsSection({ shopId }: { shopId: string }) {
                             type="button"
                             onClick={() => handleDelete(product.id)}
                             aria-label="Delete item"
-                            className="rounded-full p-1.5 text-slate-400 hover:bg-red-500/15 hover:text-red-400"
+                            className="rounded-full p-1.5 text-slate-500 hover:bg-red-500/15 hover:text-red-600"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>

@@ -16,11 +16,11 @@ function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-brand-navy p-5 shadow-2xl shadow-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-white">{title}</p>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white">
+          <p className="text-sm font-bold text-slate-900">{title}</p>
+          <button type="button" onClick={onClose} className="text-slate-500 hover:text-slate-900">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -69,36 +69,36 @@ function AddServiceModal({
           placeholder="Service name (e.g. Outlet installation)"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <textarea
           rows={2}
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-xs font-medium text-slate-400">Price</label>
+            <label className="block text-xs font-medium text-slate-500">Price</label>
             <input
               type="number"
               min="0"
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-400">Extra Cost</label>
+            <label className="block text-xs font-medium text-slate-500">Extra Cost</label>
             <input
               type="number"
               min="0"
               step="0.01"
               value={extraCost}
               onChange={(e) => setExtraCost(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
         </div>
@@ -147,7 +147,7 @@ function ServicesSection({ shopId }: { shopId: string }) {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-white">Services</h3>
+          <h3 className="text-sm font-semibold text-slate-900">Services</h3>
           <p className="mt-1 text-xs text-slate-500">
             Listed on your shop details page so customers know what you offer
             and what it costs.
@@ -163,24 +163,24 @@ function ServicesSection({ shopId }: { shopId: string }) {
       </div>
 
       <div className="mt-4 space-y-2">
-        {loading && <p className="text-sm text-slate-400">Loading...</p>}
+        {loading && <p className="text-sm text-slate-500">Loading...</p>}
         {!loading && services.length === 0 && (
-          <div className="rounded-2xl bg-white/5 p-8 text-center">
+          <div className="rounded-2xl bg-white border border-slate-200/70 p-8 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/10">
               <Wrench className="h-5 w-5 text-brand-blue" />
             </div>
-            <p className="mt-3 text-sm text-slate-400">No services added yet.</p>
+            <p className="mt-3 text-sm text-slate-500">No services added yet.</p>
           </div>
         )}
         {services.map((service) => (
           <div
             key={service.id}
-            className="flex items-start justify-between gap-3 rounded-2xl bg-white/5 p-3"
+            className="flex items-start justify-between gap-3 rounded-2xl bg-white border border-slate-200/70 p-3"
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white">{service.name}</p>
+              <p className="text-sm font-semibold text-slate-900">{service.name}</p>
               {service.description && (
-                <p className="mt-0.5 text-xs text-slate-400">{service.description}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{service.description}</p>
               )}
               <p className="mt-1 text-xs text-slate-500">
                 Price: {service.price.toFixed(2)}
@@ -190,7 +190,7 @@ function ServicesSection({ shopId }: { shopId: string }) {
             <button
               type="button"
               onClick={() => handleDelete(service.id)}
-              className="shrink-0 text-slate-500 hover:text-red-400"
+              className="shrink-0 text-slate-500 hover:text-red-600"
               aria-label="Delete service"
             >
               <X className="h-4 w-4" />

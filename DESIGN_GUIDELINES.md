@@ -32,7 +32,9 @@ glance. Avoid all of them, no exceptions without asking first:
 - **Uniform corner radii and shadows on everything with no hierarchy.**
   Not every box is `rounded-2xl` with a glow. Primary actions get the
   gradient + shadow treatment (see Buttons below); everything else is
-  plain `bg-white/5` — the glow is what makes the real CTA findable.
+  plain `bg-white/5` on the dark apps (or a plain white card with a hairline
+  border on the light owner dashboard) — the glow is what makes the real CTA
+  findable.
   If everything glows, nothing does. Use `rounded-full` only for actual
   pill content (badges, buttons) — never as a generic rounding default.
 - **Icon-for-the-sake-of-icon.** Every icon in this app maps to one
@@ -56,19 +58,62 @@ adding it here first.
 
 | Token | Hex | Use for |
 |---|---|---|
-| `brand-navy` | `#0f172a` | Dark screen backgrounds (tech/owner app), headings on light backgrounds |
-| `brand-orange` | `#f97316` | Primary brand accent — badges, active nav state |
-| `brand-orange-dark` | `#ea580c` | Paired with orange in the primary-CTA gradient |
-| `brand-blue` | `#2563eb` | Links, secondary actions, "verified/info" accents |
-| `brand-blue-dark` | `#1d4ed8` | Paired with sky/blue in secondary gradients |
-| `brand-sky` | `#0ea5e9` | Paired with blue-dark in the secondary-CTA gradient |
-| `brand-emerald` | `#10b981` | Success, completion, positive stats — never for a primary CTA |
+| `brand-navy` | `#0f172a` | Dark screen backgrounds of the **tech and customer apps**; the dark phone mockups shown inside the owner dashboard. Not used as a background on the owner dashboard itself |
+| `brand-page` | `#eef3fb` | **Owner dashboard** page background — pale blue, with white cards on top |
+| `brand-blue` | `#2563eb` | **Primary color of the owner dashboard**: active nav pill, primary buttons, links, focus rings. Secondary actions/links on the dark apps |
+| `brand-blue-dark` | `#1d4ed8` | Deep end of the blue gradients (welcome banner, primary button) |
+| `brand-sky` | `#0ea5e9` | Bright end of the blue gradients |
+| `brand-orange` | `#f97316` | Accent — stat-card icon chip, "attention" badges. Primary CTA color on the dark tech/customer apps |
+| `brand-orange-dark` | `#ea580c` | Orange **text** on light surfaces; paired with orange/amber in the dark apps' primary-CTA gradient |
+| `brand-emerald` | `#10b981` | Success, completion, positive stats (fills, chips, icon backgrounds) — never for a primary CTA |
+| `brand-emerald-dark` | `#059669` | Emerald **text and small icons** on light surfaces (plain `brand-emerald` is too pale to read there) |
 | `brand-slate` / `brand-slate-light` | `#f1f5f9` / `#ffffff` | Light-theme surfaces (customer-facing marketing/site pages) |
 
 No purple, violet, indigo, or pink anywhere in this app's palette. If a
 design needs another accent color, ask before adding one — it almost
 always means reaching for an emerald/blue/orange combination that already
 exists.
+
+## Owner dashboard: light theme rules
+
+The owner dashboard (`/dashboard/**`, including Business Settings and the
+website editor) is a **light, blue-primary** surface — pale blue page,
+white cards, one bright blue for everything interactive. This replaces
+the old dark navy dashboard; the tech and customer apps stay dark. When
+you touch a dashboard screen, use these rules and nothing else:
+
+| Thing | Rule |
+|---|---|
+| Page background | `bg-brand-page` (never `bg-brand-navy`) |
+| Card / panel / modal / dropdown | `bg-white`, `rounded-2xl`, `border border-slate-200/70` (modals: `border-slate-200`), `shadow-sm shadow-slate-900/5` (modals: `shadow-2xl shadow-slate-900/10`) |
+| Inner tile / recessed row (inside a card) | `bg-slate-50` |
+| Text input / select / textarea | `bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none`, plus `[color-scheme:light]` on date/time/select |
+| Heading text | `text-slate-900` |
+| Body text | `text-slate-600` |
+| Label / eyebrow / description | `text-slate-500` (eyebrows also `uppercase tracking-wide text-xs font-semibold`) |
+| Placeholder / faint metadata | `text-slate-400` |
+| Dividers and outlines | `border-slate-200`; outline buttons `border-slate-300` → hover `border-slate-400` |
+| Primary button | `rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark text-white` with the blue glow shadow. One per screen area |
+| Secondary button | outline: `border border-slate-300 text-slate-700 hover:border-slate-400 hover:text-slate-900` |
+| Active nav item / active tab | solid `bg-brand-blue text-white shadow-md shadow-brand-blue/25` |
+| Inactive nav item | `text-slate-600 hover:bg-slate-50 hover:text-slate-900` |
+| Welcome / hero banner | `bg-gradient-to-r from-brand-blue-dark via-brand-blue to-brand-sky text-white`, `rounded-3xl`; buttons inside are white with `text-brand-blue-dark` |
+| Stat card | white card, label + big number on the left, solid **circular** icon chip on the right (`h-11 w-11 rounded-full`, white icon) in blue / emerald / amber / orange |
+| Status pill | tinted fill + darker text, e.g. `bg-brand-emerald/15 text-brand-emerald-dark`, `bg-brand-orange/10 text-brand-orange-dark`, `bg-brand-blue/15 text-brand-blue` |
+| Warning / attention panel | `border-amber-200 bg-amber-50` (solid tints — translucent tints look muddy over the pale page) |
+| Error / danger | `text-red-600`, `border-red-500/30 bg-red-500/10`; unread/alert rows `bg-red-50` |
+| Modal overlay | `bg-slate-900/40` |
+| Text on a colored surface | stays `text-white` (gradient buttons, blue/red/emerald chips, banners, and captions over photos). White text is **only** allowed on those — never on a white or pale surface |
+
+Never use `bg-white/5`, `bg-white/10`, `border-white/10`, `text-slate-300`, or
+a bare `text-white` on a dashboard screen — those are the dark-theme
+classes and will be invisible on white. If a component is shared with the
+dark apps, give it a `theme`/`tone` prop instead of hardcoding one surface
+(see `SelectedProductsPicker` and `LocationPickerMap`).
+
+The dark phone mockups inside the dashboard (Customize Mobile App and
+Promotions previews) depict the real tech/customer apps, so they stay dark
+on purpose — keep them inside their `PhoneFrame`.
 
 ## Typography
 
@@ -95,7 +140,10 @@ specifically for anything added to a header icon row or a dense list row.
 
 - Every screen is mobile-first. Design and review at **phone width first**
   (~390–430px), not desktop — this app is viewed in a browser on a phone
-  or wrapped in a native WebView, full stop.
+  or wrapped in a native WebView, full stop. The one exception is the
+  **owner dashboard**, which is desktop-first: its left sidebar card shows
+  only from `lg` up and collapses to a horizontally scrolling pill row on
+  phones, so it never costs a phone screen permanent chrome.
 - Single-column content wrapper: `mx-auto max-w-lg`, with `px-5 py-6` page
   padding. This is the pattern in `CustomerHomeScreen.tsx` and (as of the
   Sept 2026 fix) `TechHomeScreen.tsx` — reuse it, don't reinvent a wrapper.
@@ -111,17 +159,19 @@ specifically for anything added to a header icon row or a dense list row.
 
 ## Components
 
-- **Primary CTA button**: `rounded-full bg-gradient-to-r from-amber-400
+- **Primary CTA button (tech and customer apps)**: `rounded-full bg-gradient-to-r from-amber-400
   to-brand-orange-dark px-6 py-3.5 text-sm font-bold text-white
   shadow-[0_0_20px_rgba(249,115,22,0.35)]` — one specific gradient, used
   everywhere a primary action lives. Don't invent a new gradient per
-  screen.
-- **Secondary/info button**: blue gradient (`from-brand-sky to-brand-blue-dark`)
+  screen. (The owner dashboard's primary button is the blue gradient in
+  "Owner dashboard: light theme rules" above.)
+- **Secondary/info button (dark apps)**: blue gradient (`from-brand-sky to-brand-blue-dark`)
   or a plain `border border-white/20` outline button — never a second
   orange button competing with the primary one on the same screen.
-- **Card**: `rounded-2xl bg-white/5 p-4` (or `p-5`) on dark backgrounds.
+- **Card (dark apps)**: `rounded-2xl bg-white/5 p-4` (or `p-5`) on dark backgrounds.
   Flat, no border, no shadow — the CTA glow is what should stand out, not
-  the container.
+  the container. Owner dashboard cards are white with a hairline border
+  instead (see the light-theme rules above).
 - **Badge/pill**: `rounded-full px-2.5 py-1 text-[10px] font-bold` with a
   color-matched `/15` background tint (e.g. `bg-brand-emerald/15
   text-brand-emerald`).

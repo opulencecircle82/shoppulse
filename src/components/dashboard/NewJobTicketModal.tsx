@@ -26,7 +26,7 @@ function ChecklistEditor({
 
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400">{label}</label>
+      <label className="block text-xs font-medium text-slate-500">{label}</label>
       <p className="mt-0.5 text-xs text-slate-500">
         Shown to the technician on the mobile app before they can take the
         proof photo.
@@ -37,7 +37,7 @@ function ChecklistEditor({
           {items.map((item, index) => (
             <li
               key={index}
-              className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white"
+              className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-900"
             >
               <span>{item}</span>
               <button
@@ -65,12 +65,12 @@ function ChecklistEditor({
               addItem();
             }
           }}
-          className="w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
         />
         <button
           type="button"
           onClick={addItem}
-          className="shrink-0 rounded-xl border border-white/20 px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-brand-blue hover:text-brand-blue"
+          className="shrink-0 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           Add
         </button>
@@ -134,19 +134,19 @@ export default function NewJobTicketModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-6"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-3xl border border-white/10 bg-brand-navy p-6 shadow-2xl shadow-black/40"
+        className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
       >
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-white">New Job Ticket</h3>
+          <h3 className="text-lg font-semibold text-slate-900">New Job Ticket</h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-500 hover:text-slate-900"
             aria-label="Close"
           >
             ✕
@@ -156,7 +156,7 @@ export default function NewJobTicketModal({
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Client Name
               </label>
               <input
@@ -164,11 +164,11 @@ export default function NewJobTicketModal({
                 required
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Client Email
               </label>
               <input
@@ -176,25 +176,25 @@ export default function NewJobTicketModal({
                 required
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Client Phone
             </label>
             <input
               type="tel"
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Service Address
             </label>
             <input
@@ -202,13 +202,13 @@ export default function NewJobTicketModal({
               required
               value={serviceAddress}
               onChange={(e) => setServiceAddress(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Service Type
               </label>
               <input
@@ -217,11 +217,11 @@ export default function NewJobTicketModal({
                 placeholder="Deep Cleaning, HVAC repair..."
                 value={serviceType}
                 onChange={(e) => setServiceType(e.target.value)}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400">
+              <label className="block text-xs font-medium text-slate-500">
                 Estimated Hours
               </label>
               <input
@@ -230,19 +230,19 @@ export default function NewJobTicketModal({
                 step={0.5}
                 value={estimatedHours}
                 onChange={(e) => setEstimatedHours(Number(e.target.value))}
-                className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">
+            <label className="block text-xs font-medium text-slate-500">
               Assign Technician
             </label>
             <select
               value={assignedStaffId}
               onChange={(e) => setAssignedStaffId(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:dark]"
+              className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
             >
               <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
                 Unassigned
@@ -274,7 +274,7 @@ export default function NewJobTicketModal({
           />
 
           {error && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-600">
               {error}
             </p>
           )}

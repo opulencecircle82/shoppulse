@@ -108,30 +108,30 @@ export default function EditStaffModal({
 
   if (savedPassword) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-        <div className="w-full max-w-sm rounded-2xl bg-brand-navy p-6 shadow-2xl ring-1 ring-white/10">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-white">Password reset</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Password reset</h2>
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-400 transition-colors hover:text-white"
+              className="text-slate-500 transition-colors hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+          <p className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600">
             This is the only time you&apos;ll see this password — write it
             down or share it with {fullName.split(" ")[0]} now.
           </p>
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/5 px-3.5 py-2.5">
-            <span className="flex-1 truncate font-mono text-sm text-white">
+          <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 px-3.5 py-2.5">
+            <span className="flex-1 truncate font-mono text-sm text-slate-900">
               {savedPassword}
             </span>
             <button
               type="button"
               onClick={copyPassword}
-              className="shrink-0 rounded-full border border-white/20 p-1.5 text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+              className="shrink-0 rounded-full border border-slate-300 p-1.5 text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
             </button>
@@ -149,57 +149,57 @@ export default function EditStaffModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-brand-navy p-6 shadow-2xl ring-1 ring-white/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+      <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white">Edit Staff</h2>
+          <h2 className="text-sm font-semibold text-slate-900">Edit Staff</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 transition-colors hover:text-white"
+            className="text-slate-500 transition-colors hover:text-slate-900"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-500">
           {staffMember.username ? `Mobile login: ${staffMember.username}` : staffMember.email}
         </p>
 
         <div className="mt-4 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400">Full Name</label>
+            <label className="block text-xs font-medium text-slate-500">Full Name</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">Contact Number</label>
+            <label className="block text-xs font-medium text-slate-500">Contact Number</label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="09XX XXX XXXX"
-              className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400">Address</label>
+            <label className="block text-xs font-medium text-slate-500">Address</label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Home address"
-              className="mt-1.5 w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
 
-          <div className="border-t border-white/10 pt-3">
-            <label className="flex items-center gap-2.5 text-sm text-slate-300">
+          <div className="border-t border-slate-200 pt-3">
+            <label className="flex items-center gap-2.5 text-sm text-slate-600">
               <input
                 type="checkbox"
                 checked={changePassword}
@@ -220,12 +220,12 @@ export default function EditStaffModal({
                     type="text"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full flex-1 rounded-xl bg-white/5 px-3.5 py-2.5 font-mono text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    className="w-full flex-1 rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 font-mono text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setNewPassword(generatePassword())}
-                    className="shrink-0 rounded-full border border-white/20 px-3 py-2.5 text-xs font-semibold text-slate-300 transition-colors hover:border-brand-blue hover:text-brand-blue"
+                    className="shrink-0 rounded-full border border-slate-300 px-3 py-2.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand-blue hover:text-brand-blue"
                   >
                     Generate
                   </button>
@@ -235,13 +235,13 @@ export default function EditStaffModal({
           </div>
         </div>
 
-        {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
+        {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
 
         <div className="mt-5 flex gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:border-white/40 hover:text-white"
+            className="flex-1 rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900"
           >
             Cancel
           </button>
