@@ -149,27 +149,27 @@ export default function StaffManagementTab({
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Mobile App Login</th>
-                <th className="px-4 py-3 font-medium">Contact</th>
-                <th className="px-4 py-3 font-medium">Role</th>
-                <th className="px-4 py-3 font-medium">Hourly Rate</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="px-3 py-3 font-medium">Name</th>
+                <th className="px-3 py-3 font-medium">Mobile App Login</th>
+                <th className="px-3 py-3 font-medium">Contact</th>
+                <th className="px-3 py-3 font-medium">Role</th>
+                <th className="px-3 py-3 font-medium">Hourly Rate</th>
+                <th className="px-3 py-3 font-medium">Status</th>
+                <th className="px-3 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {nonOwnerStaff.map((member) => (
                 <tr key={member.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">
+                  <td className="px-3 py-3 font-medium text-slate-900">
                     {member.full_name}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-3 py-3 text-slate-600">
                     {member.username ?? (
                       <span className="text-slate-500">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-3 py-3 text-slate-600">
                     <div>{member.email}</div>
                     {member.phone && (
                       <div className="text-xs text-slate-500">{member.phone}</div>
@@ -178,11 +178,11 @@ export default function StaffManagementTab({
                       <div className="text-xs text-slate-500">{member.address}</div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{member.role}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-3 py-3 text-slate-600">{member.role}</td>
+                  <td className="px-3 py-3 text-slate-600">
                     ${member.hourly_rate.toFixed(2)}/hr
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-3">
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                         member.is_active
@@ -193,9 +193,9 @@ export default function StaffManagementTab({
                       {member.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="min-w-[200px] px-3 py-3 text-right">
                     {member.role !== "OWNER" && (
-                      <div className="flex justify-end gap-2">
+                      <div className="flex flex-wrap justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => setHistoryStaff(member)}

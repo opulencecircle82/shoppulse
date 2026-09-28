@@ -107,7 +107,7 @@ function MapRecenter({
 
 const CLOSE_ZOOM = 17;
 
-export default function LiveFieldMap({ shop }: { shop: Shop }) {
+export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?: boolean }) {
   const [pins, setPins] = useState<MapPin[]>([]);
   const [livePins, setLivePins] = useState<LivePin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -221,12 +221,16 @@ export default function LiveFieldMap({ shop }: { shop: Shop }) {
     : DEFAULT_CENTER;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl shadow-md shadow-slate-900/5">
+    <div
+      className={`relative overflow-hidden ${
+        fill ? "h-full" : "rounded-2xl shadow-md shadow-slate-900/5"
+      }`}
+    >
       <MapContainer
         center={center}
         zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
         maxZoom={19}
-        style={{ height: "480px", width: "100%" }}
+        style={{ height: fill ? "100%" : "480px", width: "100%" }}
       >
         <MapRecenter
           center={center}

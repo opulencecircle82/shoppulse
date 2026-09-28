@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   Home,
   KanbanSquare,
-  MapPin,
   ShieldCheck,
   Users,
   Megaphone,
@@ -19,7 +18,6 @@ import {
 export const DASHBOARD_TABS = [
   { id: "home", label: "Home", icon: Home },
   { id: "board", label: "Job Board", icon: KanbanSquare },
-  { id: "map", label: "Live Field Map", icon: MapPin },
   { id: "proof", label: "Proof & Dispute Gate", icon: ShieldCheck },
   { id: "staff", label: "Staff Management", icon: Users },
   { id: "services", label: "Services", icon: Wrench },

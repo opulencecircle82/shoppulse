@@ -354,7 +354,7 @@ export default function CompanyProfilePanel({
           className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
         >
           {COUNTRIES.map((c) => (
-            <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+            <option key={c} value={c}>
               {c}
             </option>
           ))}
@@ -409,7 +409,7 @@ export default function CompanyProfilePanel({
           className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
         >
           {CURRENCIES.map((c) => (
-            <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+            <option key={c} value={c}>
               {c}
             </option>
           ))}
@@ -429,23 +429,22 @@ export default function CompanyProfilePanel({
           }}
           className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
         >
-          <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+          <option value="">
             Select category
           </option>
           {SERVICE_CATEGORY_GROUPS.map((group) => (
             <optgroup
               key={group.group}
               label={group.group}
-              style={{ backgroundColor: "#0F172A", color: "#fff" }}
             >
               {group.categories.map((c) => (
-                <option key={c} value={c} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+                <option key={c} value={c}>
                   {c}
                 </option>
               ))}
             </optgroup>
           ))}
-          <option value="Other" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+          <option value="Other">
             Other
           </option>
         </select>

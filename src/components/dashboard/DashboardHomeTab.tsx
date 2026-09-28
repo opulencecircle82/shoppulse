@@ -14,6 +14,7 @@ import {
 import { Calendar, TrendingUp, TrendingDown, Megaphone, BellRing } from "lucide-react";
 import type { JobTicket, JobStatus, Shop, StaffMember } from "@/lib/supabase/types";
 import type { DashboardTabId } from "./DashboardSidebarNav";
+import { formatDateOnly } from "@/lib/dashboard/format";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -325,7 +326,7 @@ export default function DashboardHomeTab({
                       </span>
                     </span>
                     <span className="shrink-0 text-[11px] font-medium text-slate-500">
-                      {t.preferred_date ? new Date(t.preferred_date).toLocaleDateString() : ""}
+                      {t.preferred_date ? formatDateOnly(t.preferred_date) : ""}
                     </span>
                   </button>
                 ))}
@@ -367,8 +368,8 @@ export default function DashboardHomeTab({
                       ]}
                       contentStyle={{
                         fontSize: 12,
-                        backgroundColor: "#0F172A",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #e2e8f0",
                         borderRadius: 8,
                       }}
                     />

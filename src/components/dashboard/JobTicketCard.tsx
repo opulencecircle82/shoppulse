@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Download } from "lucide-react";
+import { CalendarDays, Download, MapPin, Receipt, UserRound } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
+import { formatDateOnly, initials } from "@/lib/dashboard/format";
 import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
@@ -133,19 +134,17 @@ export default function JobTicketCard({
   return (
     <div
       onClick={() => onOpenProofDrawer?.(ticket)}
-      className={`rounded-2xl bg-white border border-slate-200/70 p-4 shadow-md shadow-slate-900/5 ${
+      className={`rounded-2xl bg-white border border-slate-200/70 p-4 shadow-sm shadow-slate-900/5 ${
         onOpenProofDrawer ? "cursor-pointer transition-shadow hover:shadow-lg hover:shadow-brand-blue/10" : ""
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-900">
-            {ticket.client_name}
-          </p>
-          <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
-          <p className="mt-1 truncate text-xs text-slate-500">
-            {ticket.service_address}
-          </p>
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-xs font-bold text-brand-blue">
+          {initials(ticket.client_name)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-slate-900">{ticket.client_name}</p>
+          <p className="truncate text-xs text-slate-500">{ticket.service_type}</p>
         </div>
         {ticket.status === "DISPUTED" && (
           <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-600">
@@ -154,13 +153,35 @@ export default function JobTicketCard({
         )}
       </div>
 
-      <p className="mt-1.5 text-[10px] text-slate-500">
-        {ticket.client_viewed_at
-          ? `Client viewed ${new Date(ticket.client_viewed_at).toLocaleDateString()}`
-          : "Not yet viewed by client"}
-      </p>
+      {ticket.is_emergency && (
+        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-600">
+          🚨 EMERGENCY
+        </span>
+      )}
 
-      {ticket.status === "UNASSIGNED" ? (
+      <div className="mt-3 space-y-1.5 text-xs text-slate-600">
+        <p className="flex items-start gap-2">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+          <span className="min-w-0 break-words">{ticket.service_address}</span>
+        </p>
+        {ticket.preferred_date && (
+          <p className="flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            Preferred: {formatDateOnly(ticket.preferred_date)}
+          </p>
+        )}
+        {ticket.status !== "UNASSIGNED" && (
+          <p className="flex items-center gap-2">
+            <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            <span>
+              Technician:{" "}
+              <span className="font-medium text-slate-900">{assignedStaff?.full_name ?? "—"}</span>
+            </span>
+          </p>
+        )}
+      </div>
+
+      {ticket.status === "UNASSIGNED" && (
         <select
           value=""
           onChange={(e) => {
@@ -168,32 +189,34 @@ export default function JobTicketCard({
             if (member) setPendingAssignee(member);
           }}
           onClick={(e) => e.stopPropagation()}
-          className="mt-3 w-full rounded-xl bg-slate-50 border border-slate-200 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
         >
-          <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
-            Assign technician...
-          </option>
+          <option value="">Assign technician...</option>
           {staff.map((member) => (
-            <option
-              key={member.id}
-              value={member.id}
-              style={{ backgroundColor: "#0F172A", color: "#fff" }}
-            >
+            <option key={member.id} value={member.id}>
               {member.full_name}
             </option>
           ))}
         </select>
-      ) : (
-        <p className="mt-3 text-xs text-slate-500">
-          Assigned: <span className="text-slate-900">{assignedStaff?.full_name ?? "—"}</span>
-        </p>
       )}
 
       {ticket.total_invoice_amount > 0 && (
-        <p className="mt-1 text-xs font-semibold text-brand-emerald-dark">
-          Invoice: {ticket.total_invoice_amount.toFixed(2)}
-        </p>
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-brand-emerald/10 px-3 py-2">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+            <Receipt className="h-3.5 w-3.5 text-slate-400" />
+            Invoice
+          </span>
+          <span className="text-sm font-bold text-brand-emerald-dark">
+            {currency} {ticket.total_invoice_amount.toFixed(2)}
+          </span>
+        </div>
       )}
+
+      <p className="mt-2.5 text-[10px] text-slate-400">
+        {ticket.client_viewed_at
+          ? `Client viewed ${new Date(ticket.client_viewed_at).toLocaleDateString()}`
+          : "Not yet viewed by client"}
+      </p>
 
       {PRODUCTS_EDITABLE_STATUSES.has(ticket.status) && (
         <div className="mt-3" onClick={(e) => e.stopPropagation()}>

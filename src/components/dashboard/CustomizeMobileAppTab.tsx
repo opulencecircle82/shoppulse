@@ -376,7 +376,7 @@ export default function CustomizeMobileAppTab({
             className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
           >
             {FONT_OPTIONS.map((font) => (
-              <option key={font} value={font} style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+              <option key={font} value={font}>
                 {font}
               </option>
             ))}

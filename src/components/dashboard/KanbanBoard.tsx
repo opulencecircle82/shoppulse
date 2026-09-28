@@ -1,20 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import type { JobStatus, JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import JobTicketCard from "./JobTicketCard";
 import BookingRequestCard from "./BookingRequestCard";
 
-const COLUMNS: { status: JobStatus; label: string }[] = [
-  { status: "PENDING", label: "Booking Requests" },
-  { status: "UNASSIGNED", label: "Unassigned" },
-  { status: "SCHEDULED", label: "Scheduled" },
-  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval" },
-  { status: "IN_PROGRESS", label: "In Progress" },
-  { status: "COMPLETED", label: "Completed" },
-  { status: "DISPUTED", label: "Disputed" },
-  { status: "APPROVED", label: "Approved" },
-  { status: "CANCELLED", label: "Cancelled" },
+const COLUMNS: {
+  status: JobStatus;
+  label: string;
+  dot: string;
+  accent: string;
+  empty: string;
+}[] = [
+  { status: "PENDING", label: "Booking Requests", dot: "bg-brand-orange", accent: "border-t-brand-orange", empty: "No new booking requests" },
+  { status: "UNASSIGNED", label: "Unassigned", dot: "bg-amber-500", accent: "border-t-amber-500", empty: "Every job has a technician" },
+  { status: "SCHEDULED", label: "Scheduled", dot: "bg-brand-sky", accent: "border-t-brand-sky", empty: "Nothing scheduled" },
+  { status: "ESTIMATE_PENDING", label: "Awaiting Quote Approval", dot: "bg-brand-blue-dark", accent: "border-t-brand-blue-dark", empty: "No quotes waiting on a customer" },
+  { status: "IN_PROGRESS", label: "In Progress", dot: "bg-brand-blue", accent: "border-t-brand-blue", empty: "No jobs in progress" },
+  { status: "COMPLETED", label: "Completed", dot: "bg-brand-emerald", accent: "border-t-brand-emerald", empty: "No jobs waiting for your review" },
+  { status: "DISPUTED", label: "Disputed", dot: "bg-red-500", accent: "border-t-red-500", empty: "No disputes" },
+  { status: "APPROVED", label: "Approved", dot: "bg-brand-emerald-dark", accent: "border-t-brand-emerald-dark", empty: "No approved jobs yet" },
+  { status: "CANCELLED", label: "Cancelled", dot: "bg-slate-400", accent: "border-t-slate-400", empty: "No cancelled jobs" },
 ];
 
 export default function KanbanBoard({
@@ -34,83 +40,102 @@ export default function KanbanBoard({
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer: (ticket: JobTicket) => void;
 }) {
-  const [activeStatus, setActiveStatus] = useState<JobStatus>("PENDING");
-  const activeTickets = tickets
-    .filter((t) => t.status === activeStatus)
-    .sort((a, b) => Number(b.is_emergency) - Number(a.is_emergency));
+  const byStatus = useMemo(() => {
+    const groups = new Map<JobStatus, JobTicket[]>();
+    for (const column of COLUMNS) groups.set(column.status, []);
+    for (const ticket of tickets) groups.get(ticket.status)?.push(ticket);
+    // Emergencies float to the top of their lane; the rest keep the
+    // newest-first order the tickets already arrive in.
+    for (const list of groups.values()) {
+      list.sort((a, b) => Number(b.is_emergency) - Number(a.is_emergency));
+    }
+    return groups;
+  }, [tickets]);
+
+  function jumpTo(status: JobStatus) {
+    document
+      .getElementById(`kanban-col-${status}`)
+      ?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+  }
 
   return (
     <div>
-      {/* Status filter pills replace the old side-by-side Kanban columns —
-          those required horizontal drag-scrolling to reach Completed/
-          Disputed/Approved, which hid the invoice info off-screen with no
-          visual hint it was there. One status at a time, full width,
-          normal page scroll only. */}
+      {/* One lane per stage, side by side. Nine lanes never fit on screen
+          at once, so this row lists every stage with its count and jumps
+          the board to it — nothing sits off-screen without a visible hint. */}
       <div className="flex flex-wrap gap-2">
-        {COLUMNS.map((column) => {
-          const count = tickets.filter((t) => t.status === column.status).length;
-          const isActive = activeStatus === column.status;
-          return (
-            <button
-              key={column.status}
-              type="button"
-              onClick={() => setActiveStatus(column.status)}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
-                isActive
-                  ? "bg-brand-blue text-white shadow-[0_0_20px_rgba(37,99,235,0.35)]"
-                  : "bg-slate-50 text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              {column.label}
-              <span
-                className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                  isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-600"
-                }`}
-              >
-                {count}
-              </span>
-            </button>
-          );
-        })}
+        {COLUMNS.map((column) => (
+          <button
+            key={column.status}
+            type="button"
+            onClick={() => jumpTo(column.status)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm shadow-slate-900/5 transition-colors hover:border-brand-blue hover:text-brand-blue"
+          >
+            <span className={`h-2 w-2 rounded-full ${column.dot}`} />
+            {column.label}
+            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
+              {byStatus.get(column.status)?.length ?? 0}
+            </span>
+          </button>
+        ))}
       </div>
 
-      <div className="mt-5">
-        {activeTickets.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-            {activeStatus === "PENDING" ? "No pending requests" : "No jobs in this status"}
-          </div>
-        )}
+      <div className="mt-4 flex gap-4 overflow-x-auto pb-4 [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin]">
+        {COLUMNS.map((column) => {
+          const columnTickets = byStatus.get(column.status) ?? [];
+          return (
+            <section
+              key={column.status}
+              id={`kanban-col-${column.status}`}
+              className={`flex max-h-[75vh] min-h-[360px] w-[320px] shrink-0 flex-col rounded-2xl border border-t-[3px] border-slate-200/70 bg-slate-100/70 ${column.accent}`}
+            >
+              <header className="flex items-center justify-between gap-2 px-4 pb-3 pt-3.5">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${column.dot}`} />
+                  <h3 className="truncate text-sm font-semibold text-slate-900">{column.label}</h3>
+                </div>
+                <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-slate-600 shadow-sm shadow-slate-900/5">
+                  {columnTickets.length}
+                </span>
+              </header>
 
-        {activeTickets.length > 0 && (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {activeStatus === "PENDING"
-              ? activeTickets.map((ticket) => (
-                  <BookingRequestCard
-                    key={ticket.id}
-                    ticket={ticket}
-                    shop={shop}
-                    onChanged={onChanged}
-                  />
-                ))
-              : activeTickets.map((ticket) => (
-                  <JobTicketCard
-                    key={ticket.id}
-                    ticket={ticket}
-                    staff={staff}
-                    defaultTasks={shop.default_tasks}
-                    shop={shop}
-                    currentStaffId={currentStaffId}
-                    onChanged={onChanged}
-                    onOpenInvoice={onOpenInvoice}
-                    onOpenProofDrawer={
-                      ticket.status === "COMPLETED" || ticket.status === "DISPUTED"
-                        ? onOpenProofDrawer
-                        : undefined
-                    }
-                  />
-                ))}
-          </div>
-        )}
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-3">
+                {columnTickets.length === 0 && (
+                  <div className="rounded-xl border border-dashed border-slate-300 px-3 py-8 text-center text-xs text-slate-500">
+                    {column.empty}
+                  </div>
+                )}
+
+                {columnTickets.map((ticket) =>
+                  column.status === "PENDING" ? (
+                    <BookingRequestCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      shop={shop}
+                      onChanged={onChanged}
+                    />
+                  ) : (
+                    <JobTicketCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      staff={staff}
+                      defaultTasks={shop.default_tasks}
+                      shop={shop}
+                      currentStaffId={currentStaffId}
+                      onChanged={onChanged}
+                      onOpenInvoice={onOpenInvoice}
+                      onOpenProofDrawer={
+                        ticket.status === "COMPLETED" || ticket.status === "DISPUTED"
+                          ? onOpenProofDrawer
+                          : undefined
+                      }
+                    />
+                  )
+                )}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

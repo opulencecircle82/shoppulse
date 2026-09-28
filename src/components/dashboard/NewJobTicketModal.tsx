@@ -244,14 +244,13 @@ export default function NewJobTicketModal({
               onChange={(e) => setAssignedStaffId(e.target.value)}
               className="mt-1 w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
             >
-              <option value="" style={{ backgroundColor: "#0F172A", color: "#fff" }}>
+              <option value="">
                 Unassigned
               </option>
               {staff.map((member) => (
                 <option
                   key={member.id}
                   value={member.id}
-                  style={{ backgroundColor: "#0F172A", color: "#fff" }}
                 >
                   {member.full_name} ({member.role})
                 </option>

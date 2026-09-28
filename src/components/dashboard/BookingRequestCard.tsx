@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, Phone } from "lucide-react";
+import { CalendarDays, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import { formatDateOnly, initials } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
 export default function BookingRequestCard({
@@ -62,7 +63,7 @@ export default function BookingRequestCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-white p-4 shadow-md shadow-slate-900/5 ${
+      className={`rounded-2xl border bg-white p-4 shadow-sm shadow-slate-900/5 ${
         ticket.is_emergency ? "border-red-500/50 ring-1 ring-red-500/30" : "border-brand-blue/20"
       }`}
     >
@@ -71,35 +72,58 @@ export default function BookingRequestCard({
           🚨 EMERGENCY
         </span>
       )}
-      <p className="text-sm font-semibold text-slate-900">{ticket.client_name}</p>
-      <p className="mt-0.5 text-xs text-slate-500">{ticket.service_type}</p>
+
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-orange/10 text-xs font-bold text-brand-orange-dark">
+          {initials(ticket.client_name)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-slate-900">{ticket.client_name}</p>
+          <p className="truncate text-xs text-slate-500">{ticket.service_type}</p>
+        </div>
+      </div>
+
       {ticket.description && (
-        <p className="mt-1 text-xs text-slate-500">{ticket.description}</p>
+        <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
+          {ticket.description}
+        </p>
       )}
+
       {ticket.discount_percent && (
-        <span className="mt-1.5 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange-dark">
+        <span className="mt-2 inline-block rounded-full bg-brand-orange/10 px-2.5 py-1 text-[11px] font-semibold text-brand-orange-dark">
           {ticket.discount_percent}% discount applied
         </span>
       )}
+
       {ticket.request_photo_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={ticket.request_photo_url}
           alt="Request photo"
-          className="mt-1.5 h-16 w-16 rounded-lg object-cover"
+          className="mt-2 h-16 w-16 rounded-lg object-cover"
         />
       )}
-      <p className="mt-1 text-xs text-slate-500">{ticket.service_address}</p>
-      {ticket.preferred_date && (
-        <p className="mt-1 text-xs text-slate-500">
-          Preferred date: {new Date(ticket.preferred_date).toLocaleDateString()}
-        </p>
-      )}
-      {distance && (
-        <p className="mt-1 text-xs font-medium text-brand-blue">{distance}</p>
-      )}
 
-      <div className="mt-2 flex flex-wrap gap-3">
+      <div className="mt-3 space-y-1.5 text-xs text-slate-600">
+        <p className="flex items-start gap-2">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+          <span className="min-w-0 break-words">{ticket.service_address}</span>
+        </p>
+        {ticket.preferred_date && (
+          <p className="flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            Preferred: {formatDateOnly(ticket.preferred_date)}
+          </p>
+        )}
+        {distance && (
+          <p className="flex items-center gap-2 font-medium text-brand-blue">
+            <Navigation className="h-3.5 w-3.5 shrink-0" />
+            {distance}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-3">
         {ticket.client_email && (
           <a
             href={`mailto:${ticket.client_email}`}

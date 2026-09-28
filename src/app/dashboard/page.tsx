@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
@@ -23,6 +22,7 @@ import PromotionsManager from "@/components/dashboard/PromotionsManager";
 import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab";
 import ReviewsTab from "@/components/dashboard/ReviewsTab";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
+import LiveMapPanel from "@/components/dashboard/LiveMapPanel";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
   type DashboardTabId,
@@ -34,7 +34,6 @@ import DashboardSidebarNav, {
 const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
   board:
     "Jobs move through stages: Booking Requests → Unassigned → Scheduled → Awaiting Quote Approval → In Progress → Completed → Approved (or Disputed). Example: a customer books (Booking Requests), you assign a tech (→ Scheduled), the tech arrives and sends an on-site quote (→ Awaiting Quote Approval), the customer approves it (→ In Progress → Completed), then you approve payment (→ Approved).",
-  map: "See where your technicians are right now while they're clocked in.",
   proof: "Review photo proof from completed jobs before approving payment.",
   staff: "Add your team, manage their mobile app logins, and see who's active.",
   services: "List what you offer and track the parts and inventory you use.",
@@ -47,11 +46,6 @@ import NotificationBell from "@/components/dashboard/NotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
-
-const LiveFieldMap = dynamic(
-  () => import("@/components/dashboard/LiveFieldMap"),
-  { ssr: false, loading: () => <p className="text-sm text-slate-500">Loading map...</p> }
-);
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -189,7 +183,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+        <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:flex-wrap xl:flex-nowrap">
           <DashboardSidebarNav
             activeTab={activeTab}
             onSelectTab={setActiveTab}
@@ -291,12 +285,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {activeTab === "map" && (
-              <div className="mt-6">
-                <LiveFieldMap shop={shop} />
-              </div>
-            )}
-
             {activeTab === "proof" && (
               <div className="mt-6">
                 <ProofDisputeGateTab
@@ -349,6 +337,12 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* The live map stays on the right for every tab. Below xl there is
+              no room beside the content, so it drops underneath instead. */}
+          <aside className="w-full shrink-0 lg:basis-full xl:w-[360px] xl:basis-auto xl:self-start xl:sticky xl:top-6 2xl:w-[420px]">
+            <LiveMapPanel shop={shop} />
+          </aside>
         </div>
       </div>
 

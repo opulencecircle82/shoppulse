@@ -6,7 +6,7 @@ import { DASHBOARD_TABS, type DashboardTabId } from "./DashboardSidebarNav";
 
 const SUPPORT_EMAIL = "support@shoppulse.com";
 
-const DASHBOARD_LINKS: DashboardTabId[] = ["home", "board", "map", "proof", "staff", "messages"];
+const DASHBOARD_LINKS: DashboardTabId[] = ["home", "board", "proof", "staff", "messages"];
 const BUSINESS_LINKS: DashboardTabId[] = ["services", "reviews", "ads", "mobile"];
 
 const PAGE_LINKS = [
