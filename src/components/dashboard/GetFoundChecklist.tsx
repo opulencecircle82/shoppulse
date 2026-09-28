@@ -6,7 +6,7 @@ import { Check, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
 import type { DashboardTabId } from "./DashboardSidebarNav";
-import { hasWorkingSchedule } from "./GoLiveButton";
+import { GO_LIVE_EVENT, hasBusinessLocation, hasWorkingSchedule } from "./GoLiveButton";
 
 /**
  * Customers in the app only see businesses that are listed, pinned on the map and
@@ -45,22 +45,24 @@ export default function GetFoundChecklist({
     done: boolean;
     href?: string;
     tab?: DashboardTabId;
+    /** Opens that step of the LIVE button (the owner never has to hunt through Settings). */
+    goLive?: "hours" | "location";
     action: string;
   }[] = [
     {
       key: "pin",
       label: "Pin your business on the map",
-      hint: "Customers are shown businesses within 20 km of them — without a pin you can't be found by distance.",
-      done: shop.latitude !== null && shop.longitude !== null,
-      href: "/dashboard/settings",
+      hint: "Customers see where your shop is on their tracking map, and find you by distance — without a pin they can't.",
+      done: hasBusinessLocation(shop),
+      goLive: "location",
       action: "Set location",
     },
     {
       key: "hours",
       label: "Set your working days and hours",
-      hint: "Customers see Open Now or Closed from these — tap LIVE at the top to add them and go live.",
+      hint: "Customers see Open Now or Closed from these.",
       done: hasWorkingSchedule(shop),
-      href: "/dashboard/settings",
+      goLive: "hours",
       action: "Set hours",
     },
     {
@@ -135,7 +137,10 @@ export default function GetFoundChecklist({
               ) : (
                 <button
                   type="button"
-                  onClick={() => item.tab && onSelectTab(item.tab)}
+                  onClick={() => {
+                    if (item.goLive) window.dispatchEvent(new CustomEvent(GO_LIVE_EVENT, { detail: item.goLive }));
+                    else if (item.tab) onSelectTab(item.tab);
+                  }}
                   className="shrink-0 whitespace-nowrap rounded-full border border-brand-blue/40 px-3 py-1 text-xs font-semibold text-brand-blue hover:bg-brand-blue/5"
                 >
                   {item.action}

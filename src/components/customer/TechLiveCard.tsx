@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { BellRing, MapPin, Navigation, Store } from "lucide-react";
 import { formatEta, techProximity } from "@/lib/customer/jobStages";
+import { distanceKm } from "@/lib/geo/distance";
 import { timeAgo } from "@/lib/dashboard/format";
 
 const TechTrackerMap = dynamic(() => import("./TechTrackerMap"), {
@@ -33,6 +34,9 @@ export default function TechLiveCard({
   children?: ReactNode;
 }) {
   const { eta, near } = techProximity(location, destination);
+  // Once the technician is at the door the map zooms in on them and the address — unless the shop is right
+  // there too (within 1 km), in which case it stays in the picture.
+  const shopInView = Boolean(shop) && (!near || (destination !== null && shop !== null && distanceKm(shop, destination) <= 1));
 
   return (
     <div className="mt-5 rounded-xl bg-white/5 p-4">
@@ -71,7 +75,7 @@ export default function TechLiveCard({
           <>
             {/* The shop stays in frame while the technician is on the way; once they're at the door the map
                 zooms in on them and the customer's address instead. */}
-            <TechTrackerMap technician={location} destination={destination} shop={shop} fitShop={!near} />
+            <TechTrackerMap technician={location} destination={destination} shop={shop} fitShop={shopInView} />
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-300">
               <span className="flex items-center gap-1">
                 <span className="h-2.5 w-2.5 rounded-full bg-brand-emerald" /> Technician
@@ -81,10 +85,13 @@ export default function TechLiveCard({
                   <MapPin className="h-3 w-3 text-brand-sky" /> Your address
                 </span>
               )}
-              {shop && !near && (
+              {shop && shopInView && (
                 <span className="flex items-center gap-1">
                   <Store className="h-3 w-3 text-brand-orange" /> {shop.name}
                 </span>
+              )}
+              {!shop && (
+                <span className="text-slate-500">The shop hasn&apos;t pinned its location yet</span>
               )}
             </div>
             <p className="mt-2 text-[11px] text-slate-400">

@@ -42,7 +42,7 @@ function FitToPoints({ points }: { points: Point[] }) {
     } else {
       map.fitBounds(
         L.latLngBounds(points.map((p): [number, number] => [p.lat, p.lng])),
-        { padding: [44, 44], maxZoom: 16 }
+        { padding: [44, 44], maxZoom: 18 }
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,14 +89,14 @@ export default function TechTrackerMap({
         />
         {shop && (
           <Marker position={[shop.lat, shop.lng]} icon={SHOP_ICON}>
-            <Tooltip direction="top" offset={[0, -38]}>
+            <Tooltip permanent direction="bottom" offset={[0, 2]}>
               {shop.name}
             </Tooltip>
           </Marker>
         )}
         {destination && (
           <Marker position={[destination.lat, destination.lng]}>
-            <Tooltip direction="top" offset={[0, -34]}>
+            <Tooltip permanent direction="right" offset={[2, -14]}>
               Your address
             </Tooltip>
           </Marker>
