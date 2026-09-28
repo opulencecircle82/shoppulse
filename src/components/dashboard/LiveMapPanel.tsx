@@ -17,8 +17,8 @@ const LiveFieldMap = dynamic(() => import("./LiveFieldMap"), {
  */
 export default function LiveMapPanel({ shop }: { shop: Shop }) {
   return (
-    <section className="flex h-[480px] flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm shadow-slate-900/5 xl:h-[calc(100vh-3rem)]">
-      <header className="flex items-center gap-3 border-b border-slate-200 px-4 py-3">
+    <section className="flex h-[480px] flex-col overflow-hidden rounded-2xl border-[3px] border-brand-blue bg-white shadow-lg shadow-brand-blue/15 xl:h-[calc(100vh-3rem)]">
+      <header className="flex items-center gap-3 border-b border-brand-blue/15 px-4 py-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue text-white shadow-md shadow-brand-blue/25">
           <MapPin className="h-4 w-4" />
         </span>

@@ -64,48 +64,58 @@ type LivePin = {
 
 const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
 
-// react-leaflet's MapContainer only applies `center`/`zoom` on the initial
-// mount — it does not reactively recenter when they change afterward. Pins
-// load asynchronously, so without this, the map would stay stuck on
-// DEFAULT_CENTER even after a technician's first real GPS check-in loads.
-//
-// This only fires ONCE, the moment real data first arrives — not on every
-// subsequent poll (staff_live_locations refreshes every 15s). Recentering
-// on every poll would reset an owner's manual zoom/pan mid-look, which is
-// exactly the "bakit nare-reset ang zoom ko" bug this guards against.
-function MapRecenter({
-  center,
-  zoom,
-  hasAnyPoint,
+const CLOSE_ZOOM = 17;
+
+// The map is locked (no dragging or wheel/touch zoom — see MapContainer
+// below), so the view itself has to keep every pin reachable: frame all
+// points when data first arrives or the number of pins changes, and again
+// whenever a live position drifts outside what's on screen. It deliberately
+// does NOT refit on every 15s poll while everything is still in view, so a
+// zoom the owner picked with the +/- buttons isn't reset for no reason.
+// The "Recenter" button refits on demand.
+function MapFitPoints({
+  points,
   recenterSignal,
 }: {
-  center: [number, number];
-  zoom: number;
-  hasAnyPoint: boolean;
+  points: [number, number][];
   recenterSignal: number;
 }) {
   const map = useMap();
-  const hasRecenteredRef = useRef(false);
+  const fittedCountRef = useRef(0);
+
+  function fit() {
+    if (points.length === 0) return;
+    if (points.length === 1) {
+      map.setView(points[0], CLOSE_ZOOM);
+    } else {
+      map.fitBounds(L.latLngBounds(points), { padding: [110, 90], maxZoom: CLOSE_ZOOM });
+    }
+  }
+
+  const pointsKey = points.map(([lat, lng]) => `${lat.toFixed(5)},${lng.toFixed(5)}`).join("|");
 
   useEffect(() => {
-    if (hasAnyPoint && !hasRecenteredRef.current) {
-      hasRecenteredRef.current = true;
-      map.setView(center, zoom);
+    if (points.length === 0) {
+      fittedCountRef.current = 0;
+      return;
     }
-  }, [map, center, zoom, hasAnyPoint]);
+    const countChanged = points.length !== fittedCountRef.current;
+    const someOutside = points.some((point) => !map.getBounds().contains(point));
+    if (countChanged || someOutside) {
+      fittedCountRef.current = points.length;
+      fit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointsKey]);
 
-  // Manual "Recenter" button — lets the owner snap back to the live pin
-  // after panning away, without fighting the one-time auto-recenter above.
   useEffect(() => {
     if (recenterSignal === 0) return;
-    map.setView(center, zoom);
+    fit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recenterSignal]);
 
   return null;
 }
-
-const CLOSE_ZOOM = 17;
 
 export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?: boolean }) {
   const [pins, setPins] = useState<MapPin[]>([]);
@@ -230,12 +240,19 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
         center={center}
         zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
         maxZoom={19}
+        dragging={false}
+        touchZoom={false}
+        scrollWheelZoom={false}
+        doubleClickZoom={false}
+        boxZoom={false}
+        keyboard={false}
         style={{ height: fill ? "100%" : "480px", width: "100%" }}
       >
-        <MapRecenter
-          center={center}
-          zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
-          hasAnyPoint={hasAnyPoint}
+        <MapFitPoints
+          points={[
+            ...pins.map((pin): [number, number] => [pin.lat, pin.lng]),
+            ...livePins.map((live): [number, number] => [live.lat, live.lng]),
+          ]}
           recenterSignal={recenterSignal}
         />
         <TileLayer
