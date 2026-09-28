@@ -243,6 +243,21 @@ export default function ShopWebsitePage() {
           Book Now
         </Link>
 
+        {/* Right under Book Now, where visitors look first — the same app link is
+            repeated in the "Get the ShopPulse App" card at the bottom of the page. */}
+        <a
+          href={CUSTOMER_APP_DOWNLOAD_URL}
+          style={{
+            backgroundColor: colors.card,
+            color: colors.heading,
+            border: `1px solid ${displayShop.accent_color_hex}66`,
+          }}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+        >
+          <Smartphone className="h-4 w-4" style={{ color: displayShop.accent_color_hex }} />
+          Download Our App (Android)
+        </a>
+
         <div className="mt-6 flex flex-wrap gap-4 text-sm" style={{ color: colors.body }}>
           {shop.address && (
             <p className="flex items-center gap-1.5">
