@@ -704,14 +704,8 @@ export default function ClientTicketPage() {
             </div>
           )}
 
+          {/* The customer only reviews the finished work; the job-start proof photo is for the shop and the technician. */}
           <div className="mt-6 space-y-4">
-            <ProofPhoto
-              label="Job Start Proof"
-              url={ticket.start_photo_url}
-              timestamp={ticket.started_at}
-              hasGps={ticket.start_lat !== null}
-              ticket={ticket}
-            />
             <ProofPhoto
               label="Job Completion Proof"
               url={ticket.end_photo_url}
@@ -735,13 +729,6 @@ export default function ClientTicketPage() {
                 />
               </div>
             </div>
-          )}
-
-          {!ticket.start_photo_url && !ticket.end_photo_url && (
-            <p className="mt-6 text-sm text-slate-400">
-              Your technician hasn&apos;t started this job yet. Check back once
-              it&apos;s underway to see live proof photos here.
-            </p>
           )}
 
           {ticket.status === "ESTIMATE_PENDING" && (

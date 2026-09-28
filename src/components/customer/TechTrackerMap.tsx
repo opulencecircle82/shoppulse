@@ -75,11 +75,6 @@ export default function TechTrackerMap({
   ];
   if (points.length === 0) return null;
 
-  // The address label opens towards the middle of the picture, so it never runs off the edge of the map.
-  const lngs = points.map((p) => p.lng);
-  const midLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
-  const addressLabelSide = destination && destination.lng > midLng ? "left" : "right";
-
   return (
     <div className="overflow-hidden rounded-xl shadow-md shadow-black/30">
       <MapContainer
@@ -106,16 +101,9 @@ export default function TechTrackerMap({
           </Marker>
         )}
         {destination && (
-          <Marker position={[destination.lat, destination.lng]}>
-            <Tooltip
-              key={addressLabelSide}
-              permanent
-              direction={addressLabelSide}
-              offset={[addressLabelSide === "left" ? -2 : 2, -14]}
-            >
-              Your address
-            </Tooltip>
-          </Marker>
+          // No permanent label here: the legend under the map names the blue pin, and a label beside it
+          // used to land on top of the shop's name whenever the two were close.
+          <Marker position={[destination.lat, destination.lng]} />
         )}
         {technician && (
           <Marker position={[technician.lat, technician.lng]} icon={TECH_DOT_ICON}>
