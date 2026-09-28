@@ -276,11 +276,13 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
                 <p className="text-xs">{pin.status}</p>
               </Popup>
             </Marker>
-            <Circle
-              center={[pin.lat, pin.lng]}
-              radius={shop.geofence_radius_meters}
-              pathOptions={{ color: "#10B981", fillOpacity: 0.1 }}
-            />
+            {shop.geofence_enforced && (
+              <Circle
+                center={[pin.lat, pin.lng]}
+                radius={shop.geofence_radius_meters}
+                pathOptions={{ color: "#10B981", fillOpacity: 0.1 }}
+              />
+            )}
           </Fragment>
         ))}
 

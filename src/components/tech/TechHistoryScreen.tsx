@@ -54,7 +54,7 @@ export default function TechHistoryScreen({
                 <p className="mt-0.5 truncate text-xs text-slate-400">
                   {job.service_type} · {job.service_address}
                 </p>
-                {job.total_invoice_amount > 0 && (
+                {shop.show_job_prices_to_techs && job.total_invoice_amount > 0 && (
                   <p className="mt-1 text-xs font-semibold text-brand-emerald">
                     {shop.currency} {job.total_invoice_amount.toFixed(2)}
                   </p>

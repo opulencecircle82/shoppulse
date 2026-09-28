@@ -85,12 +85,16 @@ function ProofPhoto({
   hash,
   distanceM,
   geofenceRadiusM,
+  geofenceEnforced,
+  photoOptional,
 }: {
   label: string;
   url: string | null;
   hash: string | null;
   distanceM: number | null;
   geofenceRadiusM: number;
+  geofenceEnforced: boolean;
+  photoOptional: boolean;
 }) {
   // The GPS/timestamp/logo badges are burned into the photo's pixels
   // at capture time now (see renderWatermarkedPhoto), so this just
@@ -108,7 +112,9 @@ function ProofPhoto({
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <span className="text-xs text-slate-500">
-              No photo yet — appears once submitted via mobile app
+              {photoOptional
+                ? "No photo attached — photos are optional for this shop"
+                : "No photo yet — appears once submitted via mobile app"}
             </span>
           </div>
         )}
@@ -117,9 +123,11 @@ function ProofPhoto({
         <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
           <span>
             {distanceM !== null
-              ? distanceM <= geofenceRadiusM
-                ? `✓ ${Math.round(distanceM)}m from site`
-                : `⚠ ${Math.round(distanceM)}m from site (outside ${geofenceRadiusM}m)`
+              ? !geofenceEnforced
+                ? `${Math.round(distanceM)}m from site`
+                : distanceM <= geofenceRadiusM
+                  ? `✓ ${Math.round(distanceM)}m from site`
+                  : `⚠ ${Math.round(distanceM)}m from site (outside ${geofenceRadiusM}m)`
               : "Site coordinates unavailable"}
           </span>
           {hash && <span className="font-mono">#{hash.slice(0, 10)}</span>}
@@ -157,15 +165,17 @@ export default function ProofDisputeDrawer({
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const hasBothProofs = ticket.start_photo_url !== null && ticket.end_photo_url !== null;
+  const hasBothProofs =
+    (ticket.start_photo_url !== null && ticket.end_photo_url !== null) || ticket.completed_at !== null;
   // The proof pack can be opened for any job that has photos, but only a
   // finished (or disputed) one can be approved or rejected from here.
   const canDecide = ticket.status === "COMPLETED" || ticket.status === "DISPUTED";
   const geofenceBreached =
-    (ticket.start_geofence_distance_m !== null &&
+    shop.geofence_enforced &&
+    ((ticket.start_geofence_distance_m !== null &&
       ticket.start_geofence_distance_m > shop.geofence_radius_meters) ||
     (ticket.end_geofence_distance_m !== null &&
-      ticket.end_geofence_distance_m > shop.geofence_radius_meters);
+      ticket.end_geofence_distance_m > shop.geofence_radius_meters));
 
   async function handleApprove() {
     setSaving("approve");
@@ -322,6 +332,8 @@ export default function ProofDisputeDrawer({
             hash={ticket.start_photo_hash}
             distanceM={ticket.start_geofence_distance_m}
             geofenceRadiusM={shop.geofence_radius_meters}
+            geofenceEnforced={shop.geofence_enforced}
+            photoOptional={!shop.require_before_after_photos}
           />
           <ProofPhoto
             label="Job Completion Proof"
@@ -329,6 +341,8 @@ export default function ProofDisputeDrawer({
             hash={ticket.end_photo_hash}
             distanceM={ticket.end_geofence_distance_m}
             geofenceRadiusM={shop.geofence_radius_meters}
+            geofenceEnforced={shop.geofence_enforced}
+            photoOptional={!shop.require_before_after_photos}
           />
         </div>
 
@@ -355,14 +369,16 @@ export default function ProofDisputeDrawer({
               <dt className="text-slate-500">Geofence</dt>
               <dd
                 className={`font-medium ${
-                  !hasBothProofs
+                  !shop.geofence_enforced || !hasBothProofs
                     ? "text-slate-500"
                     : geofenceBreached
                       ? "text-red-600"
                       : "text-brand-emerald-dark"
                 }`}
               >
-                {!hasBothProofs
+                {!shop.geofence_enforced
+                  ? "Not enforced"
+                  : !hasBothProofs
                   ? "Awaiting proof"
                   : geofenceBreached
                     ? `Outside ${shop.geofence_radius_meters}m tolerance`

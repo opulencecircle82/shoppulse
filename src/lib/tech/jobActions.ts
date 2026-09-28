@@ -84,13 +84,15 @@ export async function fetchPaymentVerification(
   };
 }
 
+// A shop can let technicians skip the photo and/or the location check, so all
+// of the proof fields may legitimately be empty.
 export async function submitStartProof(params: {
   ticketId: string;
-  photoUrl: string;
-  photoHash: string;
+  photoUrl: string | null;
+  photoHash: string | null;
   geofenceDistanceM: number | null;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
 }) {
   // Arrival no longer drops straight into IN_PROGRESS — the technician
   // has to diagnose and submit a quote first, which the client must
@@ -103,7 +105,10 @@ export async function submitStartProof(params: {
       start_photo_hash: params.photoHash,
       start_geofence_distance_m: params.geofenceDistanceM,
       started_at: new Date().toISOString(),
-      start_gps_location: toGeographyPoint(params.latitude, params.longitude),
+      start_gps_location:
+        params.latitude !== null && params.longitude !== null
+          ? toGeographyPoint(params.latitude, params.longitude)
+          : null,
     })
     .eq("id", params.ticketId);
 
@@ -154,11 +159,11 @@ export async function fetchQuoteApproval(
 
 export async function submitCompletionProof(params: {
   ticketId: string;
-  photoUrl: string;
-  photoHash: string;
+  photoUrl: string | null;
+  photoHash: string | null;
   geofenceDistanceM: number | null;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   signatureUrl: string | null;
 }) {
   const { error } = await supabase
@@ -169,7 +174,10 @@ export async function submitCompletionProof(params: {
       end_photo_hash: params.photoHash,
       end_geofence_distance_m: params.geofenceDistanceM,
       completed_at: new Date().toISOString(),
-      end_gps_location: toGeographyPoint(params.latitude, params.longitude),
+      end_gps_location:
+        params.latitude !== null && params.longitude !== null
+          ? toGeographyPoint(params.latitude, params.longitude)
+          : null,
       signature_url: params.signatureUrl,
     })
     .eq("id", params.ticketId);

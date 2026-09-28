@@ -88,6 +88,12 @@ export default function GeofencePanel({
           Technicians must be within this distance of the job site to clock
           in or out.
         </p>
+        {!shop.geofence_enforced && (
+          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            The geofence is turned off in Customize Mobile App, so this distance isn&apos;t being
+            checked right now.
+          </p>
+        )}
       </div>
 
       <div>

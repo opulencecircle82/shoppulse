@@ -108,3 +108,135 @@ body {
     box-shadow: 0 0 0 16px rgba(239, 68, 68, 0), 0 25px 50px -12px rgba(239, 68, 68, 0.4);
   }
 }
+
+/*
+ * Light look for the technician app and the customer's job page.
+ *
+ * Those screens are written dark-first (white text on `bg-brand-navy`,
+ * `bg-white/5` cards). When a shop picks the Light theme, <AppThemeApplier>
+ * sets data-app-theme="light" on <html> and everything below repaints the
+ * same markup: page and card surfaces flip to light, neutral text flips to
+ * dark, accent text gets a darker shade so it stays readable on white.
+ * Text that sits on a gradient or solid brand colour (buttons, hero
+ * banners, badges) stays white — see the last rule. The owner dashboard
+ * never sets the attribute, so it is unaffected.
+ */
+html[data-app-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-app-theme="light"] .bg-brand-navy {
+  background-color: #eef3fb;
+}
+html[data-app-theme="light"] .bg-brand-navy\/95 {
+  background-color: rgba(238, 243, 251, 0.95);
+}
+html[data-app-theme="light"] .ring-brand-navy {
+  --tw-ring-color: #eef3fb;
+}
+
+/* Cards, inputs and rows: white with a hairline edge instead of a faint tint. */
+html[data-app-theme="light"] .bg-white\/5 {
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.07);
+}
+html[data-app-theme="light"] .bg-white\/5 .bg-white\/5 {
+  background-color: #f8fafc;
+  box-shadow: none;
+}
+html[data-app-theme="light"] .bg-white\/5:focus {
+  box-shadow: 0 0 0 2px #2563eb;
+}
+html[data-app-theme="light"] .bg-white\/10,
+html[data-app-theme="light"] .hover\:bg-white\/10:hover {
+  background-color: #e2e8f0;
+}
+html[data-app-theme="light"] .hover\:bg-white\/5:hover {
+  background-color: #f1f5f9;
+}
+html[data-app-theme="light"] .bg-black\/20 {
+  background-color: #f1f5f9;
+}
+
+html[data-app-theme="light"] .border-white\/10,
+html[data-app-theme="light"] .divide-white\/10 > :not(:last-child) {
+  border-color: #e2e8f0;
+}
+html[data-app-theme="light"] .border-white\/20 {
+  border-color: #cbd5e1;
+}
+
+/* Neutral text */
+html[data-app-theme="light"] .text-white,
+html[data-app-theme="light"] .hover\:text-white:hover {
+  color: #0f172a;
+}
+html[data-app-theme="light"] .text-slate-200,
+html[data-app-theme="light"] .text-slate-300 {
+  color: #334155;
+}
+html[data-app-theme="light"] .text-slate-400 {
+  color: #64748b;
+}
+html[data-app-theme="light"] .text-slate-500 {
+  color: #7c8aa0;
+}
+html[data-app-theme="light"] .placeholder\:text-slate-500::placeholder {
+  color: #94a3b8;
+}
+html[data-app-theme="light"] .text-white\/60,
+html[data-app-theme="light"] .text-white\/70,
+html[data-app-theme="light"] .text-white\/75,
+html[data-app-theme="light"] .text-white\/80,
+html[data-app-theme="light"] .text-white\/90 {
+  color: #475569;
+}
+
+/* Accent text: the dark theme's bright shades wash out on white. */
+html[data-app-theme="light"] .text-brand-emerald {
+  color: #059669;
+}
+html[data-app-theme="light"] .text-brand-orange {
+  color: #c2410c;
+}
+html[data-app-theme="light"] .text-brand-sky {
+  color: #0369a1;
+}
+html[data-app-theme="light"] .text-amber-400 {
+  color: #b45309;
+}
+html[data-app-theme="light"] .text-red-400 {
+  color: #dc2626;
+}
+html[data-app-theme="light"] .text-red-300 {
+  color: #b91c1c;
+}
+html[data-app-theme="light"] .text-blue-400 {
+  color: #2563eb;
+}
+
+/* Anything sitting on a gradient or a solid brand colour keeps its white text. */
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55) .text-white,
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55).text-white {
+  color: #ffffff;
+}
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55) .text-white\/60,
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55).text-white\/60 {
+  color: rgba(255, 255, 255, 0.6);
+}
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55) .text-white\/70,
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55).text-white\/70 {
+  color: rgba(255, 255, 255, 0.7);
+}
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55) .text-white\/75,
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55).text-white\/75 {
+  color: rgba(255, 255, 255, 0.75);
+}
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55) .text-white\/80,
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55).text-white\/80 {
+  color: rgba(255, 255, 255, 0.8);
+}
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55) .text-white\/90,
+html[data-app-theme="light"] :is([class*="bg-gradient-to"], .bg-brand-blue, .bg-brand-orange, .bg-brand-emerald, .bg-brand-emerald-dark, .bg-red-500, .bg-black\/50, .bg-black\/55).text-white\/90 {
+  color: rgba(255, 255, 255, 0.9);
+}

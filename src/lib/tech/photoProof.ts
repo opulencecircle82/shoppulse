@@ -1,4 +1,19 @@
 /**
+ * Fetches the logo as a bitmap. Returns null when it can't be loaded (offline,
+ * or a host that doesn't allow the canvas to use it) so the photo still gets
+ * its watermark, just with the name alone.
+ */
+async function loadLogo(url: string): Promise<ImageBitmap | null> {
+  try {
+    const response = await fetch(url, { mode: "cors" });
+    if (!response.ok) return null;
+    return await createImageBitmap(await response.blob());
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Burns the same GPS/timestamp/logo badges shown in the live preview
  * directly into the photo's pixels (not just a CSS overlay on top of
  * it), so the watermark survives once the file leaves this component —
@@ -8,6 +23,8 @@ export async function renderWatermarkedPhoto(
   source: File,
   options: {
     shopName: string;
+    /** The shop's uploaded logo, drawn beside the name when it can be loaded. */
+    logoUrl?: string | null;
     showLogo: boolean;
     showTimestamp: boolean;
     showGps: boolean;
@@ -45,7 +62,29 @@ export async function renderWatermarkedPhoto(
   }
 
   if (options.showLogo) {
-    drawBadge(options.shopName, pad, pad, "left");
+    const logo = options.logoUrl ? await loadLogo(options.logoUrl) : null;
+    if (logo) {
+      // Logo and name share one badge.
+      const logoSize = fontSize + pad;
+      const textWidth = ctx.measureText(options.shopName).width;
+      const boxHeight = logoSize + pad;
+      const boxWidth = logoSize + textWidth + pad * 3;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+      ctx.beginPath();
+      ctx.roundRect(pad, pad, boxWidth, boxHeight, 6 * scale);
+      ctx.fill();
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(pad * 1.5, pad * 1.5, logoSize, logoSize, 4 * scale);
+      ctx.clip();
+      ctx.drawImage(logo, pad * 1.5, pad * 1.5, logoSize, logoSize);
+      ctx.restore();
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(options.shopName, pad * 2.5 + logoSize, pad + boxHeight / 2);
+      logo.close();
+    } else {
+      drawBadge(options.shopName, pad, pad, "left");
+    }
   }
   if (options.showTimestamp) {
     drawBadge(options.timestamp.toLocaleString(), pad, canvas.height - pad - (fontSize + pad), "left");

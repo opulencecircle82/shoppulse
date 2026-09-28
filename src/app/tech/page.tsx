@@ -22,6 +22,7 @@ import TechRouteScreen from "@/components/tech/TechRouteScreen";
 import TechHistoryScreen from "@/components/tech/TechHistoryScreen";
 import TechProfileScreen from "@/components/tech/TechProfileScreen";
 import TechBottomNav, { type TechTab } from "@/components/tech/TechBottomNav";
+import { useAppTheme } from "@/lib/hooks/useAppTheme";
 
 type Screen = "loading" | "login" | "tab" | "job" | "messages";
 
@@ -35,6 +36,9 @@ export default function TechAppPage() {
   const [allTickets, setAllTickets] = useState<JobTicket[]>([]);
   const [stats, setStats] = useState<TechStats>({ completedToday: 0, completedTotal: 0 });
   const [selectedTicket, setSelectedTicket] = useState<JobTicket | null>(null);
+
+  // The look the owner picked in Customize Mobile App (dark until the shop has loaded).
+  useAppTheme(shop?.mobile_app_theme);
 
   const loadHome = useCallback(async (context: StaffContext, opts?: { isInitialLoad?: boolean }) => {
     try {

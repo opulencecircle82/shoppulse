@@ -55,6 +55,15 @@ export type Shop = {
   barangay: string | null;
   default_tasks: string[];
   accepted_payment_methods: string[];
+  /** Look of the technician app and the customer's job page. */
+  mobile_app_theme: "light" | "dark" | "auto";
+  /** False lets a technician start or finish a job without a photo. */
+  require_before_after_photos: boolean;
+  require_customer_signature: boolean;
+  /** False turns the "must be near the job site" check off entirely. */
+  geofence_enforced: boolean;
+  show_job_prices_to_techs: boolean;
+  allow_onsite_quote_additions: boolean;
 };
 
 export type StaffMember = {

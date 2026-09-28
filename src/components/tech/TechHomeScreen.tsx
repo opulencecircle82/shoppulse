@@ -195,7 +195,13 @@ export default function TechHomeScreen({
                   </span>
                 )}
               </div>
-              <p className="truncate text-xs text-slate-400">{shop.shop_name}</p>
+              <div className="flex items-center gap-1.5">
+                {shop.logo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={shop.logo_url} alt="" className="h-4 w-4 shrink-0 rounded object-cover" />
+                )}
+                <p className="truncate text-xs text-slate-400">{shop.shop_name}</p>
+              </div>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">

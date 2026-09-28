@@ -135,15 +135,25 @@ export default function TechJobScreen({
   }, [isCompletionStage, paymentVerifiedAt, ticket.id]);
 
   const checklistCompleted = checkedItems.size >= activeChecklist.length;
-  const needsSignature = isCompletionStage;
   const needsPaymentVerification = isCompletionStage;
   const hasGeofenceTarget = ticket.booking_latitude !== null && ticket.booking_longitude !== null;
+
+  // What the shop asks of a technician (Customize Mobile App).
+  const photoRequired = shop.require_before_after_photos;
+  const geofenceOn = shop.geofence_enforced && hasGeofenceTarget;
+  // A GPS reading comes with every photo; with no photo required it is still
+  // needed whenever the job site has to be checked.
+  const needsPosition = photoRequired || geofenceOn;
+  const needsSignature = isCompletionStage && shop.require_customer_signature;
+  const showPrices = shop.show_job_prices_to_techs;
+  const canAddToQuote = shop.allow_onsite_quote_additions;
+
   const withinGeofence =
-    !hasGeofenceTarget || geofenceDistanceM === null || geofenceDistanceM <= shop.geofence_radius_meters;
+    !geofenceOn || geofenceDistanceM === null || geofenceDistanceM <= shop.geofence_radius_meters;
   const canSubmit =
     checklistCompleted &&
-    capturedFile !== null &&
-    position !== null &&
+    (!photoRequired || capturedFile !== null) &&
+    (!needsPosition || position !== null) &&
     withinGeofence &&
     (!needsSignature || signatureDataUrl !== null) &&
     (!needsPaymentVerification || paymentVerifiedAt !== null) &&
@@ -162,6 +172,21 @@ export default function TechJobScreen({
     });
   }
 
+  // Remembers where the technician is standing and how far that is from the job site.
+  function applyPosition(pos: GeolocationPosition) {
+    setPosition(pos);
+    setGeofenceDistanceM(
+      hasGeofenceTarget
+        ? haversineDistanceMeters(
+            pos.coords.latitude,
+            pos.coords.longitude,
+            ticket.booking_latitude!,
+            ticket.booking_longitude!
+          )
+        : null
+    );
+  }
+
   async function handleFileChosen(file: File) {
     setError(null);
     setCapturing(true);
@@ -169,17 +194,7 @@ export default function TechJobScreen({
       const pos = await getCurrentPosition();
       setCapturedFile(file);
       setCapturedPreview(URL.createObjectURL(file));
-      setPosition(pos);
-      setGeofenceDistanceM(
-        ticket.booking_latitude !== null && ticket.booking_longitude !== null
-          ? haversineDistanceMeters(
-              pos.coords.latitude,
-              pos.coords.longitude,
-              ticket.booking_latitude,
-              ticket.booking_longitude
-            )
-          : null
-      );
+      applyPosition(pos);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not capture proof.");
     } finally {
@@ -187,24 +202,44 @@ export default function TechJobScreen({
     }
   }
 
+  // For shops that don't require a photo but still check where the technician is.
+  async function handleCheckLocation() {
+    setError(null);
+    setCapturing(true);
+    try {
+      applyPosition(await getCurrentPosition());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not get your location.");
+    } finally {
+      setCapturing(false);
+    }
+  }
+
   async function handleSubmit() {
-    if (!canSubmit || !capturedFile || !position) return;
+    if (!canSubmit) return;
 
     setSubmitting(true);
     setError(null);
 
     try {
-      const watermarked = await renderWatermarkedPhoto(capturedFile, {
-        shopName: shop.shop_name,
-        showLogo: shop.watermark_show_logo,
-        showTimestamp: shop.watermark_show_timestamp,
-        showGps: shop.watermark_show_gps,
-        timestamp: new Date(),
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-      const photoHash = await sha256Hex(watermarked);
-      const photoUrl = await uploadJobPhoto(shop.id, ticket.id, watermarked);
+      let photoUrl: string | null = null;
+      let photoHash: string | null = null;
+      if (capturedFile && position) {
+        const watermarked = await renderWatermarkedPhoto(capturedFile, {
+          shopName: shop.shop_name,
+          logoUrl: shop.logo_url,
+          showLogo: shop.watermark_show_logo,
+          showTimestamp: shop.watermark_show_timestamp,
+          showGps: shop.watermark_show_gps,
+          timestamp: new Date(),
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        photoHash = await sha256Hex(watermarked);
+        photoUrl = await uploadJobPhoto(shop.id, ticket.id, watermarked);
+      }
+      const latitude = position?.coords.latitude ?? null;
+      const longitude = position?.coords.longitude ?? null;
 
       if (isStartStage) {
         await submitStartProof({
@@ -212,8 +247,8 @@ export default function TechJobScreen({
           photoUrl,
           photoHash,
           geofenceDistanceM,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
         });
       } else {
         const signatureUrl = signatureDataUrl
@@ -224,8 +259,8 @@ export default function TechJobScreen({
           photoUrl,
           photoHash,
           geofenceDistanceM,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
           signatureUrl,
         });
       }
@@ -277,6 +312,7 @@ export default function TechJobScreen({
                 Waiting for them to approve it before you can start the actual repair. This
                 updates automatically.
               </p>
+              {showPrices && (
               <div className="mt-4 space-y-1.5 rounded-xl bg-white/5 p-3 text-left text-sm">
                 {diagnosticFee > 0 && (
                   <div className="flex justify-between text-slate-300">
@@ -301,8 +337,10 @@ export default function TechJobScreen({
                   <span>{shop.currency} {ticket.total_invoice_amount.toFixed(2)}</span>
                 </div>
               </div>
+              )}
             </div>
           ) : (
+
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
                 Create On-Site Estimate
@@ -318,57 +356,70 @@ export default function TechJobScreen({
                 </p>
               )}
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400">
-                    Diagnostic Fee ({shop.currency})
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.5}
-                    value={diagnosticFee}
-                    onChange={(e) => setDiagnosticFee(Number(e.target.value))}
-                    className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+              {showPrices && (
+                <div className={`mt-4 grid gap-3 ${canAddToQuote ? "grid-cols-2" : "grid-cols-1"}`}>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400">
+                      Diagnostic Fee ({shop.currency})
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={diagnosticFee}
+                      onChange={(e) => setDiagnosticFee(Number(e.target.value))}
+                      className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                    />
+                  </div>
+                  {canAddToQuote && (
+                    <div>
+                      <label className="block text-xs font-medium text-slate-400">
+                        Labor Fee ({shop.currency})
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={laborFee}
+                        onChange={(e) => setLaborFee(Number(e.target.value))}
+                        className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {canAddToQuote ? (
+                <div className="mt-4">
+                  <SelectedProductsPicker
+                    theme="dark"
+                    shopId={shop.id}
+                    currency={shop.currency}
+                    selectedProducts={quoteProducts}
+                    onChange={setQuoteProducts}
+                    label="Parts Needed"
+                    showPrices={showPrices}
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400">
-                    Labor Fee ({shop.currency})
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.5}
-                    value={laborFee}
-                    onChange={(e) => setLaborFee(Number(e.target.value))}
-                    className="mt-1 w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-brand-blue focus:outline-none"
-                  />
+              ) : (
+                <p className="mt-4 rounded-xl bg-white/5 px-3.5 py-3 text-xs text-slate-400">
+                  Your shop adds parts and extra charges for you — just send the standard estimate.
+                </p>
+              )}
+
+              {showPrices && (
+                <div className="mt-4 flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
+                  <span className="text-sm text-slate-400">Estimated Total</span>
+                  <span className="text-lg font-bold text-brand-emerald">
+                    {shop.currency}{" "}
+                    {(
+                      diagnosticFee +
+                      laborFee +
+                      quoteProducts.reduce((sum, item) => sum + item.price * item.quantity, 0)
+                    ).toFixed(2)}
+                  </span>
                 </div>
-              </div>
-
-              <div className="mt-4">
-                <SelectedProductsPicker
-                  theme="dark"
-                  shopId={shop.id}
-                  currency={shop.currency}
-                  selectedProducts={quoteProducts}
-                  onChange={setQuoteProducts}
-                  label="Parts Needed"
-                />
-              </div>
-
-              <div className="mt-4 flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
-                <span className="text-sm text-slate-400">Estimated Total</span>
-                <span className="text-lg font-bold text-brand-emerald">
-                  {shop.currency}{" "}
-                  {(
-                    diagnosticFee +
-                    laborFee +
-                    quoteProducts.reduce((sum, item) => sum + item.price * item.quantity, 0)
-                  ).toFixed(2)}
-                </span>
-              </div>
+              )}
 
               {quoteError && (
                 <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
@@ -393,7 +444,7 @@ export default function TechJobScreen({
             This job is {ticket.status}. No action needed here.
           </p>
 
-          {ticket.total_invoice_amount > 0 && (
+          {showPrices && ticket.total_invoice_amount > 0 && (
             <div className="mt-4 rounded-2xl bg-white/5 p-4">
               <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
                 Receipt — Show to Customer
@@ -452,11 +503,11 @@ export default function TechJobScreen({
                 </span>
               ) : (
                 <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-slate-400">
-                  AWAITING CAPTURE
+                  {needsPosition ? "AWAITING CAPTURE" : "NOT REQUIRED"}
                 </span>
               )}
             </div>
-            {hasGeofenceTarget && geofenceDistanceM !== null ? (
+            {geofenceOn && geofenceDistanceM !== null ? (
               <p
                 className={`mt-1.5 flex items-center gap-1 text-xs font-semibold ${
                   withinGeofence ? "text-brand-emerald" : "text-red-400"
@@ -473,8 +524,12 @@ export default function TechJobScreen({
               </p>
             ) : (
               <p className="mt-1.5 text-xs text-slate-500">
-                Geofence tolerance: {shop.geofence_radius_meters}m around the job site.
-                {!hasGeofenceTarget && " (No site coordinates on this ticket — not enforced.)"}
+                {shop.geofence_enforced
+                  ? `Geofence tolerance: ${shop.geofence_radius_meters}m around the job site.`
+                  : "Location check is off — your shop doesn't limit where you start or finish."}
+                {shop.geofence_enforced &&
+                  !hasGeofenceTarget &&
+                  " (No site coordinates on this ticket — not enforced.)"}
               </p>
             )}
           </div>
@@ -514,7 +569,7 @@ export default function TechJobScreen({
               id={fileInputId}
               type="file"
               accept="image/*"
-              capture="environment"
+              capture={shop.mandatory_live_camera ? "environment" : undefined}
               hidden
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -534,11 +589,29 @@ export default function TechJobScreen({
                   ? "Getting GPS..."
                   : capturedFile
                     ? "Retake Photo Proof"
-                    : isStartStage
-                      ? "Take Live Photo Proof + GPS Tag"
-                      : "Take Completion Photo + GPS Tag"}
+                    : !photoRequired
+                      ? "Add a Photo (optional)"
+                      : isStartStage
+                        ? "Take Live Photo Proof + GPS Tag"
+                        : "Take Completion Photo + GPS Tag"}
               </label>
             </div>
+
+            {!photoRequired && needsPosition && !position && (
+              <div className="mt-3 text-center">
+                <p className="text-xs text-slate-500">
+                  Your shop doesn&apos;t require a photo, but it does check where you are.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleCheckLocation}
+                  disabled={capturing}
+                  className="mt-2 rounded-full border border-brand-blue/40 px-5 py-2.5 text-xs font-semibold text-brand-blue disabled:opacity-60"
+                >
+                  {capturing ? "Getting GPS..." : "Check My Location"}
+                </button>
+              </div>
+            )}
 
             {capturedPreview && (
               <div className="mt-4 flex justify-center">
@@ -550,9 +623,14 @@ export default function TechJobScreen({
                     className="h-full w-full object-cover"
                   />
                   <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-md bg-black/55 px-2 py-1 backdrop-blur">
-                    <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
-                      {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
-                    </span>
+                    {shop.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={shop.logo_url} alt="" className="h-4 w-4 rounded object-cover" />
+                    ) : (
+                      <span className="flex h-4 w-4 items-center justify-center rounded bg-brand-blue text-[8px] font-bold text-white">
+                        {shop.shop_name.slice(0, 1).toUpperCase() || "S"}
+                      </span>
+                    )}
                     <span className="text-[10px] font-semibold text-white">
                       {shop.shop_name}
                     </span>
@@ -590,7 +668,7 @@ export default function TechJobScreen({
             {isCompletionStage && (
               <div className="mt-6 border-t border-white/10 pt-6">
                 <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">
-                  Customer Signature &amp; Parts
+                  {needsSignature ? "Customer Signature & Parts" : "Parts Used"}
                 </p>
 
                 {ticket.selected_products.length > 0 && (
@@ -610,16 +688,19 @@ export default function TechJobScreen({
                 {paymentVerifiedAt ? (
                   <>
                     <p className="mt-3 text-xs font-semibold text-brand-emerald">
-                      Payment Verified by Owner: {shop.currency} {paymentVerifiedAmount.toFixed(2)}
+                      Payment Verified by Owner
+                      {showPrices && `: ${shop.currency} ${paymentVerifiedAmount.toFixed(2)}`}
                     </p>
-                    <div className="mt-3">
-                      <SignaturePad onChange={setSignatureDataUrl} />
-                    </div>
+                    {needsSignature && (
+                      <div className="mt-3">
+                        <SignaturePad onChange={setSignatureDataUrl} />
+                      </div>
+                    )}
                   </>
                 ) : (
                   <p className="mt-3 rounded-lg bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-400">
                     Waiting for the owner to confirm the customer&apos;s payment
-                    before you can collect a signature and complete this job.
+                    before you can{needsSignature ? " collect a signature and" : ""} complete this job.
                     This will update automatically.
                   </p>
                 )}

@@ -42,6 +42,9 @@ export default function JobRow({
   const technician = staff.find((member) => member.id === ticket.assigned_staff_id);
   const hasProof = Boolean(ticket.start_photo_url || ticket.end_photo_url);
   const proofIsPrimary = ticket.status === "COMPLETED" || ticket.status === "DISPUTED";
+  // A finished job always opens its proof pack — that's where it gets approved —
+  // even when the shop lets technicians skip photos and there are none.
+  const showProofButton = hasProof || proofIsPrimary;
 
   return (
     <li className="relative transition-colors hover:bg-slate-50/50">
@@ -108,7 +111,7 @@ export default function JobRow({
             <BookingDecisionButtons ticketId={ticket.id} onChanged={onChanged} />
           )}
 
-          {hasProof && (
+          {showProofButton && (
             <button
               type="button"
               onClick={() => onOpenProofDrawer(ticket)}

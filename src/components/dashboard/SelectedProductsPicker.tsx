@@ -48,6 +48,7 @@ export default function SelectedProductsPicker({
   onChange,
   label = "Products Needed",
   theme = "light",
+  showPrices = true,
 }: {
   shopId: string;
   currency: string;
@@ -55,6 +56,8 @@ export default function SelectedProductsPicker({
   onChange: (next: SelectedProduct[]) => void;
   label?: string;
   theme?: keyof typeof THEMES;
+  /** False for technicians whose shop keeps prices private. */
+  showPrices?: boolean;
 }) {
   const t = THEMES[theme];
   const [products, setProducts] = useState<ShopProduct[]>([]);
@@ -126,9 +129,11 @@ export default function SelectedProductsPicker({
                 {item.quantity > 1 ? ` ×${item.quantity}` : ""}
               </span>
               <div className="flex items-center gap-2">
-                <span className={`font-medium ${t.price}`}>
-                  {currency} {(item.price * item.quantity).toFixed(2)}
-                </span>
+                {showPrices && (
+                  <span className={`font-medium ${t.price}`}>
+                    {currency} {(item.price * item.quantity).toFixed(2)}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => removeProduct(index)}
@@ -159,9 +164,11 @@ export default function SelectedProductsPicker({
                   {product.name}
                   {outOfStock && <span className={`ml-1.5 ${t.outOfStock}`}>(out of stock)</span>}
                 </span>
-                <span className={`font-medium ${t.price}`}>
-                  {currency} {product.price.toFixed(2)}
-                </span>
+                {showPrices && (
+                  <span className={`font-medium ${t.price}`}>
+                    {currency} {product.price.toFixed(2)}
+                  </span>
+                )}
               </button>
             );
           })}

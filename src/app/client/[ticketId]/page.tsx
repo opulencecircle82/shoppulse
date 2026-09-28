@@ -17,6 +17,7 @@ import {
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
+import { useAppTheme, type AppTheme } from "@/lib/hooks/useAppTheme";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -71,6 +72,7 @@ type ClientTicket = {
   client_payment_confirmed_at: string | null;
   en_route_at: string | null;
   job_number: number | null;
+  mobile_app_theme: AppTheme;
 };
 
 /** The same wording the customer sees on their bookings list, so the two never disagree. */
@@ -143,6 +145,8 @@ export default function ClientTicketPage() {
   const ticketId = params.ticketId as string;
 
   const [ticket, setTicket] = useState<ClientTicket | null>(null);
+  // This page follows the shop's chosen look (dark until the job has loaded).
+  useAppTheme(ticket?.mobile_app_theme);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [staffLocation, setStaffLocation] = useState<{ lat: number; lng: number } | null>(null);
