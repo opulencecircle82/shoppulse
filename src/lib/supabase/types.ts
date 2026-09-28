@@ -151,8 +151,10 @@ export type JobTicket = {
   created_at: string;
   /** When the technician tapped "I'm on my way"; cleared if the job is re-assigned. */
   en_route_at: string | null;
-  /** Short per-shop job number shown as #201. */
+  /** Short per-shop job number, shown everywhere as #JOB-0007 (see lib/jobNumber.ts). */
   job_number: number;
+  /** PAID once proof of payment is in (or the shop confirmed it); the technician's signature step waits on it. */
+  payment_status: "UNPAID" | "PAID";
 };
 
 export type StaffLiveLocation = {

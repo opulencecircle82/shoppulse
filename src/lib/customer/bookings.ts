@@ -177,10 +177,10 @@ export async function cancelBooking(ticketId: string, reason?: string) {
   if (error) throw new Error(error.message);
 }
 
-/** Reuses the "job-photos" storage bucket (its INSERT policy already
- * allows any authenticated user, not just staff) rather than a new
- * bucket, for both the customer's booking-request photo and their
- * review photo. */
+/** Booking-request and review photos reuse the "job-photos" bucket (its
+ * INSERT policy already allows any signed-in user). Proof of payment goes to
+ * its own "payment-receipts" bucket so screenshots of bank transfers are kept
+ * apart from job photos. */
 export async function uploadCustomerPhoto(
   folder: "requests" | "reviews" | "receipts",
   file: File
@@ -188,15 +188,17 @@ export async function uploadCustomerPhoto(
   const extension = file.name.split(".").pop() ?? "jpg";
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
 
+  const bucket = folder === "receipts" ? "payment-receipts" : "job-photos";
+
   const { error } = await supabase.storage
-    .from("job-photos")
+    .from(bucket)
     .upload(path, file, { contentType: file.type || "image/jpeg" });
 
   if (error) throw error;
 
   const {
     data: { publicUrl },
-  } = supabase.storage.from("job-photos").getPublicUrl(path);
+  } = supabase.storage.from(bucket).getPublicUrl(path);
 
   return publicUrl;
 }
@@ -393,6 +395,27 @@ export async function confirmClientPayment(ticketId: string) {
     p_ticket_id: ticketId,
   });
   if (error) throw new Error(error.message);
+}
+
+/** Where this shop wants to be paid (bank, PayPal, QR, instructions). */
+export type TicketPaymentInfo = {
+  bank_name: string | null;
+  bank_account_name: string | null;
+  bank_account_number: string | null;
+  paypal_email: string | null;
+  payment_qr_url: string | null;
+  payment_instructions: string | null;
+};
+
+/** Only answers once the job is under way, and only for that one job's shop. */
+export async function fetchTicketPaymentInfo(
+  ticketId: string
+): Promise<TicketPaymentInfo | null> {
+  const { data, error } = await supabase
+    .rpc("get_ticket_payment_info", { p_ticket_id: ticketId })
+    .maybeSingle();
+  if (error) throw error;
+  return data as TicketPaymentInfo | null;
 }
 
 export async function fetchTicketTechnician(

@@ -9,11 +9,14 @@ export default function PhotoUploadField({
   photoUrl,
   onChange,
   label = "Add a photo (optional)",
+  allowGallery = false,
 }: {
   folder: "requests" | "reviews" | "receipts";
   photoUrl: string | null;
   onChange: (url: string | null) => void;
   label?: string;
+  /** Screenshots (proof of payment) come from the gallery, so the camera-only hint is dropped. */
+  allowGallery?: boolean;
 }) {
   const inputId = useId();
   const [uploading, setUploading] = useState(false);
@@ -59,7 +62,7 @@ export default function PhotoUploadField({
         id={inputId}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture={allowGallery ? undefined : "environment"}
         onChange={(e) => {
           handleFile(e.target.files?.[0]);
           e.target.value = "";

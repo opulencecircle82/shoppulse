@@ -14,12 +14,14 @@ import WorkingHoursPanel from "@/components/dashboard/settings/WorkingHoursPanel
 import DefaultTasksPanel from "@/components/dashboard/settings/DefaultTasksPanel";
 import PaymentMethodsPanel from "@/components/dashboard/settings/PaymentMethodsPanel";
 import BookingAlertsPanel from "@/components/dashboard/settings/BookingAlertsPanel";
+import ReceivingPaymentsPanel from "@/components/dashboard/settings/ReceivingPaymentsPanel";
 
 const TABS = [
   { id: "profile", label: "Company Profile" },
   { id: "hours", label: "Working Hours" },
   { id: "tasks", label: "Default Tasks" },
   { id: "payments", label: "Payment Methods" },
+  { id: "receiving", label: "Receiving Payments" },
   { id: "alerts", label: "Booking Alerts" },
   { id: "geofence", label: "Geofence & Theft Tolerance" },
   { id: "staff", label: "Staff Pay Rates" },
@@ -155,6 +157,7 @@ export default function SettingsPage() {
             {activeTab === "payments" && (
               <PaymentMethodsPanel shop={shop} onSaved={refresh} />
             )}
+            {activeTab === "receiving" && <ReceivingPaymentsPanel shop={shop} />}
             {activeTab === "alerts" && <BookingAlertsPanel />}
             {activeTab === "geofence" && (
               <GeofencePanel

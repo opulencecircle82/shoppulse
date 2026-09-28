@@ -23,6 +23,7 @@ import TechHistoryScreen from "@/components/tech/TechHistoryScreen";
 import TechProfileScreen from "@/components/tech/TechProfileScreen";
 import TechBottomNav, { type TechTab } from "@/components/tech/TechBottomNav";
 import { useAppTheme } from "@/lib/hooks/useAppTheme";
+import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
 type Screen = "loading" | "login" | "tab" | "job" | "messages";
 
@@ -132,7 +133,17 @@ export default function TechAppPage() {
     const interval = setInterval(() => {
       loadHome(staffContext);
     }, 20000);
-    return () => clearInterval(interval);
+    // A job assigned, taken back or cancelled shows up at once. Like the poll, this
+    // only runs on a main tab, so it can never yank the technician out of a job screen.
+    const stopRealtime = subscribeToJobTickets(
+      `tech-jobs-${staffContext.staffId}`,
+      `assigned_staff_id=eq.${staffContext.staffId}`,
+      () => loadHome(staffContext)
+    );
+    return () => {
+      clearInterval(interval);
+      stopRealtime();
+    };
   }, [screen, staffContext, loadHome]);
 
   function openTask(ticket: JobTicket) {

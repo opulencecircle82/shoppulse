@@ -5,6 +5,7 @@ import { Download } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
+import { formatJobNumber } from "@/lib/jobNumber";
 
 export default function InvoiceGeneratorModal({
   ticket,
@@ -102,6 +103,7 @@ export default function InvoiceGeneratorModal({
           shopContactPhone: shop.contact_phone,
           clientName: ticket.client_name,
           serviceType: ticket.service_type,
+          ticketNumber: formatJobNumber(ticket.job_number, ticket.id),
           date: new Date().toLocaleDateString(),
           currency,
           items,

@@ -1,4 +1,5 @@
 import type { JobTicket } from "@/lib/supabase/types";
+import { formatJobNumber } from "@/lib/jobNumber";
 import { timeAgo } from "./format";
 
 /**
@@ -32,7 +33,7 @@ export type JobPhase = {
 };
 
 export function jobLabel(ticket: JobTicket): string {
-  return `#${ticket.job_number ?? ticket.id.slice(0, 6).toUpperCase()}`;
+  return formatJobNumber(ticket.job_number, ticket.id);
 }
 
 export function describeJob(ticket: JobTicket): JobPhase {
@@ -102,7 +103,13 @@ export function describeJob(ticket: JobTicket): JobPhase {
         stage: "In Progress",
         tone: "green",
         techStatus: "Working",
-        detail: ticket.started_at ? `Started ${timeAgo(ticket.started_at)}` : null,
+        detail:
+          [
+            ticket.started_at ? `Started ${timeAgo(ticket.started_at)}` : null,
+            ticket.payment_status !== "PAID" && ticket.total_invoice_amount > 0 ? "payment pending" : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || null,
         gpsVerified,
       };
     case "COMPLETED":

@@ -13,11 +13,16 @@ import {
   uploadPaymentReceipt,
   confirmClientPayment,
   cancelBooking,
+  fetchTicketPaymentInfo,
+  type TicketPaymentInfo,
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
+import PaymentDetails from "@/components/customer/PaymentDetails";
+import { formatJobNumber } from "@/lib/jobNumber";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
 import { useAppTheme, type AppTheme } from "@/lib/hooks/useAppTheme";
+import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
 const ShopLocationMap = dynamic(
   () => import("@/components/customer/ShopLocationMap"),
@@ -73,6 +78,7 @@ type ClientTicket = {
   en_route_at: string | null;
   job_number: number | null;
   mobile_app_theme: AppTheme;
+  payment_status: "UNPAID" | "PAID";
 };
 
 /** The same wording the customer sees on their bookings list, so the two never disagree. */
@@ -162,6 +168,8 @@ export default function ClientTicketPage() {
   const [selectingPayment, setSelectingPayment] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const [uploadReceiptError, setUploadReceiptError] = useState<string | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<TicketPaymentInfo | null>(null);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [confirmPaymentError, setConfirmPaymentError] = useState<string | null>(null);
   const [approvingQuote, setApprovingQuote] = useState(false);
@@ -212,15 +220,18 @@ export default function ClientTicketPage() {
 
   useEffect(() => {
     const interval = setInterval(refreshQuietly, TICKET_POLL_MS);
+    // Instant when signed in as this job's customer; anyone else relies on the poll above.
+    const stopRealtime = subscribeToJobTickets(`client-ticket-${ticketId}`, `id=eq.${ticketId}`, refreshQuietly);
     const onVisible = () => {
       if (!document.hidden) refreshQuietly();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(interval);
+      stopRealtime();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [refreshQuietly]);
+  }, [refreshQuietly, ticketId]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -228,6 +239,31 @@ export default function ClientTicketPage() {
     }, 0);
     return () => clearTimeout(id);
   }, [load]);
+
+  // The shop's bank / PayPal / QR details, once the job is far enough along to pay for.
+  const paymentOpen = ticket
+    ? ticket.status === "IN_PROGRESS" || ticket.status === "COMPLETED" || ticket.status === "APPROVED"
+    : false;
+  useEffect(() => {
+    if (!paymentOpen) return;
+    let active = true;
+    fetchTicketPaymentInfo(ticketId)
+      .then((info) => {
+        if (active) setPaymentInfo(info);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [paymentOpen, ticketId]);
+
+  // "Pay Now" from the customer's home screen lands right on the payment section.
+  const hasTicket = ticket !== null;
+  useEffect(() => {
+    if (hasTicket && window.location.hash === "#pay") {
+      document.getElementById("pay")?.scrollIntoView({ block: "start" });
+    }
+  }, [hasTicket]);
 
   const ticketStatus = ticket?.status;
 
@@ -329,9 +365,12 @@ export default function ClientTicketPage() {
   async function handleUploadReceipt(url: string | null) {
     if (!url) return;
     setUploadingReceipt(true);
+    setUploadReceiptError(null);
     try {
       await uploadPaymentReceipt(ticketId, url);
       await load();
+    } catch (e) {
+      setUploadReceiptError(e instanceof Error ? e.message : "Could not save your proof of payment.");
     } finally {
       setUploadingReceipt(false);
     }
@@ -369,6 +408,7 @@ export default function ClientTicketPage() {
           shopContactPhone: ticket.shop_contact_phone,
           clientName: ticket.client_name,
           serviceType: ticket.service_type,
+          ticketNumber: formatJobNumber(ticket.job_number, ticket.id),
           date: new Date().toLocaleDateString(),
           currency: ticket.currency,
           items,
@@ -435,9 +475,9 @@ export default function ClientTicketPage() {
           </span>
 
           <h1 className="mt-3 text-xl font-bold text-white">{ticket.service_type}</h1>
-          {ticket.job_number !== null && (
-            <p className="mt-0.5 text-xs font-semibold text-slate-500">Job #{ticket.job_number}</p>
-          )}
+          <p className="mt-0.5 text-xs font-bold tracking-wide text-slate-400">
+            Ticket {formatJobNumber(ticket.job_number, ticket.id)}
+          </p>
           <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-400">For: {ticket.client_name}</p>
 
@@ -722,9 +762,9 @@ export default function ClientTicketPage() {
           {ticket.status !== "ESTIMATE_PENDING" &&
             ticket.total_invoice_amount !== null &&
             ticket.total_invoice_amount > 0 && (
-            <div className="mt-6 border-t border-white/10 pt-5">
+            <div id="pay" className="mt-6 scroll-mt-4 border-t border-white/10 pt-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Receipt
+                Receipt · Ticket {formatJobNumber(ticket.job_number, ticket.id)}
               </p>
               {ticket.selected_products.length > 0 && (
                 <div className="mt-2 space-y-1">
@@ -800,46 +840,87 @@ export default function ClientTicketPage() {
                 </p>
               )}
 
+              <PaymentDetails info={paymentInfo} />
+
               <div className="mt-4 border-t border-white/10 pt-4">
                 {ticket.invoice_paid_at ? (
                   <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
                     Payment confirmed — thank you!
                   </p>
-                ) : ticket.client_payment_confirmed_at ? (
-                  <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
-                    ✓ You confirmed payment — {ticket.shop_name} will verify it shortly.
-                  </p>
+                ) : ticket.payment_status === "PAID" ? (
+                  <div>
+                    <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
+                      ✓ Payment received — thank you! {ticket.shop_name} and your technician have
+                      been notified.
+                    </p>
+                    {ticket.payment_receipt_url && (
+                      <a
+                        href={ticket.payment_receipt_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 flex items-center gap-2 text-xs text-slate-400 hover:text-white"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={ticket.payment_receipt_url}
+                          alt="Your proof of payment"
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
+                        Your proof of payment — view full size
+                      </a>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Already paid?
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleConfirmPayment}
-                      disabled={confirmingPayment}
-                      className="mt-2 w-full rounded-full bg-brand-emerald px-4 py-2.5 text-sm font-bold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {confirmingPayment ? "Confirming..." : "Confirm I've Paid"}
-                    </button>
-                    {confirmPaymentError && (
-                      <p className="mt-1.5 text-xs text-red-400">{confirmPaymentError}</p>
-                    )}
-
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Optional: upload your receipt
+                      Sent your payment?
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
-                      A screenshot of your bank transfer or payment confirmation helps
-                      the business verify it faster.
+                      Upload a screenshot of your transfer or your reference number. Your technician
+                      can finish the job as soon as it&apos;s uploaded.
                     </p>
+                    {ticket.payment_receipt_url && (
+                      <p className="mt-2 rounded-lg bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-400">
+                        Proof uploaded — {ticket.shop_name} will review it shortly. You can replace it
+                        below.
+                      </p>
+                    )}
                     <div className="mt-2">
                       <PhotoUploadField
                         folder="receipts"
+                        allowGallery
                         photoUrl={ticket.payment_receipt_url}
                         onChange={handleUploadReceipt}
-                        label={uploadingReceipt ? "Uploading..." : "Upload payment receipt"}
+                        label={uploadingReceipt ? "Uploading..." : "Upload Payment Proof / Screenshot"}
                       />
+                    </div>
+                    {uploadReceiptError && (
+                      <p className="mt-1.5 text-xs text-red-400">{uploadReceiptError}</p>
+                    )}
+
+                    <div className="mt-4 border-t border-white/10 pt-4">
+                      {ticket.client_payment_confirmed_at ? (
+                        <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
+                          ✓ You said you paid — {ticket.shop_name} will verify it shortly.
+                        </p>
+                      ) : (
+                        <>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            Paid in cash?
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleConfirmPayment}
+                            disabled={confirmingPayment}
+                            className="mt-2 w-full rounded-full bg-brand-emerald px-4 py-2.5 text-sm font-bold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {confirmingPayment ? "Confirming..." : "Confirm I've Paid"}
+                          </button>
+                          {confirmPaymentError && (
+                            <p className="mt-1.5 text-xs text-red-400">{confirmPaymentError}</p>
+                          )}
+                        </>
+                      )}
                     </div>
                   </>
                 )}

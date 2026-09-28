@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { MapPin, ShieldCheck, ShieldAlert } from "lucide-react";
 import type { Shop, JobTicket } from "@/lib/supabase/types";
 import { getCurrentPosition, haversineDistanceMeters } from "@/lib/tech/gps";
@@ -10,16 +10,17 @@ import {
   submitStartProof,
   submitCompletionProof,
   submitEstimate,
-  fetchPaymentVerification,
-  fetchQuoteApproval,
+  fetchTicketLive,
 } from "@/lib/tech/jobActions";
+import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 import SignaturePad from "@/components/shared/SignaturePad";
+import TicketNumber from "@/components/ui/TicketNumber";
 import SelectedProductsPicker, {
   type SelectedProduct,
 } from "@/components/dashboard/SelectedProductsPicker";
 
-const PAYMENT_POLL_MS = 8000;
-const QUOTE_APPROVAL_POLL_MS = 8000;
+// Safety-net poll for the live fields below; the real-time connection is what makes it instant.
+const LIVE_POLL_MS = 8000;
 
 export default function TechJobScreen({
   shop,
@@ -58,10 +59,13 @@ export default function TechJobScreen({
   const [error, setError] = useState<string | null>(null);
   const fileInputId = useId();
 
-  const [paymentVerifiedAt, setPaymentVerifiedAt] = useState(ticket.payment_verified_at);
-  const [paymentVerifiedAmount, setPaymentVerifiedAmount] = useState(
-    ticket.payment_verified_amount
+  // PAID means proof of payment is in (or the shop confirmed it). It is what unlocks
+  // the customer's signature on this screen — nobody has to approve anything by hand.
+  const [paid, setPaid] = useState(ticket.payment_status === "PAID");
+  const [paidAmount, setPaidAmount] = useState(
+    ticket.payment_verified_amount > 0 ? ticket.payment_verified_amount : ticket.total_invoice_amount
   );
+  const signatureRef = useRef<HTMLDivElement>(null);
 
   const [diagnosticFee, setDiagnosticFee] = useState(
     ticket.discount_percent
@@ -75,24 +79,45 @@ export default function TechJobScreen({
   const [submittingQuote, setSubmittingQuote] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
 
-  // The technician has no way to know the client approved the quote
-  // from their own phone — poll just the approval fields, same
-  // narrow-poll pattern as payment verification below, then flip the
-  // stage locally instead of forcing a back-out/reopen.
+  // Two things happen on other people's phones while the technician is in this
+  // job: the customer approves the quote, and proof of payment arrives (or is
+  // rejected). Both are re-read from the ticket the moment it changes — instantly
+  // over the live connection, with a slow poll as a safety net — touching only
+  // these fields so nothing half-typed is lost.
+  const refreshLive = useCallback(async () => {
+    const live = await fetchTicketLive(ticket.id).catch(() => null);
+    if (!live) return;
+    if (live.quoteApprovedAt) {
+      setEffectiveStatus((current) => (current === "ESTIMATE_PENDING" ? "IN_PROGRESS" : current));
+    }
+    setPaid(live.paid);
+    setPaidAmount(live.paidAmount);
+  }, [ticket.id]);
+
+  const listening =
+    (isEstimateStage && quoteSubmittedAt !== null) || (isCompletionStage && !synced);
   useEffect(() => {
-    if (!isEstimateStage || !quoteSubmittedAt) return;
-    let active = true;
-    const interval = setInterval(async () => {
-      const result = await fetchQuoteApproval(ticket.id).catch(() => null);
-      if (active && result?.approvedAt) {
-        setEffectiveStatus("IN_PROGRESS");
-      }
-    }, QUOTE_APPROVAL_POLL_MS);
+    if (!listening) return;
+    const first = setTimeout(refreshLive, 0);
+    const interval = setInterval(refreshLive, LIVE_POLL_MS);
+    const stopRealtime = subscribeToJobTickets(
+      `tech-job-${ticket.id}`,
+      `id=eq.${ticket.id}`,
+      refreshLive
+    );
     return () => {
-      active = false;
+      clearTimeout(first);
       clearInterval(interval);
+      stopRealtime();
     };
-  }, [isEstimateStage, quoteSubmittedAt, ticket.id]);
+  }, [listening, refreshLive, ticket.id]);
+
+  // When payment lands, bring the signature pad into view.
+  useEffect(() => {
+    if (paid && isCompletionStage) {
+      signatureRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [paid, isCompletionStage]);
 
   async function handleSubmitEstimate() {
     setSubmittingQuote(true);
@@ -111,28 +136,6 @@ export default function TechJobScreen({
       setSubmittingQuote(false);
     }
   }
-
-  // The tech app deliberately doesn't poll the ticket mid-job (would risk
-  // disturbing an in-progress checklist/photo) — but once completion is
-  // gated on the owner confirming payment from a separate device, the
-  // technician needs SOME way to find out it happened without backing out
-  // and re-opening the job. This polls only the two payment fields, so it
-  // can't touch anything else in local state.
-  useEffect(() => {
-    if (!isCompletionStage || paymentVerifiedAt) return;
-    let active = true;
-    const interval = setInterval(async () => {
-      const result = await fetchPaymentVerification(ticket.id).catch(() => null);
-      if (active && result?.verifiedAt) {
-        setPaymentVerifiedAt(result.verifiedAt);
-        setPaymentVerifiedAmount(result.verifiedAmount);
-      }
-    }, PAYMENT_POLL_MS);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [isCompletionStage, paymentVerifiedAt, ticket.id]);
 
   const checklistCompleted = checkedItems.size >= activeChecklist.length;
   const needsPaymentVerification = isCompletionStage;
@@ -156,7 +159,7 @@ export default function TechJobScreen({
     (!needsPosition || position !== null) &&
     withinGeofence &&
     (!needsSignature || signatureDataUrl !== null) &&
-    (!needsPaymentVerification || paymentVerifiedAt !== null) &&
+    (!needsPaymentVerification || paid) &&
     !submitting;
 
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
@@ -266,7 +269,10 @@ export default function TechJobScreen({
       }
 
       setSynced(true);
-      setTimeout(onSubmitted, 900);
+      // Starting a job heads straight back to the list. Finishing one waits for the
+      // technician to tap "Proceed to Next Job" — a timer could fire after they have
+      // already opened the next job and pull them out of it.
+      if (isStartStage) setTimeout(onSubmitted, 900);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed.");
       setSubmitting(false);
@@ -293,7 +299,8 @@ export default function TechJobScreen({
         </a>
       </header>
 
-      <h1 className="text-lg font-bold text-white">{ticket.client_name}</h1>
+      <TicketNumber jobNumber={ticket.job_number} id={ticket.id} />
+      <h1 className="mt-1 text-lg font-bold text-white">{ticket.client_name}</h1>
       <p className="mt-1 text-sm text-slate-400">{ticket.service_type}</p>
       <p className="mt-0.5 text-sm text-slate-500">{ticket.service_address}</p>
 
@@ -685,23 +692,24 @@ export default function TechJobScreen({
                   </div>
                 )}
 
-                {paymentVerifiedAt ? (
+                {paid ? (
                   <>
-                    <p className="mt-3 text-xs font-semibold text-brand-emerald">
-                      Payment Verified by Owner
-                      {showPrices && `: ${shop.currency} ${paymentVerifiedAmount.toFixed(2)}`}
+                    <p className="mt-3 rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-xs font-semibold text-brand-emerald">
+                      ✓ Payment received
+                      {showPrices && ` — ${shop.currency} ${paidAmount.toFixed(2)}`}
+                      {needsSignature && ". Hand the phone to the customer to sign."}
                     </p>
                     {needsSignature && (
-                      <div className="mt-3">
+                      <div className="mt-3" ref={signatureRef}>
                         <SignaturePad onChange={setSignatureDataUrl} />
                       </div>
                     )}
                   </>
                 ) : (
                   <p className="mt-3 rounded-lg bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-400">
-                    Waiting for the owner to confirm the customer&apos;s payment
+                    Waiting for the customer&apos;s payment
                     before you can{needsSignature ? " collect a signature and" : ""} complete this job.
-                    This will update automatically.
+                    This unlocks the moment proof of payment comes in.
                   </p>
                 )}
               </div>
@@ -714,9 +722,24 @@ export default function TechJobScreen({
             )}
 
             {synced ? (
-              <div className="mt-6 flex items-center justify-center gap-2 rounded-full bg-brand-emerald/15 px-6 py-3.5 text-sm font-bold text-brand-emerald">
-                <ShieldCheck className="h-4 w-4" /> Proof Synced to Owner Dashboard
-              </div>
+              isStartStage ? (
+                <div className="mt-6 flex items-center justify-center gap-2 rounded-full bg-brand-emerald/15 px-6 py-3.5 text-sm font-bold text-brand-emerald">
+                  <ShieldCheck className="h-4 w-4" /> Proof Synced to Owner Dashboard
+                </div>
+              ) : (
+                <div className="mt-6 space-y-3">
+                  <div className="flex items-center justify-center gap-2 rounded-full bg-brand-emerald/15 px-6 py-3.5 text-sm font-bold text-brand-emerald">
+                    <ShieldCheck className="h-4 w-4" /> Job Completed — Proof Synced
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onSubmitted}
+                    className="w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+                  >
+                    Proceed to Next Job
+                  </button>
+                </div>
+              )
             ) : (
               <button
                 type="button"

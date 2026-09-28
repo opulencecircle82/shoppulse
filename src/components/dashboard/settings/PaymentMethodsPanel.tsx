@@ -53,7 +53,8 @@ export default function PaymentMethodsPanel({
         <p className="mt-1 text-xs text-slate-500">
           Shown to customers when they choose how to pay — Cash is always
           accepted. This records the customer&apos;s choice only; it
-          doesn&apos;t process any payment.
+          doesn&apos;t process any payment. Add your bank, PayPal or QR details under
+          Receiving Payments so customers know where to send the money.
         </p>
       </div>
 

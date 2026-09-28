@@ -1,5 +1,6 @@
 "use client";
 
+import { formatJobNumber } from "@/lib/jobNumber";
 import { MapPin, Navigation as NavigationIcon } from "lucide-react";
 import type { JobTicket } from "@/lib/supabase/types";
 
@@ -62,6 +63,9 @@ export default function TechRouteScreen({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate text-sm font-semibold text-white">
+                      <span className="mr-1.5 font-mono text-[10px] font-bold text-slate-400">
+                        {formatJobNumber(stop.job_number, stop.id)}
+                      </span>
                       {stop.client_name}
                     </p>
                     {index === 0 && (

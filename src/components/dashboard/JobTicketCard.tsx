@@ -5,6 +5,7 @@ import { CalendarDays, Clock, Download, MapPin, Receipt, UserRound } from "lucid
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
+import { formatJobNumber } from "@/lib/jobNumber";
 import JobProgress from "./JobProgress";
 import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
@@ -69,6 +70,7 @@ export default function JobTicketCard({
   const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
+  const [rejectingPayment, setRejectingPayment] = useState(false);
   const assignedStaff = staff.find((s) => s.id === ticket.assigned_staff_id);
   const timeInStage = stageTimeLabel(ticket);
 
@@ -93,6 +95,31 @@ export default function JobTicketCard({
       .eq("id", ticket.id);
     setConfirmingPayment(false);
     setShowPaymentForm(false);
+    onChanged();
+  }
+
+  // A customer's proof of payment unlocks the technician's signature step on its own.
+  // If the screenshot turns out to be fake or unreadable, take it back: the job goes
+  // unpaid, the signature step locks again, and the customer is asked for a new proof.
+  async function handleRejectPayment() {
+    const confirmed = window.confirm(
+      "Mark this job as unpaid and ask the customer for a new proof of payment? The technician's signature step will lock again."
+    );
+    if (!confirmed) return;
+
+    setRejectingPayment(true);
+    await supabase
+      .from("job_tickets")
+      .update({
+        payment_status: "UNPAID",
+        payment_receipt_url: null,
+        payment_verified_at: null,
+        payment_verified_amount: 0,
+        payment_verified_by: null,
+        client_payment_confirmed_at: null,
+      })
+      .eq("id", ticket.id);
+    setRejectingPayment(false);
     onChanged();
   }
 
@@ -124,6 +151,7 @@ export default function JobTicketCard({
           shopContactPhone: shop.contact_phone,
           clientName: ticket.client_name,
           serviceType: ticket.service_type,
+          ticketNumber: formatJobNumber(ticket.job_number, ticket.id),
           date: new Date().toLocaleDateString(),
           currency,
           items,
@@ -283,7 +311,7 @@ export default function JobTicketCard({
               to submit completion proof from the mobile app.
             </p>
 
-            {ticket.client_payment_confirmed_at && !ticket.payment_verified_at && (
+            {ticket.client_payment_confirmed_at && ticket.payment_status !== "PAID" && (
               <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-emerald/15 px-2.5 py-1 text-[11px] font-semibold text-brand-emerald-dark">
                 ✓ Customer confirmed they paid — review and confirm below
               </p>
@@ -307,10 +335,26 @@ export default function JobTicketCard({
               </a>
             )}
 
-            {ticket.payment_verified_at ? (
-              <p className="mt-2 text-xs font-semibold text-brand-emerald-dark">
-                Payment Verified: {currency} {ticket.payment_verified_amount.toFixed(2)}
-              </p>
+            {ticket.payment_status === "PAID" ? (
+              <div className="mt-2">
+                <p className="text-xs font-semibold text-brand-emerald-dark">
+                  ✓ Paid
+                  {ticket.payment_verified_amount > 0 &&
+                    ` — ${currency} ${ticket.payment_verified_amount.toFixed(2)}`}
+                  {!ticket.payment_verified_at && " — the customer's proof was accepted automatically"}
+                </p>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  The technician can now collect the signature and finish the job.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRejectPayment}
+                  disabled={rejectingPayment}
+                  className="mt-1.5 text-[11px] font-semibold text-red-600 hover:text-red-700 disabled:opacity-60"
+                >
+                  {rejectingPayment ? "Saving..." : "Proof looks wrong — mark unpaid"}
+                </button>
+              </div>
             ) : showPaymentForm ? (
               <form onSubmit={handleConfirmPayment} className="mt-2 flex items-center gap-2">
                 <input

@@ -1,6 +1,7 @@
 import type { JobTicket } from "@/lib/supabase/types";
 import { distanceKm } from "@/lib/geo/distance";
 import { timeAgo } from "@/lib/dashboard/format";
+import { formatJobNumber } from "@/lib/jobNumber";
 
 /**
  * How the customer's app reads their bookings — the same tickets the owner
@@ -74,6 +75,16 @@ export const CUSTOMER_TONE_CLASSES: Record<CustomerTone, { chip: string; bar: st
   slate: { chip: "bg-white/10 text-slate-400", bar: "bg-slate-500" },
 };
 
+/** The customer still owes money on a job that is under way or finished. */
+export function paymentDue(job: JobTicket): boolean {
+  return (
+    job.total_invoice_amount > 0 &&
+    job.payment_status !== "PAID" &&
+    !job.invoice_paid_at &&
+    (job.status === "IN_PROGRESS" || job.status === "COMPLETED" || job.status === "APPROVED")
+  );
+}
+
 export type CustomerJobStatus = {
   label: string;
   tone: CustomerTone;
@@ -135,27 +146,39 @@ export function customerJobStatus(job: JobTicket): CustomerJobStatus {
             detail: "Diagnosing the issue",
             action: "View Details",
           };
-    case "IN_PROGRESS":
+    case "IN_PROGRESS": {
+      const due = paymentDue(job);
       return {
         label: "Work in progress",
         tone: "emerald",
-        detail: job.started_at ? `Started ${timeAgo(job.started_at)}` : null,
-        action: "View Live Proof",
+        detail:
+          [
+            job.started_at ? `Started ${timeAgo(job.started_at)}` : null,
+            due ? "Payment due" : job.payment_status === "PAID" ? "Paid ✓" : null,
+          ]
+            .filter(Boolean)
+            .join(" · ") || null,
+        action: due ? "Pay Now" : "View Live Proof",
       };
-    case "COMPLETED":
+    }
+    case "COMPLETED": {
+      const settled = job.payment_status === "PAID" || Boolean(job.invoice_paid_at);
       return {
-        label: "Completed — review & pay",
+        label: settled ? "Completed — please rate it" : "Completed — review & pay",
         tone: "blue",
         detail: job.completed_at ? `Finished ${timeAgo(job.completed_at)}` : null,
-        action: "Review & Pay",
+        action: settled ? "Review & Rate" : "Review & Pay",
       };
-    case "APPROVED":
+    }
+    case "APPROVED": {
+      const settled = job.payment_status === "PAID" || Boolean(job.invoice_paid_at);
       return {
-        label: job.invoice_paid_at ? "Paid — thank you" : "Approved — payment due",
-        tone: job.invoice_paid_at ? "emerald" : "blue",
+        label: settled ? "Paid — thank you" : "Approved — payment due",
+        tone: settled ? "emerald" : "blue",
         detail: job.completed_at ? `Finished ${timeAgo(job.completed_at)}` : null,
-        action: job.invoice_paid_at ? "View Receipt" : "Pay & Rate",
+        action: settled ? "View Receipt" : "Pay & Rate",
       };
+    }
     case "DISPUTED":
       return {
         label: "Under review by the shop",
@@ -176,7 +199,7 @@ export function customerJobStatus(job: JobTicket): CustomerJobStatus {
 }
 
 export function jobNumberLabel(job: JobTicket): string {
-  return `#${job.job_number ?? job.id.slice(0, 6).toUpperCase()}`;
+  return formatJobNumber(job.job_number, job.id);
 }
 
 /** What the big banner at the top of the app is about, most urgent first. */

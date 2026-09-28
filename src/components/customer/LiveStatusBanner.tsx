@@ -14,6 +14,7 @@ import {
   estimateEta,
   formatEta,
   jobNumberLabel,
+  paymentDue,
   pickBanner,
   type BannerKind,
 } from "@/lib/customer/jobStages";
@@ -135,6 +136,10 @@ function Banner({
       headline = "Work is in progress";
       subline = job.started_at ? `${name} started ${timeAgo(job.started_at)}` : `${name} is on the job`;
       cta = "View Live Proof";
+      if (paymentDue(job)) {
+        subline = "Please pay so your technician can finish the job.";
+        cta = "Pay Now";
+      }
       break;
     case "REVIEW":
       headline = "Your job is complete";
@@ -171,7 +176,7 @@ function Banner({
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white">
           {live && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />}
-          {live ? "LIVE" : "UPDATE"} · {jobNumberLabel(job)}
+          {live ? "LIVE" : "UPDATE"} · TICKET {jobNumberLabel(job)}
         </span>
         {others > 0 && (
           <span className="text-[10px] font-medium text-white/80">
@@ -197,7 +202,7 @@ function Banner({
           </button>
         ) : (
           <Link
-            href={`/client/${job.id}`}
+            href={cta === "Pay Now" ? `/client/${job.id}#pay` : `/client/${job.id}`}
             className="inline-flex items-center rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-900 shadow-sm"
           >
             {kind === "EN_ROUTE" ? "View Job" : cta}

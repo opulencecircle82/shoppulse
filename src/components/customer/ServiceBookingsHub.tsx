@@ -9,6 +9,7 @@ import {
   PIPELINE,
   customerJobStatus,
   jobNumberLabel,
+  paymentDue,
   pipelineStageOf,
   type PipelineStageId,
 } from "@/lib/customer/jobStages";
@@ -43,19 +44,35 @@ function StageTracker({ job, stageId }: { job: JobTicket; stageId: PipelineStage
 function BookingCard({ job }: { job: JobTicket }) {
   const status = customerJobStatus(job);
   const stageId = pipelineStageOf(job);
+  const due = paymentDue(job);
+  const paid = !due && job.payment_status === "PAID" && job.total_invoice_amount > 0;
 
   return (
     <Link
-      href={`/client/${job.id}`}
+      href={due ? `/client/${job.id}#pay` : `/client/${job.id}`}
       className="block rounded-2xl bg-white/5 p-4 shadow-md shadow-black/20 transition-shadow hover:shadow-lg"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold text-slate-500">{jobNumberLabel(job)}</span>
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CUSTOMER_TONE_CLASSES[status.tone].chip}`}
-        >
-          {status.label}
+        <span className="text-[11px] font-bold tracking-wide text-slate-400">
+          Ticket {jobNumberLabel(job)}
         </span>
+        <div className="flex flex-wrap justify-end gap-1.5">
+          {due && (
+            <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-bold text-amber-400">
+              To Pay
+            </span>
+          )}
+          {paid && (
+            <span className="rounded-full bg-brand-emerald/15 px-2.5 py-0.5 text-[10px] font-bold text-brand-emerald">
+              Paid
+            </span>
+          )}
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CUSTOMER_TONE_CLASSES[status.tone].chip}`}
+          >
+            {status.label}
+          </span>
+        </div>
       </div>
       <p className="mt-2 text-sm font-semibold text-white">{job.service_type}</p>
       <p className="mt-0.5 line-clamp-2 text-xs text-slate-400">{job.service_address}</p>

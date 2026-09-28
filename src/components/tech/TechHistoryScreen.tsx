@@ -2,6 +2,7 @@
 
 import { CheckCircle2 } from "lucide-react";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
+import { formatJobNumber } from "@/lib/jobNumber";
 
 const FINISHED_STATUSES = new Set(["COMPLETED", "APPROVED", "DISPUTED"]);
 
@@ -43,6 +44,9 @@ export default function TechHistoryScreen({
               <div key={job.id} className="rounded-xl bg-white/5 px-4 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-sm font-semibold text-white">
+                    <span className="mr-1.5 font-mono text-[10px] font-bold text-slate-400">
+                      {formatJobNumber(job.job_number, job.id)}
+                    </span>
                     {job.client_name}
                   </p>
                   {job.completed_at && (

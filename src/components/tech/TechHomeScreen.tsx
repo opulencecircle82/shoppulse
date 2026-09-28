@@ -28,6 +28,8 @@ import {
   type NearbyEmergencyJob,
 } from "@/lib/tech/jobActions";
 import TechNotificationBell from "./TechNotificationBell";
+import TicketNumber from "@/components/ui/TicketNumber";
+import { formatJobNumber } from "@/lib/jobNumber";
 
 const EMERGENCY_POLL_MS = 15000;
 
@@ -324,7 +326,8 @@ export default function TechHomeScreen({
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-bold text-amber-400">
                   NEEDS YOUR CONFIRMATION
                 </span>
-                <p className="mt-3 text-lg font-bold text-white">
+                <TicketNumber jobNumber={task.job_number} id={task.id} className="mt-3" />
+                <p className="mt-1 text-lg font-bold text-white">
                   {task.client_name}
                 </p>
                 <p className="mt-0.5 text-sm text-slate-300">
@@ -376,7 +379,8 @@ export default function TechHomeScreen({
                   onClick={() => onOpenTask(task)}
                   className="mt-3 block w-full text-left"
                 >
-                  <p className="text-lg font-bold text-white">{task.client_name}</p>
+                  <TicketNumber jobNumber={task.job_number} id={task.id} />
+                  <p className="mt-1 text-lg font-bold text-white">{task.client_name}</p>
                   <p className="mt-0.5 text-sm text-slate-300">{task.service_type}</p>
                 </button>
 
@@ -494,6 +498,9 @@ export default function TechHomeScreen({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <p className="truncate text-sm font-semibold text-white">
+                            <span className="mr-1.5 font-mono text-[10px] font-bold text-slate-400">
+                              {formatJobNumber(job.job_number, job.id)}
+                            </span>
                             {job.client_name}
                           </p>
                           <span

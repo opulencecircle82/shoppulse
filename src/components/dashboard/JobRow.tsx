@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, MapPin, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { BadgeCheck, ChevronDown, MapPin, Phone, ShieldCheck, UserRound } from "lucide-react";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { describeJob, firstName, jobLabel, TONE_CLASSES } from "@/lib/dashboard/jobStatus";
 import AssignTechSelect from "./AssignTechSelect";
@@ -103,6 +103,13 @@ export default function JobRow({
               GPS Verified
             </span>
           )}
+          {ticket.payment_status === "PAID" &&
+            (ticket.status === "IN_PROGRESS" || ticket.status === "COMPLETED" || ticket.status === "APPROVED") && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-emerald-dark">
+                <BadgeCheck className="h-3.5 w-3.5" />
+                Paid
+              </span>
+            )}
           {phase.detail && <span className="text-[11px] text-slate-500">{phase.detail}</span>}
         </div>
 

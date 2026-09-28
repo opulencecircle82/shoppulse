@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket } from "@/lib/supabase/types";
+import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
-/** How often the list quietly re-checks for changes made elsewhere (a technician's phone, the customer). */
+/** Safety-net poll: the list also listens for live changes, so this only matters if that connection drops. */
 const POLL_MS = 8000;
 
 export function useJobTickets(shopId: string | undefined) {
@@ -77,6 +78,12 @@ export function useJobTickets(shopId: string | undefined) {
   useEffect(() => {
     if (!shopId) return;
     const interval = setInterval(refreshQuietly, POLL_MS);
+    // Instant updates; the poll above is the safety net if the connection drops.
+    const stopRealtime = subscribeToJobTickets(
+      `job-tickets-${shopId}`,
+      `shop_id=eq.${shopId}`,
+      refreshQuietly
+    );
     // Catch up right away when the owner comes back to this tab.
     const onVisible = () => {
       if (!document.hidden) refreshQuietly();
@@ -84,6 +91,7 @@ export function useJobTickets(shopId: string | undefined) {
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(interval);
+      stopRealtime();
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [shopId, refreshQuietly]);

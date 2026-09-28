@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { JobTicket } from "@/lib/supabase/types";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
 import { fetchMyJobs } from "@/lib/customer/bookings";
+import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 import CustomerAuthScreen from "@/components/customer/CustomerAuthScreen";
 import CustomerHomeScreen from "@/components/customer/CustomerHomeScreen";
 
@@ -16,6 +17,7 @@ export default function CustomerAppPage() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [jobs, setJobs] = useState<JobTicket[]>([]);
   const lastJobsRef = useRef("");
+  const customerEmail = customer?.email ?? null;
 
   const resolveSession = useCallback(async () => {
     const current = await fetchCurrentCustomer();
@@ -54,15 +56,20 @@ export default function CustomerAppPage() {
       }
     }
     const interval = setInterval(refreshQuietly, JOBS_POLL_MS);
+    // Instant updates; the poll above is the safety net if the connection drops.
+    const stopRealtime = customerEmail
+      ? subscribeToJobTickets(`customer-jobs-${customerEmail}`, `client_email=eq.${customerEmail}`, refreshQuietly)
+      : () => {};
     const onVisible = () => {
       if (!document.hidden) refreshQuietly();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(interval);
+      stopRealtime();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [screen]);
+  }, [screen, customerEmail]);
 
   if (screen === "loading") {
     return (

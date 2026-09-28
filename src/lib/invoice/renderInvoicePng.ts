@@ -10,6 +10,8 @@ export type InvoiceData = {
   shopContactPhone: string | null;
   clientName: string;
   serviceType: string;
+  /** The job's ticket number, e.g. #JOB-0007. */
+  ticketNumber?: string | null;
   date: string;
   currency: string;
   items: InvoiceLineItem[];
@@ -66,6 +68,7 @@ export async function renderInvoicePng(data: InvoiceData): Promise<Blob> {
     (data.shopContactPhone ? 16 : 0) +
     18 + // divider + spacing
     18 + // meta row (date)
+    (data.ticketNumber ? 16 : 0) + // ticket number
     18 + // client row
     10 + // divider spacing
     itemsHeight +
@@ -145,6 +148,14 @@ export async function renderInvoicePng(data: InvoiceData): Promise<Blob> {
   ctx.font = "10px Arial, sans-serif";
   ctx.fillText(data.date, WIDTH - PADDING, y);
   y += 18;
+
+  if (data.ticketNumber) {
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#0F172A";
+    ctx.font = "bold 10px Arial, sans-serif";
+    ctx.fillText(`Ticket ${data.ticketNumber}`, PADDING, y);
+    y += 16;
+  }
 
   // Client row
   ctx.textAlign = "left";

@@ -68,24 +68,6 @@ export async function fetchAssignedJobs(staffId: string): Promise<JobTicket[]> {
   return (data ?? []) as JobTicket[];
 }
 
-export async function fetchPaymentVerification(
-  ticketId: string
-): Promise<{ verifiedAt: string | null; verifiedAmount: number }> {
-  const { data, error } = await supabase
-    .from("job_tickets")
-    .select("payment_verified_at, payment_verified_amount")
-    .eq("id", ticketId)
-    .single();
-
-  if (error) throw error;
-  return {
-    verifiedAt: data.payment_verified_at as string | null,
-    verifiedAmount: data.payment_verified_amount as number,
-  };
-}
-
-// A shop can let technicians skip the photo and/or the location check, so all
-// of the proof fields may legitimately be empty.
 export async function submitStartProof(params: {
   ticketId: string;
   photoUrl: string | null;
@@ -141,19 +123,31 @@ export async function submitEstimate(params: {
   if (error) throw error;
 }
 
-export async function fetchQuoteApproval(
-  ticketId: string
-): Promise<{ approvedAt: string | null; status: string }> {
+/**
+ * The few fields other people change under a technician who is standing in a
+ * job: the customer approving the quote, and proof of payment arriving (or
+ * being rejected). Read narrowly so it can never disturb a half-filled
+ * checklist, photo or signature on the technician's screen.
+ */
+export async function fetchTicketLive(ticketId: string): Promise<{
+  status: string;
+  quoteApprovedAt: string | null;
+  paid: boolean;
+  paidAmount: number;
+}> {
   const { data, error } = await supabase
     .from("job_tickets")
-    .select("quote_approved_at, status")
+    .select("status, quote_approved_at, payment_status, payment_verified_amount, total_invoice_amount")
     .eq("id", ticketId)
     .single();
 
   if (error) throw error;
+  const verified = Number(data.payment_verified_amount);
   return {
-    approvedAt: data.quote_approved_at as string | null,
     status: data.status as string,
+    quoteApprovedAt: data.quote_approved_at as string | null,
+    paid: data.payment_status === "PAID",
+    paidAmount: verified > 0 ? verified : Number(data.total_invoice_amount),
   };
 }
 
