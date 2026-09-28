@@ -11,7 +11,6 @@ import { useStaffMembers } from "@/lib/hooks/useStaffMembers";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket } from "@/lib/supabase/types";
 import DashboardHomeTab from "@/components/dashboard/DashboardHomeTab";
-import MetricsBar from "@/components/dashboard/MetricsBar";
 import KanbanBoard from "@/components/dashboard/KanbanBoard";
 import NewJobTicketModal from "@/components/dashboard/NewJobTicketModal";
 import InvoiceGeneratorModal from "@/components/dashboard/InvoiceGeneratorModal";
@@ -197,15 +196,10 @@ export default function DashboardPage() {
             bookingRequestCount={pendingBookingRequests}
           />
 
-          <div className="min-w-0 flex-1">
-            <MetricsBar
-              tickets={tickets}
-              staff={staff}
-              currency={shop.currency}
-              onOpenPendingApprovals={() => setActiveTab("proof")}
-            />
-
-            <div className="mt-6 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+          {/* Every tab wrapper below opens with mt-6; pull the column up on
+              desktop so the first visible block lines up with the sidebar. */}
+          <div className="min-w-0 flex-1 lg:-mt-6">
+            <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
               {DASHBOARD_TABS.map((tab) => {
                 const hasUnread =
                   (tab.id === "messages" && unreadMessages > 0) ||

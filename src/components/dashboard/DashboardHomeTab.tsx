@@ -88,8 +88,8 @@ export default function DashboardHomeTab({
 
   const totalActiveJobs = pipelineData.reduce((sum, d) => sum + d.value, 0);
 
-  // "Revenue" only ever counts APPROVED tickets, matching MetricsBar's
-  // Total Revenue definition — an invoice isn't real revenue until approved.
+  // "Revenue" only ever counts APPROVED tickets — an invoice isn't real
+  // revenue until approved.
   const revenue = useMemo(() => {
     const now = new Date();
     const thisKey = monthKey(now);
