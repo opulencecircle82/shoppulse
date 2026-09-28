@@ -13,11 +13,14 @@ export default function AssignTechSelect({
   ticket,
   staff,
   defaultTasks,
+  busy,
   onAssigned,
 }: {
   ticket: JobTicket;
   staff: StaffMember[];
   defaultTasks: string[];
+  /** Technician id → the job they are still busy on; those people can't be picked yet. */
+  busy: Map<string, string>;
   onAssigned: () => void;
 }) {
   const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
@@ -34,11 +37,14 @@ export default function AssignTechSelect({
         className="w-full max-w-[220px] rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
       >
         <option value="">Assign Tech...</option>
-        {staff.map((member) => (
-          <option key={member.id} value={member.id}>
-            {member.full_name}
-          </option>
-        ))}
+        {staff.map((member) => {
+          const busyOn = busy.get(member.id);
+          return (
+            <option key={member.id} value={member.id} disabled={Boolean(busyOn)}>
+              {busyOn ? `${member.full_name} — busy on ${busyOn}` : member.full_name}
+            </option>
+          );
+        })}
       </select>
 
       {pendingAssignee && (

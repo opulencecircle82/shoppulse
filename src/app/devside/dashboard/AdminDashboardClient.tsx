@@ -224,6 +224,7 @@ type AdminShop = {
   is_verified: boolean;
   has_quality_booster: boolean;
   has_marketing_tier: boolean;
+  unlimited_tech_seats: boolean;
   staff_members: AdminStaffMember[];
 };
 
@@ -240,6 +241,8 @@ export default function AdminDashboardClient({
   const [search, setSearch] = useState("");
   const [viewingShop, setViewingShop] = useState<AdminShop | null>(null);
   const [showAddAccount, setShowAddAccount] = useState(false);
+  const [seatsSavingId, setSeatsSavingId] = useState<string | null>(null);
+  const [seatsError, setSeatsError] = useState<string | null>(null);
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -296,6 +299,28 @@ export default function AdminDashboardClient({
     }
 
     setShops((prev) => prev.filter((s) => s.id !== shop.id));
+  }
+
+  // Unlimited technician seats: a test/demo account that never sees the paid-seat prompts.
+  async function handleToggleUnlimitedSeats(shop: AdminShop) {
+    setSeatsSavingId(shop.id);
+    setSeatsError(null);
+    const res = await fetch(`/api/admin/shops/${shop.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unlimitedTechSeats: !shop.unlimited_tech_seats }),
+    });
+    setSeatsSavingId(null);
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setSeatsError(body.error ?? "Could not change the seats.");
+      return;
+    }
+
+    const updated = { ...shop, unlimited_tech_seats: !shop.unlimited_tech_seats };
+    setShops((prev) => prev.map((s) => (s.id === shop.id ? updated : s)));
+    setViewingShop(updated);
   }
 
   async function handleChangePassword(event: FormEvent<HTMLFormElement>) {
@@ -477,6 +502,11 @@ export default function AdminDashboardClient({
                                 Verified
                               </span>
                             )}
+                            {shop.unlimited_tech_seats && (
+                              <span className="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[10px] font-semibold text-brand-orange">
+                                Unlimited seats
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-slate-600">
@@ -581,12 +611,37 @@ export default function AdminDashboardClient({
                 </dd>
               </div>
               <div className="flex justify-between">
+                <dt className="text-slate-500">Technician seats</dt>
+                <dd className="text-slate-900">
+                  {viewingShop.unlimited_tech_seats ? "Unlimited (test account)" : "1 free, more are paid"}
+                </dd>
+              </div>
+              <div className="flex justify-between">
                 <dt className="text-slate-500">Created</dt>
                 <dd className="text-slate-900">
                   {new Date(viewingShop.created_at).toLocaleString()}
                 </dd>
               </div>
             </dl>
+
+            <div className="mt-5 rounded-2xl bg-brand-slate-light/30 p-4">
+              <p className="text-xs text-slate-400">
+                Testing an account? Unlimited seats lets the owner add as many technicians as needed without the paid-seat prompt.
+              </p>
+              <button
+                type="button"
+                onClick={() => handleToggleUnlimitedSeats(viewingShop)}
+                disabled={seatsSavingId === viewingShop.id}
+                className="mt-3 rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {seatsSavingId === viewingShop.id
+                  ? "Saving..."
+                  : viewingShop.unlimited_tech_seats
+                    ? "Remove unlimited seats"
+                    : "Give unlimited tech seats"}
+              </button>
+              {seatsError && <p className="mt-2 text-xs text-red-400">{seatsError}</p>}
+            </div>
 
             <div className="mt-5">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500">

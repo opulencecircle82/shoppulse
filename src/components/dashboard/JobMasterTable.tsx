@@ -9,6 +9,7 @@ import {
   type JobFilterId,
 } from "@/lib/dashboard/jobStatus";
 import type { CustomerChatTarget } from "@/lib/chat/chat";
+import { busyTechnicians } from "@/lib/dashboard/techBusy";
 import JobRow from "./JobRow";
 
 const PAGE_SIZE = 25;
@@ -45,6 +46,9 @@ export default function JobMasterTable({
   // starts a fresh page.
   const [pageState, setPageState] = useState({ filter, size: PAGE_SIZE });
   const pageSize = pageState.filter === filter ? pageState.size : PAGE_SIZE;
+
+  // Technicians still working a job can't be handed another one.
+  const busy = useMemo(() => busyTechnicians(tickets), [tickets]);
 
   // Emergencies first, then jobs that are waiting on the owner; otherwise the
   // newest-first order the tickets already arrive in.
@@ -134,6 +138,7 @@ export default function JobMasterTable({
               staff={staff}
               shop={shop}
               currentStaffId={currentStaffId}
+              busyTechnicians={busy}
               onChanged={onChanged}
               onOpenInvoice={onOpenInvoice}
               onOpenProofDrawer={onOpenProofDrawer}

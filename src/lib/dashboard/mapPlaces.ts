@@ -79,10 +79,11 @@ export function buildMapPlaces(rows: MapRow[]): MapPlace[] {
 
     const proofLat = row.end_lat ?? row.start_lat;
     const proofLng = row.end_lng ?? row.start_lng;
-    const hasProof = proofLat !== null && proofLng !== null;
+    const hasProof = typeof proofLat === "number" && typeof proofLng === "number";
     const lat = row.booking_latitude ?? proofLat;
     const lng = row.booking_longitude ?? proofLng;
-    if (lat === null || lng === null) continue;
+    // A row with a missing coordinate must never reach the map, however the value comes back (null or absent).
+    if (typeof lat !== "number" || typeof lng !== "number") continue;
 
     const job: MapJob = {
       id: row.id,

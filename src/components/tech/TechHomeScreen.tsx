@@ -33,6 +33,7 @@ import TechNotificationBell from "./TechNotificationBell";
 import TicketNumber from "@/components/ui/TicketNumber";
 import { HomeInfo } from "./ShopInfoCards";
 import { formatJobNumber } from "@/lib/jobNumber";
+import { keepsTechnicianBusy } from "@/lib/dashboard/techBusy";
 import { guardExternalLink } from "@/lib/tech/externalLinks";
 
 const EMERGENCY_POLL_MS = 15000;
@@ -180,6 +181,8 @@ export default function TechHomeScreen({
   }
 
   const isInProgress = task?.status === "IN_PROGRESS";
+  // Still on (or heading to) a job: another one can't be claimed until it is finished.
+  const stillWorkingOn = task && keepsTechnicianBusy(task) ? formatJobNumber(task.job_number, task.id) : null;
   const isEstimatePending = task?.status === "ESTIMATE_PENDING";
   const needsAcceptance =
     task?.status === "SCHEDULED" && !task.staff_accepted_at;
@@ -336,10 +339,10 @@ export default function TechHomeScreen({
                       <button
                         type="button"
                         onClick={() => handleClaimEmergencyJob(job.id)}
-                        disabled={claimingId === job.id}
+                        disabled={claimingId === job.id || Boolean(stillWorkingOn)}
                         className="mt-3 w-full rounded-full bg-gradient-to-r from-red-500 to-red-700 px-4 py-2.5 text-xs font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {claimingId === job.id ? "Claiming..." : "Claim This Job"}
+                        {claimingId === job.id ? "Claiming..." : stillWorkingOn ? `Finish ${stillWorkingOn} to claim` : "Claim This Job"}
                       </button>
                     </div>
                   ))}

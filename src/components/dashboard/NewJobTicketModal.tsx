@@ -82,11 +82,14 @@ function ChecklistEditor({
 export default function NewJobTicketModal({
   shopId,
   staff,
+  busyTechnicians,
   onClose,
   onCreated,
 }: {
   shopId: string;
   staff: StaffMember[];
+  /** Technician id → the job they are still busy on; those people can't be picked yet. */
+  busyTechnicians: Map<string, string>;
   onClose: () => void;
   onCreated: () => void;
 }) {
@@ -247,14 +250,14 @@ export default function NewJobTicketModal({
               <option value="">
                 Unassigned
               </option>
-              {staff.map((member) => (
-                <option
-                  key={member.id}
-                  value={member.id}
-                >
-                  {member.full_name} ({member.role})
-                </option>
-              ))}
+              {staff.map((member) => {
+                const busyOn = busyTechnicians.get(member.id);
+                return (
+                  <option key={member.id} value={member.id} disabled={Boolean(busyOn)}>
+                    {member.full_name} ({member.role}){busyOn ? ` — busy on ${busyOn}` : ""}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

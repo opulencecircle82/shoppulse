@@ -9,16 +9,19 @@ const FREE_TECH_SEATS = 1;
 export default function AddStaffModal({
   staff,
   defaultHourlyRate,
+  unlimitedSeats = false,
   onClose,
   onCreated,
 }: {
   staff: StaffMember[];
   defaultHourlyRate: number;
+  /** A test account with unlimited technician seats — nothing to pay for, nothing to acknowledge. */
+  unlimitedSeats?: boolean;
   onClose: () => void;
   onCreated: () => void;
 }) {
   const seatsUsed = staff.filter((s) => s.role !== "OWNER").length;
-  const isPaidSeat = seatsUsed >= FREE_TECH_SEATS;
+  const isPaidSeat = !unlimitedSeats && seatsUsed >= FREE_TECH_SEATS;
 
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
@@ -151,7 +154,9 @@ export default function AddStaffModal({
                   isPaidSeat ? "text-amber-600" : "text-brand-emerald-dark"
                 }`}
               >
-                {Math.min(seatsUsed, FREE_TECH_SEATS)}/{FREE_TECH_SEATS} Free Tech Seat Used
+                {unlimitedSeats
+                  ? "Unlimited (test account)"
+                  : `${Math.min(seatsUsed, FREE_TECH_SEATS)}/${FREE_TECH_SEATS} Free Tech Seat Used`}
               </span>
             </div>
 

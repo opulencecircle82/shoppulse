@@ -10,7 +10,7 @@ export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("shops")
     .select(
-      "id, shop_name, slug, currency, created_at, is_verified, has_quality_booster, has_marketing_tier, staff_members(id, full_name, email, role, auth_user_id)"
+      "id, shop_name, slug, currency, created_at, is_verified, has_quality_booster, has_marketing_tier, unlimited_tech_seats, staff_members(id, full_name, email, role, auth_user_id)"
     )
     .order("created_at", { ascending: false });
 

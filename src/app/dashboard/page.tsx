@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
@@ -12,6 +12,7 @@ import type { JobTicket } from "@/lib/supabase/types";
 import DashboardHomeTab from "@/components/dashboard/DashboardHomeTab";
 import JobMasterTable from "@/components/dashboard/JobMasterTable";
 import { jobFilterOf, type JobFilterId } from "@/lib/dashboard/jobStatus";
+import { busyTechnicians } from "@/lib/dashboard/techBusy";
 import NewJobTicketModal from "@/components/dashboard/NewJobTicketModal";
 import InvoiceGeneratorModal from "@/components/dashboard/InvoiceGeneratorModal";
 import ProofDisputeDrawer from "@/components/dashboard/ProofDisputeDrawer";
@@ -91,6 +92,8 @@ export default function DashboardPage() {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const unreadRef = useRef(0);
   const tabStripRef = useRef<HTMLDivElement>(null);
+  // Technicians still working a job can't be handed another one (New Job Ticket's Assign Technician list).
+  const busy = useMemo(() => busyTechnicians(tickets), [tickets]);
   const pendingBookingRequests = tickets.filter((t) => t.status === "PENDING").length;
   // Only the very first load hides the board. Later refreshes (after accepting
   // a request, a new booking arriving...) keep it on screen, so the tab the
@@ -382,6 +385,7 @@ export default function DashboardPage() {
                   defaultHourlyRate={shop.default_hourly_rate}
                   tickets={tickets}
                   currency={shop.currency}
+                  unlimitedSeats={shop.unlimited_tech_seats}
                   onChanged={refreshStaff}
                 />
               </div>
@@ -454,6 +458,7 @@ export default function DashboardPage() {
         <NewJobTicketModal
           shopId={shop.id}
           staff={staff}
+          busyTechnicians={busy}
           onClose={() => setShowNewTicket(false)}
           onCreated={refreshTickets}
         />

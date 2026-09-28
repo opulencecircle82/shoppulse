@@ -23,6 +23,7 @@ export default function AssignTaskingModal({
   );
   const [newTask, setNewTask] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function addTask() {
     const trimmed = newTask.trim();
@@ -37,7 +38,8 @@ export default function AssignTaskingModal({
 
   async function handleConfirm() {
     setSaving(true);
-    await supabase
+    setError(null);
+    const { error: updateError } = await supabase
       .from("job_tickets")
       .update({
         assigned_staff_id: staffMember.id,
@@ -46,6 +48,11 @@ export default function AssignTaskingModal({
       })
       .eq("id", ticket.id);
     setSaving(false);
+    // Say why it didn't work (e.g. the technician is still busy) instead of closing as if it had.
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
     onAssigned();
   }
 
@@ -111,6 +118,12 @@ export default function AssignTaskingModal({
             Add
           </button>
         </div>
+
+        {error && (
+          <p role="alert" className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600">
+            {error}
+          </p>
+        )}
 
         <button
           type="button"

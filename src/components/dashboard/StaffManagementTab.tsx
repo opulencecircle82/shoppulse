@@ -16,6 +16,7 @@ export default function StaffManagementTab({
   defaultHourlyRate,
   tickets,
   currency,
+  unlimitedSeats = false,
   onChanged,
 }: {
   staff: StaffMember[];
@@ -23,6 +24,8 @@ export default function StaffManagementTab({
   defaultHourlyRate: number;
   tickets: JobTicket[];
   currency: string;
+  /** A test account with unlimited technician seats. */
+  unlimitedSeats?: boolean;
   onChanged: () => void;
 }) {
   const [showAddStaff, setShowAddStaff] = useState(false);
@@ -153,12 +156,17 @@ export default function StaffManagementTab({
           </p>
           <p
             className={`mt-1 text-sm font-semibold ${
-              seatsUsed >= FREE_TECH_SEATS ? "text-amber-600" : "text-brand-emerald-dark"
+              !unlimitedSeats && seatsUsed >= FREE_TECH_SEATS ? "text-amber-600" : "text-brand-emerald-dark"
             }`}
           >
-            {Math.min(seatsUsed, FREE_TECH_SEATS)}/{FREE_TECH_SEATS} Free Tech Seat Used
-            {seatsUsed > FREE_TECH_SEATS &&
-              ` (+${seatsUsed - FREE_TECH_SEATS} paid)`}
+            {unlimitedSeats ? (
+              `Unlimited tech seats (test account) · ${seatsUsed} in use`
+            ) : (
+              <>
+                {Math.min(seatsUsed, FREE_TECH_SEATS)}/{FREE_TECH_SEATS} Free Tech Seat Used
+                {seatsUsed > FREE_TECH_SEATS && ` (+${seatsUsed - FREE_TECH_SEATS} paid)`}
+              </>
+            )}
           </p>
         </div>
         <button
@@ -311,6 +319,7 @@ export default function StaffManagementTab({
         <AddStaffModal
           staff={staff}
           defaultHourlyRate={defaultHourlyRate}
+          unlimitedSeats={unlimitedSeats}
           onClose={() => setShowAddStaff(false)}
           onCreated={onChanged}
         />

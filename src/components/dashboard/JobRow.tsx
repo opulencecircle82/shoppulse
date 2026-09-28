@@ -24,6 +24,7 @@ export default function JobRow({
   staff,
   shop,
   currentStaffId,
+  busyTechnicians,
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
@@ -33,6 +34,7 @@ export default function JobRow({
   staff: StaffMember[];
   shop: Shop;
   currentStaffId: string | null;
+  busyTechnicians: Map<string, string>;
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer: (ticket: JobTicket) => void;
@@ -119,6 +121,7 @@ export default function JobRow({
               ticket={ticket}
               staff={staff}
               defaultTasks={shop.default_tasks}
+              busy={busyTechnicians}
               onAssigned={onChanged}
             />
           ) : ticket.assigned_staff_id && phase.techStatus ? (

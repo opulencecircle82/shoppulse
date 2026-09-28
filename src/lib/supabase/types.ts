@@ -45,6 +45,8 @@ export type Shop = {
   city: string | null;
   business_category: string | null;
   is_publicly_listed: boolean;
+  /** Test/demo accounts: no paid-seat prompts. Only the developer console can change it. */
+  unlimited_tech_seats: boolean;
   business_hours_open: string | null;
   business_hours_close: string | null;
   business_days: string[];
