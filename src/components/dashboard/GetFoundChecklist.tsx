@@ -6,6 +6,7 @@ import { Check, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
 import type { DashboardTabId } from "./DashboardSidebarNav";
+import { hasWorkingSchedule } from "./GoLiveButton";
 
 /**
  * Customers in the app only see businesses that are listed, pinned on the map and
@@ -53,6 +54,14 @@ export default function GetFoundChecklist({
       done: shop.latitude !== null && shop.longitude !== null,
       href: "/dashboard/settings",
       action: "Set location",
+    },
+    {
+      key: "hours",
+      label: "Set your working days and hours",
+      hint: "Customers see Open Now or Closed from these — tap LIVE at the top to add them and go live.",
+      done: hasWorkingSchedule(shop),
+      href: "/dashboard/settings",
+      action: "Set hours",
     },
     {
       key: "city",

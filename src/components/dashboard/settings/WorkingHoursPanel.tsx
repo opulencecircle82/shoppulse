@@ -17,9 +17,11 @@ const DAYS = [
 export default function WorkingHoursPanel({
   shop,
   onSaved,
+  submitLabel = "Save Changes",
 }: {
   shop: Shop | null;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
+  submitLabel?: string;
 }) {
   const [openTime, setOpenTime] = useState(shop?.business_hours_open ?? "08:00");
   const [closeTime, setCloseTime] = useState(shop?.business_hours_close ?? "17:00");
@@ -46,9 +48,19 @@ export default function WorkingHoursPanel({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaving(true);
     setError(null);
     setSuccess(false);
+
+    if (days.length === 0) {
+      setError("Pick at least one working day.");
+      return;
+    }
+    if (!openTime || !closeTime || closeTime <= openTime) {
+      setError("Closing time must be after opening time.");
+      return;
+    }
+
+    setSaving(true);
 
     const { error: updateError } = await supabase
       .from("shops")
@@ -67,7 +79,7 @@ export default function WorkingHoursPanel({
     }
 
     setSuccess(true);
-    onSaved();
+    await onSaved();
   }
 
   return (
@@ -139,7 +151,7 @@ export default function WorkingHoursPanel({
         disabled={saving}
         className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {saving ? "Saving..." : "Save Changes"}
+        {saving ? "Saving..." : submitLabel}
       </button>
     </form>
   );

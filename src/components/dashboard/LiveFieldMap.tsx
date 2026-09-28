@@ -63,6 +63,10 @@ type LivePin = {
 };
 
 const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
+// Where the map looks before there is anything to show, for a shop that hasn't pinned its own location yet.
+const PHILIPPINES_CENTER: [number, number] = [12.8797, 121.774];
+// Zoom for the shop's own neighbourhood (streets and nearby barangays), wider than a single job.
+const SHOP_AREA_ZOOM = 14;
 
 const CLOSE_ZOOM = 17;
 
@@ -226,9 +230,15 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
 
   const firstPoint = pins[0] ?? livePins[0];
   const hasAnyPoint = pins.length > 0 || livePins.length > 0;
+  // With no jobs or technicians to show yet, look at the shop's own neighbourhood — not the middle of the
+  // United States. An unpinned shop in the Philippines gets the Philippines.
+  const shopPoint: [number, number] | null =
+    shop.latitude !== null && shop.longitude !== null ? [shop.latitude, shop.longitude] : null;
+  const inPhilippines = shop.country?.toLowerCase() === "philippines";
   const center: [number, number] = firstPoint
     ? [firstPoint.lat, firstPoint.lng]
-    : DEFAULT_CENTER;
+    : (shopPoint ?? (inPhilippines ? PHILIPPINES_CENTER : DEFAULT_CENTER));
+  const startZoom = hasAnyPoint ? CLOSE_ZOOM : shopPoint ? SHOP_AREA_ZOOM : inPhilippines ? 5 : 4;
 
   return (
     <div
@@ -238,7 +248,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
     >
       <MapContainer
         center={center}
-        zoom={hasAnyPoint ? CLOSE_ZOOM : 4}
+        zoom={startZoom}
         maxZoom={19}
         dragging={false}
         touchZoom={false}
@@ -260,6 +270,14 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           maxZoom={19}
         />
+        {!hasAnyPoint && shopPoint && (
+          <Marker position={shopPoint}>
+            <Tooltip permanent direction="top" offset={[0, -34]}>
+              {shop.shop_name}
+            </Tooltip>
+          </Marker>
+        )}
+
         {pins.map((pin) => (
           <Fragment key={pin.id}>
             <Marker position={[pin.lat, pin.lng]} icon={TECH_MARKER_ICON}>
@@ -320,7 +338,11 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
       )}
 
       {!loading && !hasAnyPoint && (
-        <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center bg-slate-900/20">
+        <div
+          className={`pointer-events-none absolute inset-0 z-[1000] flex justify-center bg-slate-900/20 ${
+            shopPoint ? "items-end pb-6" : "items-center"
+          }`}
+        >
           <div className="pointer-events-auto mx-6 max-w-sm rounded-2xl bg-white px-6 py-5 text-center shadow-2xl shadow-slate-900/10">
             <p className="text-sm font-semibold text-slate-900">
               No staff pins yet

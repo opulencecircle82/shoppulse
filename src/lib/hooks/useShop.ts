@@ -10,8 +10,10 @@ export function useShop() {
   const [staffMember, setStaffMember] = useState<StaffMember | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  // `quiet` re-reads the shop without blanking the screen behind the loading spinner — for a small change
+  // (like going LIVE) the owner is watching happen on the page they're already on.
+  const refresh = useCallback(async (options?: { quiet?: boolean }) => {
+    if (!options?.quiet) setLoading(true);
     setError(null);
 
     // getSession() reads the already-verified session from local
