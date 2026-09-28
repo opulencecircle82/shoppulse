@@ -194,6 +194,43 @@ export type JobPhoto = {
   sha256_mismatch: boolean;
 };
 
+/** A review as the owner sees it when choosing which to ask to have removed. */
+export type ReviewForModeration = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  photo_url: string | null;
+  created_at: string;
+  client_name: string;
+  /** Set while the review is part of a request that is still waiting. */
+  pending_request_id: string | null;
+  pending_delete_after: string | null;
+};
+
+export type ReviewRemovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+
+/** What was asked to be removed, as it was when the owner asked — it stays readable after the review is gone. */
+export type ReviewRemovalItem = {
+  id: string;
+  review_id: string | null;
+  rating: number;
+  comment: string | null;
+  client_name: string | null;
+  reviewed_at: string;
+};
+
+/** The owner's request to remove reviews: waits 3 days (`delete_after`), then the reviews are removed unless it was declined. */
+export type ReviewRemovalRequest = {
+  id: string;
+  status: ReviewRemovalStatus;
+  reason: string | null;
+  created_at: string;
+  delete_after: string;
+  decided_at: string | null;
+  decision_note: string | null;
+  review_deletion_request_items: ReviewRemovalItem[];
+};
+
 export type StaffLiveLocation = {
   staff_id: string;
   shop_id: string;

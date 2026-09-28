@@ -16,12 +16,14 @@ import PaymentMethodsPanel from "@/components/dashboard/settings/PaymentMethodsP
 import BookingAlertsPanel from "@/components/dashboard/settings/BookingAlertsPanel";
 import ReceivingPaymentsPanel from "@/components/dashboard/settings/ReceivingPaymentsPanel";
 import NightShiftPanel from "@/components/dashboard/settings/NightShiftPanel";
+import ReviewRemovalPanel from "@/components/dashboard/settings/ReviewRemovalPanel";
 import { hasWorkingSchedule } from "@/components/dashboard/GoLiveButton";
 
 const TABS = [
   { id: "profile", label: "Company Profile" },
   { id: "hours", label: "Working Hours" },
   { id: "nightshift", label: "Night Shift" },
+  { id: "reviews", label: "Review Removal" },
   { id: "tasks", label: "Default Tasks" },
   { id: "payments", label: "Payment Methods" },
   { id: "receiving", label: "Receiving Payments" },
@@ -202,6 +204,9 @@ export default function SettingsPage() {
               />
             )}
             {activeTab === "nightshift" && <NightShiftPanel shop={shop} onSaved={refresh} />}
+            {activeTab === "reviews" && (shop ? <ReviewRemovalPanel /> : (
+              <p className="text-sm text-slate-500">Set up your Company Profile first.</p>
+            ))}
             {activeTab === "tasks" && (
               <DefaultTasksPanel shop={shop} onSaved={refresh} />
             )}

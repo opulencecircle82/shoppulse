@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import AccountDetailModal from "./AccountDetailModal";
 
 const CURRENCIES = ["USD", "AUD", "GBP", "EUR"];
 
@@ -225,6 +226,8 @@ type AdminShop = {
   has_quality_booster: boolean;
   has_marketing_tier: boolean;
   unlimited_tech_seats: boolean;
+  /** Review-removal requests from this owner that are still waiting. */
+  pending_review_requests: number;
   staff_members: AdminStaffMember[];
 };
 
@@ -507,6 +510,11 @@ export default function AdminDashboardClient({
                                 Unlimited seats
                               </span>
                             )}
+                            {shop.pending_review_requests > 0 && (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                                {shop.pending_review_requests} review request{shop.pending_review_requests === 1 ? "" : "s"}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-slate-600">
@@ -562,110 +570,14 @@ export default function AdminDashboardClient({
       </div>
 
       {viewingShop && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
-          onClick={() => setViewingShop(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-3xl bg-brand-slate p-6 shadow-2xl shadow-black/40"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {viewingShop.shop_name}
-                </h3>
-                <p className="text-xs text-slate-400">/{viewingShop.slug}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setViewingShop(null)}
-                className="text-slate-500 hover:text-slate-900"
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-
-            <dl className="mt-5 space-y-3 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Currency</dt>
-                <dd className="text-slate-900">{viewingShop.currency}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Verified</dt>
-                <dd className="text-slate-900">
-                  {viewingShop.is_verified ? "Yes" : "No"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Quality Booster</dt>
-                <dd className="text-slate-900">
-                  {viewingShop.has_quality_booster ? "Active" : "Not active"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Marketing Suite</dt>
-                <dd className="text-slate-900">
-                  {viewingShop.has_marketing_tier ? "Active" : "Not active"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Technician seats</dt>
-                <dd className="text-slate-900">
-                  {viewingShop.unlimited_tech_seats ? "Unlimited (test account)" : "1 free, more are paid"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Created</dt>
-                <dd className="text-slate-900">
-                  {new Date(viewingShop.created_at).toLocaleString()}
-                </dd>
-              </div>
-            </dl>
-
-            <div className="mt-5 rounded-2xl bg-brand-slate-light/30 p-4">
-              <p className="text-xs text-slate-400">
-                Testing an account? Unlimited seats lets the owner add as many technicians as needed without the paid-seat prompt.
-              </p>
-              <button
-                type="button"
-                onClick={() => handleToggleUnlimitedSeats(viewingShop)}
-                disabled={seatsSavingId === viewingShop.id}
-                className="mt-3 rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {seatsSavingId === viewingShop.id
-                  ? "Saving..."
-                  : viewingShop.unlimited_tech_seats
-                    ? "Remove unlimited seats"
-                    : "Give unlimited tech seats"}
-              </button>
-              {seatsError && <p className="mt-2 text-xs text-red-400">{seatsError}</p>}
-            </div>
-
-            <div className="mt-5">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Staff ({viewingShop.staff_members.length})
-              </p>
-              <div className="mt-2 space-y-2">
-                {viewingShop.staff_members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between rounded-xl bg-brand-slate-light/30 px-3 py-2 text-sm shadow-sm shadow-black/20"
-                  >
-                    <div>
-                      <p className="text-slate-900">{member.full_name}</p>
-                      <p className="text-xs text-slate-400">{member.email}</p>
-                    </div>
-                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                      {member.role}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <AccountDetailModal
+          shop={viewingShop}
+          onClose={() => setViewingShop(null)}
+          onToggleUnlimitedSeats={() => handleToggleUnlimitedSeats(viewingShop)}
+          seatsSaving={seatsSavingId === viewingShop.id}
+          seatsError={seatsError}
+          onRequestsChanged={loadShops}
+        />
       )}
 
       {showAddAccount && (
