@@ -71,6 +71,7 @@ export default function TechHomeScreen({
   const [responding, setResponding] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const unreadRef = useRef(0);
+  const emergencyRef = useRef<HTMLDivElement>(null);
   const [emergencyJobs, setEmergencyJobs] = useState<NearbyEmergencyJob[]>([]);
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
@@ -245,7 +246,18 @@ export default function TechHomeScreen({
                 <Bell className="h-5 w-5" />
               </span>
             ) : (
-              <TechNotificationBell staffId={staffContext.staffId} onOpenTicket={onOpenTicket} />
+              <TechNotificationBell
+                staffId={staffContext.staffId}
+                onOpenTicket={(jobTicketId) => {
+                  // An emergency job nearby isn't the technician's job yet, so there is no job screen to open —
+                  // take them to its card in the Emergency Jobs list, where it can be claimed.
+                  if (emergencyJobs.some((job) => job.id === jobTicketId)) {
+                    emergencyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    return;
+                  }
+                  onOpenTicket(jobTicketId);
+                }}
+              />
             )}
           </div>
         </header>
@@ -295,7 +307,7 @@ export default function TechHomeScreen({
             </div>
 
             {emergencyJobs.length > 0 && (
-              <div className="mt-6">
+              <div ref={emergencyRef} className="mt-6 scroll-mt-4">
                 <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-400">
                   <Siren className="h-3.5 w-3.5" />
                   Emergency Jobs Nearby ({emergencyJobs.length})
