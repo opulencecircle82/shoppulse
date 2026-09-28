@@ -186,6 +186,26 @@ export async function ensureCustomerConversationById(customerId: string): Promis
   return data as string;
 }
 
+/** Which customer chat to open — what the job board hands to the Messages tab. */
+export type CustomerChatTarget = {
+  conversationId: string;
+  customerId: string;
+  name: string;
+};
+
+/** Opens (or creates) the owner's chat with whoever booked a job. Customers are matched by
+ * email, the same way the rest of customer chat does it. Returns null when that person has
+ * no ShopPulse account — a job the owner typed in by hand can be for someone who never signed up. */
+export async function openCustomerChatForEmail(email: string): Promise<CustomerChatTarget | null> {
+  const wanted = email.trim().toLowerCase();
+  if (!wanted) return null;
+  const customers = await listShopCustomers();
+  const match = customers.find((customer) => customer.email.toLowerCase() === wanted);
+  if (!match) return null;
+  const conversationId = await ensureCustomerConversationById(match.customerId);
+  return { conversationId, customerId: match.customerId, name: match.fullName };
+}
+
 export type ShopCustomerProfile = {
   fullName: string;
   email: string;

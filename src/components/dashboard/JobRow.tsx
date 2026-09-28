@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, ChevronDown, MapPin, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { BadgeCheck, ChevronDown, MapPin, MessageCircle, Phone, ShieldCheck, UserRound } from "lucide-react";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
+import { openCustomerChatForEmail, type CustomerChatTarget } from "@/lib/chat/chat";
 import { describeJob, firstName, jobLabel, TONE_CLASSES } from "@/lib/dashboard/jobStatus";
 import AssignTechSelect from "./AssignTechSelect";
 import BookingDecisionButtons from "./BookingDecisionButtons";
@@ -26,6 +27,7 @@ export default function JobRow({
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
+  onMessageCustomer,
 }: {
   ticket: JobTicket;
   staff: StaffMember[];
@@ -34,8 +36,11 @@ export default function JobRow({
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer: (ticket: JobTicket) => void;
+  onMessageCustomer: (target: CustomerChatTarget) => void;
 }) {
   const [managing, setManaging] = useState(false);
+  const [openingChat, setOpeningChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
 
   const phase = describeJob(ticket);
   const tone = TONE_CLASSES[phase.tone];
@@ -45,6 +50,23 @@ export default function JobRow({
   // A finished job always opens its proof pack — that's where it gets approved —
   // even when the shop lets technicians skip photos and there are none.
   const showProofButton = hasProof || proofIsPrimary;
+
+  async function messageCustomer() {
+    setOpeningChat(true);
+    setChatError(null);
+    try {
+      const target = await openCustomerChatForEmail(ticket.client_email);
+      if (!target) {
+        setChatError("This customer doesn't have a ShopPulse account yet, so there's no chat. Use Call Customer instead.");
+        return;
+      }
+      onMessageCustomer(target);
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : "Couldn't open the chat. Try again.");
+    } finally {
+      setOpeningChat(false);
+    }
+  }
 
   return (
     <li className="relative transition-colors hover:bg-slate-50/50">
@@ -142,6 +164,17 @@ export default function JobRow({
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${managing ? "rotate-180" : ""}`} />
           </button>
 
+          <button
+            type="button"
+            onClick={messageCustomer}
+            disabled={openingChat || !ticket.client_email}
+            title={ticket.client_email ? undefined : "The customer didn't leave an email"}
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-brand-blue hover:text-brand-blue disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            {openingChat ? "Opening..." : "Message"}
+          </button>
+
           {ticket.client_phone ? (
             <a
               href={`tel:${ticket.client_phone}`}
@@ -158,6 +191,12 @@ export default function JobRow({
               <Phone className="h-3.5 w-3.5" />
               Call Customer
             </span>
+          )}
+
+          {chatError && (
+            <p role="alert" className="basis-full text-xs text-red-600 @5xl:text-right">
+              {chatError}
+            </p>
           )}
         </div>
       </div>

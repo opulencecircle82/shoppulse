@@ -8,6 +8,7 @@ import {
   needsOwnerAction,
   type JobFilterId,
 } from "@/lib/dashboard/jobStatus";
+import type { CustomerChatTarget } from "@/lib/chat/chat";
 import JobRow from "./JobRow";
 
 const PAGE_SIZE = 25;
@@ -27,6 +28,7 @@ export default function JobMasterTable({
   onChanged,
   onOpenInvoice,
   onOpenProofDrawer,
+  onMessageCustomer,
 }: {
   shop: Shop;
   tickets: JobTicket[];
@@ -37,6 +39,7 @@ export default function JobMasterTable({
   onChanged: () => void;
   onOpenInvoice: (ticket: JobTicket) => void;
   onOpenProofDrawer: (ticket: JobTicket) => void;
+  onMessageCustomer: (target: CustomerChatTarget) => void;
 }) {
   // How many rows are showing, remembered per filter so switching tabs
   // starts a fresh page.
@@ -123,6 +126,7 @@ export default function JobMasterTable({
               onChanged={onChanged}
               onOpenInvoice={onOpenInvoice}
               onOpenProofDrawer={onOpenProofDrawer}
+              onMessageCustomer={onMessageCustomer}
             />
           ))}
         </ul>

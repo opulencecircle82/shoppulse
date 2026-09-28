@@ -53,7 +53,11 @@ const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import BookingAlertHost from "@/components/dashboard/BookingAlertHost";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
-import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
+import {
+  listStaffConversations,
+  listShopCustomerConversations,
+  type CustomerChatTarget,
+} from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
 
 const MAP_COLLAPSED_KEY = "shoppulse.dashboard.mapCollapsed";
@@ -69,6 +73,8 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<DashboardTabId>("home");
   const [showNewTicket, setShowNewTicket] = useState(false);
+  // A chat picked from a job's Message button, waiting for the Messages tab to open it.
+  const [chatTarget, setChatTarget] = useState<CustomerChatTarget | null>(null);
   // Which tab of the job board is open. It lives here (not in the board) so a
   // booking popup or a notification can send the owner straight to the right one.
   const [boardFilter, setBoardFilter] = useState<JobFilterId>("ALL");
@@ -348,6 +354,10 @@ export default function DashboardPage() {
                     onChanged={refreshTickets}
                     onOpenInvoice={setInvoiceTicket}
                     onOpenProofDrawer={setProofTicket}
+                    onMessageCustomer={(target) => {
+                      setChatTarget(target);
+                      setActiveTab("messages");
+                    }}
                   />
                 )}
               </div>
@@ -383,7 +393,12 @@ export default function DashboardPage() {
 
             {activeTab === "messages" && staffMember && (
               <div className="mt-6">
-                <MessagesTab staffMember={staffMember} staff={staff} />
+                <MessagesTab
+                  staffMember={staffMember}
+                  staff={staff}
+                  openThread={chatTarget}
+                  onOpenThreadHandled={() => setChatTarget(null)}
+                />
               </div>
             )}
 

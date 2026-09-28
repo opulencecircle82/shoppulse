@@ -11,6 +11,7 @@ import {
   type StaffConversation,
   type ShopCustomerConversation,
   type ShopCustomer,
+  type CustomerChatTarget,
 } from "@/lib/chat/chat";
 import ChatThread from "@/components/chat/ChatThread";
 import NewCustomerMessageModal from "./NewCustomerMessageModal";
@@ -42,18 +43,25 @@ function timeLabel(iso: string | null) {
 export default function MessagesTab({
   staffMember,
   staff,
+  openThread,
+  onOpenThreadHandled,
 }: {
   staffMember: StaffMember;
   staff: StaffMember[];
+  /** A customer chat to open straight away (from a job's Message button). */
+  openThread?: CustomerChatTarget | null;
+  onOpenThreadHandled?: () => void;
 }) {
   const isOwner = staffMember.role === "OWNER";
   const [teamRows, setTeamRows] = useState<TeamRow[]>([]);
   const [customerConvos, setCustomerConvos] = useState<ShopCustomerConversation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<SelectedThread | null>(null);
+  const [selected, setSelected] = useState<SelectedThread | null>(() =>
+    openThread ? { kind: "customer", ...openThread } : null
+  );
   // Phones show either the conversation list or one open chat (never both stacked);
   // wide screens show them side by side and ignore this.
-  const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [mobileChatOpen, setMobileChatOpen] = useState(Boolean(openThread));
   const chatPanelRef = useRef<HTMLDivElement>(null);
 
   // On a phone, bring the chat that just opened up under the pinned tab bar.
@@ -61,6 +69,11 @@ export default function MessagesTab({
     if (!mobileChatOpen || !window.matchMedia("(max-width: 1023px)").matches) return;
     chatPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [mobileChatOpen]);
+  // The handed-over chat is opened by the initial state above — tell the dashboard it's been
+  // used, so coming back to Messages later doesn't reopen it.
+  useEffect(() => {
+    if (openThread) onOpenThreadHandled?.();
+  }, [openThread, onOpenThreadHandled]);
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
 

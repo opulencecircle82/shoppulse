@@ -60,11 +60,14 @@ export default function ChatThread({
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState(initialDraft ?? "");
   const [sending, setSending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<ChatMessage[]>([]);
 
+  // Scroll only the message list. scrollIntoView() would also drag the whole page along —
+  // on the owner dashboard that yanked the screen away from the chat header.
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
-    bottomRef.current?.scrollIntoView({ behavior });
+    const list = messagesScrollRef.current;
+    list?.scrollTo({ top: list.scrollHeight, behavior });
   }, []);
 
   const load = useCallback(async () => {
@@ -146,7 +149,7 @@ export default function ChatThread({
         </div>
       </div>
 
-      <div className="flex-1 space-y-2.5 overflow-y-auto px-4 py-4">
+      <div ref={messagesScrollRef} className="flex-1 space-y-2.5 overflow-y-auto px-4 py-4">
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
@@ -186,7 +189,6 @@ export default function ChatThread({
             );
           })
         )}
-        <div ref={bottomRef} />
       </div>
 
       <form
