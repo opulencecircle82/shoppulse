@@ -9,6 +9,10 @@ export type Stage = {
   dot: string;
   accent: string;
   badge: string;
+  /** Header band of a job card in this stage (background + bottom border). */
+  header: string;
+  /** Text color for the avatar initials and stage pill on that header. */
+  tint: string;
   /** Jobs in this stage are waiting on the owner, so the tab gets an alert dot. */
   needsAttention: boolean;
 };
@@ -22,6 +26,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-orange",
     accent: "border-t-brand-orange",
     badge: "bg-brand-orange/15 text-brand-orange-dark",
+    header: "bg-brand-orange/15 border-brand-orange/25",
+    tint: "text-brand-orange-dark",
     needsAttention: true,
   },
   {
@@ -32,6 +38,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-orange",
     accent: "border-t-brand-orange",
     badge: "bg-brand-orange/15 text-brand-orange-dark",
+    header: "bg-brand-orange/15 border-brand-orange/25",
+    tint: "text-brand-orange-dark",
     needsAttention: true,
   },
   {
@@ -42,6 +50,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-sky",
     accent: "border-t-brand-sky",
     badge: "bg-brand-sky/15 text-sky-700",
+    header: "bg-brand-sky/15 border-brand-sky/30",
+    tint: "text-sky-700",
     needsAttention: false,
   },
   {
@@ -52,6 +62,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-blue-dark",
     accent: "border-t-brand-blue-dark",
     badge: "bg-brand-blue-dark/15 text-brand-blue-dark",
+    header: "bg-brand-blue-dark/10 border-brand-blue-dark/20",
+    tint: "text-brand-blue-dark",
     needsAttention: false,
   },
   {
@@ -62,6 +74,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-blue",
     accent: "border-t-brand-blue",
     badge: "bg-brand-blue/15 text-brand-blue",
+    header: "bg-brand-blue/10 border-brand-blue/20",
+    tint: "text-brand-blue",
     needsAttention: false,
   },
   {
@@ -72,6 +86,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-emerald",
     accent: "border-t-brand-emerald",
     badge: "bg-brand-emerald/15 text-brand-emerald-dark",
+    header: "bg-brand-emerald/15 border-brand-emerald/30",
+    tint: "text-brand-emerald-dark",
     needsAttention: true,
   },
   {
@@ -82,6 +98,8 @@ export const STAGES: Stage[] = [
     dot: "bg-red-500",
     accent: "border-t-red-500",
     badge: "bg-red-500/15 text-red-600",
+    header: "bg-red-500/10 border-red-500/20",
+    tint: "text-red-600",
     needsAttention: true,
   },
   {
@@ -92,6 +110,8 @@ export const STAGES: Stage[] = [
     dot: "bg-brand-emerald-dark",
     accent: "border-t-brand-emerald-dark",
     badge: "bg-brand-emerald-dark/15 text-brand-emerald-dark",
+    header: "bg-brand-emerald-dark/10 border-brand-emerald-dark/20",
+    tint: "text-brand-emerald-dark",
     needsAttention: false,
   },
   {
@@ -102,6 +122,8 @@ export const STAGES: Stage[] = [
     dot: "bg-slate-400",
     accent: "border-t-slate-400",
     badge: "bg-slate-200 text-slate-600",
+    header: "bg-slate-100 border-slate-200",
+    tint: "text-slate-600",
     needsAttention: false,
   },
 ];

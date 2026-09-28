@@ -5,8 +5,9 @@ import { CalendarDays, Clock, Download, MapPin, Receipt, UserRound } from "lucid
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop, StaffMember } from "@/lib/supabase/types";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
+import JobCardShell from "./JobCardShell";
 import JobProgress from "./JobProgress";
-import { formatDateOnly, initials, timeAgo } from "@/lib/dashboard/format";
+import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
 import AssignTaskingModal from "./AssignTaskingModal";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
@@ -157,34 +158,11 @@ export default function JobTicketCard({
   }
 
   return (
-    <div
-      onClick={() => onOpenProofDrawer?.(ticket)}
-      className={`rounded-2xl bg-white border border-slate-200/70 p-4 shadow-sm shadow-slate-900/5 ${
-        onOpenProofDrawer ? "cursor-pointer transition-shadow hover:shadow-lg hover:shadow-brand-blue/10" : ""
-      }`}
+    <JobCardShell
+      ticket={ticket}
+      onClick={onOpenProofDrawer ? () => onOpenProofDrawer(ticket) : undefined}
     >
-      <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-xs font-bold text-brand-blue">
-          {initials(ticket.client_name)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">{ticket.client_name}</p>
-          <p className="truncate text-xs text-slate-500">{ticket.service_type}</p>
-        </div>
-        {ticket.status === "DISPUTED" && (
-          <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-600">
-            Disputed
-          </span>
-        )}
-      </div>
-
       <JobProgress status={ticket.status} />
-
-      {ticket.is_emergency && (
-        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-600">
-          🚨 EMERGENCY
-        </span>
-      )}
 
       <div className="mt-3 space-y-1.5 text-xs text-slate-600">
         <p className="flex items-start gap-2">
@@ -513,6 +491,6 @@ export default function JobTicketCard({
           />
         </div>
       )}
-    </div>
+    </JobCardShell>
   );
 }

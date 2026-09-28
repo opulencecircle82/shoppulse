@@ -5,8 +5,9 @@ import { CalendarDays, Clock, Mail, MapPin, Navigation, Phone } from "lucide-rea
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket, Shop } from "@/lib/supabase/types";
 import { distanceKm, formatDistance } from "@/lib/geo/distance";
+import JobCardShell from "./JobCardShell";
 import JobProgress from "./JobProgress";
-import { formatDateOnly, initials, timeAgo } from "@/lib/dashboard/format";
+import { formatDateOnly, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
 
 export default function BookingRequestCard({
@@ -63,27 +64,7 @@ export default function BookingRequestCard({
   }
 
   return (
-    <div
-      className={`rounded-2xl border bg-white p-4 shadow-sm shadow-slate-900/5 ${
-        ticket.is_emergency ? "border-red-500/50 ring-1 ring-red-500/30" : "border-brand-blue/20"
-      }`}
-    >
-      {ticket.is_emergency && (
-        <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-600">
-          🚨 EMERGENCY
-        </span>
-      )}
-
-      <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-orange/10 text-xs font-bold text-brand-orange-dark">
-          {initials(ticket.client_name)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">{ticket.client_name}</p>
-          <p className="truncate text-xs text-slate-500">{ticket.service_type}</p>
-        </div>
-      </div>
-
+    <JobCardShell ticket={ticket}>
       <JobProgress status={ticket.status} />
 
       {ticket.description && (
@@ -176,6 +157,6 @@ export default function BookingRequestCard({
           Reject
         </button>
       </div>
-    </div>
+    </JobCardShell>
   );
 }
