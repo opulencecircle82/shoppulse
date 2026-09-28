@@ -292,6 +292,7 @@ export default function MessagesTab({
                 key={selected.conversationId}
                 conversationId={selected.conversationId}
                 currentRole={isOwner ? "owner" : "staff"}
+                theme="light"
                 title={selected.name}
                 subtitle={selected.kind === "customer" ? "Customer" : undefined}
               />

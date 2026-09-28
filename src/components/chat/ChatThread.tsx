@@ -11,6 +11,32 @@ import {
 
 const POLL_MS = 3000;
 
+// The thread is shared: the tech and customer apps are dark, the owner's
+// dashboard is light. Every color that depends on the background lives here,
+// so a message from the other person is never white text on a white page.
+const THEMES = {
+  dark: {
+    shell: "bg-white/5",
+    divider: "border-white/10",
+    back: "text-slate-400 hover:text-white",
+    title: "text-white",
+    muted: "text-slate-400",
+    theirs: "bg-white/10 text-slate-200",
+    theirsTime: "text-slate-500",
+    input: "bg-white/5 text-white placeholder:text-slate-500",
+  },
+  light: {
+    shell: "border border-slate-200/70 bg-white shadow-sm shadow-slate-900/5",
+    divider: "border-slate-100",
+    back: "text-slate-500 hover:text-slate-900",
+    title: "text-slate-900",
+    muted: "text-slate-500",
+    theirs: "bg-slate-100 text-slate-800",
+    theirsTime: "text-slate-500",
+    input: "border border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400",
+  },
+} as const;
+
 export default function ChatThread({
   conversationId,
   currentRole,
@@ -18,6 +44,7 @@ export default function ChatThread({
   subtitle,
   initialDraft,
   onBack,
+  theme = "dark",
 }: {
   conversationId: string;
   currentRole: "owner" | "staff" | "customer";
@@ -25,7 +52,10 @@ export default function ChatThread({
   subtitle?: string;
   initialDraft?: string;
   onBack?: () => void;
+  /** "light" on the owner dashboard; the tech and customer apps use the default "dark". */
+  theme?: "dark" | "light";
 }) {
+  const t = THEMES[theme];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState(initialDraft ?? "");
@@ -98,21 +128,21 @@ export default function ChatThread({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white/5">
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+    <div className={`flex h-full min-h-0 flex-col overflow-hidden rounded-2xl ${t.shell}`}>
+      <div className={`flex items-center gap-3 border-b px-4 py-3 ${t.divider}`}>
         {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="-ml-2 shrink-0 rounded-full p-2 text-slate-400 hover:text-white"
+            className={`-ml-2 shrink-0 rounded-full p-2 ${t.back}`}
             aria-label="Back"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
         )}
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{title}</p>
-          {subtitle && <p className="truncate text-xs text-slate-400">{subtitle}</p>}
+          <p className={`truncate text-sm font-semibold ${t.title}`}>{title}</p>
+          {subtitle && <p className={`truncate text-xs ${t.muted}`}>{subtitle}</p>}
         </div>
       </div>
 
@@ -122,7 +152,7 @@ export default function ChatThread({
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
           </div>
         ) : messages.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-400">
+          <p className={`py-8 text-center text-sm ${t.muted}`}>
             No messages yet. Say hello!
           </p>
         ) : (
@@ -137,13 +167,13 @@ export default function ChatThread({
                   className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
                     isMine
                       ? "bg-gradient-to-r from-brand-sky to-brand-blue-dark text-white"
-                      : "bg-white/10 text-slate-200"
+                      : t.theirs
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{message.body}</p>
                   <p
                     className={`mt-1 text-[10px] ${
-                      isMine ? "text-white/70" : "text-slate-500"
+                      isMine ? "text-white/70" : t.theirsTime
                     }`}
                   >
                     {new Date(message.createdAt).toLocaleTimeString([], {
@@ -161,14 +191,14 @@ export default function ChatThread({
 
       <form
         onSubmit={handleSend}
-        className="flex items-center gap-2 border-t border-white/10 px-3 py-3"
+        className={`flex items-center gap-2 border-t px-3 py-3 ${t.divider}`}
       >
         <input
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Type a message..."
-          className="w-full rounded-full bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          className={`w-full rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-blue focus:outline-none ${t.input}`}
         />
         <button
           type="submit"
