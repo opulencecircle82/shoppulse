@@ -131,6 +131,7 @@ export function isShopOpenNow(shop: ShopHours): boolean {
   return nowMinutes >= openMinutes && nowMinutes < closeMinutes;
 }
 
+/** Sends the booking request and returns its ticket id. */
 export async function submitBooking(params: {
   shopSlug: string;
   fullName: string;
@@ -145,8 +146,8 @@ export async function submitBooking(params: {
   latitude?: number | null;
   longitude?: number | null;
   promotionId?: string | null;
-}) {
-  const { error } = await supabase.rpc("submit_job_booking", {
+}): Promise<string> {
+  const { data, error } = await supabase.rpc("submit_job_booking", {
     p_shop_slug: params.shopSlug,
     p_client_name: params.fullName,
     p_client_email: params.email,
@@ -163,6 +164,8 @@ export async function submitBooking(params: {
   });
 
   if (error) throw new Error(error.message);
+  // The new request's id, so the confirmation screen can link straight to its status.
+  return data as string;
 }
 
 /** Free before a technician arrives on-site; once they've arrived

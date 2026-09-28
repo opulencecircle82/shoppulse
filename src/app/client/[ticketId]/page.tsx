@@ -18,6 +18,8 @@ import {
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import PaymentDetails from "@/components/customer/PaymentDetails";
+import RequestProgress from "@/components/customer/RequestProgress";
+import { requestProgress } from "@/lib/customer/jobStages";
 import { formatJobNumber } from "@/lib/jobNumber";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
@@ -76,6 +78,8 @@ type ClientTicket = {
   cancellation_fee_applied: boolean;
   client_payment_confirmed_at: string | null;
   en_route_at: string | null;
+  staff_accepted_at: string | null;
+  created_at: string;
   job_number: number | null;
   mobile_app_theme: AppTheme;
   payment_status: "UNPAID" | "PAID";
@@ -85,11 +89,12 @@ type ClientTicket = {
 function clientStatusLabel(ticket: ClientTicket): string {
   switch (ticket.status) {
     case "PENDING":
-      return "Request Sent";
+      return "Waiting For The Shop";
     case "UNASSIGNED":
-      return "Booking Confirmed";
+      return "Waiting For A Technician";
     case "SCHEDULED":
-      return ticket.en_route_at ? "Technician On The Way" : "Technician Assigned";
+      if (ticket.en_route_at) return "Technician On The Way";
+      return ticket.staff_accepted_at ? "Technician Preparing" : "Technician Assigned";
     case "ESTIMATE_PENDING":
       return ticket.quote_submitted_at && !ticket.quote_approved_at
         ? "Quote Ready"
@@ -480,6 +485,11 @@ export default function ClientTicketPage() {
           </p>
           <p className="mt-1 text-sm text-slate-400">{ticket.service_address}</p>
           <p className="mt-1 text-sm text-slate-400">For: {ticket.client_name}</p>
+
+          {(() => {
+            const progress = requestProgress(ticket);
+            return progress ? <RequestProgress progress={progress} /> : null;
+          })()}
 
           {["PENDING", "UNASSIGNED", "SCHEDULED", "ESTIMATE_PENDING"].includes(ticket.status) && (
             <div className="mt-4">

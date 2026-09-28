@@ -23,6 +23,7 @@ import AvailabilityCalendar from "@/components/customer/AvailabilityCalendar";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import AddressFormModal from "@/components/customer/AddressFormModal";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
+import { ensureCustomerConversation } from "@/lib/chat/chat";
 
 export default function BookJobPage() {
   return (
@@ -63,7 +64,10 @@ function BookJobPageContent() {
   const [availability, setAvailability] = useState<DateAvailability | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  // Set once the request is sent — the id of the new ticket, for the "View My Request Status" link.
+  const [submittedTicketId, setSubmittedTicketId] = useState<string | null>(null);
+  const [openingChat, setOpeningChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -135,7 +139,7 @@ function BookJobPageContent() {
     setError(null);
 
     try {
-      await submitBooking({
+      const ticketId = await submitBooking({
         shopSlug,
         fullName: customer.fullName,
         email: customer.email,
@@ -150,7 +154,7 @@ function BookJobPageContent() {
         longitude: selectedAddress?.longitude ?? null,
         promotionId,
       });
-      setSubmitted(true);
+      setSubmittedTicketId(ticketId);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not submit booking.");
     } finally {
@@ -180,7 +184,19 @@ function BookJobPageContent() {
     return <CustomerAuthScreen onSignedIn={load} />;
   }
 
-  if (submitted) {
+  async function handleMessageOwner() {
+    setOpeningChat(true);
+    setChatError(null);
+    try {
+      const conversationId = await ensureCustomerConversation(shopSlug);
+      router.push(`/customer/messages/${conversationId}`);
+    } catch (e) {
+      setChatError(e instanceof Error ? e.message : "Couldn't open the chat. Try again.");
+      setOpeningChat(false);
+    }
+  }
+
+  if (submittedTicketId) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
         <p className="text-lg font-bold text-white">Request sent!</p>
@@ -190,11 +206,24 @@ function BookJobPageContent() {
         </p>
         <button
           type="button"
-          onClick={() => router.push("/customer")}
-          className="mt-6 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+          onClick={() => router.push(`/client/${submittedTicketId}`)}
+          className="mt-6 w-full max-w-xs rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
         >
-          View My Jobs
+          View My Request Status
         </button>
+        <button
+          type="button"
+          onClick={handleMessageOwner}
+          disabled={openingChat}
+          className="mt-3 w-full max-w-xs rounded-full border border-white/20 px-6 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {openingChat ? "Opening chat..." : "Message the Owner"}
+        </button>
+        {chatError && (
+          <p role="alert" className="mt-3 max-w-xs text-xs text-red-400">
+            {chatError}
+          </p>
+        )}
       </main>
     );
   }

@@ -157,10 +157,17 @@ export default function TechHomeScreen({
     onRefresh();
   }
 
-  // Tapping either button tells the owner and the customer the technician has
-  // set off. Failing to record it must never get in the way of the trip itself.
+  // "I'm On My Way" is the one button that sets the technician off: it tells the owner
+  // and the customer they're coming, starts the technician's time (clocks them in if they
+  // aren't already) and — because the app keeps sharing the technician's position — lets
+  // both of them follow the trip on a map. Failing to record any of it must never get in
+  // the way of the trip itself.
   function handleOnMyWay() {
     if (!task || task.status !== "SCHEDULED" || task.en_route_at) return;
+    if (!isClockedIn) {
+      setIsClockedIn(true);
+      clockIn().catch(() => setIsClockedIn(false));
+    }
     markEnRoute(task.id)
       .catch(() => {})
       .finally(onRefresh);
@@ -461,33 +468,47 @@ export default function TechHomeScreen({
                   {task.service_address}
                 </p>
 
-                {task.status === "SCHEDULED" && !task.en_route_at && (
-                  <button
-                    type="button"
+                {/* One button at a time, following the job: leave -> arrive -> finish. */}
+                {task.status === "SCHEDULED" && !task.en_route_at ? (
+                  <a
+                    href={mapsUrl(task.service_address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={handleOnMyWay}
                     className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-emerald to-brand-emerald-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]"
                   >
                     <NavigationIcon className="h-4 w-4" /> I&apos;m On My Way
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onOpenTask(task)}
+                    className="mt-3 flex w-full items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]"
+                  >
+                    {isInProgress ? "Complete Job" : isEstimatePending ? "Continue Job" : "I've Arrived — Start Job"}
                   </button>
                 )}
 
-                <a
-                  href={mapsUrl(task.service_address)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={handleOnMyWay}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)]"
-                >
-                  <NavigationIcon className="h-4 w-4" /> Start Navigation
-                </a>
+                {task.status === "SCHEDULED" && !task.en_route_at && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenTask(task)}
+                    className="mt-3 block w-full text-center text-xs font-semibold text-slate-400"
+                  >
+                    Already at the customer&apos;s place? Start the job
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  onClick={() => onOpenTask(task)}
-                  className="mt-2 flex w-full items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-brand-orange-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(249,115,22,0.35)]"
-                >
-                  {isInProgress ? "Complete Job" : isEstimatePending ? "Continue Job" : "Start Job"}
-                </button>
+                {task.status === "SCHEDULED" && task.en_route_at && (
+                  <a
+                    href={mapsUrl(task.service_address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-brand-sky"
+                  >
+                    <NavigationIcon className="h-3.5 w-3.5" /> Open navigation again
+                  </a>
+                )}
               </div>
             )}
 

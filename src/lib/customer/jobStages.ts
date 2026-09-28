@@ -198,6 +198,87 @@ export function customerJobStatus(job: JobTicket): CustomerJobStatus {
   }
 }
 
+export type RequestStepState = "done" | "current" | "todo";
+
+export type RequestProgress = {
+  /** What is happening to the request right now, in a few words. */
+  headline: string;
+  /** One line on what the customer is waiting for. */
+  detail: string;
+  steps: { label: string; state: RequestStepState }[];
+};
+
+const REQUEST_STEPS = [
+  "Request sent",
+  "Shop confirmed",
+  "Technician assigned",
+  "Technician preparing",
+  "On the way",
+] as const;
+
+/**
+ * How far a booking request has got before the technician arrives — the
+ * "is anyone on it yet?" view. Returns null once the technician is on site
+ * (the job page takes over from there) or if the request was cancelled/declined.
+ * Reads only the status and the technician's own timestamps, so it agrees with
+ * the owner's board and the technician's app.
+ */
+export function requestProgress(job: {
+  status: string;
+  staff_accepted_at: string | null;
+  en_route_at: string | null;
+}): RequestProgress | null {
+  let current: number;
+  let headline: string;
+  let detail: string;
+  // What the lit step says while it is the one being waited on ("Shop confirmed" would read as already done).
+  let activeLabel: string;
+
+  switch (job.status) {
+    case "PENDING":
+      current = 1;
+      headline = "Waiting for the shop";
+      detail = "The shop will review your request and confirm it.";
+      activeLabel = "Waiting for the shop to confirm";
+      break;
+    case "UNASSIGNED":
+      current = 2;
+      headline = "Waiting for a technician";
+      detail = "The shop accepted your request and is choosing who will come.";
+      activeLabel = "Waiting for a technician";
+      break;
+    case "SCHEDULED":
+      if (!job.staff_accepted_at) {
+        current = 3;
+        headline = "Technician assigned";
+        detail = "Waiting for the technician to confirm the job.";
+        activeLabel = "Waiting for the technician to confirm";
+      } else if (!job.en_route_at) {
+        current = 3;
+        headline = "Technician preparing";
+        detail = "Confirmed — gathering tools before heading to you.";
+        activeLabel = "Technician is preparing";
+      } else {
+        current = 4;
+        headline = "Technician on the way";
+        detail = "Heading to your address now.";
+        activeLabel = "Technician is on the way";
+      }
+      break;
+    default:
+      return null;
+  }
+
+  return {
+    headline,
+    detail,
+    steps: REQUEST_STEPS.map((label, index) => ({
+      label: index === current ? activeLabel : label,
+      state: index < current ? "done" : index === current ? "current" : "todo",
+    })),
+  };
+}
+
 export function jobNumberLabel(job: JobTicket): string {
   return formatJobNumber(job.job_number, job.id);
 }
