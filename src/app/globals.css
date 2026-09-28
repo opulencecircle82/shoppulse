@@ -63,3 +63,48 @@ html,
 body {
   overscroll-behavior-y: contain;
 }
+
+/* New-booking popup on the owner dashboard (BookingAlertCard). */
+@keyframes booking-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes booking-ring {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  10% {
+    transform: rotate(16deg);
+  }
+  20% {
+    transform: rotate(-16deg);
+  }
+  30% {
+    transform: rotate(12deg);
+  }
+  40% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes booking-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6), 0 25px 50px -12px rgba(239, 68, 68, 0.4);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 16px rgba(239, 68, 68, 0), 0 25px 50px -12px rgba(239, 68, 68, 0.4);
+  }
+}

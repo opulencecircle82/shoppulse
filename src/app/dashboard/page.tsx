@@ -50,6 +50,7 @@ const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
   mobile: "Personalize how your team's mobile app looks and feels.",
 };
 import NotificationBell from "@/components/dashboard/NotificationBell";
+import BookingAlertHost from "@/components/dashboard/BookingAlertHost";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import { listStaffConversations, listShopCustomerConversations } from "@/lib/chat/chat";
 import { playMessageChime } from "@/lib/chat/chime";
@@ -67,6 +68,8 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<DashboardTabId>("home");
   const [showNewTicket, setShowNewTicket] = useState(false);
+  // Bumped to send the job board back to the tab that needs the owner.
+  const [boardKey, setBoardKey] = useState(0);
   const [mapCollapsed, setMapCollapsed] = useState(() => {
     try {
       return typeof window !== "undefined" && window.localStorage.getItem(MAP_COLLAPSED_KEY) === "1";
@@ -79,6 +82,11 @@ export default function DashboardPage() {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const unreadRef = useRef(0);
   const pendingBookingRequests = tickets.filter((t) => t.status === "PENDING").length;
+  // Only the very first load hides the board. Later refreshes (after accepting
+  // a request, a new booking arriving...) keep it on screen, so the tab the
+  // owner is looking at doesn't snap back to the default.
+  const boardLoading =
+    (ticketsLoading && tickets.length === 0) || (staffLoading && staff.length === 0);
 
   useEffect(() => {
     if (!staffMember) return;
@@ -302,12 +310,11 @@ export default function DashboardPage() {
                   </button>
                 </div>
 
-                {(ticketsLoading || staffLoading) && (
-                  <p className="text-sm text-slate-500">Loading job board...</p>
-                )}
+                {boardLoading && <p className="text-sm text-slate-500">Loading job board...</p>}
 
-                {!ticketsLoading && !staffLoading && (
+                {!boardLoading && (
                   <KanbanBoard
+                    key={boardKey}
                     shop={shop}
                     tickets={tickets}
                     staff={staff}
@@ -386,6 +393,19 @@ export default function DashboardPage() {
       </div>
 
       <DashboardFooter onSelectTab={setActiveTab} />
+
+      {staffMember && (
+        <BookingAlertHost
+          staffId={staffMember.id}
+          tickets={tickets}
+          onNewBooking={refreshTickets}
+          onOpenBooking={() => {
+            setActiveTab("board");
+            setBoardKey((key) => key + 1);
+            refreshTickets();
+          }}
+        />
+      )}
 
       {showNewTicket && (
         <NewJobTicketModal
