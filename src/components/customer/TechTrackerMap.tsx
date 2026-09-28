@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -18,6 +18,13 @@ const TECH_DOT_ICON = L.icon({
   iconUrl: "/images/technician-marker-live.svg",
   iconSize: [40, 40],
   iconAnchor: [20, 20],
+});
+
+// The business itself: an orange pin with a storefront, the same one the owner sees on their own map.
+const SHOP_ICON = L.icon({
+  iconUrl: "/images/shop-marker.svg",
+  iconSize: [34, 41],
+  iconAnchor: [17, 41],
 });
 
 type Point = { lat: number; lng: number };
@@ -44,15 +51,23 @@ function FitToPoints({ points }: { points: Point[] }) {
   return null;
 }
 
-/** Live map for a customer following their technician to their door. */
+/**
+ * Live map for a customer following their technician to their door: the technician, the
+ * customer's address and — when the shop has pinned itself — the shop. `fitShop` keeps the shop
+ * inside the frame; leave it off once the technician is at the door so the map can zoom in on them.
+ */
 export default function TechTrackerMap({
   technician,
   destination,
+  shop = null,
+  fitShop = true,
 }: {
   technician: Point;
   destination: Point | null;
+  shop?: (Point & { name: string }) | null;
+  fitShop?: boolean;
 }) {
-  const points = destination ? [technician, destination] : [technician];
+  const points = [technician, ...(destination ? [destination] : []), ...(shop && fitShop ? [shop] : [])];
 
   return (
     <div className="overflow-hidden rounded-xl shadow-md shadow-black/30">
@@ -72,8 +87,25 @@ export default function TechTrackerMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {destination && <Marker position={[destination.lat, destination.lng]} />}
-        <Marker position={[technician.lat, technician.lng]} icon={TECH_DOT_ICON} />
+        {shop && (
+          <Marker position={[shop.lat, shop.lng]} icon={SHOP_ICON}>
+            <Tooltip direction="top" offset={[0, -38]}>
+              {shop.name}
+            </Tooltip>
+          </Marker>
+        )}
+        {destination && (
+          <Marker position={[destination.lat, destination.lng]}>
+            <Tooltip direction="top" offset={[0, -34]}>
+              Your address
+            </Tooltip>
+          </Marker>
+        )}
+        <Marker position={[technician.lat, technician.lng]} icon={TECH_DOT_ICON}>
+          <Tooltip direction="top" offset={[0, -18]}>
+            Your technician
+          </Tooltip>
+        </Marker>
       </MapContainer>
     </div>
   );

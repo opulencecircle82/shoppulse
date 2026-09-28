@@ -99,6 +99,8 @@ type ClientTicket = {
   booking_longitude: number | null;
   preferred_date: string | null;
   preferred_time: string | null;
+  shop_latitude: number | null;
+  shop_longitude: number | null;
   job_number: number | null;
   mobile_app_theme: AppTheme;
   payment_status: "UNPAID" | "PAID";
@@ -576,7 +578,15 @@ export default function ClientTicketPage() {
             return (
               <>
                 {enRoute && (
-                  <TechLiveCard location={staffLocation} destination={destination}>
+                  <TechLiveCard
+                    location={staffLocation}
+                    destination={destination}
+                    shop={
+                      ticket.shop_latitude !== null && ticket.shop_longitude !== null
+                        ? { lat: ticket.shop_latitude, lng: ticket.shop_longitude, name: ticket.shop_name }
+                        : null
+                    }
+                  >
                     {messageButton}
                   </TechLiveCard>
                 )}

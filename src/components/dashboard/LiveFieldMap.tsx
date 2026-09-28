@@ -6,6 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
+import { formatJobNumber } from "@/lib/jobNumber";
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })
   ._getIconUrl;
@@ -37,11 +38,20 @@ const TECH_MARKER_ICON = L.icon({
   popupAnchor: [0, -46],
 });
 
+// The business itself — the orange storefront pin the customer also sees on their tracking map.
+const SHOP_MARKER_ICON = L.icon({
+  iconUrl: "/images/shop-marker.svg",
+  iconSize: [34, 41],
+  iconAnchor: [17, 41],
+  popupAnchor: [0, -38],
+});
+
 // Live positions older than this are treated as stale (app closed/
 // backgrounded) and hidden, rather than showing a "live" dot that's
 // actually long gone.
 const LIVE_STALE_MS = 3 * 60 * 1000;
 const LIVE_POLL_MS = 15000;
+const CLIENT_POLL_MS = 30000;
 
 type MapPin = {
   id: string;
@@ -51,6 +61,26 @@ type MapPin = {
   service_address: string;
   lat: number;
   lng: number;
+};
+
+// Where an open job actually is — the address the customer gave — whether or not a technician has been there yet.
+type ClientPin = {
+  id: string;
+  label: string;
+  clientName: string;
+  service: string;
+  address: string;
+  stage: string;
+  lat: number;
+  lng: number;
+};
+
+const OPEN_JOB_STAGE: Record<string, string> = {
+  PENDING: "Awaiting your approval",
+  UNASSIGNED: "Needs a technician",
+  SCHEDULED: "Scheduled",
+  ESTIMATE_PENDING: "Technician on site",
+  IN_PROGRESS: "Work in progress",
 };
 
 type LivePin = {
@@ -124,6 +154,7 @@ function MapFitPoints({
 export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?: boolean }) {
   const [pins, setPins] = useState<MapPin[]>([]);
   const [livePins, setLivePins] = useState<LivePin[]>([]);
+  const [clientPins, setClientPins] = useState<ClientPin[]>([]);
   const [loading, setLoading] = useState(true);
   const [recenterSignal, setRecenterSignal] = useState(0);
 
@@ -178,6 +209,55 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
     };
   }, [shop.id]);
 
+  // The customers' addresses for jobs that are still open, straight from what they booked with.
+  useEffect(() => {
+    let active = true;
+
+    async function fetchClients() {
+      const { data } = await supabase
+        .from("job_tickets")
+        .select("id, job_number, client_name, service_type, service_address, status, booking_latitude, booking_longitude")
+        .eq("shop_id", shop.id)
+        .in("status", Object.keys(OPEN_JOB_STAGE))
+        .not("booking_latitude", "is", null)
+        .not("booking_longitude", "is", null);
+
+      if (!active) return;
+
+      const rows = (data ?? []) as {
+        id: string;
+        job_number: number | null;
+        client_name: string;
+        service_type: string;
+        service_address: string;
+        status: string;
+        booking_latitude: number;
+        booking_longitude: number;
+      }[];
+
+      setClientPins(
+        rows.map((row) => ({
+          id: row.id,
+          label: formatJobNumber(row.job_number, row.id),
+          clientName: row.client_name,
+          service: row.service_type,
+          address: row.service_address,
+          stage: OPEN_JOB_STAGE[row.status] ?? row.status,
+          lat: row.booking_latitude,
+          lng: row.booking_longitude,
+        }))
+      );
+    }
+
+    fetchClients();
+    const interval = setInterval(fetchClients, CLIENT_POLL_MS);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [shop.id]);
+
   useEffect(() => {
     let active = true;
 
@@ -228,8 +308,8 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
     };
   }, [shop.id]);
 
-  const firstPoint = pins[0] ?? livePins[0];
-  const hasAnyPoint = pins.length > 0 || livePins.length > 0;
+  const firstPoint = pins[0] ?? livePins[0] ?? clientPins[0];
+  const hasAnyPoint = pins.length > 0 || livePins.length > 0 || clientPins.length > 0;
   // With no jobs or technicians to show yet, look at the shop's own neighbourhood — not the middle of the
   // United States. An unpinned shop in the Philippines gets the Philippines.
   const shopPoint: [number, number] | null =
@@ -262,6 +342,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
           points={[
             ...pins.map((pin): [number, number] => [pin.lat, pin.lng]),
             ...livePins.map((live): [number, number] => [live.lat, live.lng]),
+            ...clientPins.map((client): [number, number] => [client.lat, client.lng]),
           ]}
           recenterSignal={recenterSignal}
         />
@@ -270,13 +351,34 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           maxZoom={19}
         />
-        {!hasAnyPoint && shopPoint && (
-          <Marker position={shopPoint}>
-            <Tooltip permanent direction="top" offset={[0, -34]}>
+        {shopPoint && (
+          <Marker position={shopPoint} icon={SHOP_MARKER_ICON}>
+            <Tooltip permanent direction="top" offset={[0, -38]}>
               {shop.shop_name}
             </Tooltip>
+            <Popup>
+              <p className="font-semibold">{shop.shop_name}</p>
+              <p className="text-xs text-slate-600">Your business</p>
+            </Popup>
           </Marker>
         )}
+
+        {clientPins.map((client) => (
+          <Marker key={`client-${client.id}`} position={[client.lat, client.lng]}>
+            <Tooltip permanent direction="bottom" offset={[0, -4]}>
+              Client: {client.clientName} · {client.label}
+            </Tooltip>
+            <Popup>
+              <p className="font-semibold">Client: {client.clientName}</p>
+              <p className="text-xs text-slate-600">
+                {client.label} · {client.service}
+              </p>
+              <p className="text-xs">{client.address}</p>
+              <p className="text-xs font-semibold">{client.stage}</p>
+            </Popup>
+          </Marker>
+        ))}
+
 
         {pins.map((pin) => (
           <Fragment key={pin.id}>

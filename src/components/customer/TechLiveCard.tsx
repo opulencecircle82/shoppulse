@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { BellRing, Navigation } from "lucide-react";
+import { BellRing, MapPin, Navigation, Store } from "lucide-react";
 import { formatEta, techProximity } from "@/lib/customer/jobStages";
 import { timeAgo } from "@/lib/dashboard/format";
 
@@ -23,10 +23,13 @@ type Point = { lat: number; lng: number };
 export default function TechLiveCard({
   location,
   destination,
+  shop = null,
   children,
 }: {
   location: (Point & { updated_at: string }) | null;
   destination: Point | null;
+  /** Where the business is (its own pin), when it has set one. */
+  shop?: (Point & { name: string }) | null;
   children?: ReactNode;
 }) {
   const { eta, near } = techProximity(location, destination);
@@ -66,7 +69,24 @@ export default function TechLiveCard({
       <div className="mt-4">
         {location ? (
           <>
-            <TechTrackerMap technician={location} destination={destination} />
+            {/* The shop stays in frame while the technician is on the way; once they're at the door the map
+                zooms in on them and the customer's address instead. */}
+            <TechTrackerMap technician={location} destination={destination} shop={shop} fitShop={!near} />
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-300">
+              <span className="flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-brand-emerald" /> Technician
+              </span>
+              {destination && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3 text-brand-sky" /> Your address
+                </span>
+              )}
+              {shop && !near && (
+                <span className="flex items-center gap-1">
+                  <Store className="h-3 w-3 text-brand-orange" /> {shop.name}
+                </span>
+              )}
+            </div>
             <p className="mt-2 text-[11px] text-slate-400">
               {eta.stale
                 ? `Last seen ${timeAgo(location.updated_at)} — the technician's app may be closed.`
