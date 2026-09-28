@@ -64,6 +64,12 @@ export type Shop = {
   geofence_enforced: boolean;
   show_job_prices_to_techs: boolean;
   allow_onsite_quote_additions: boolean;
+  /** Text the owner adds to the technician app (App Builder → App Information). */
+  mobile_app_welcome: string | null;
+  mobile_app_announcement_title: string | null;
+  mobile_app_announcement: string | null;
+  mobile_app_office_phone: string | null;
+  mobile_app_job_reminder: string | null;
 };
 
 export type StaffMember = {

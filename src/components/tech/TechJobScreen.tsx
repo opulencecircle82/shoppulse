@@ -15,6 +15,7 @@ import {
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 import SignaturePad from "@/components/shared/SignaturePad";
 import TicketNumber from "@/components/ui/TicketNumber";
+import { JobReminder } from "./ShopInfoCards";
 import SelectedProductsPicker, {
   type SelectedProduct,
 } from "@/components/dashboard/SelectedProductsPicker";
@@ -27,11 +28,14 @@ export default function TechJobScreen({
   ticket,
   onBack,
   onSubmitted,
+  preview = false,
 }: {
   shop: Shop;
   ticket: JobTicket;
   onBack: () => void;
   onSubmitted: () => void;
+  /** The App Builder shows this real screen with sample data: nothing is read from or listened to live. */
+  preview?: boolean;
 }) {
   // Once the client approves the on-site quote (from a different
   // device), this flips locally so the screen moves straight into the
@@ -95,7 +99,8 @@ export default function TechJobScreen({
   }, [ticket.id]);
 
   const listening =
-    (isEstimateStage && quoteSubmittedAt !== null) || (isCompletionStage && !synced);
+    !preview &&
+    ((isEstimateStage && quoteSubmittedAt !== null) || (isCompletionStage && !synced));
   useEffect(() => {
     if (!listening) return;
     const first = setTimeout(refreshLive, 0);
@@ -114,10 +119,10 @@ export default function TechJobScreen({
 
   // When payment lands, bring the signature pad into view.
   useEffect(() => {
-    if (paid && isCompletionStage) {
+    if (paid && isCompletionStage && !preview) {
       signatureRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [paid, isCompletionStage]);
+  }, [paid, isCompletionStage, preview]);
 
   async function handleSubmitEstimate() {
     setSubmittingQuote(true);
@@ -303,6 +308,8 @@ export default function TechJobScreen({
       <h1 className="mt-1 text-lg font-bold text-white">{ticket.client_name}</h1>
       <p className="mt-1 text-sm text-slate-400">{ticket.service_type}</p>
       <p className="mt-0.5 text-sm text-slate-500">{ticket.service_address}</p>
+
+      <JobReminder shop={shop} />
 
       {shop.mandatory_live_camera && (
         <span className="mt-4 inline-flex rounded-full bg-brand-emerald/15 px-3 py-1.5 text-[11px] font-semibold text-brand-emerald">

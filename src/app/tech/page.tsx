@@ -23,6 +23,7 @@ import TechHistoryScreen from "@/components/tech/TechHistoryScreen";
 import TechProfileScreen from "@/components/tech/TechProfileScreen";
 import TechBottomNav, { type TechTab } from "@/components/tech/TechBottomNav";
 import { useAppTheme } from "@/lib/hooks/useAppTheme";
+import { useAppBranding } from "@/lib/hooks/useAppBranding";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
 type Screen = "loading" | "login" | "tab" | "job" | "messages";
@@ -40,6 +41,8 @@ export default function TechAppPage() {
 
   // The look the owner picked in Customize Mobile App (dark until the shop has loaded).
   useAppTheme(shop?.mobile_app_theme);
+  // ...and the colours and font the owner chose in the App Builder.
+  useAppBranding(shop?.primary_color_hex, shop?.accent_color_hex, shop?.mobile_app_font_family);
 
   const loadHome = useCallback(async (context: StaffContext, opts?: { isInitialLoad?: boolean }) => {
     try {

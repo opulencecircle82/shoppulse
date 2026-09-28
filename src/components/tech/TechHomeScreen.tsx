@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  Bell,
   MapPin,
   ClipboardList,
   CheckCircle2,
@@ -29,6 +30,7 @@ import {
 } from "@/lib/tech/jobActions";
 import TechNotificationBell from "./TechNotificationBell";
 import TicketNumber from "@/components/ui/TicketNumber";
+import { HomeInfo } from "./ShopInfoCards";
 import { formatJobNumber } from "@/lib/jobNumber";
 
 const EMERGENCY_POLL_MS = 15000;
@@ -47,6 +49,7 @@ export default function TechHomeScreen({
   onOpenTicket,
   onOpenMessages,
   onRefresh,
+  preview = false,
 }: {
   shop: Shop;
   staffContext: StaffContext;
@@ -57,6 +60,8 @@ export default function TechHomeScreen({
   onOpenTicket: (jobTicketId: string) => void;
   onOpenMessages: () => void;
   onRefresh: () => void;
+  /** The App Builder shows this real screen with sample data: no polling, no chimes, nothing live. */
+  preview?: boolean;
 }) {
   const [responding, setResponding] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -68,6 +73,7 @@ export default function TechHomeScreen({
   const [clockLoading, setClockLoading] = useState(false);
 
   useEffect(() => {
+    if (preview) return;
     let active = true;
     function loadUnread() {
       listStaffConversations().then((rows) => {
@@ -84,11 +90,12 @@ export default function TechHomeScreen({
       active = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [preview]);
 
   // Polls rather than waiting for the technician to notice the bell —
   // an emergency job sitting unclaimed for minutes defeats the point.
   useEffect(() => {
+    if (preview) return;
     let active = true;
     function loadEmergencyJobs() {
       listNearbyEmergencyJobs()
@@ -103,7 +110,7 @@ export default function TechHomeScreen({
       active = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [preview]);
 
   async function handleClaimEmergencyJob(jobId: string) {
     setClaimingId(jobId);
@@ -221,7 +228,13 @@ export default function TechHomeScreen({
               )}
             </button>
 
-            <TechNotificationBell staffId={staffContext.staffId} onOpenTicket={onOpenTicket} />
+            {preview ? (
+              <span className="rounded-full p-2 text-white/80">
+                <Bell className="h-5 w-5" />
+              </span>
+            ) : (
+              <TechNotificationBell staffId={staffContext.staffId} onOpenTicket={onOpenTicket} />
+            )}
           </div>
         </header>
 
@@ -238,6 +251,8 @@ export default function TechHomeScreen({
           <Clock className="h-4 w-4" />
           {clockLoading ? "Please wait..." : isClockedIn ? "Clock Out" : "Clock In"}
         </button>
+
+        <HomeInfo shop={shop} />
 
         <div className="pb-24">
           <div className="mt-6 grid grid-cols-2 gap-3">
