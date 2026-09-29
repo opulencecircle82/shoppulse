@@ -116,9 +116,10 @@ export default function CustomerHomeScreen({
     new Set(nearbyShops.map((shop) => shop.business_category).filter((c): c is string => Boolean(c)))
   );
   const selectedCategory = pickedCategory && nearbyCategories.includes(pickedCategory) ? pickedCategory : null;
-  const visibleShops = selectedCategory
-    ? nearbyShops.filter((shop) => shop.business_category === selectedCategory)
-    : nearbyShops;
+  // Open ones first (a `.sort` is stable, so nearest-first still holds within each group).
+  const visibleShops = (selectedCategory ? nearbyShops.filter((shop) => shop.business_category === selectedCategory) : nearbyShops)
+    .slice()
+    .sort((a, b) => Number(isShopOpenNow(b)) - Number(isShopOpenNow(a)));
 
   const unreadRef = useRef(0);
 
@@ -376,46 +377,52 @@ export default function CustomerHomeScreen({
                 No {selectedCategory} businesses near you yet.
               </p>
             ) : (
-              <ul className="mt-3 space-y-2">
+              <ul className="mt-3 grid grid-cols-2 gap-3">
                 {visibleShops.map((shop) => {
                   const open = isShopOpenNow(shop);
+                  const { icon: CategoryIcon } = categoryIcon(shop.business_category);
                   return (
                     <li key={shop.id} className="overflow-hidden rounded-2xl bg-white/5 shadow-md shadow-black/20">
-                      <Link href={`/customer/shop/${shop.slug}`} className="flex items-center gap-3 p-3.5">
-                        {shop.logo_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={shop.logo_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
-                        ) : (
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-blue/15 text-sm font-bold text-brand-blue">
-                            {shop.shop_name.slice(0, 1).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-white">{shop.shop_name}</p>
-                            {/* A business with no working hours yet counts as closed — but can still take requests. */}
-                            <span
-                              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                open ? "bg-brand-emerald/15 text-brand-emerald" : "bg-white/10 text-slate-400"
-                              }`}
-                            >
-                              {open ? "Open Now" : "Closed"}
+                      <Link href={`/customer/shop/${shop.slug}`} className="block">
+                        <div className="relative aspect-[4/3] w-full bg-white/5">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={shop.website_header_url ?? stockPhotoForCategory(shop.business_category)}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                          {/* A business with no working hours yet counts as closed — but can still take requests. */}
+                          <span
+                            className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              open ? "bg-brand-emerald text-white" : "bg-black/55 text-slate-200"
+                            }`}
+                          >
+                            {open ? "Open Now" : "Closed"}
+                          </span>
+                          {/* What kind of service this is, at a glance — the whole point of browsing this grid. On
+                              the opposite corner from Open/Closed so a long category name never runs into it. */}
+                          {shop.business_category && (
+                            <span className="absolute bottom-2 left-2 inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur">
+                              <CategoryIcon className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{shop.business_category}</span>
                             </span>
-                          </div>
-                          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-400">
-                            <span>{[shop.business_category, shop.city].filter(Boolean).join(" · ") || "Service provider"}</span>
-                            <span className="flex items-center gap-1">
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <p className="truncate text-sm font-semibold text-white">{shop.shop_name}</p>
+                          <p className="mt-1 flex items-center justify-between gap-1.5 text-[11px]">
+                            <span className={shop.avg_rating !== null ? "font-medium text-amber-400" : "text-slate-500"}>
+                              {shop.avg_rating !== null ? `★ ${Number(shop.avg_rating).toFixed(1)}` : "No rating yet"}
+                            </span>
+                            <span className="flex shrink-0 items-center gap-1 text-slate-400">
                               <Navigation className="h-3 w-3" />
                               {shop.distance_km !== null ? formatDistance(shop.distance_km) : "In your area"}
                             </span>
                           </p>
-                          <p className={`mt-0.5 text-[11px] font-medium ${shop.avg_rating !== null ? "text-amber-400" : "text-slate-500"}`}>
-                            {shop.avg_rating !== null ? `★ ${Number(shop.avg_rating).toFixed(1)} (${shop.review_count})` : "★ No rating yet"}
-                          </p>
                         </div>
                       </Link>
                       {!open && (
-                        <div className="px-3.5 pb-3.5">
+                        <div className="px-3 pb-3">
                           <ScheduleTomorrowLink slug={shop.slug} />
                         </div>
                       )}

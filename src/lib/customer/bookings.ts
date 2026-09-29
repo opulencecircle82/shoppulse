@@ -360,8 +360,10 @@ export async function listPublicShopProducts(shopId: string): Promise<PublicProd
   return (data ?? []) as PublicProduct[];
 }
 
-/** distance_km is null for a business that hasn't pinned its location but is in the customer's area. */
-export type NearbyShop = PublicShop & { distance_km: number | null };
+/** distance_km is null for a business that hasn't pinned its location but is in the customer's area.
+ * website_header_url is the cover photo from the shop's own site, when it has uploaded one — the "Services
+ * Near You" cards fall back to a stock photo for the category (`stockPhotoForCategory`) when it hasn't. */
+export type NearbyShop = PublicShop & { website_header_url: string | null; distance_km: number | null };
 
 /** Publicly listed businesses within radiusKm of the customer's pin, nearest first — whether or not they have
  * added services — followed by businesses that haven't pinned a location yet but are in the customer's city
