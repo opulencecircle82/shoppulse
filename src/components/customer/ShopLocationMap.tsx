@@ -47,9 +47,11 @@ export default function ShopLocationMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {/* Never pass icon={undefined} to a Leaflet Marker — it replaces the default icon with nothing
+            and the map crashes. Leave the prop off entirely for the shop variant instead. */}
         <Marker
           position={[latitude, longitude]}
-          icon={variant === "technician" ? TECH_MARKER_ICON : undefined}
+          {...(variant === "technician" ? { icon: TECH_MARKER_ICON } : {})}
         />
       </MapContainer>
     </div>
