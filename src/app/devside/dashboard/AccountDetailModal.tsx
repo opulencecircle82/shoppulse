@@ -214,9 +214,47 @@ export default function AccountDetailModal({
                 <Row label="Created">{new Date(profile.created_at).toLocaleString()}</Row>
                 {detail.counts.lastJobAt && <Row label="Last job">{new Date(detail.counts.lastJobAt).toLocaleString()}</Row>}
               </dl>
-              <p className="mt-2 text-[11px] text-slate-400">
-                ShopPulse has one location per account — there are no separate branches.
-              </p>
+              {detail.branches.length === 0 ? (
+                <p className="mt-2 text-[11px] text-slate-400">
+                  Single-location account — no branches added beyond the address above (its Main Branch).
+                </p>
+              ) : (
+                <div className="mt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Branches ({detail.branches.length})
+                  </p>
+                  <div className="mt-2 space-y-2">
+                    {detail.branches.map((branch) => (
+                      <div key={branch.id} className="rounded-xl bg-brand-slate-light/40 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-sm font-semibold text-slate-900">{branch.name}</p>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              branch.is_active ? "bg-brand-emerald/15 text-brand-emerald-dark" : "bg-slate-200 text-slate-500"
+                            }`}
+                          >
+                            {branch.is_active ? "Active" : "Deactivated"}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-slate-500">{branch.address}</p>
+                        <p className="mt-1.5 text-xs text-slate-500">
+                          Manager:{" "}
+                          {branch.manager ? (
+                            <span className="text-slate-900">{branch.manager.full_name}</span>
+                          ) : (
+                            <span className="text-amber-500">Unassigned</span>
+                          )}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {branch.technician_count} tech{branch.technician_count === 1 ? "" : "s"} ·{" "}
+                          {branch.job_count} job{branch.job_count === 1 ? "" : "s"} ·{" "}
+                          {branch.customer_count} customer{branch.customer_count === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="mt-6">

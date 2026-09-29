@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { MapPin, PanelRightClose, PanelRightOpen } from "lucide-react";
 import type { Shop } from "@/lib/supabase/types";
+import type { MapBranchFilter } from "./LiveFieldMap";
 
 const LiveFieldMap = dynamic(() => import("./LiveFieldMap"), {
   ssr: false,
@@ -20,10 +21,12 @@ export default function LiveMapPanel({
   shop,
   collapsed,
   onToggle,
+  branchFilter = null,
 }: {
   shop: Shop;
   collapsed: boolean;
   onToggle: () => void;
+  branchFilter?: MapBranchFilter | null;
 }) {
   // The same clean white card every other dashboard container uses (job board, the header bar) — not a
   // heavier, differently-bordered box — so it reads as one more panel on the page instead of an odd one out.
@@ -70,7 +73,7 @@ export default function LiveMapPanel({
         </button>
       </header>
       <div className="relative min-h-0 flex-1">
-        <LiveFieldMap shop={shop} fill />
+        <LiveFieldMap shop={shop} fill branchFilter={branchFilter} />
       </div>
     </section>
   );

@@ -46,4 +46,16 @@ export type AdminShopDetail = {
   }[];
   /** Newest first. The console acts on the ones still PENDING; the rest are history. */
   removalRequests: ReviewRemovalRequest[];
+  /** Additional locations under this account — empty for the (still common) single-location shop, which
+   * keeps using its own profile address/hours as its one and only "Main Branch". */
+  branches: {
+    id: string;
+    name: string;
+    address: string;
+    is_active: boolean;
+    manager: { full_name: string; email: string } | null;
+    technician_count: number;
+    job_count: number;
+    customer_count: number;
+  }[];
 };

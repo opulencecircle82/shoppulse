@@ -134,7 +134,20 @@ function MapFitPoints({
   return null;
 }
 
-export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?: boolean }) {
+// "MAIN" is a stand-in for `branch_id is null` — the header switcher's own value for that
+// choice, since a real query param can't carry SQL's NULL.
+export type MapBranchFilter = "MAIN" | (string & {});
+
+export default function LiveFieldMap({
+  shop,
+  fill = false,
+  branchFilter = null,
+}: {
+  shop: Shop;
+  fill?: boolean;
+  /** Owner's header switcher — null/undefined shows every branch, matching today's behavior. */
+  branchFilter?: MapBranchFilter | null;
+}) {
   const [places, setPlaces] = useState<MapPlace[]>([]);
   const [livePins, setLivePins] = useState<LivePin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,7 +158,10 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
     let active = true;
 
     async function fetchPlaces() {
-      const { data } = await supabase.from("job_tickets_map_view").select("*").eq("shop_id", shop.id);
+      let query = supabase.from("job_tickets_map_view").select("*").eq("shop_id", shop.id);
+      if (branchFilter === "MAIN") query = query.is("branch_id", null);
+      else if (branchFilter) query = query.eq("branch_id", branchFilter);
+      const { data } = await query;
       if (!active) return;
       setPlaces(buildMapPlaces((data ?? []) as MapRow[]));
       setLoading(false);
@@ -159,7 +175,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
       clearTimeout(id);
       clearInterval(interval);
     };
-  }, [shop.id]);
+  }, [shop.id, branchFilter]);
 
   useEffect(() => {
     let active = true;
@@ -167,7 +183,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
     async function fetchLive() {
       const { data } = await supabase
         .from("staff_live_locations")
-        .select("staff_id, lat, lng, accuracy, updated_at, staff_members(full_name)")
+        .select("staff_id, lat, lng, accuracy, updated_at, staff_members(full_name, branch_id)")
         .eq("shop_id", shop.id);
 
       if (!active) return;
@@ -178,27 +194,38 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
         lng: number;
         accuracy: number | null;
         updated_at: string;
-        staff_members: { full_name: string }[] | { full_name: string } | null;
+        staff_members: { full_name: string; branch_id: string | null }[] | { full_name: string; branch_id: string | null } | null;
       }[];
 
       const fresh = rows.filter(
         (row) => Date.now() - new Date(row.updated_at).getTime() < LIVE_STALE_MS
       );
 
+      const matchesBranch = (branchId: string | null) => {
+        if (branchFilter === "MAIN") return branchId === null;
+        if (branchFilter) return branchId === branchFilter;
+        return true;
+      };
+
       setLivePins(
-        fresh.map((row) => {
-          const staffRow = Array.isArray(row.staff_members)
-            ? row.staff_members[0]
-            : row.staff_members;
-          return {
-            staffId: row.staff_id,
-            staffName: staffRow?.full_name ?? "Technician",
-            lat: row.lat,
-            lng: row.lng,
-            accuracy: row.accuracy,
-            updatedAt: row.updated_at,
-          };
-        })
+        fresh
+          .filter((row) => {
+            const staffRow = Array.isArray(row.staff_members) ? row.staff_members[0] : row.staff_members;
+            return matchesBranch(staffRow?.branch_id ?? null);
+          })
+          .map((row) => {
+            const staffRow = Array.isArray(row.staff_members)
+              ? row.staff_members[0]
+              : row.staff_members;
+            return {
+              staffId: row.staff_id,
+              staffName: staffRow?.full_name ?? "Technician",
+              lat: row.lat,
+              lng: row.lng,
+              accuracy: row.accuracy,
+              updatedAt: row.updated_at,
+            };
+          })
       );
     }
 
@@ -209,7 +236,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
       active = false;
       clearInterval(interval);
     };
-  }, [shop.id]);
+  }, [shop.id, branchFilter]);
 
   const firstPoint = places[0] ?? livePins[0];
   const hasAnyPoint = places.length > 0 || livePins.length > 0;

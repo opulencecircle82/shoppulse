@@ -4,13 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { MessageCircle, Star } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   fetchShopBySlug,
+  fetchPublicBranch,
   isShopOpenNow,
   listShopReviews,
   listPublicShopServices,
   type BookingShop,
+  type PublicBranch,
   type ShopReview,
   type PublicService,
 } from "@/lib/customer/bookings";
@@ -37,11 +39,16 @@ const DAY_LABELS: Record<string, string> = {
 export default function ShopDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const goBack = useSmartBack("/customer");
   const slug = params.slug as string;
+  // Set when the customer came from a branch's own card on the home screen — everything location/hours-related
+  // below shows that branch's own details instead of the shop's Main Branch, and "Book Now" carries it forward.
+  const branchId = searchParams.get("branch");
 
   const [loading, setLoading] = useState(true);
   const [shop, setShop] = useState<BookingShop | null>(null);
+  const [branch, setBranch] = useState<PublicBranch | null>(null);
   const [reviews, setReviews] = useState<ShopReview[]>([]);
   const [services, setServices] = useState<PublicService[]>([]);
   const [notFound, setNotFound] = useState(false);
@@ -57,7 +64,8 @@ export default function ShopDetailsPage() {
     setLoading(false);
     listShopReviews(shopRow.id).then(setReviews).catch(() => {});
     listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
-  }, [slug]);
+    if (branchId) fetchPublicBranch(branchId).then(setBranch).catch(() => {});
+  }, [slug, branchId]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -84,8 +92,14 @@ export default function ShopDetailsPage() {
     );
   }
 
-  const open = isShopOpenNow(shop);
-  const hasHours = Boolean(shop.business_hours_open && shop.business_hours_close);
+  // The branch's own location/hours stand in for the shop's Main Branch ones wherever this page shows
+  // "where" or "when" — the business identity (name, logo, rating, reviews) is still the shop's own.
+  const open = isShopOpenNow(branch ?? shop);
+  const hasHours = Boolean((branch ?? shop).business_hours_open && (branch ?? shop).business_hours_close);
+  const displayAddress = branch?.address ?? shop.address;
+  const displayLat = branch?.latitude ?? shop.latitude;
+  const displayLng = branch?.longitude ?? shop.longitude;
+  const displayHours = branch ?? shop;
 
   async function handleChat(prefillText?: string) {
     const customer = await fetchCurrentCustomer();
@@ -169,17 +183,25 @@ export default function ShopDetailsPage() {
             </div>
           </div>
 
+          {branch && (
+            <div className="mt-5 border-t border-white/10 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Branch</p>
+              <p className="mt-1.5 text-sm font-semibold text-white">{branch.name}</p>
+              {displayAddress && <p className="mt-0.5 text-sm text-slate-400">{displayAddress}</p>}
+            </div>
+          )}
+
           {hasHours && (
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Working Hours
               </p>
               <p className="mt-1.5 text-sm text-slate-300">
-                {shop.business_hours_open} – {shop.business_hours_close}
+                {displayHours.business_hours_open} – {displayHours.business_hours_close}
               </p>
               <p className="mt-1 text-sm text-slate-400">
-                {shop.business_days.length > 0
-                  ? shop.business_days
+                {displayHours.business_days.length > 0
+                  ? displayHours.business_days
                       .map((d) => DAY_LABELS[d] ?? d)
                       .join(", ")
                   : "No days set"}
@@ -187,13 +209,13 @@ export default function ShopDetailsPage() {
             </div>
           )}
 
-          {shop.latitude !== null && shop.longitude !== null && (
+          {displayLat !== null && displayLng !== null && (
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Location
               </p>
               <div className="mt-2">
-                <ShopLocationMap latitude={shop.latitude} longitude={shop.longitude} />
+                <ShopLocationMap latitude={displayLat} longitude={displayLng} />
               </div>
             </div>
           )}
@@ -299,10 +321,10 @@ export default function ShopDetailsPage() {
             )}
           </div>
 
-          {!open && <ScheduleTomorrowLink slug={shop.slug} className="mt-6" />}
+          {!open && <ScheduleTomorrowLink slug={shop.slug} branchId={branchId} className="mt-6" />}
 
           <Link
-            href={`/customer/book/${shop.slug}`}
+            href={branchId ? `/customer/book/${shop.slug}?branch=${branchId}` : `/customer/book/${shop.slug}`}
             className="mt-3 block w-full rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3.5 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
           >
             Book Now

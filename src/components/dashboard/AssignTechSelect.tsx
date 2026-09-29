@@ -25,6 +25,10 @@ export default function AssignTechSelect({
 }) {
   const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
 
+  // A technician can only ever be assigned within their own branch (enforced again at the database
+  // trigger level) — filtering the list here means the owner never even sees the invalid choice.
+  const eligibleStaff = staff.filter((s) => (s.branch_id ?? null) === (ticket.branch_id ?? null));
+
   return (
     <>
       <select
@@ -37,7 +41,7 @@ export default function AssignTechSelect({
         className="w-full max-w-[220px] rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
       >
         <option value="">Assign Tech...</option>
-        {staff.map((member) => {
+        {eligibleStaff.map((member) => {
           const busyOn = busy.get(member.id);
           return (
             <option key={member.id} value={member.id} disabled={Boolean(busyOn)}>

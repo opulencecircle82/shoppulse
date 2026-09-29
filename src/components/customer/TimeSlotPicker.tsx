@@ -18,6 +18,7 @@ export default function TimeSlotPicker({
   onChange,
   onNextDay,
   refreshKey = 0,
+  branchId = null,
 }: {
   shopSlug: string;
   date: string;
@@ -29,13 +30,15 @@ export default function TimeSlotPicker({
   onNextDay: (() => void) | null;
   /** Bump to re-check availability (e.g. after the shop reported a slot was just taken). */
   refreshKey?: number;
+  /** Booking a specific branch — capacity and bookings are checked against that branch only. */
+  branchId?: string | null;
 }) {
   // Kept with the date it answers, so switching days never shows the old day's answer.
   const [loaded, setLoaded] = useState<{ date: string; rows: SlotAvailability[] | null } | null>(null);
 
   useEffect(() => {
     let active = true;
-    getSlotAvailability(shopSlug, date)
+    getSlotAvailability(shopSlug, date, branchId)
       .then((rows) => {
         if (active) setLoaded({ date, rows });
       })
@@ -47,7 +50,7 @@ export default function TimeSlotPicker({
     return () => {
       active = false;
     };
-  }, [shopSlug, date, refreshKey]);
+  }, [shopSlug, date, refreshKey, branchId]);
 
   const rows = loaded && loaded.date === date ? loaded.rows : undefined;
   const loading = rows === undefined;

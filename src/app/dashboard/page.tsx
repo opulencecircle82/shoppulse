@@ -7,6 +7,7 @@ import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
 import { useJobTickets } from "@/lib/hooks/useJobTickets";
 import { useStaffMembers } from "@/lib/hooks/useStaffMembers";
+import { useBranches } from "@/lib/hooks/useBranches";
 import { supabase } from "@/lib/supabase/client";
 import type { JobTicket } from "@/lib/supabase/types";
 import DashboardHomeTab from "@/components/dashboard/DashboardHomeTab";
@@ -25,6 +26,8 @@ import CustomizeMobileAppTab from "@/components/dashboard/CustomizeMobileAppTab"
 import ReviewsTab from "@/components/dashboard/ReviewsTab";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import LiveMapPanel from "@/components/dashboard/LiveMapPanel";
+import BranchSwitcher from "@/components/dashboard/BranchSwitcher";
+import { matchesBranchFilter, type BranchFilterValue } from "@/lib/dashboard/branchFilter";
 import HelpTip from "@/components/ui/HelpTip";
 import DashboardSidebarNav, {
   DASHBOARD_TABS,
@@ -72,6 +75,8 @@ export default function DashboardPage() {
     useJobTickets(shop?.id);
   const { staff, loading: staffLoading, refresh: refreshStaff } =
     useStaffMembers(shop?.id);
+  const { branches } = useBranches(shop?.id);
+  const [branchFilter, setBranchFilter] = useState<BranchFilterValue>("ALL");
 
   const [activeTab, setActiveTab] = useState<DashboardTabId>("home");
   const [showNewTicket, setShowNewTicket] = useState(false);
@@ -95,6 +100,27 @@ export default function DashboardPage() {
   // Technicians still working a job can't be handed another one (New Job Ticket's Assign Technician list).
   const busy = useMemo(() => busyTechnicians(tickets), [tickets]);
   const pendingBookingRequests = tickets.filter((t) => t.status === "PENDING").length;
+
+  // The owner's header switcher — "All Branches" (the default) is exactly today's unfiltered view. A
+  // branch manager or technician never sees the switcher at all (RLS already scopes their own dashboard).
+  const boardTickets = useMemo(
+    () => (branchFilter === "ALL" ? tickets : tickets.filter((t) => matchesBranchFilter(t.branch_id, branchFilter))),
+    [tickets, branchFilter]
+  );
+  const mapBranchFilter = branchFilter === "ALL" ? null : branchFilter;
+  // A new ticket always belongs to a real branch (or Main Branch, null) — a branch manager's own branch,
+  // or whatever the owner's switcher currently points at (defaulting to Main Branch on "All Branches").
+  const newTicketBranchId =
+    staffMember?.role === "OWNER"
+      ? branchFilter !== "ALL" && branchFilter !== "MAIN"
+        ? branchFilter
+        : null
+      : (staffMember?.branch_id ?? null);
+  const newTicketBranchName = branches.find((b) => b.id === newTicketBranchId)?.name ?? null;
+  const staffForNewTicket = useMemo(
+    () => staff.filter((s) => (s.branch_id ?? null) === newTicketBranchId),
+    [staff, newTicketBranchId]
+  );
   // Only the very first load hides the board. Later refreshes (after accepting
   // a request, a new booking arriving...) keep it on screen, so the tab the
   // owner is looking at doesn't snap back to the default.
@@ -226,6 +252,7 @@ export default function DashboardPage() {
             {staffMember?.role === "OWNER" && <GoLiveButton shop={shop} onChanged={() => refreshShop({ quiet: true })} />}
           </div>
           <div className="relative flex items-center gap-2 sm:gap-3">
+            {isOwner && <BranchSwitcher branches={branches} value={branchFilter} onChange={setBranchFilter} />}
             {staffMember && (
               <NotificationBell
                 staffId={staffMember.id}
@@ -363,7 +390,7 @@ export default function DashboardPage() {
                 {!boardLoading && (
                   <JobMasterTable
                     shop={shop}
-                    tickets={tickets}
+                    tickets={boardTickets}
                     staff={staff}
                     currentStaffId={staffMember?.id ?? null}
                     filter={boardFilter}
@@ -398,6 +425,8 @@ export default function DashboardPage() {
                   tickets={tickets}
                   currency={shop.currency}
                   unlimitedSeats={shop.unlimited_tech_seats}
+                  branches={branches}
+                  isOwner={isOwner}
                   onChanged={refreshStaff}
                 />
               </div>
@@ -446,7 +475,7 @@ export default function DashboardPage() {
               mapCollapsed ? "xl:w-14" : "xl:w-[360px] 2xl:w-[420px]"
             }`}
           >
-            <LiveMapPanel shop={shop} collapsed={mapCollapsed} onToggle={toggleMap} />
+            <LiveMapPanel shop={shop} collapsed={mapCollapsed} onToggle={toggleMap} branchFilter={mapBranchFilter} />
           </aside>
         </div>
       </div>
@@ -469,8 +498,10 @@ export default function DashboardPage() {
       {showNewTicket && (
         <NewJobTicketModal
           shopId={shop.id}
-          staff={staff}
+          staff={staffForNewTicket}
           busyTechnicians={busy}
+          branchId={newTicketBranchId}
+          branchName={newTicketBranchName}
           onClose={() => setShowNewTicket(false)}
           onCreated={refreshTickets}
         />

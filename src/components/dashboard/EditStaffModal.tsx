@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Copy, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { StaffMember } from "@/lib/supabase/types";
+import type { Branch, StaffMember } from "@/lib/supabase/types";
 
 function generatePassword(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
@@ -16,16 +16,23 @@ function generatePassword(): string {
 
 export default function EditStaffModal({
   staffMember,
+  branches = [],
+  isOwner = false,
   onClose,
   onSaved,
 }: {
   staffMember: StaffMember;
+  /** Only the owner sees the branch/role controls below — a branch manager can't transfer staff or self-promote. */
+  branches?: Branch[];
+  isOwner?: boolean;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const [fullName, setFullName] = useState(staffMember.full_name);
   const [phone, setPhone] = useState(staffMember.phone ?? "");
   const [address, setAddress] = useState(staffMember.address ?? "");
+  const [branchId, setBranchId] = useState(staffMember.branch_id ?? "");
+  const [isBranchManager, setIsBranchManager] = useState(staffMember.role === "MANAGER");
   const [changePassword, setChangePassword] = useState(false);
   const [newPassword, setNewPassword] = useState(generatePassword());
   const [saving, setSaving] = useState(false);
@@ -59,6 +66,19 @@ export default function EditStaffModal({
       setSaving(false);
       setError(profileError.message);
       return;
+    }
+
+    if (isOwner && (branchId !== (staffMember.branch_id ?? "") || isBranchManager !== (staffMember.role === "MANAGER"))) {
+      const { error: branchError } = await supabase.rpc("set_staff_branch_role", {
+        p_staff_id: staffMember.id,
+        p_branch_id: branchId || null,
+        p_role: isBranchManager ? "MANAGER" : "TECHNICIAN",
+      });
+      if (branchError) {
+        setSaving(false);
+        setError(branchError.message);
+        return;
+      }
     }
 
     if (!changePassword) {
@@ -197,6 +217,35 @@ export default function EditStaffModal({
               className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
             />
           </div>
+
+          {isOwner && (
+            <div className="border-t border-slate-200 pt-3">
+              <label className="block text-xs font-medium text-slate-500">Branch</label>
+              <select
+                value={branchId}
+                onChange={(e) => setBranchId(e.target.value)}
+                className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-brand-blue focus:outline-none [color-scheme:light]"
+              >
+                <option value="">Main Branch</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              {branches.length > 0 && (
+                <label className="mt-3 flex items-center gap-2.5 text-sm text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={isBranchManager}
+                    onChange={(e) => setIsBranchManager(e.target.checked)}
+                    className="accent-brand-blue"
+                  />
+                  Branch manager for this location
+                </label>
+              )}
+            </div>
+          )}
 
           <div className="border-t border-slate-200 pt-3">
             <label className="flex items-center gap-2.5 text-sm text-slate-600">

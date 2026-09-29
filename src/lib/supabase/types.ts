@@ -95,6 +95,27 @@ export type StaffMember = {
   location_token: string;
   /** On call for after-hours emergencies. Only the owner or a manager can change it. */
   is_night_shift: boolean;
+  /** null = Main Branch (the shop's own address/hours). Owners are never branch-scoped regardless of this. */
+  branch_id: string | null;
+};
+
+/** A second physical location under the same shop account — its own address, hours, manager and staff. */
+export type Branch = {
+  id: string;
+  shop_id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  contact_phone: string | null;
+  city: string | null;
+  region: string | null;
+  business_hours_open: string | null;
+  business_hours_close: string | null;
+  business_days: string[];
+  timezone: string;
+  is_active: boolean;
+  created_at: string;
 };
 
 export type JobStatus =
@@ -175,6 +196,8 @@ export type JobTicket = {
   job_number: number;
   /** PAID once proof of payment is in (or the shop confirmed it); the technician's signature step waits on it. */
   payment_status: "UNPAID" | "PAID";
+  /** null = Main Branch. */
+  branch_id: string | null;
 };
 
 /** One row of the photo registry: the photo's address and fingerprint outlive the file on the server. */

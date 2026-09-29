@@ -383,7 +383,14 @@ export default function CustomerHomeScreen({
                   const { icon: CategoryIcon } = categoryIcon(shop.business_category);
                   return (
                     <li key={shop.id} className="overflow-hidden rounded-2xl bg-white/5 shadow-md shadow-black/20">
-                      <Link href={`/customer/shop/${shop.slug}`} className="block">
+                      <Link
+                        href={
+                          shop.branch_id
+                            ? `/customer/shop/${shop.slug}?branch=${shop.branch_id}`
+                            : `/customer/shop/${shop.slug}`
+                        }
+                        className="block"
+                      >
                         <div className="relative aspect-[4/3] w-full bg-white/5">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img

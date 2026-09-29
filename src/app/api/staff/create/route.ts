@@ -35,13 +35,15 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { username, fullName, email, phone, password, hourlyRate } = body as {
+  const { username, fullName, email, phone, password, hourlyRate, role, branchId } = body as {
     username?: string;
     fullName?: string;
     email?: string;
     phone?: string | null;
     password?: string;
     hourlyRate?: number;
+    role?: "TECHNICIAN" | "MANAGER";
+    branchId?: string | null;
   };
 
   if (!username || !fullName || !email || !password) {
@@ -49,6 +51,27 @@ export async function POST(request: Request) {
       { error: "Username, full name, email, and password are required." },
       { status: 400 }
     );
+  }
+
+  // Only the owner can bring someone on as a branch manager or assign a branch at creation time —
+  // a manager adding staff always gets today's behavior (a Main Branch technician).
+  const wantsElevated = (role && role !== "TECHNICIAN") || Boolean(branchId);
+  if (wantsElevated && requester.role !== "OWNER") {
+    return Response.json(
+      { error: "Only the owner can assign a branch or manager role." },
+      { status: 403 }
+    );
+  }
+  if (branchId) {
+    const { data: branch } = await supabaseAdmin
+      .from("branches")
+      .select("id")
+      .eq("id", branchId)
+      .eq("shop_id", requester.shop_id)
+      .maybeSingle();
+    if (!branch) {
+      return Response.json({ error: "That branch is not on your account." }, { status: 400 });
+    }
   }
 
   if (password.length < 8) {
@@ -93,7 +116,8 @@ export async function POST(request: Request) {
       email,
       phone: phone || null,
       hourly_rate: hourlyRate ?? 0,
-      role: "TECHNICIAN",
+      role: role ?? "TECHNICIAN",
+      branch_id: branchId || null,
     })
     .select()
     .single();

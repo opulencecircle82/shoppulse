@@ -11,11 +11,13 @@ import {
 } from "@/lib/customer/addresses";
 import {
   fetchShopBySlug,
+  fetchPublicBranch,
   submitBooking,
   checkDateAvailability,
   isShopOpenNow,
   listPublicShopServices,
   type BookingShop,
+  type PublicBranch,
   type DateAvailability,
   type PublicService,
 } from "@/lib/customer/bookings";
@@ -47,6 +49,7 @@ function BookJobPageContent() {
   const searchParams = useSearchParams();
   const goBack = useSmartBack("/customer");
   const shopSlug = params.shopSlug as string;
+  const branchId = searchParams.get("branch");
   const promotionId = searchParams.get("promo");
   // Arrived from "Click to schedule your request for tomorrow" on a business that is closed right now.
   const scheduleMode = searchParams.get("schedule") === "1";
@@ -59,6 +62,7 @@ function BookJobPageContent() {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [shop, setShop] = useState<BookingShop | null>(null);
+  const [branch, setBranch] = useState<PublicBranch | null>(null);
   const [services, setServices] = useState<PublicService[]>([]);
   const [notFound, setNotFound] = useState(false);
 
@@ -99,8 +103,10 @@ function BookJobPageContent() {
     setShop(shopRow);
     setCustomer(current);
     setLoading(false);
+    const branchRow = branchId ? await fetchPublicBranch(branchId).catch(() => null) : null;
+    setBranch(branchRow);
     if (scheduleMode) {
-      const firstDay = nextOpenDay(toIsoDate(new Date()), shopRow.business_days);
+      const firstDay = nextOpenDay(toIsoDate(new Date()), branchRow?.business_days ?? shopRow.business_days);
       if (firstDay) setPreferredDate(firstDay);
     }
     listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
@@ -114,7 +120,7 @@ function BookJobPageContent() {
         })
         .catch(() => {});
     }
-  }, [shopSlug, scheduleMode]);
+  }, [shopSlug, scheduleMode, branchId]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -128,7 +134,7 @@ function BookJobPageContent() {
     let active = true;
     const id = setTimeout(() => {
       setCheckingAvailability(true);
-      checkDateAvailability(shopSlug, preferredDate)
+      checkDateAvailability(shopSlug, preferredDate, branchId)
         .then((result) => {
           if (active) setAvailability(result);
         })
@@ -140,7 +146,7 @@ function BookJobPageContent() {
       active = false;
       clearTimeout(id);
     };
-  }, [shopSlug, preferredDate]);
+  }, [shopSlug, preferredDate, branchId]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -177,6 +183,7 @@ function BookJobPageContent() {
         latitude: selectedAddress?.latitude ?? null,
         longitude: selectedAddress?.longitude ?? null,
         promotionId,
+        branchId,
       });
       setSubmittedWhen(
         !isEmergency && preferredDate
@@ -286,7 +293,7 @@ function BookJobPageContent() {
           )}
           <div>
             <p className="text-lg font-bold text-white">{shop?.shop_name}</p>
-            <p className="text-xs text-slate-400">Request a service</p>
+            <p className="text-xs text-slate-400">{branch ? branch.name : "Request a service"}</p>
           </div>
         </div>
 
@@ -380,7 +387,7 @@ function BookJobPageContent() {
                 🚨 This is an emergency
               </span>
               <span className="block text-xs text-slate-400">
-                {shop?.night_shift_enabled && !isShopOpenNow(shop)
+                {shop?.night_shift_enabled && !isShopOpenNow(branch ?? shop)
                   ? `Skips scheduling — ${shop.shop_name} is closed right now, but its night-shift technician is on call and will be alerted right away.`
                   : "Skips scheduling — we'll try to dispatch the nearest available technician to you right away."}
               </span>
@@ -473,7 +480,11 @@ function BookJobPageContent() {
             )}
           </div>
 
-          {shop && !isEmergency && (
+          {shop && !isEmergency && (() => {
+            const businessDays = branch?.business_days ?? shop.business_days;
+            const hoursOpen = branch?.business_hours_open ?? shop.business_hours_open;
+            const hoursClose = branch?.business_hours_close ?? shop.business_hours_close;
+            return (
             <div>
               <label className="block text-xs font-medium text-slate-400">
                 {scheduleMode ? "Day and time" : "Preferred Date (optional)"}
@@ -481,9 +492,9 @@ function BookJobPageContent() {
               <div className="mt-1">
                 <AvailabilityCalendar
                   key={preferredDate.slice(0, 7)}
-                  businessDays={shop.business_days}
-                  businessHoursOpen={shop.business_hours_open}
-                  businessHoursClose={shop.business_hours_close}
+                  businessDays={businessDays}
+                  businessHoursOpen={hoursOpen}
+                  businessHoursClose={hoursClose}
                   selectedDate={preferredDate}
                   onSelect={(day) => {
                     setPreferredDate(day);
@@ -513,12 +524,13 @@ function BookJobPageContent() {
                 <TimeSlotPicker
                   shopSlug={shopSlug}
                   date={preferredDate}
-                  hoursOpen={shop.business_hours_open}
-                  hoursClose={shop.business_hours_close}
+                  hoursOpen={hoursOpen}
+                  hoursClose={hoursClose}
                   value={preferredTime}
                   onChange={setPreferredTime}
+                  branchId={branchId}
                   onNextDay={(() => {
-                    const next = nextOpenDay(preferredDate, shop.business_days);
+                    const next = nextOpenDay(preferredDate, businessDays);
                     return next
                       ? () => {
                           setPreferredDate(next);
@@ -530,7 +542,8 @@ function BookJobPageContent() {
                 />
               )}
             </div>
-          )}
+            );
+          })()}
 
           <p className="text-xs text-slate-400">
             We&apos;ll contact you at {customer.email}

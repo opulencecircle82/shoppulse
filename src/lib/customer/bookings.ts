@@ -151,6 +151,8 @@ export async function submitBooking(params: {
   latitude?: number | null;
   longitude?: number | null;
   promotionId?: string | null;
+  /** Set when the customer found this shop through a specific branch card — null books the Main Branch. */
+  branchId?: string | null;
 }): Promise<string> {
   const { data, error } = await supabase.rpc("submit_job_booking", {
     p_shop_slug: params.shopSlug,
@@ -167,6 +169,7 @@ export async function submitBooking(params: {
     p_longitude: params.longitude ?? null,
     p_promotion_id: params.promotionId || null,
     p_preferred_time: params.preferredTime || null,
+    p_branch_id: params.branchId || null,
   });
 
   if (error) throw new Error(error.message);
@@ -229,10 +232,11 @@ export type DateAvailability = {
  * this looks fully booked, since it's not a hard capacity reservation. */
 export async function checkDateAvailability(
   shopSlug: string,
-  date: string
+  date: string,
+  branchId?: string | null
 ): Promise<DateAvailability | null> {
   const { data, error } = await supabase
-    .rpc("check_date_availability", { p_shop_slug: shopSlug, p_date: date })
+    .rpc("check_date_availability", { p_shop_slug: shopSlug, p_date: date, p_branch_id: branchId || null })
     .maybeSingle();
 
   if (error) throw error;
@@ -248,8 +252,16 @@ export type SlotAvailability = {
 
 /** For every hour of the day: how many requests already hold it and how many the shop can take at once
  * (its active technicians, at least one). A slot is vacant while booked_count < capacity. */
-export async function getSlotAvailability(shopSlug: string, date: string): Promise<SlotAvailability[]> {
-  const { data, error } = await supabase.rpc("get_slot_availability", { p_shop_slug: shopSlug, p_date: date });
+export async function getSlotAvailability(
+  shopSlug: string,
+  date: string,
+  branchId?: string | null
+): Promise<SlotAvailability[]> {
+  const { data, error } = await supabase.rpc("get_slot_availability", {
+    p_shop_slug: shopSlug,
+    p_date: date,
+    p_branch_id: branchId || null,
+  });
   if (error) throw error;
   return (data ?? []) as SlotAvailability[];
 }
@@ -381,7 +393,33 @@ export async function listPublicShopProducts(shopId: string): Promise<PublicProd
 /** distance_km is null for a business that hasn't pinned its location but is in the customer's area.
  * website_header_url is the cover photo from the shop's own site, when it has uploaded one — the "Services
  * Near You" cards fall back to a stock photo for the category (`stockPhotoForCategory`) when it hasn't. */
-export type NearbyShop = PublicShop & { website_header_url: string | null; distance_km: number | null };
+export type NearbyShop = PublicShop & {
+  website_header_url: string | null;
+  distance_km: number | null;
+  /** Set when this row is a branch location rather than the shop's Main Branch. */
+  branch_id: string | null;
+};
+
+/** A branch's own public-facing address/hours, shown in place of the shop's Main Branch details when the
+ * customer came from a branch's own card — the business name and reviews still belong to the shop as a whole. */
+export type PublicBranch = {
+  id: string;
+  shop_id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  contact_phone: string | null;
+  business_hours_open: string | null;
+  business_hours_close: string | null;
+  business_days: string[];
+};
+
+export async function fetchPublicBranch(branchId: string): Promise<PublicBranch | null> {
+  const { data, error } = await supabase.rpc("get_public_branch", { p_branch_id: branchId }).maybeSingle();
+  if (error) throw error;
+  return data as PublicBranch | null;
+}
 
 /** Publicly listed businesses within radiusKm of the customer's pin, nearest first — whether or not they have
  * added services — followed by businesses that haven't pinned a location yet but are in the customer's city

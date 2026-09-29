@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Users, Pencil, LogOut, Moon } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { JobTicket, StaffMember } from "@/lib/supabase/types";
+import type { Branch, JobTicket, StaffMember } from "@/lib/supabase/types";
 import AddStaffModal from "./AddStaffModal";
 import StaffJobHistoryModal from "./StaffJobHistoryModal";
 import EditStaffModal from "./EditStaffModal";
@@ -26,6 +26,8 @@ export default function StaffManagementTab({
   tickets,
   currency,
   unlimitedSeats = false,
+  branches = [],
+  isOwner = false,
   onChanged,
 }: {
   staff: StaffMember[];
@@ -35,6 +37,9 @@ export default function StaffManagementTab({
   currency: string;
   /** A test account with unlimited technician seats. */
   unlimitedSeats?: boolean;
+  branches?: Branch[];
+  /** Only the owner can transfer staff between branches or promote a branch manager. */
+  isOwner?: boolean;
   onChanged: () => void;
 }) {
   const [showAddStaff, setShowAddStaff] = useState(false);
@@ -46,6 +51,8 @@ export default function StaffManagementTab({
   const [actionError, setActionError] = useState<string | null>(null);
   const nonOwnerStaff = staff.filter((s) => s.role !== "OWNER");
   const seatsUsed = nonOwnerStaff.length;
+  const branchName = (member: StaffMember) =>
+    member.branch_id ? (branches.find((b) => b.id === member.branch_id)?.name ?? "Unknown branch") : "Main Branch";
 
   async function toggleActive(member: StaffMember) {
     await supabase
@@ -222,6 +229,7 @@ export default function StaffManagementTab({
                   {member.is_night_shift && <NightShiftChip />}
                   <p className="mt-0.5 text-xs text-slate-500">
                     {member.role} · ${member.hourly_rate.toFixed(2)}/hr
+                    {branches.length > 0 && ` · ${branchName(member)}`}
                   </p>
                 </div>
                 <span
@@ -301,7 +309,12 @@ export default function StaffManagementTab({
                       <div className="text-xs text-slate-500">{member.address}</div>
                     )}
                   </td>
-                  <td className="px-3 py-3 text-slate-600">{member.role}</td>
+                  <td className="px-3 py-3 text-slate-600">
+                    <div>{member.role}</div>
+                    {branches.length > 0 && (
+                      <div className="text-xs text-slate-500">{branchName(member)}</div>
+                    )}
+                  </td>
                   <td className="px-3 py-3 text-slate-600">
                     ${member.hourly_rate.toFixed(2)}/hr
                   </td>
@@ -348,6 +361,8 @@ export default function StaffManagementTab({
       {editingStaff && (
         <EditStaffModal
           staffMember={editingStaff}
+          branches={branches}
+          isOwner={isOwner}
           onClose={() => setEditingStaff(null)}
           onSaved={onChanged}
         />

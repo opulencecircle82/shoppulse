@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
+import { useStaffMembers } from "@/lib/hooks/useStaffMembers";
 import CompanyProfilePanel from "@/components/dashboard/settings/CompanyProfilePanel";
+import BranchManagementPanel from "@/components/dashboard/settings/BranchManagementPanel";
 import GeofencePanel from "@/components/dashboard/settings/GeofencePanel";
 import StaffPayRatesPanel from "@/components/dashboard/settings/StaffPayRatesPanel";
 import WatermarkPanel from "@/components/dashboard/settings/WatermarkPanel";
@@ -22,6 +24,7 @@ import { hasWorkingSchedule } from "@/components/dashboard/GoLiveButton";
 const TABS = [
   { id: "profile", label: "Company Profile" },
   { id: "hours", label: "Working Hours" },
+  { id: "branches", label: "Branch Management" },
   { id: "nightshift", label: "Night Shift" },
   { id: "reviews", label: "Review Removal" },
   { id: "tasks", label: "Default Tasks" },
@@ -43,6 +46,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { checked } = useRequireAuth();
   const { loading, shop, staffMember, isOwner, refresh } = useShop();
+  const { staff, loading: staffLoading, refresh: refreshStaff } = useStaffMembers(shop?.id);
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -203,6 +207,16 @@ export default function SettingsPage() {
                 submitLabel={isOnboarding ? "Save & Continue" : "Save Changes"}
               />
             )}
+            {activeTab === "branches" && (shop ? (
+              <BranchManagementPanel
+                shop={shop}
+                staff={staff}
+                staffLoading={staffLoading}
+                onStaffChanged={refreshStaff}
+              />
+            ) : (
+              <p className="text-sm text-slate-500">Set up your Company Profile first.</p>
+            ))}
             {activeTab === "nightshift" && <NightShiftPanel shop={shop} onSaved={refresh} />}
             {activeTab === "reviews" && (shop ? <ReviewRemovalPanel /> : (
               <p className="text-sm text-slate-500">Set up your Company Profile first.</p>

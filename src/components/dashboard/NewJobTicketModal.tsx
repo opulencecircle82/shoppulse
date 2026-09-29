@@ -83,6 +83,8 @@ export default function NewJobTicketModal({
   shopId,
   staff,
   busyTechnicians,
+  branchId = null,
+  branchName = null,
   onClose,
   onCreated,
 }: {
@@ -90,6 +92,10 @@ export default function NewJobTicketModal({
   staff: StaffMember[];
   /** Technician id → the job they are still busy on; those people can't be picked yet. */
   busyTechnicians: Map<string, string>;
+  /** Which branch this ticket belongs to — null is Main Branch. Already scopes `staff` to the same branch. */
+  branchId?: string | null;
+  /** Shown next to the title so it's clear which location this ticket is being created for. */
+  branchName?: string | null;
   onClose: () => void;
   onCreated: () => void;
 }) {
@@ -112,6 +118,7 @@ export default function NewJobTicketModal({
 
     const { error: insertError } = await supabase.from("job_tickets").insert({
       shop_id: shopId,
+      branch_id: branchId,
       start_checklist: startChecklist,
       end_checklist: endChecklist,
       client_name: clientName,
@@ -145,7 +152,10 @@ export default function NewJobTicketModal({
         className="max-h-[90vh] overflow-y-auto w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10"
       >
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">New Job Ticket</h3>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">New Job Ticket</h3>
+            {branchName && <p className="mt-0.5 text-xs text-slate-500">For {branchName}</p>}
+          </div>
           <button
             type="button"
             onClick={onClose}

@@ -14,7 +14,7 @@ export async function GET(
 
   const { id } = await context.params;
 
-  const [profile, owner, overview, reviews, requests] = await Promise.all([
+  const [profile, owner, overview, branches, reviews, requests] = await Promise.all([
     supabaseAdmin
       .from("shops")
       .select(
@@ -31,6 +31,7 @@ export async function GET(
       .limit(1)
       .maybeSingle(),
     supabaseAdmin.rpc("admin_shop_overview", { p_shop_id: id }),
+    supabaseAdmin.rpc("admin_branch_overview", { p_shop_id: id }),
     supabaseAdmin
       .from("shop_reviews")
       .select("id, rating, comment, photo_url, created_at, job_tickets(client_name)")
@@ -47,7 +48,9 @@ export async function GET(
       .limit(30),
   ]);
 
-  const failure = [profile.error, owner.error, overview.error, reviews.error, requests.error].find(Boolean);
+  const failure = [profile.error, owner.error, overview.error, branches.error, reviews.error, requests.error].find(
+    Boolean
+  );
   if (failure) {
     return Response.json({ error: failure.message }, { status: 500 });
   }
@@ -59,6 +62,7 @@ export async function GET(
     profile: profile.data as AdminShopDetail["profile"],
     owner: owner.data,
     counts: overview.data as AdminShopDetail["counts"],
+    branches: (branches.data ?? []) as AdminShopDetail["branches"],
     reviews: (reviews.data ?? []).map((row) => {
       const ticket = row.job_tickets as { client_name: string } | { client_name: string }[] | null;
       return {
