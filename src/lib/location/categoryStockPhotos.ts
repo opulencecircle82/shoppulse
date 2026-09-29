@@ -11,7 +11,7 @@ const UNSPLASH = (id: string) =>
 export const CATEGORY_STOCK_PHOTOS: Record<string, string> = {
   Electrical: UNSPLASH("1621905251189-08b45d6a269e"),
   Plumbing: UNSPLASH("1585704032915-c3400ca199e7"),
-  HVAC: UNSPLASH("1607400201889-565b1ee75f8e"),
+  "Aircon & Refrigeration": UNSPLASH("1607400201889-565b1ee75f8e"),
   "Handyman & Painting": UNSPLASH("1504148455328-c376907d081c"),
   "House Cleaning": UNSPLASH("1581578731548-c64695cc6952"),
 };

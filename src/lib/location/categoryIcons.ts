@@ -6,6 +6,7 @@ import {
   Home,
   PaintRoller,
   Refrigerator,
+  Snowflake,
   Sparkles,
   SprayCan,
   Sprout,
@@ -13,7 +14,6 @@ import {
   Toilet,
   TreePine,
   Waves,
-  Wind,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -37,7 +37,7 @@ const CATEGORY_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   "Septic Tank & Sewer Pumping": { icon: Toilet, color: "text-stone-500" },
   Plumbing: { icon: Droplet, color: "text-brand-sky" },
   Electrical: { icon: Zap, color: "text-amber-500" },
-  HVAC: { icon: Wind, color: "text-cyan-500" },
+  "Aircon & Refrigeration": { icon: Snowflake, color: "text-cyan-500" },
   "Pool Maintenance": { icon: Waves, color: "text-blue-500" },
   "Restoration Services": { icon: Hammer, color: "text-amber-600" },
 };

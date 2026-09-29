@@ -33,6 +33,13 @@ export function hasBusinessLocation(shop: Pick<Shop, "latitude" | "longitude">):
   return shop.latitude !== null && shop.longitude !== null;
 }
 
+/** A real street address and a map pin — required in Company Profile since customers and technicians both
+ * navigate by it, and a shop created without going through that form (e.g. a devside test account) can
+ * otherwise sit with neither forever. */
+export function hasCompanyProfile(shop: Pick<Shop, "address" | "latitude" | "longitude">): boolean {
+  return Boolean(shop.address?.trim()) && hasBusinessLocation(shop);
+}
+
 /** A shop is LIVE when it is listed for customers, has told them when it works, and has pinned where it is. */
 export function isShopLive(shop: ShopSetup): boolean {
   return shop.is_publicly_listed && hasWorkingSchedule(shop) && hasBusinessLocation(shop);

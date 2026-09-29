@@ -32,7 +32,7 @@ export const SERVICE_CATEGORY_GROUPS = [
       "Septic Tank & Sewer Pumping",
       "Plumbing",
       "Electrical",
-      "HVAC",
+      "Aircon & Refrigeration",
       "Pool Maintenance",
       "Restoration Services",
     ],

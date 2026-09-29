@@ -52,7 +52,7 @@ const TAB_DESCRIPTIONS: Partial<Record<DashboardTabId, string>> = {
   mobile: "Personalize how your team's mobile app looks and feels.",
 };
 import NotificationBell from "@/components/dashboard/NotificationBell";
-import GoLiveButton from "@/components/dashboard/GoLiveButton";
+import GoLiveButton, { hasCompanyProfile, hasWorkingSchedule } from "@/components/dashboard/GoLiveButton";
 import BookingAlertHost from "@/components/dashboard/BookingAlertHost";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";
 import {
@@ -67,7 +67,7 @@ const MAP_COLLAPSED_KEY = "shoppulse.dashboard.mapCollapsed";
 export default function DashboardPage() {
   const router = useRouter();
   const { checked } = useRequireAuth();
-  const { loading: shopLoading, shop, staffMember, refresh: refreshShop } = useShop();
+  const { loading: shopLoading, shop, staffMember, isOwner, refresh: refreshShop } = useShop();
   const { tickets, loading: ticketsLoading, refresh: refreshTickets } =
     useJobTickets(shop?.id);
   const { staff, loading: staffLoading, refresh: refreshStaff } =
@@ -164,18 +164,30 @@ export default function DashboardPage() {
     router.replace("/login");
   }
 
-  if (!shop) {
+  // The job board, invoicing, live map etc. all assume a real address, a map pin and working hours — without
+  // them a customer can't find the shop or know when it's open, so the owner can't get past this screen until
+  // both are in, however the shop was created (self-signup here, or a bare shop the devside console made for a
+  // client). A manager or technician can't fix any of this themselves, so only the owner is held here.
+  const setupIncomplete =
+    isOwner && shop !== null && (!hasCompanyProfile(shop) || !hasWorkingSchedule(shop));
+
+  if (!shop || setupIncomplete) {
+    const missing: string[] = [];
+    if (shop && !hasCompanyProfile(shop)) missing.push("your business address and map pin");
+    if (shop && !hasWorkingSchedule(shop)) missing.push("your working days and hours");
+
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-brand-page px-6 text-center">
         <span className="rounded-full bg-brand-blue/15 px-3 py-1 text-xs font-semibold text-brand-blue">
           You&apos;re in
         </span>
         <h1 className="mt-4 text-3xl font-bold text-slate-900">
-          Set up your shop to get started
+          {shop ? "Finish setting up your shop" : "Set up your shop to get started"}
         </h1>
         <p className="mt-2 max-w-md text-sm text-slate-500">
-          Complete your business profile to unlock the job board, invoicing,
-          and the local ad network.
+          {shop
+            ? `Please add ${missing.join(" and ")} before using your dashboard — customers and technicians both depend on them.`
+            : "Complete your business profile to unlock the job board, invoicing, and the local ad network."}
         </p>
         <div className="mt-8 flex items-center gap-4">
           <a

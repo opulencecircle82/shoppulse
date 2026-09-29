@@ -6,7 +6,9 @@ import type { JobTicket } from "@/lib/supabase/types";
 import {
   fetchTicketStaffLocation,
   fetchTicketTechnician,
+  fetchTicketWaitEstimate,
   type TicketTechnician,
+  type TicketWaitEstimate,
 } from "@/lib/customer/bookings";
 import {
   formatEta,
@@ -19,6 +21,7 @@ import {
 import { timeAgo } from "@/lib/dashboard/format";
 
 const LOCATION_POLL_MS = 15000;
+const WAIT_ESTIMATE_POLL_MS = 20000;
 
 /** Banners where the technician is out on the road or at the door, so a live position is worth reading. */
 const TRACKABLE: BannerKind[] = ["EN_ROUTE", "PREPARING", "ON_SITE", "WORKING"];
@@ -62,7 +65,10 @@ function Banner({
 }) {
   const [technician, setTechnician] = useState<TicketTechnician | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number; updated_at: string } | null>(null);
+  const [waitEstimate, setWaitEstimate] = useState<TicketWaitEstimate | null>(null);
   const trackable = TRACKABLE.includes(kind);
+  // The only banners a technician hasn't been put on yet — the one case "every technician is busy" can apply to.
+  const awaitingAssignment = kind === "PENDING" || (kind === "CONFIRMED" && job.status === "UNASSIGNED");
 
   useEffect(() => {
     if (!trackable) return;
@@ -85,6 +91,24 @@ function Banner({
       clearInterval(interval);
     };
   }, [job.id, trackable]);
+
+  useEffect(() => {
+    if (!awaitingAssignment) return;
+    let active = true;
+    function poll() {
+      fetchTicketWaitEstimate(job.id)
+        .then((estimate) => {
+          if (active) setWaitEstimate(estimate);
+        })
+        .catch(() => {});
+    }
+    poll();
+    const interval = setInterval(poll, WAIT_ESTIMATE_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [job.id, awaitingAssignment]);
 
   const destination: Pin | null =
     job.booking_latitude !== null && job.booking_longitude !== null
@@ -150,13 +174,17 @@ function Banner({
       headline = "Your booking is confirmed";
       subline =
         job.status === "UNASSIGNED"
-          ? "The shop is assigning a technician."
+          ? waitEstimate?.allBusy
+            ? "Every technician is busy right now — see your request for details."
+            : "The shop is assigning a technician."
           : "A technician has been assigned.";
       cta = "View Job";
       break;
     case "PENDING":
       headline = "Waiting for the shop to confirm";
-      subline = "We'll let you know the moment they accept.";
+      subline = waitEstimate?.allBusy
+        ? "Every technician is busy right now — see your request for details."
+        : "We'll let you know the moment they accept.";
       cta = "View Request";
       break;
   }

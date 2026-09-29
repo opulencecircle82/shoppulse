@@ -397,3 +397,8 @@ export function formatEta(minutes: number): string {
   const rest = minutes % 60;
   return rest === 0 ? `about ${hours} hr` : `about ${hours} hr ${rest} min`;
 }
+
+/** Whole minutes from now until `iso`, floored at 1 — feed straight into `formatEta`, never "in 0 mins" or negative. */
+export function minutesUntil(iso: string, now: number = Date.now()): number {
+  return Math.max(1, Math.round((Date.parse(iso) - now) / 60000));
+}

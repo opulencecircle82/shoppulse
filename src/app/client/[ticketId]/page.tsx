@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { CalendarClock, Download, MessageCircle, Star } from "lucide-react";
+import { CalendarClock, Clock, Download, MessageCircle, Star } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
   fetchTicketStaffLocation,
@@ -13,7 +13,9 @@ import {
   confirmClientPayment,
   cancelBooking,
   fetchTicketPaymentInfo,
+  fetchTicketWaitEstimate,
   type TicketPaymentInfo,
+  type TicketWaitEstimate,
 } from "@/lib/customer/bookings";
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import PaymentDetails from "@/components/customer/PaymentDetails";
@@ -21,7 +23,7 @@ import RequestProgress from "@/components/customer/RequestProgress";
 import TechLiveCard, { type TrackPhase } from "@/components/customer/TechLiveCard";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
 import { ensureCustomerConversation } from "@/lib/chat/chat";
-import { requestProgress } from "@/lib/customer/jobStages";
+import { requestProgress, formatEta, minutesUntil } from "@/lib/customer/jobStages";
 import { formatJobNumber } from "@/lib/jobNumber";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
@@ -41,7 +43,10 @@ const CANCEL_REASONS = [
   "Other",
 ] as const;
 const TICKET_POLL_MS = 8000;
+const WAIT_ESTIMATE_POLL_MS = 20000;
 const TRACKED_STATUSES = ["SCHEDULED", "ESTIMATE_PENDING", "IN_PROGRESS"];
+/** Still waiting for a technician — the only stage "every technician is busy" can apply to. */
+const AWAITING_ASSIGNMENT_STATUSES = ["PENDING", "UNASSIGNED"];
 
 type ClientTicket = {
   id: string;
@@ -206,6 +211,7 @@ export default function ClientTicketPage() {
   const [cancelDetails, setCancelDetails] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [waitEstimate, setWaitEstimate] = useState<TicketWaitEstimate | null>(null);
 
   const load = useCallback(async () => {
     const { data, error: fetchError } = await supabase
@@ -258,6 +264,29 @@ export default function ClientTicketPage() {
     };
   }, [refreshQuietly, ticketId]);
 
+  // While still waiting for a technician, whether every one of the shop's technicians is currently
+  // busy can change at any moment (one could free up, or another could pick up an emergency) — worth
+  // its own light poll rather than only refreshing when the ticket itself changes.
+  const ticketStatus = ticket?.status;
+  const awaitingAssignment = Boolean(ticketStatus && AWAITING_ASSIGNMENT_STATUSES.includes(ticketStatus));
+  useEffect(() => {
+    if (!awaitingAssignment) return;
+    let active = true;
+    function poll() {
+      fetchTicketWaitEstimate(ticketId)
+        .then((estimate) => {
+          if (active) setWaitEstimate(estimate);
+        })
+        .catch(() => {});
+    }
+    poll();
+    const interval = setInterval(poll, WAIT_ESTIMATE_POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [awaitingAssignment, ticketId]);
+
   useEffect(() => {
     const id = setTimeout(() => {
       load();
@@ -289,8 +318,6 @@ export default function ClientTicketPage() {
       document.getElementById("pay")?.scrollIntoView({ block: "start" });
     }
   }, [hasTicket]);
-
-  const ticketStatus = ticket?.status;
 
   useEffect(() => {
     if (!ticketStatus || !TRACKED_STATUSES.includes(ticketStatus)) return;
@@ -612,6 +639,20 @@ export default function ClientTicketPage() {
               </>
             );
           })()}
+
+          {awaitingAssignment && waitEstimate?.allBusy && (
+            <div className="mt-4 rounded-2xl bg-amber-500/10 p-4">
+              <p className="flex items-center gap-2 text-sm font-bold text-amber-400">
+                <Clock className="h-4 w-4 shrink-0" />
+                {ticket.shop_name}&apos;s technicians are all busy right now
+              </p>
+              <p className="mt-1 text-xs text-slate-300">
+                {waitEstimate.estimatedAvailableAt &&
+                  `One should be free ${formatEta(minutesUntil(waitEstimate.estimatedAvailableAt))}. `}
+                You&apos;re welcome to wait, or cancel below and look for another service.
+              </p>
+            </div>
+          )}
 
           {["PENDING", "UNASSIGNED", "SCHEDULED", "ESTIMATE_PENDING"].includes(ticket.status) && (
             <div className="mt-4">

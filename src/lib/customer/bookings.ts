@@ -303,6 +303,24 @@ export async function fetchTicketStaffLocation(
   return data as { lat: number; lng: number; updated_at: string } | null;
 }
 
+export type TicketWaitEstimate = {
+  /** Every one of the shop's technicians is currently busy on another job — only ever true while this
+   * ticket is still PENDING/UNASSIGNED (unset once someone is assigned to it). */
+  allBusy: boolean;
+  /** Roughly when a technician should free up, from the shop's own history of how long a job usually
+   * takes — null when there isn't enough to go on (e.g. every technician has been deactivated). */
+  estimatedAvailableAt: string | null;
+};
+
+export async function fetchTicketWaitEstimate(ticketId: string): Promise<TicketWaitEstimate> {
+  const { data, error } = await supabase
+    .rpc("get_ticket_wait_estimate", { p_ticket_id: ticketId })
+    .maybeSingle();
+  if (error) throw error;
+  const row = data as { all_busy: boolean; estimated_available_at: string | null } | null;
+  return { allBusy: row?.all_busy === true, estimatedAvailableAt: row?.estimated_available_at ?? null };
+}
+
 export type NearbyPromotion = {
   id: string;
   title: string;
