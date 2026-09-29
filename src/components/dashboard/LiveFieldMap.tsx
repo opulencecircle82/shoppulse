@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -69,6 +69,19 @@ const PHILIPPINES_CENTER: [number, number] = [12.8797, 121.774];
 const SHOP_AREA_ZOOM = 14;
 
 const CLOSE_ZOOM = 17;
+
+// Leaflet's permanent tooltips are single-line by default (`white-space: nowrap`) and don't reposition
+// themselves for the edge of the map, so a long one (a client's name plus job number) can run off the side
+// of this map — especially the narrow docked panel. Wrapping the text keeps every tooltip a fixed width no
+// matter what it says, so it can spill onto a second line instead of past the map's edge. Inline styles,
+// not a class, since they need to win over Leaflet's own `.leaflet-tooltip` rule regardless of CSS order.
+function TooltipText({ children }: { children: ReactNode }) {
+  return (
+    <span style={{ display: "inline-block", maxWidth: 130, whiteSpace: "normal", textAlign: "center", lineHeight: 1.25 }}>
+      {children}
+    </span>
+  );
+}
 
 // The map is locked (no dragging or wheel/touch zoom — see MapContainer
 // below), so the view itself has to keep every pin reachable: frame all
@@ -243,7 +256,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
         {shopPoint && (
           <Marker position={shopPoint} icon={SHOP_MARKER_ICON}>
             <Tooltip permanent direction="top" offset={[0, -38]}>
-              {shop.shop_name}
+              <TooltipText>{shop.shop_name}</TooltipText>
             </Tooltip>
             <Popup>
               <p className="font-semibold">{shop.shop_name}</p>
@@ -260,9 +273,11 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
               {/* Blue pin: a job is still open here. Engineer pin: only finished work, where a technician took proof photos. */}
               <Marker position={[place.lat, place.lng]} {...(place.hasOpen ? {} : { icon: TECH_MARKER_ICON })}>
                 <Tooltip permanent direction={place.hasOpen ? "bottom" : "top"} offset={place.hasOpen ? [0, -4] : [0, -46]}>
-                  Client: {place.clientName} · {primary.label}
-                  {!primary.open && primary.tech ? ` · Tech: ${primary.tech}` : ""}
-                  {extra > 0 ? ` (+${extra} more)` : ""}
+                  <TooltipText>
+                    Client: {place.clientName} · {primary.label}
+                    {!primary.open && primary.tech ? ` · Tech: ${primary.tech}` : ""}
+                    {extra > 0 ? ` (+${extra} more)` : ""}
+                  </TooltipText>
                 </Tooltip>
                 <Popup>
                   <p className="font-semibold">Client: {place.clientName}</p>
@@ -293,7 +308,7 @@ export default function LiveFieldMap({ shop, fill = false }: { shop: Shop; fill?
         {livePins.map((live) => (
           <Marker key={live.staffId} position={[live.lat, live.lng]} icon={LIVE_DOT_ICON}>
             <Tooltip permanent direction="right" offset={[20, 0]}>
-              🟢 Tech: {live.staffName} (live)
+              <TooltipText>🟢 Tech: {live.staffName} (live)</TooltipText>
             </Tooltip>
             <Popup>
               <p className="font-semibold">Tech: {live.staffName}</p>

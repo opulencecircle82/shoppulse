@@ -442,7 +442,7 @@ export default function DashboardPage() {
           {/* The live map stays on the right for every tab. Below xl there is
               no room beside the content, so it drops underneath instead. */}
           <aside
-            className={`w-full shrink-0 lg:basis-full xl:basis-auto xl:self-start xl:sticky xl:top-6 ${
+            className={`w-full min-w-0 max-w-full shrink-0 lg:basis-full xl:basis-auto xl:self-start xl:sticky xl:top-6 ${
               mapCollapsed ? "xl:w-14" : "xl:w-[360px] 2xl:w-[420px]"
             }`}
           >

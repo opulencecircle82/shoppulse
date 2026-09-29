@@ -25,13 +25,15 @@ export default function LiveMapPanel({
   collapsed: boolean;
   onToggle: () => void;
 }) {
+  // The same clean white card every other dashboard container uses (job board, the header bar) — not a
+  // heavier, differently-bordered box — so it reads as one more panel on the page instead of an odd one out.
   if (collapsed) {
     return (
       <button
         type="button"
         onClick={onToggle}
         aria-label="Show the live field map"
-        className="flex w-full items-center gap-3 rounded-2xl border-[3px] border-brand-blue bg-white px-4 py-3 text-left shadow-lg shadow-brand-blue/15 transition-colors hover:bg-brand-blue/5 xl:w-14 xl:flex-col xl:gap-4 xl:px-0 xl:py-4"
+        className="flex w-full min-w-0 max-w-full items-center gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 text-left shadow-md shadow-slate-900/5 transition-colors hover:bg-slate-50 xl:w-14 xl:flex-col xl:gap-4 xl:px-0 xl:py-4"
       >
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue text-white shadow-md shadow-brand-blue/25">
           <MapPin className="h-4 w-4" />
@@ -45,10 +47,11 @@ export default function LiveMapPanel({
   }
 
   return (
-    <section className="isolate flex h-[480px] flex-col overflow-hidden rounded-2xl border-[3px] border-brand-blue bg-white shadow-lg shadow-brand-blue/15 xl:h-[calc(100vh-3rem)]">
-      <header className="flex items-center gap-3 border-b border-brand-blue/15 px-4 py-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue text-white shadow-md shadow-brand-blue/25">
+    <section className="isolate flex h-[480px] w-full min-w-0 max-w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 xl:h-[calc(100vh-3rem)]">
+      <header className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+        <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue text-white shadow-md shadow-brand-blue/25">
           <MapPin className="h-4 w-4" />
+          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-brand-emerald ring-2 ring-white" />
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-semibold text-slate-900">Live Field Map</h2>
