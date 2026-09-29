@@ -360,46 +360,6 @@ export async function listPublicShopProducts(shopId: string): Promise<PublicProd
   return (data ?? []) as PublicProduct[];
 }
 
-export type FeaturedService = {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  shop_name: string;
-  shop_slug: string;
-  shop_logo_url: string | null;
-  avg_rating: number | null;
-  review_count: number;
-};
-
-export async function listFeaturedServices(city?: string | null): Promise<FeaturedService[]> {
-  const { data, error } = await supabase.rpc("list_featured_services", {
-    p_city: city || null,
-    p_limit: 6,
-  });
-  if (error) throw error;
-  return (data ?? []) as FeaturedService[];
-}
-
-export type NearbyService = FeaturedService & { distance_km: number };
-
-/** Distance-based (not just same-city) — only returns services from shops
- * with a pinned location, within p_radiusKm of the customer's own pin. */
-export async function listNearbyShopServices(
-  lat: number,
-  lng: number,
-  radiusKm = 20
-): Promise<NearbyService[]> {
-  const { data, error } = await supabase.rpc("list_nearby_shop_services", {
-    p_lat: lat,
-    p_lng: lng,
-    p_radius_km: radiusKm,
-    p_limit: 20,
-  });
-  if (error) throw error;
-  return (data ?? []) as NearbyService[];
-}
-
 /** distance_km is null for a business that hasn't pinned its location but is in the customer's area. */
 export type NearbyShop = PublicShop & { distance_km: number | null };
 
