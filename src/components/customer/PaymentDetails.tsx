@@ -33,17 +33,28 @@ function CopyRow({ label, value }: { label: string; value: string }) {
 }
 
 /**
- * How to pay this shop directly: bank account, PayPal, QR code and their own
- * instructions. Renders nothing if the shop hasn't filled anything in, so the
- * job page falls back to its plain "pay the technician or shop directly" line.
+ * How to pay this shop directly, filtered down to whichever payment method the customer actually
+ * picked — showing every method at once regardless of their choice was confusing when a shop had
+ * both bank and PayPal filled in. Cash and Credit/Debit Card are paid to the technician in person,
+ * so neither has anything to show here. Renders nothing if the shop hasn't filled in the relevant
+ * details, so the job page falls back to its plain "pay the technician or shop directly" line.
  */
-export default function PaymentDetails({ info }: { info: TicketPaymentInfo | null }) {
-  if (!info) return null;
+export default function PaymentDetails({
+  info,
+  method,
+}: {
+  info: TicketPaymentInfo | null;
+  method: string | null;
+}) {
+  if (!info || !method || method === "Cash") return null;
 
-  const hasBank = info.bank_name || info.bank_account_name || info.bank_account_number;
-  if (!hasBank && !info.paypal_email && !info.payment_qr_url && !info.payment_instructions) {
-    return null;
-  }
+  const hasBank = Boolean(info.bank_name || info.bank_account_name || info.bank_account_number);
+  const showBank = method === "Bank Transfer" && hasBank;
+  const showPaypal = method === "PayPal" && Boolean(info.paypal_email);
+  const showQr = (method === "Bank Transfer" || method === "PayPal") && Boolean(info.payment_qr_url);
+  const showInstructions = Boolean(info.payment_instructions);
+
+  if (!showBank && !showPaypal && !showQr && !showInstructions) return null;
 
   return (
     <div className="mt-4 rounded-2xl bg-white/5 p-4">
@@ -51,7 +62,7 @@ export default function PaymentDetails({ info }: { info: TicketPaymentInfo | nul
         Pay this shop directly
       </p>
 
-      {hasBank && (
+      {showBank && (
         <div className="mt-2 divide-y divide-white/10">
           <p className="flex items-center gap-1.5 pb-1 text-xs font-semibold text-slate-300">
             <Landmark className="h-3.5 w-3.5" /> Bank transfer
@@ -64,22 +75,22 @@ export default function PaymentDetails({ info }: { info: TicketPaymentInfo | nul
         </div>
       )}
 
-      {info.paypal_email && (
+      {showPaypal && (
         <div className="mt-3 divide-y divide-white/10">
           <p className="flex items-center gap-1.5 pb-1 text-xs font-semibold text-slate-300">
             <Wallet className="h-3.5 w-3.5" /> PayPal
           </p>
-          <CopyRow label="PayPal email" value={info.paypal_email} />
+          <CopyRow label="PayPal email" value={info.paypal_email!} />
         </div>
       )}
 
-      {info.payment_qr_url && (
+      {showQr && (
         <div className="mt-3">
           <p className="text-xs font-semibold text-slate-300">Scan to pay</p>
-          <a href={info.payment_qr_url} target="_blank" rel="noopener noreferrer">
+          <a href={info.payment_qr_url!} target="_blank" rel="noopener noreferrer">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={info.payment_qr_url}
+              src={info.payment_qr_url!}
               alt="Payment QR code"
               className="mt-2 h-40 w-40 rounded-xl bg-white object-contain p-2"
             />
@@ -87,7 +98,7 @@ export default function PaymentDetails({ info }: { info: TicketPaymentInfo | nul
         </div>
       )}
 
-      {info.payment_instructions && (
+      {showInstructions && (
         <p className="mt-3 whitespace-pre-wrap rounded-xl bg-black/20 px-3 py-2.5 text-xs leading-relaxed text-slate-300">
           {info.payment_instructions}
         </p>

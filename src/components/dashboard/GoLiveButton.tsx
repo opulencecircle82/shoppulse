@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop, StaffMember } from "@/lib/supabase/types";
@@ -16,7 +17,15 @@ const LocationPickerMap = dynamic(() => import("@/components/shared/LocationPick
 /** Other parts of the dashboard (the Home checklist) ask the LIVE button to open a step with this event. */
 export const GO_LIVE_EVENT = "shoppulse:go-live";
 
-type Step = "hours" | "location" | "technician";
+type Step = "hours" | "location" | "technician" | "receiving";
+
+type ReceivingSettings = {
+  bank_name: string | null;
+  bank_account_name: string | null;
+  bank_account_number: string | null;
+  paypal_email: string | null;
+  payment_qr_url: string | null;
+};
 
 type ShopSetup = Pick<
   Shop,
@@ -51,13 +60,21 @@ export function hasActiveTechnician(staff: Pick<StaffMember, "role" | "is_active
   return staff.some((s) => s.role === "TECHNICIAN" && s.is_active);
 }
 
+/** At least one real way for a customer to actually send money — otherwise picking a non-cash payment
+ * method in Payment Methods leads nowhere. Any one of bank details, PayPal or a QR code is enough. */
+export function hasReceivingPaymentInfo(settings: ReceivingSettings | null): boolean {
+  if (!settings) return false;
+  const hasBank = Boolean(settings.bank_name || settings.bank_account_name || settings.bank_account_number);
+  return hasBank || Boolean(settings.paypal_email) || Boolean(settings.payment_qr_url);
+}
+
 /**
  * The owner's LIVE switch, in the dashboard header. Not live: a "Go LIVE" button that walks the owner
- * through whatever is missing — first the working days and hours ("Please input your working days"),
- * then the business location on the map, then (a new requirement, checked only on the way to going
- * live — never retroactively takes an already-live shop offline) at least one active technician — and
- * goes live the moment the last step is done. Live: a green "LIVE NOW" badge whose menu edits hours or
- * location, or takes the business offline.
+ * through whatever is missing, in order — working days and hours, the business location on the map, at
+ * least one active technician, then at least one real way to receive payments (bank, PayPal or a QR
+ * code) — and goes live the moment the last one is done. Both newer checks (technician, receiving) are
+ * checked only on the way to going live and never retroactively take an already-live shop offline. Live:
+ * a green "LIVE NOW" badge whose menu edits hours or location, or takes the business offline.
  */
 export default function GoLiveButton({
   shop,
@@ -70,17 +87,37 @@ export default function GoLiveButton({
   onSelectTab: (tab: DashboardTabId) => void;
   onChanged: () => void;
 }) {
+  const router = useRouter();
   const [step, setStep] = useState<Step | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+  const [receiving, setReceiving] = useState<ReceivingSettings | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const hasSchedule = hasWorkingSchedule(shop);
   const hasLocation = hasBusinessLocation(shop);
   const hasTechnician = hasActiveTechnician(staff);
+  const hasReceiving = hasReceivingPaymentInfo(receiving);
   const live = isShopLive(shop);
+
+  // A small self-contained read, same pattern as the Home checklist's own service count —
+  // nothing else on this page already loads business_settings.
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("business_settings")
+      .select("bank_name, bank_account_name, bank_account_number, paypal_email, payment_qr_url")
+      .eq("shop_id", shop.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (active) setReceiving(data as ReceivingSettings | null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [shop.id]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -103,7 +140,8 @@ export default function GoLiveButton({
   useEffect(() => {
     function handleOpen(event: Event) {
       const wanted = (event as CustomEvent<Step>).detail;
-      if (wanted === "hours" || wanted === "location" || wanted === "technician") openStep(wanted);
+      if (wanted === "hours" || wanted === "location" || wanted === "technician" || wanted === "receiving")
+        openStep(wanted);
     }
     window.addEventListener(GO_LIVE_EVENT, handleOpen);
     return () => window.removeEventListener(GO_LIVE_EVENT, handleOpen);
@@ -124,21 +162,24 @@ export default function GoLiveButton({
     return true;
   }
 
+  // Whatever's still missing, checked in this fixed order — null once nothing is.
+  function nextGap(): Step | null {
+    if (!hasSchedule) return "hours";
+    if (!hasLocation) return "location";
+    if (!hasTechnician) return "technician";
+    if (!hasReceiving) return "receiving";
+    return null;
+  }
+
   async function handleHoursSaved() {
     // Already live — editing hours never re-triggers the setup gate.
     if (live) {
       setStep(null);
       return;
     }
-    // Working days are in. Whatever's still missing is the next thing to ask for;
-    // otherwise nothing is missing and it goes live now.
-    if (!hasLocation) {
-      setStep("location");
-      onChanged();
-      return;
-    }
-    if (!hasTechnician) {
-      setStep("technician");
+    const gap = !hasLocation ? "location" : !hasTechnician ? "technician" : !hasReceiving ? "receiving" : null;
+    if (gap) {
+      setStep(gap);
       onChanged();
       return;
     }
@@ -155,26 +196,23 @@ export default function GoLiveButton({
       if (await update({ latitude: pin.lat, longitude: pin.lng })) setStep(null);
       return;
     }
-    // Saving the pin completes the setup only if working days and a technician are already there.
-    const willGoLive = hasSchedule && hasTechnician;
+    // Saving the pin completes the setup only if everything else is already there too.
+    const willGoLive = hasSchedule && hasTechnician && hasReceiving;
     const fields = willGoLive
       ? { latitude: pin.lat, longitude: pin.lng, is_publicly_listed: true }
       : { latitude: pin.lat, longitude: pin.lng };
-    if (await update(fields)) setStep(!hasSchedule ? "hours" : !hasTechnician ? "technician" : null);
+    if (await update(fields))
+      setStep(!hasSchedule ? "hours" : !hasTechnician ? "technician" : !hasReceiving ? "receiving" : null);
   }
 
   function handleClick() {
     if (live) {
       setMenuOpen((open) => !open);
-    } else if (!hasSchedule) {
-      openStep("hours");
-    } else if (!hasLocation) {
-      openStep("location");
-    } else if (!hasTechnician) {
-      openStep("technician");
-    } else {
-      void update({ is_publicly_listed: true });
+      return;
     }
+    const gap = nextGap();
+    if (gap) openStep(gap);
+    else void update({ is_publicly_listed: true });
   }
 
   const missingHint = !hasSchedule
@@ -183,14 +221,18 @@ export default function GoLiveButton({
       ? "Not live yet — pin your business on the map to go live."
       : !hasTechnician
         ? "Not live yet — add at least one technician to go live."
-        : "Not live yet — tap to show your business to customers.";
+        : !hasReceiving
+          ? "Not live yet — add a way to receive payments to go live."
+          : "Not live yet — tap to show your business to customers.";
 
   const stepTitle =
     step === "hours"
       ? "Please input your working days"
       : step === "location"
         ? "Pin your business on the map"
-        : "Add at least one technician";
+        : step === "technician"
+          ? "Add at least one technician"
+          : "Add a way to receive payments";
 
   const stepDescription =
     step === "hours"
@@ -199,13 +241,15 @@ export default function GoLiveButton({
         : "Customers need to know when you work before you go live."
       : step === "location"
         ? "Customers follow their technician on a map and see where your shop is. Tap the map or use your current location."
-        : "Someone has to actually be dispatchable before customers can book you — add at least one technician (or yourself, if you also do the jobs) before you go live.";
+        : step === "technician"
+          ? "Someone has to actually be dispatchable before customers can book you — add at least one technician (or yourself, if you also do the jobs) before you go live."
+          : "A customer who picks a non-cash payment method needs somewhere real to send it — add your bank account, PayPal or a QR code before you go live.";
 
   const locationSaveLabel = live
     ? "Save location"
     : !hasSchedule
       ? "Save & continue"
-      : hasTechnician
+      : hasTechnician && hasReceiving
         ? "Save & go LIVE"
         : "Save & continue";
 
@@ -290,7 +334,9 @@ export default function GoLiveButton({
                 <WorkingHoursPanel
                   shop={shop}
                   onSaved={handleHoursSaved}
-                  submitLabel={live ? "Save Changes" : hasLocation && hasTechnician ? "Save & go LIVE" : "Save & continue"}
+                  submitLabel={
+                    live ? "Save Changes" : hasLocation && hasTechnician && hasReceiving ? "Save & go LIVE" : "Save & continue"
+                  }
                 />
               ) : step === "location" ? (
                 <>
@@ -311,7 +357,7 @@ export default function GoLiveButton({
                     {busy ? "Saving..." : locationSaveLabel}
                   </button>
                 </>
-              ) : (
+              ) : step === "technician" ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -321,6 +367,17 @@ export default function GoLiveButton({
                   className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
                 >
                   Go to Staff
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(null);
+                    router.push("/dashboard/settings?tab=receiving");
+                  }}
+                  className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+                >
+                  Go to Receiving Payments
                 </button>
               )}
             </div>

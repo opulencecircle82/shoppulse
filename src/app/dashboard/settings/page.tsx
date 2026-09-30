@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
 import { useShop } from "@/lib/hooks/useShop";
 import { useStaffMembers } from "@/lib/hooks/useStaffMembers";
@@ -43,11 +43,24 @@ type TabId = (typeof TABS)[number]["id"];
 const ONBOARDING_ORDER: TabId[] = ["profile", "hours", "geofence", "staff", "watermark"];
 
 export default function SettingsPage() {
+  return (
+    <Suspense fallback={null}>
+      <SettingsPageInner />
+    </Suspense>
+  );
+}
+
+function SettingsPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { checked } = useRequireAuth();
   const { loading, shop, staffMember, isOwner, refresh } = useShop();
   const { staff, loading: staffLoading, refresh: refreshStaff } = useStaffMembers(shop?.id);
-  const [activeTab, setActiveTab] = useState<TabId>("profile");
+  // A deep link (e.g. the LIVE button's "Go to Receiving Payments") can open straight to a tab.
+  const requestedTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<TabId>(
+    TABS.some((tab) => tab.id === requestedTab) ? (requestedTab as TabId) : "profile"
+  );
   const [onboardingStep, setOnboardingStep] = useState<number | null>(null);
   const navRef = useRef<HTMLElement>(null);
 

@@ -1009,7 +1009,7 @@ export default function ClientTicketPage() {
                 </p>
               )}
 
-              <PaymentDetails info={paymentInfo} />
+              <PaymentDetails info={paymentInfo} method={ticket.payment_method} />
 
               <div className="mt-4 border-t border-white/10 pt-4">
                 {ticket.invoice_paid_at ? (
@@ -1039,6 +1039,33 @@ export default function ClientTicketPage() {
                       </a>
                     )}
                   </div>
+                ) : !ticket.payment_method ? (
+                  <p className="text-xs text-slate-500">
+                    Select how you&apos;ll pay above to continue.
+                  </p>
+                ) : ticket.payment_method === "Cash" ? (
+                  ticket.client_payment_confirmed_at ? (
+                    <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
+                      ✓ You said you paid — {ticket.shop_name} will verify it shortly.
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Paid in cash?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleConfirmPayment}
+                        disabled={confirmingPayment}
+                        className="mt-2 w-full rounded-full bg-brand-emerald px-4 py-2.5 text-sm font-bold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {confirmingPayment ? "Confirming..." : "Confirm I've Paid"}
+                      </button>
+                      {confirmPaymentError && (
+                        <p className="mt-1.5 text-xs text-red-400">{confirmPaymentError}</p>
+                      )}
+                    </>
+                  )
                 ) : (
                   <>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -1066,31 +1093,6 @@ export default function ClientTicketPage() {
                     {uploadReceiptError && (
                       <p className="mt-1.5 text-xs text-red-400">{uploadReceiptError}</p>
                     )}
-
-                    <div className="mt-4 border-t border-white/10 pt-4">
-                      {ticket.client_payment_confirmed_at ? (
-                        <p className="rounded-lg bg-brand-emerald/15 px-3.5 py-2.5 text-sm font-semibold text-brand-emerald">
-                          ✓ You said you paid — {ticket.shop_name} will verify it shortly.
-                        </p>
-                      ) : (
-                        <>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            Paid in cash?
-                          </p>
-                          <button
-                            type="button"
-                            onClick={handleConfirmPayment}
-                            disabled={confirmingPayment}
-                            className="mt-2 w-full rounded-full bg-brand-emerald px-4 py-2.5 text-sm font-bold text-brand-slate transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {confirmingPayment ? "Confirming..." : "Confirm I've Paid"}
-                          </button>
-                          {confirmPaymentError && (
-                            <p className="mt-1.5 text-xs text-red-400">{confirmPaymentError}</p>
-                          )}
-                        </>
-                      )}
-                    </div>
                   </>
                 )}
               </div>
