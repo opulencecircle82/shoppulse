@@ -9,6 +9,7 @@ import { formatJobNumber } from "@/lib/jobNumber";
 import JobProgress from "./JobProgress";
 import { formatPreferred, timeAgo } from "@/lib/dashboard/format";
 import SelectedProductsPicker from "./SelectedProductsPicker";
+import CancelJobButton from "./CancelJobButton";
 
 const PRODUCTS_EDITABLE_STATUSES = new Set([
   "UNASSIGNED",
@@ -250,17 +251,22 @@ export default function JobTicketCard({
         className="mt-3 flex flex-wrap gap-2"
         onClick={(e) => e.stopPropagation()}
       >
-        {ticket.status === "SCHEDULED" && !ticket.staff_accepted_at && (
-          <p className="text-xs text-amber-600">
-            Waiting for {assignedStaff?.full_name ?? "the technician"} to
-            confirm this job.
-          </p>
+        {ticket.status === "SCHEDULED" && !ticket.en_route_at && (
+          <div className="w-full">
+            <p className={ticket.staff_accepted_at ? "text-xs text-slate-500" : "text-xs text-amber-600"}>
+              {ticket.staff_accepted_at
+                ? `Confirmed — waiting for ${assignedStaff?.full_name ?? "the technician"} to start this job from the mobile app.`
+                : `Waiting for ${assignedStaff?.full_name ?? "the technician"} to confirm this job.`}
+            </p>
+            <div className="mt-2">
+              <CancelJobButton ticketId={ticket.id} onChanged={onChanged} />
+            </div>
+          </div>
         )}
 
-        {ticket.status === "SCHEDULED" && ticket.staff_accepted_at && (
+        {ticket.status === "SCHEDULED" && ticket.en_route_at && (
           <p className="text-xs text-slate-500">
-            Confirmed — waiting for {assignedStaff?.full_name ?? "the technician"} to
-            start this job from the mobile app.
+            {assignedStaff?.full_name ?? "The technician"} is already on the way — cancellation is no longer available.
           </p>
         )}
 
@@ -290,21 +296,13 @@ export default function JobTicketCard({
         {ticket.status === "CANCELLED" && (
           <div className="w-full">
             <p className="text-xs text-slate-500">
-              Cancelled by the customer
+              Cancelled by {ticket.cancelled_by === "SHOP" ? "the shop" : "the customer"}
               {ticket.cancelled_at && ` on ${new Date(ticket.cancelled_at).toLocaleDateString()}`}.
             </p>
             <p className="mt-1 text-xs text-slate-600">
               <span className="font-semibold text-slate-700">Reason:</span>{" "}
               {ticket.cancellation_reason?.trim() || "No reason was given."}
             </p>
-            {ticket.en_route_at && (
-              <p className="mt-1 text-xs font-medium text-amber-700">The technician had already set off.</p>
-            )}
-            {ticket.cancellation_fee_applied && (
-              <p className="mt-1.5 text-xs font-semibold text-amber-600">
-                Call-out fee applies: {currency} {ticket.total_invoice_amount.toFixed(2)}
-              </p>
-            )}
           </div>
         )}
 

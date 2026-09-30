@@ -136,14 +136,16 @@ export function describeJob(ticket: JobTicket): JobPhase {
         detail: ticket.completed_at ? `Finished ${timeAgo(ticket.completed_at)}` : null,
         gpsVerified,
       };
-    case "CANCELLED":
+    case "CANCELLED": {
+      const cancelledBy = ticket.cancelled_by === "SHOP" ? "the shop" : "customer";
       return {
         stage: "Cancelled",
         tone: "slate",
         techStatus: null,
-        detail: ticket.cancelled_at ? `Cancelled by customer · ${timeAgo(ticket.cancelled_at)}` : "Cancelled by customer",
+        detail: ticket.cancelled_at ? `Cancelled by ${cancelledBy} · ${timeAgo(ticket.cancelled_at)}` : `Cancelled by ${cancelledBy}`,
         gpsVerified: false,
       };
+    }
     case "REJECTED":
       return { stage: "Declined", tone: "slate", techStatus: null, detail: null, gpsVerified: false };
   }

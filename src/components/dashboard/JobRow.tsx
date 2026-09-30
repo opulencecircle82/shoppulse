@@ -119,15 +119,11 @@ export default function JobRow({
           {cancelled && (
             <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
               <p>
-                <span className="font-semibold text-slate-700">Reason:</span>{" "}
+                <span className="font-semibold text-slate-700">
+                  Cancelled by {ticket.cancelled_by === "SHOP" ? "the shop" : "the customer"}:
+                </span>{" "}
                 {ticket.cancellation_reason?.trim() || "No reason was given."}
               </p>
-              {ticket.en_route_at && (
-                <p className="mt-1 font-medium text-amber-700">The technician had already set off.</p>
-              )}
-              {ticket.cancellation_fee_applied && (
-                <p className="mt-1 font-medium text-amber-700">Call-out fee applies.</p>
-              )}
             </div>
           )}
         </div>

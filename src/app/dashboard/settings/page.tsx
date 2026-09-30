@@ -198,7 +198,7 @@ export default function SettingsPage() {
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8">
             {activeTab === "profile" && (
-              <CompanyProfilePanel shop={shop} onSaved={handleProfileSaved} />
+              <CompanyProfilePanel shop={shop} staffMember={staffMember} onSaved={handleProfileSaved} />
             )}
             {activeTab === "hours" && (
               <WorkingHoursPanel

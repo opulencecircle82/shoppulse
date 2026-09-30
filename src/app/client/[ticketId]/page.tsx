@@ -89,6 +89,7 @@ type ClientTicket = {
   cancelled_at: string | null;
   cancellation_reason: string | null;
   cancellation_fee_applied: boolean;
+  cancelled_by: "CUSTOMER" | "SHOP" | null;
   client_payment_confirmed_at: string | null;
   en_route_at: string | null;
   staff_accepted_at: string | null;
@@ -654,17 +655,12 @@ export default function ClientTicketPage() {
             </div>
           )}
 
-          {["PENDING", "UNASSIGNED", "SCHEDULED", "ESTIMATE_PENDING"].includes(ticket.status) && (
+          {(["PENDING", "UNASSIGNED"].includes(ticket.status) ||
+            (ticket.status === "SCHEDULED" && !ticket.en_route_at)) && (
             <div className="mt-4">
               {showCancelConfirm ? (
                 <div className="rounded-xl bg-red-500/10 p-3.5">
-                  <p className="text-xs text-red-300">
-                    {ticket.status === "ESTIMATE_PENDING"
-                      ? "Your technician has already arrived on site, so the shop's standard call-out fee will apply if you cancel now."
-                      : ticket.status === "SCHEDULED" && ticket.en_route_at
-                        ? "Your technician has already set off. Cancelling is still free, but their trip will be wasted."
-                        : "Cancelling now is free."}
-                  </p>
+                  <p className="text-xs text-red-300">Cancelling now is free.</p>
                   <p className="mt-3 text-xs font-semibold text-slate-200">Why are you cancelling?</p>
                   <div className="mt-2 space-y-1.5">
                     {CANCEL_REASONS.map((reason) => (
@@ -914,7 +910,9 @@ export default function ClientTicketPage() {
           {ticket.status === "CANCELLED" && (
             <div className="mt-6 rounded-lg bg-white/5 px-4 py-3 text-sm text-slate-300">
               <p className="font-semibold text-white">
-                This booking was cancelled
+                {ticket.cancelled_by === "SHOP"
+                  ? "This booking was cancelled by the shop"
+                  : "You cancelled this booking"}
                 {ticket.cancelled_at &&
                   ` on ${new Date(ticket.cancelled_at).toLocaleDateString()}`}
                 .

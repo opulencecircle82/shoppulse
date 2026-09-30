@@ -177,6 +177,8 @@ export type JobTicket = {
   cancelled_at: string | null;
   cancellation_reason: string | null;
   cancellation_fee_applied: boolean;
+  /** Who cancelled the job — set by client_cancel_booking / shop_cancel_booking. */
+  cancelled_by: "CUSTOMER" | "SHOP" | null;
   dispute_notes: string | null;
   client_viewed_at: string | null;
   staff_accepted_at: string | null;

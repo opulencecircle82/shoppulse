@@ -1,11 +1,11 @@
 "use client";
 
-import { useId, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useId, useState, type ChangeEvent, type FormEvent } from "react";
 import dynamic from "next/dynamic";
 import { ImageUp, Loader2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { slugify } from "@/lib/slugify";
-import type { Currency, Shop } from "@/lib/supabase/types";
+import type { Currency, Shop, StaffMember } from "@/lib/supabase/types";
 import { COUNTRIES } from "@/lib/location/countries";
 import { SERVICE_CATEGORIES, SERVICE_CATEGORY_GROUPS } from "@/lib/location/serviceCategories";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
@@ -21,11 +21,17 @@ const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
 export default function CompanyProfilePanel({
   shop,
+  staffMember,
   onSaved,
 }: {
   shop: Shop | null;
+  /** Null until the shop exists — the owner's own staff row, so their name can be edited afterward too. */
+  staffMember: StaffMember | null;
   onSaved: (created: boolean) => void;
 }) {
+  // A plain email/password or Google sign-in with no display name otherwise leaves this blank forever
+  // (nothing else in the app lets an owner correct their own name) — asked for up front instead.
+  const [ownerName, setOwnerName] = useState(staffMember?.full_name ?? "");
   const [shopName, setShopName] = useState(shop?.shop_name ?? "");
   const [logoUrl, setLogoUrl] = useState(shop?.logo_url ?? "");
   const [primaryColor, setPrimaryColor] = useState(shop?.primary_color_hex ?? "#0F172A");
@@ -53,6 +59,17 @@ export default function CompanyProfilePanel({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+
+  // Google sign-in sometimes already has a display name — worth a head start, but still editable
+  // and still required, rather than silently falling back to the email address at signup like before.
+  useEffect(() => {
+    if (shop || ownerName) return;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const metaName = user?.user_metadata?.full_name as string | undefined;
+      if (metaName) setOwnerName(metaName);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shop]);
 
   async function uploadLogo(file: File) {
     const looksLikeImage =
@@ -113,6 +130,10 @@ export default function CompanyProfilePanel({
     setError(null);
     setSuccess(false);
 
+    if (!ownerName.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
     // Customers and technicians find the business by its address and its pin, so both are required.
     if (!address.trim()) {
       setError("Please enter your business address — customers see it, and it is how your pin is placed on the map.");
@@ -146,8 +167,8 @@ export default function CompanyProfilePanel({
         })
         .eq("id", shop.id);
 
-      setSaving(false);
       if (updateError) {
+        setSaving(false);
         setError(
           updateError.code === "23505"
             ? "This business name is already taken. Please choose a different one."
@@ -155,6 +176,20 @@ export default function CompanyProfilePanel({
         );
         return;
       }
+
+      if (staffMember && ownerName.trim() !== staffMember.full_name) {
+        const { error: nameError } = await supabase
+          .from("staff_members")
+          .update({ full_name: ownerName.trim() })
+          .eq("id", staffMember.id);
+        if (nameError) {
+          setSaving(false);
+          setError(nameError.message);
+          return;
+        }
+      }
+
+      setSaving(false);
       setSuccess(true);
       onSaved(false);
       return;
@@ -178,10 +213,7 @@ export default function CompanyProfilePanel({
         p_logo_url: logoUrl || null,
         p_address: address.trim(),
         p_currency: currency,
-        p_owner_full_name:
-          (user.user_metadata?.full_name as string | undefined) ??
-          user.email ??
-          "Owner",
+        p_owner_full_name: ownerName.trim(),
         p_owner_email: user.email ?? "",
         p_country: country || null,
         p_region: region || null,
@@ -215,6 +247,23 @@ export default function CompanyProfilePanel({
           Welcome! Set up your shop profile to get started.
         </p>
       )}
+
+      <div>
+        <label className="block text-sm font-medium text-slate-600">
+          Your Name
+        </label>
+        <p className="mt-1 text-xs text-slate-500">
+          Shown on your own dashboard and staff list — never left as your email address.
+        </p>
+        <input
+          type="text"
+          required
+          value={ownerName}
+          onChange={(e) => setOwnerName(e.target.value)}
+          className="mt-1.5 w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+          placeholder="Juan Dela Cruz"
+        />
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-slate-600">

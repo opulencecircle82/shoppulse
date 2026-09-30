@@ -177,10 +177,8 @@ export async function submitBooking(params: {
   return data as string;
 }
 
-/** Free before a technician arrives on-site; once they've arrived
- * (status ESTIMATE_PENDING) the shop's standard call-out fee applies
- * automatically — the caller doesn't choose that, it's enforced
- * server-side by client_cancel_booking. */
+/** Free right up until the technician taps "I'm on my way" (en_route_at
+ * set) — after that, client_cancel_booking rejects it server-side. */
 export async function cancelBooking(ticketId: string, reason?: string) {
   const { error } = await supabase.rpc("client_cancel_booking", {
     p_ticket_id: ticketId,
