@@ -99,6 +99,9 @@ export default function NewJobTicketModal({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  // Only technicians do field work — the owner or a manager (whose "name" can even be their bare
+  // email, e.g. a Google sign-in with no display name set) never belongs in an assignment list.
+  const technicians = staff.filter((s) => s.role === "TECHNICIAN");
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
@@ -260,11 +263,11 @@ export default function NewJobTicketModal({
               <option value="">
                 Unassigned
               </option>
-              {staff.map((member) => {
+              {technicians.map((member) => {
                 const busyOn = busyTechnicians.get(member.id);
                 return (
                   <option key={member.id} value={member.id} disabled={Boolean(busyOn)}>
-                    {member.full_name} ({member.role}){busyOn ? ` — busy on ${busyOn}` : ""}
+                    {member.full_name}{busyOn ? ` — busy on ${busyOn}` : ""}
                   </option>
                 );
               })}

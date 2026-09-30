@@ -25,9 +25,13 @@ export default function AssignTechSelect({
 }) {
   const [pendingAssignee, setPendingAssignee] = useState<StaffMember | null>(null);
 
-  // A technician can only ever be assigned within their own branch (enforced again at the database
-  // trigger level) — filtering the list here means the owner never even sees the invalid choice.
-  const eligibleStaff = staff.filter((s) => (s.branch_id ?? null) === (ticket.branch_id ?? null));
+  // Only technicians do field work — an owner or manager (whose "name" can even be their bare email,
+  // e.g. a Google sign-in with no display name set) never belongs in this list. A technician can
+  // also only ever be assigned within their own branch (enforced again at the database trigger
+  // level) — filtering both here means the owner never even sees an invalid choice.
+  const eligibleStaff = staff.filter(
+    (s) => s.role === "TECHNICIAN" && (s.branch_id ?? null) === (ticket.branch_id ?? null)
+  );
 
   return (
     <>
