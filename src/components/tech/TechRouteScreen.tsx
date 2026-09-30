@@ -1,22 +1,19 @@
 "use client";
 
 import { formatJobNumber } from "@/lib/jobNumber";
-import { guardExternalLink } from "@/lib/tech/externalLinks";
 import { MapPin, Navigation as NavigationIcon } from "lucide-react";
 import type { JobTicket } from "@/lib/supabase/types";
-
-function mapsUrl(address: string) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-}
 
 export default function TechRouteScreen({
   task,
   queue,
   onOpenTask,
+  onStartNavigation,
 }: {
   task: JobTicket | null;
   queue: JobTicket[];
   onOpenTask: (ticket: JobTicket) => void;
+  onStartNavigation: (ticket: JobTicket) => void;
 }) {
   const stops = task ? [task, ...queue] : queue;
 
@@ -81,19 +78,17 @@ export default function TechRouteScreen({
                     <span className="truncate">{stop.service_address}</span>
                   </div>
                 </button>
-                <a
-                  href={mapsUrl(stop.service_address)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    guardExternalLink(e);
+                    onStartNavigation(stop);
                   }}
                   className="flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full bg-brand-blue/15 text-brand-blue"
                   aria-label="Navigate"
                 >
                   <NavigationIcon className="h-4 w-4" />
-                </a>
+                </button>
               </div>
             ))}
           </div>

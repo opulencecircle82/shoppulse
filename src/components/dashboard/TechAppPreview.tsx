@@ -158,6 +158,7 @@ export default function TechAppPreview({ shop, dark }: { shop: Shop; dark: boole
             queue={HOME_QUEUE}
             stats={{ completedToday: 2, completedTotal: 31 }}
             onOpenTask={noop}
+            onStartNavigation={noop}
             onOpenTicket={noop}
             onOpenMessages={noop}
             onRefresh={noop}

@@ -41,10 +41,6 @@ import type { PendingProof } from "@/lib/tech/proofOutbox";
 
 const EMERGENCY_POLL_MS = 15000;
 
-function mapsUrl(address: string) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-}
-
 export default function TechHomeScreen({
   shop,
   staffContext,
@@ -52,6 +48,7 @@ export default function TechHomeScreen({
   queue,
   stats,
   onOpenTask,
+  onStartNavigation,
   onOpenTicket,
   onOpenMessages,
   onRefresh,
@@ -68,6 +65,8 @@ export default function TechHomeScreen({
   queue: JobTicket[];
   stats: TechStats;
   onOpenTask: (ticket: JobTicket) => void;
+  /** Opens ShopPulse's own in-app turn-by-turn navigation for this job. */
+  onStartNavigation: (ticket: JobTicket) => void;
   onOpenTicket: (jobTicketId: string) => void;
   onOpenMessages: () => void;
   onRefresh: () => void;
@@ -591,18 +590,16 @@ export default function TechHomeScreen({
                   <>
                 {/* One button at a time, following the job: leave -> arrive -> finish. */}
                 {task.status === "SCHEDULED" && !task.en_route_at ? (
-                  <a
-                    href={mapsUrl(task.service_address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(event) => {
-                      guardExternalLink(event);
+                  <button
+                    type="button"
+                    onClick={() => {
                       handleOnMyWay();
+                      onStartNavigation(task);
                     }}
                     className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-emerald to-brand-emerald-dark px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]"
                   >
                     <NavigationIcon className="h-4 w-4" /> I&apos;m On My Way
-                  </a>
+                  </button>
                 ) : (
                   <button
                     type="button"
@@ -624,15 +621,13 @@ export default function TechHomeScreen({
                 )}
 
                 {task.status === "SCHEDULED" && task.en_route_at && (
-                  <a
-                    href={mapsUrl(task.service_address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={guardExternalLink}
-                    className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-brand-sky"
+                  <button
+                    type="button"
+                    onClick={() => onStartNavigation(task)}
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-brand-sky"
                   >
                     <NavigationIcon className="h-3.5 w-3.5" /> Open navigation again
-                  </a>
+                  </button>
                 )}
                   </>
                 )}

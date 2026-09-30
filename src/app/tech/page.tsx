@@ -17,6 +17,7 @@ import { notifyNativeSignedIn, notifyNativeSignedOut } from "@/lib/tech/nativeBr
 import TechLoginScreen from "@/components/tech/TechLoginScreen";
 import TechHomeScreen from "@/components/tech/TechHomeScreen";
 import TechJobScreen from "@/components/tech/TechJobScreen";
+import TechNavigationScreen from "@/components/tech/TechNavigationScreen";
 import TechMessagesScreen from "@/components/tech/TechMessagesScreen";
 import TechRouteScreen from "@/components/tech/TechRouteScreen";
 import TechHistoryScreen from "@/components/tech/TechHistoryScreen";
@@ -27,7 +28,7 @@ import { useAppBranding } from "@/lib/hooks/useAppBranding";
 import { useProofOutbox } from "@/lib/hooks/useProofOutbox";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 
-type Screen = "loading" | "login" | "tab" | "job" | "messages";
+type Screen = "loading" | "login" | "tab" | "job" | "messages" | "navigate";
 
 /**
  * A job the technician had already set off for that the customer then cancelled — shown on their home
@@ -53,6 +54,7 @@ export default function TechAppPage() {
   const [allTickets, setAllTickets] = useState<JobTicket[]>([]);
   const [stats, setStats] = useState<TechStats>({ completedToday: 0, completedTotal: 0 });
   const [selectedTicket, setSelectedTicket] = useState<JobTicket | null>(null);
+  const [navigatingTicket, setNavigatingTicket] = useState<JobTicket | null>(null);
 
   // The look the owner picked in Customize Mobile App (dark until the shop has loaded).
   useAppTheme(shop?.mobile_app_theme);
@@ -178,6 +180,11 @@ export default function TechAppPage() {
     setScreen("job");
   }
 
+  function startNavigation(ticket: JobTicket) {
+    setNavigatingTicket(ticket);
+    setScreen("navigate");
+  }
+
   function handleSignedOut() {
     setStaffContext(null);
     setShop(null);
@@ -218,6 +225,10 @@ export default function TechAppPage() {
     return <TechMessagesScreen shop={shop} onBack={() => setScreen("tab")} />;
   }
 
+  if (screen === "navigate" && navigatingTicket) {
+    return <TechNavigationScreen ticket={navigatingTicket} onExit={() => setScreen("tab")} />;
+  }
+
   if (screen === "tab" && shop && staffContext) {
     return (
       <>
@@ -230,6 +241,7 @@ export default function TechAppPage() {
             stats={stats}
             onRefresh={() => loadHome(staffContext)}
             onOpenTask={openTask}
+            onStartNavigation={startNavigation}
             onOpenMessages={() => setScreen("messages")}
             cancelledJob={recentEnRouteCancellation(allTickets)}
             pendingProofs={proofOutbox.pending}
@@ -250,7 +262,7 @@ export default function TechAppPage() {
           />
         )}
         {tab === "route" && (
-          <TechRouteScreen task={task} queue={queue} onOpenTask={openTask} />
+          <TechRouteScreen task={task} queue={queue} onOpenTask={openTask} onStartNavigation={startNavigation} />
         )}
         {tab === "history" && <TechHistoryScreen shop={shop} allTickets={allTickets} />}
         {tab === "profile" && (
