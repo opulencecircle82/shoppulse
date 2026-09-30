@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -101,23 +101,35 @@ export default function LocationPickerMap({
 
   const center: [number, number] = hasPin ? [latitude, longitude] : DEFAULT_CENTER;
 
+  // Read inside an async GPS callback without retriggering the effect on every pin change.
+  const hasPinRef = useRef(hasPin);
+  useEffect(() => {
+    hasPinRef.current = hasPin;
+  });
+
   // `enforceNearMe` can't check anything without a GPS fix of its own, so it asks for one right
-  // away instead of waiting for "Use my current location" to be tapped.
+  // away instead of waiting for "Use my current location" to be tapped — and since setup only
+  // happens while someone is actually there, it goes ahead and places the pin on that reading too,
+  // rather than making them tap a button to confirm what the device already told us. They can still
+  // nudge it afterward (drag, tap, search) within the same enforced radius.
   useEffect(() => {
     if (!enforceNearMe || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setMyLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setMyLocation(here);
         setGpsStatus("ready");
+        if (!hasPinRef.current) onChange(here.lat, here.lng);
       },
       () => setGpsStatus("denied"),
       { enableHighAccuracy: true, timeout: 15000 }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enforceNearMe]);
 
   // Recenter to the freshly-picked country — re-geocodes only when the country itself changes, not
-  // every time a pin is cleared. `preferredView` below already refuses to apply this once a pin (or
-  // a GPS fix, under enforceNearMe) exists, so it's harmless if a result arrives after one does.
+  // every time a pin is cleared. `preferredView` below prefers a GPS fix over this once one exists
+  // (under enforceNearMe), so it's harmless if this result arrives after that.
   useEffect(() => {
     if (!country) return;
     let active = true;
@@ -197,14 +209,13 @@ export default function LocationPickerMap({
       : "bg-white/5 text-white placeholder:text-slate-500"
   }`;
 
-  // Once a pin exists the map just shows it, same as before; until then, GPS (once it arrives) beats
-  // a country's centroid, since it's the actual answer to "where is this person."
-  const preferredView: [number, number] | null = hasPin
-    ? null
-    : enforceNearMe && myLocation
-      ? [myLocation.lat, myLocation.lng]
-      : countryCenter;
-  const preferredZoom = enforceNearMe && myLocation ? PIN_ZOOM - 2 : COUNTRY_ZOOM;
+  // Deliberately NOT gated on hasPin: under enforceNearMe the GPS fix and the pin it places land in
+  // the same render, and `RecenterView` only re-fires when this target's actual coordinates change —
+  // so once GPS (or a picked country) has resolved once, further manual drags/taps/searches are left
+  // alone instead of being fought back to this view on every render.
+  const preferredView: [number, number] | null =
+    enforceNearMe && myLocation ? [myLocation.lat, myLocation.lng] : countryCenter;
+  const preferredZoom = enforceNearMe && myLocation ? PIN_ZOOM : COUNTRY_ZOOM;
 
   return (
     <div>
