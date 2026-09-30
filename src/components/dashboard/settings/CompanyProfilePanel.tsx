@@ -504,7 +504,9 @@ export default function CompanyProfilePanel({
           setLatitude(lat);
           setLongitude(lng);
         }}
-        description="Tap anywhere on the map to drop a pin — useful when your address has no formal street or house number. Customers will see this exact spot."
+        description="Search your address, tap the map, or use your current location — useful when your address has no formal street or house number. Customers will see this exact spot."
+        country={country}
+        enforceNearMe={!shop}
       />
 
       {error && (

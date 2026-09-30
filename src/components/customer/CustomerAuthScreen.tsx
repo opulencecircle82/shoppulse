@@ -189,7 +189,9 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
                     setLongitude(lng);
                   }}
                   label="Your Location"
-                  description="Tap the map to drop a pin where you are, or use your current location — helps us find services near you."
+                  description="Search your address, tap the map, or use your current location — helps us find services near you."
+                  country={country}
+                  enforceNearMe
                 />
               </div>
             </>
