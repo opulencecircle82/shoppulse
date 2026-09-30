@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Shop } from "@/lib/supabase/types";
 
-const AVAILABLE_METHODS = ["Cash", "GCash", "Bank Transfer", "Credit/Debit Card", "PayMaya"];
+const AVAILABLE_METHODS = ["Cash", "Bank Transfer", "Credit/Debit Card", "PayPal"];
 
 export default function PaymentMethodsPanel({
   shop,
