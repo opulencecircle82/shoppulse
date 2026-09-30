@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import type { Shop } from "@/lib/supabase/types";
+import type { Shop, StaffMember } from "@/lib/supabase/types";
+import type { DashboardTabId } from "./DashboardSidebarNav";
 import WorkingHoursPanel from "./settings/WorkingHoursPanel";
 
 const LocationPickerMap = dynamic(() => import("@/components/shared/LocationPickerMap"), {
@@ -15,7 +16,7 @@ const LocationPickerMap = dynamic(() => import("@/components/shared/LocationPick
 /** Other parts of the dashboard (the Home checklist) ask the LIVE button to open a step with this event. */
 export const GO_LIVE_EVENT = "shoppulse:go-live";
 
-type Step = "hours" | "location";
+type Step = "hours" | "location" | "technician";
 
 type ShopSetup = Pick<
   Shop,
@@ -45,13 +46,30 @@ export function isShopLive(shop: ShopSetup): boolean {
   return shop.is_publicly_listed && hasWorkingSchedule(shop) && hasBusinessLocation(shop);
 }
 
+/** Someone has to actually be dispatchable before customers can book — a deactivated-only staff list doesn't count. */
+export function hasActiveTechnician(staff: Pick<StaffMember, "role" | "is_active">[]): boolean {
+  return staff.some((s) => s.role === "TECHNICIAN" && s.is_active);
+}
+
 /**
  * The owner's LIVE switch, in the dashboard header. Not live: a "Go LIVE" button that walks the owner
  * through whatever is missing — first the working days and hours ("Please input your working days"),
- * then the business location on the map — and goes live the moment the last step is saved. Live: a
- * green "LIVE NOW" badge whose menu edits either of those or takes the business offline.
+ * then the business location on the map, then (a new requirement, checked only on the way to going
+ * live — never retroactively takes an already-live shop offline) at least one active technician — and
+ * goes live the moment the last step is done. Live: a green "LIVE NOW" badge whose menu edits hours or
+ * location, or takes the business offline.
  */
-export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChanged: () => void }) {
+export default function GoLiveButton({
+  shop,
+  staff,
+  onSelectTab,
+  onChanged,
+}: {
+  shop: Shop;
+  staff: StaffMember[];
+  onSelectTab: (tab: DashboardTabId) => void;
+  onChanged: () => void;
+}) {
   const [step, setStep] = useState<Step | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -61,6 +79,7 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
 
   const hasSchedule = hasWorkingSchedule(shop);
   const hasLocation = hasBusinessLocation(shop);
+  const hasTechnician = hasActiveTechnician(staff);
   const live = isShopLive(shop);
 
   useEffect(() => {
@@ -84,7 +103,7 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
   useEffect(() => {
     function handleOpen(event: Event) {
       const wanted = (event as CustomEvent<Step>).detail;
-      if (wanted === "hours" || wanted === "location") openStep(wanted);
+      if (wanted === "hours" || wanted === "location" || wanted === "technician") openStep(wanted);
     }
     window.addEventListener(GO_LIVE_EVENT, handleOpen);
     return () => window.removeEventListener(GO_LIVE_EVENT, handleOpen);
@@ -106,10 +125,20 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
   }
 
   async function handleHoursSaved() {
-    // Working days are in. If the business still has no pin, that is the next thing to ask for;
+    // Already live — editing hours never re-triggers the setup gate.
+    if (live) {
+      setStep(null);
+      return;
+    }
+    // Working days are in. Whatever's still missing is the next thing to ask for;
     // otherwise nothing is missing and it goes live now.
     if (!hasLocation) {
       setStep("location");
+      onChanged();
+      return;
+    }
+    if (!hasTechnician) {
+      setStep("technician");
       onChanged();
       return;
     }
@@ -121,11 +150,17 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
       setError("Tap the map or use your current location to drop your pin first.");
       return;
     }
-    // Saving the pin completes the setup only if the working days were already there.
-    const fields = hasSchedule
+    // Already live — editing the pin never re-triggers the setup gate.
+    if (live) {
+      if (await update({ latitude: pin.lat, longitude: pin.lng })) setStep(null);
+      return;
+    }
+    // Saving the pin completes the setup only if working days and a technician are already there.
+    const willGoLive = hasSchedule && hasTechnician;
+    const fields = willGoLive
       ? { latitude: pin.lat, longitude: pin.lng, is_publicly_listed: true }
       : { latitude: pin.lat, longitude: pin.lng };
-    if (await update(fields)) setStep(hasSchedule ? null : "hours");
+    if (await update(fields)) setStep(!hasSchedule ? "hours" : !hasTechnician ? "technician" : null);
   }
 
   function handleClick() {
@@ -135,6 +170,8 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
       openStep("hours");
     } else if (!hasLocation) {
       openStep("location");
+    } else if (!hasTechnician) {
+      openStep("technician");
     } else {
       void update({ is_publicly_listed: true });
     }
@@ -144,7 +181,33 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
     ? "Not live yet — set your working days to go live."
     : !hasLocation
       ? "Not live yet — pin your business on the map to go live."
-      : "Not live yet — tap to show your business to customers.";
+      : !hasTechnician
+        ? "Not live yet — add at least one technician to go live."
+        : "Not live yet — tap to show your business to customers.";
+
+  const stepTitle =
+    step === "hours"
+      ? "Please input your working days"
+      : step === "location"
+        ? "Pin your business on the map"
+        : "Add at least one technician";
+
+  const stepDescription =
+    step === "hours"
+      ? live
+        ? "Change the days and hours customers see."
+        : "Customers need to know when you work before you go live."
+      : step === "location"
+        ? "Customers follow their technician on a map and see where your shop is. Tap the map or use your current location."
+        : "Someone has to actually be dispatchable before customers can book you — add at least one technician (or yourself, if you also do the jobs) before you go live.";
+
+  const locationSaveLabel = live
+    ? "Save location"
+    : !hasSchedule
+      ? "Save & continue"
+      : hasTechnician
+        ? "Save & go LIVE"
+        : "Save & continue";
 
   return (
     <div className="relative mt-3" ref={containerRef}>
@@ -153,14 +216,14 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
         onClick={handleClick}
         disabled={busy}
         aria-expanded={live ? menuOpen : undefined}
-        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-shadow disabled:cursor-not-allowed disabled:opacity-60 ${
+        className={`inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-bold transition-shadow disabled:cursor-not-allowed disabled:opacity-60 ${
           live
             ? "bg-brand-emerald/15 text-brand-emerald-dark ring-1 ring-brand-emerald/30"
             : "bg-gradient-to-r from-red-500 to-brand-orange text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.45)]"
         }`}
       >
         <span
-          className={`h-2 w-2 rounded-full ${live ? "animate-pulse bg-brand-emerald" : "bg-white"}`}
+          className={`h-2.5 w-2.5 rounded-full ${live ? "animate-pulse bg-brand-emerald" : "bg-white"}`}
           aria-hidden="true"
         />
         {busy && !step ? "Please wait..." : live ? "LIVE NOW" : "Go LIVE"}
@@ -209,16 +272,8 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
           <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  {step === "hours" ? "Please input your working days" : "Pin your business on the map"}
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {step === "hours"
-                    ? live
-                      ? "Change the days and hours customers see."
-                      : "Customers need to know when you work before you go live."
-                    : "Customers follow their technician on a map and see where your shop is. Tap the map or use your current location."}
-                </p>
+                <h2 className="text-lg font-bold text-slate-900">{stepTitle}</h2>
+                <p className="mt-1 text-sm text-slate-500">{stepDescription}</p>
               </div>
               <button
                 type="button"
@@ -235,9 +290,9 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
                 <WorkingHoursPanel
                   shop={shop}
                   onSaved={handleHoursSaved}
-                  submitLabel={live ? "Save Changes" : hasLocation ? "Save & go LIVE" : "Save & continue"}
+                  submitLabel={live ? "Save Changes" : hasLocation && hasTechnician ? "Save & go LIVE" : "Save & continue"}
                 />
-              ) : (
+              ) : step === "location" ? (
                 <>
                   <LocationPickerMap
                     tone="light"
@@ -253,9 +308,20 @@ export default function GoLiveButton({ shop, onChanged }: { shop: Shop; onChange
                     disabled={busy}
                     className="mt-4 rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {busy ? "Saving..." : live || !hasSchedule ? (hasSchedule ? "Save location" : "Save & continue") : "Save & go LIVE"}
+                    {busy ? "Saving..." : locationSaveLabel}
                   </button>
                 </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(null);
+                    onSelectTab("staff");
+                  }}
+                  className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+                >
+                  Go to Staff
+                </button>
               )}
             </div>
             {error && (

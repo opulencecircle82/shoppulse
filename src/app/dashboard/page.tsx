@@ -249,7 +249,14 @@ export default function DashboardPage() {
               Owner Command Center
             </span>
             <h1 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">{shop.shop_name}</h1>
-            {staffMember?.role === "OWNER" && <GoLiveButton shop={shop} onChanged={() => refreshShop({ quiet: true })} />}
+            {staffMember?.role === "OWNER" && (
+              <GoLiveButton
+                shop={shop}
+                staff={staff}
+                onSelectTab={setActiveTab}
+                onChanged={() => refreshShop({ quiet: true })}
+              />
+            )}
           </div>
           <div className="relative flex items-center gap-2 sm:gap-3">
             {isOwner && <BranchSwitcher branches={branches} value={branchFilter} onChange={setBranchFilter} />}
