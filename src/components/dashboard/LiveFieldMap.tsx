@@ -83,13 +83,11 @@ function TooltipText({ children }: { children: ReactNode }) {
   );
 }
 
-// The map is locked (no dragging or wheel/touch zoom — see MapContainer
-// below), so the view itself has to keep every pin reachable: frame all
-// points when data first arrives or the number of pins changes, and again
-// whenever a live position drifts outside what's on screen. It deliberately
-// does NOT refit on every 15s poll while everything is still in view, so a
-// zoom the owner picked with the +/- buttons isn't reset for no reason.
-// The "Recenter" button refits on demand.
+// The owner can freely drag and zoom this map (unlike the small, locked preview maps elsewhere in
+// the app), so this only frames every pin automatically when data first arrives or the number of
+// pins changes, and again whenever a live position drifts outside what's currently on screen —
+// never on every 15s poll while everything is still in view, so a pan or zoom the owner made by hand
+// isn't reset for no reason. The "Recenter" button refits on demand.
 function MapFitPoints({
   points,
   recenterSignal,
@@ -260,12 +258,6 @@ export default function LiveFieldMap({
         center={center}
         zoom={startZoom}
         maxZoom={19}
-        dragging={false}
-        touchZoom={false}
-        scrollWheelZoom={false}
-        doubleClickZoom={false}
-        boxZoom={false}
-        keyboard={false}
         style={{ height: fill ? "100%" : "480px", width: "100%" }}
       >
         <MapFitPoints
