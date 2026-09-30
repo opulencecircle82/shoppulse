@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import {
-  X,
   Volume2,
   VolumeX,
   Navigation as NavigationIcon,
@@ -16,10 +15,13 @@ import {
   Undo2,
   Flag,
   RefreshCw,
+  CheckCircle2,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 import type { JobTicket } from "@/lib/supabase/types";
 import { guardExternalLink } from "@/lib/tech/externalLinks";
 import { getCurrentPosition, haversineDistanceMeters } from "@/lib/tech/gps";
+import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
 import {
   fetchRoute,
   distanceToRouteMeters,
@@ -65,13 +67,27 @@ function TurnIcon({ instruction, className }: { instruction: string; className?:
  * ShopPulse's own stand-in for handing the technician off to Google Maps. Since OSRM's public demo
  * server has no uptime guarantee, every failure here (no route, lost signal) degrades to the same
  * "Open in Google Maps instead" link this screen replaced, never a dead end.
+ *
+ * Deliberately has no "close and go back" button once a route is showing — this stays open for the
+ * whole trip, the same way the job itself only has one way forward at a time. The two ways out are
+ * arriving (GPS auto-detect, or the "I've Arrived" button for when the pin's a little off) and the
+ * job being cancelled or handed to someone else out from under the technician, caught here by its
+ * own live subscription since the app-wide one only runs on the main tab screen.
  */
 export default function TechNavigationScreen({
   ticket,
   onExit,
+  onArrived,
+  onCancelled,
 }: {
   ticket: JobTicket;
+  /** Only reachable before a route is showing at all (no pin, GPS denied, routing failed) — there is
+   * no trip in progress yet to stay locked into. */
   onExit: () => void;
+  /** Arrival confirmed (by GPS or by hand) — hands off into the job's Start Job / proof step. */
+  onArrived: (ticket: JobTicket) => void;
+  /** The job was cancelled or reassigned away from this technician while they were en route. */
+  onCancelled: () => void;
 }) {
   const destination = useMemo<LatLng | null>(
     () =>
@@ -92,19 +108,24 @@ export default function TechNavigationScreen({
   const [arrived, setArrived] = useState(false);
   const [muted, setMuted] = useState(false);
 
-  // Read fresh inside the long-lived watchPosition callback below without having to tear it down
-  // and re-subscribe every time one of these changes.
+  // Read fresh inside the long-lived watchPosition/subscription callbacks below without having to
+  // tear them down and re-subscribe every time one of these changes — onCancelled in particular is
+  // an inline callback from the parent, a fresh function reference on every one of its renders, and
+  // putting it directly in an effect's dependency array would re-subscribe (and re-run the immediate
+  // check) on every single one of those renders instead of just once per navigation session.
   const mutedRef = useRef(muted);
   const routeRef = useRef<Route | null>(null);
   const stepIndexRef = useRef(0);
   const arrivedRef = useRef(false);
   const announcedRef = useRef<Set<string>>(new Set());
   const offRouteStreakRef = useRef(0);
+  const onCancelledRef = useRef(onCancelled);
   useEffect(() => {
     mutedRef.current = muted;
     routeRef.current = route;
     stepIndexRef.current = stepIndex;
     arrivedRef.current = arrived;
+    onCancelledRef.current = onCancelled;
   });
 
   const loadRoute = useCallback(
@@ -210,6 +231,40 @@ export default function TechNavigationScreen({
     };
   }, [destination, loadRoute, handlePositionUpdate]);
 
+  // The app-wide job poll/realtime subscription only runs while on the main tab screen (so it can
+  // never yank a technician out of a job mid-checklist) — this screen is just as "not the main tab",
+  // so without its own check here a job cancelled or reassigned while the technician is en route
+  // would go completely unnoticed until they physically arrived.
+  useEffect(() => {
+    let active = true;
+
+    async function checkStillMine() {
+      const { data } = await supabase
+        .from("job_tickets")
+        .select("status, assigned_staff_id")
+        .eq("id", ticket.id)
+        .maybeSingle();
+      if (!active || !data) return;
+      if (data.status !== "SCHEDULED" || data.assigned_staff_id !== ticket.assigned_staff_id) {
+        active = false;
+        stopSpeaking();
+        onCancelledRef.current();
+      }
+    }
+
+    // Also checked once immediately, not just on the next live change — a job could already be
+    // cancelled or reassigned by the time this screen opens (a reconnect after being offline, a
+    // stale ticket passed in), and that shouldn't need to wait for a fresh event to be caught.
+    checkStillMine();
+    const stop = subscribeToJobTickets(`nav-${ticket.id}`, `id=eq.${ticket.id}`, checkStillMine);
+    return () => {
+      active = false;
+      stop();
+    };
+    // onCancelled is read from onCancelledRef, not listed here, precisely so a fresh inline callback
+    // from the parent on every render doesn't tear down and recreate this subscription each time.
+  }, [ticket.id, ticket.assigned_staff_id]);
+
   const currentStep = route?.steps[stepIndex] ?? null;
   const distanceToNext = position && currentStep
     ? haversineDistanceMeters(position.lat, position.lng, currentStep.location.lat, currentStep.location.lng)
@@ -272,10 +327,10 @@ export default function TechNavigationScreen({
           <p className="mt-1.5 text-sm text-slate-400">{ticket.service_address}</p>
           <button
             type="button"
-            onClick={onExit}
+            onClick={() => onArrived(ticket)}
             className="mt-6 rounded-full bg-gradient-to-r from-brand-emerald to-brand-emerald-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]"
           >
-            Done
+            Start Job
           </button>
         </div>
       ) : (
@@ -300,36 +355,42 @@ export default function TechNavigationScreen({
             >
               {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
-            <button
-              type="button"
-              onClick={onExit}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white"
-              aria-label="Exit navigation"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
 
           <div className="relative flex-1">
             {route && <TechNavMap position={position} destination={destination} routeGeometry={route.geometry} />}
           </div>
 
-          <div className="flex items-center justify-between border-t border-white/10 bg-white/5 px-5 py-3">
-            <div>
-              <p className="text-sm font-bold text-white">
-                {formatDuration((remainingDistance / (route?.distanceMeters || 1)) * (route?.durationSeconds || 0))}
-              </p>
-              <p className="text-xs text-slate-400">{formatDistance(remainingDistance)} remaining</p>
+          <div className="border-t border-white/10 bg-white/5 px-5 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-white">
+                  {formatDuration((remainingDistance / (route?.distanceMeters || 1)) * (route?.durationSeconds || 0))}
+                </p>
+                <p className="text-xs text-slate-400">{formatDistance(remainingDistance)} remaining</p>
+              </div>
+              <a
+                href={mapsUrl(ticket.service_address)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={guardExternalLink}
+                className="text-xs font-semibold text-brand-sky"
+              >
+                Open in Google Maps
+              </a>
             </div>
-            <a
-              href={mapsUrl(ticket.service_address)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={guardExternalLink}
-              className="text-xs font-semibold text-brand-sky"
+            {/* GPS auto-detects arrival within 40m — this is for when the pin's a little off (a big
+                compound, weak signal) and the technician is really there before that triggers. */}
+            <button
+              type="button"
+              onClick={() => {
+                setArrived(true);
+                stopSpeaking();
+              }}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-white/10 py-2.5 text-sm font-semibold text-white"
             >
-              Open in Google Maps
-            </a>
+              <CheckCircle2 className="h-4 w-4" /> I&apos;ve Arrived
+            </button>
           </div>
         </>
       )}

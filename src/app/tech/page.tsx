@@ -226,7 +226,17 @@ export default function TechAppPage() {
   }
 
   if (screen === "navigate" && navigatingTicket) {
-    return <TechNavigationScreen ticket={navigatingTicket} onExit={() => setScreen("tab")} />;
+    return (
+      <TechNavigationScreen
+        ticket={navigatingTicket}
+        onExit={() => setScreen("tab")}
+        onArrived={openTask}
+        onCancelled={() => {
+          setScreen("tab");
+          if (staffContext) loadHome(staffContext);
+        }}
+      />
+    );
   }
 
   if (screen === "tab" && shop && staffContext) {
