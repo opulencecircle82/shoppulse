@@ -46,7 +46,6 @@ export default function CustomerHomeScreen({
   onSignedOut: () => void;
 }) {
   const router = useRouter();
-  const [shopCode, setShopCode] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [promotions, setPromotions] = useState<NearbyPromotion[]>([]);
   const [nearbyShops, setNearbyShops] = useState<NearbyShop[]>([]);
@@ -147,13 +146,6 @@ export default function CustomerHomeScreen({
     onSignedOut();
   }
 
-  function handleBookSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const slug = shopCode.trim().toLowerCase().replace(/\s+/g, "-");
-    if (!slug) return;
-    router.push(`/customer/book/${slug}`);
-  }
-
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     router.push(`/customer/discover?q=${encodeURIComponent(searchQuery.trim())}`);
@@ -174,7 +166,7 @@ export default function CustomerHomeScreen({
               ShopPulse
             </span>
             <p className="mt-1.5 text-lg font-bold text-white">Hi, {customer.fullName}</p>
-            <p className="text-xs text-white/60">Your jobs, all in one place</p>
+            <p className="text-xs text-white/60">Your service requests, all in one place</p>
           </div>
           <div className="relative flex items-center gap-1">
             <Link
@@ -442,32 +434,15 @@ export default function CustomerHomeScreen({
         )}
 
         <div className="mt-6 rounded-2xl bg-white/5 p-5 shadow-md shadow-black/20">
-          <p className="text-sm font-semibold text-white">Book a New Job</p>
+          <p className="text-sm font-semibold text-white">Terms &amp; Conditions</p>
           <p className="mt-1 text-xs text-slate-400">
-            Enter the business code your service provider gave you (it&apos;s
-            also the end of the booking link they shared).
+            Review how ShopPulse works for customers requesting a service.
           </p>
-          <form onSubmit={handleBookSubmit} className="mt-3 flex gap-2">
-            <input
-              type="text"
-              required
-              placeholder="e.g. leans-electrical-service"
-              value={shopCode}
-              onChange={(e) => setShopCode(e.target.value)}
-              className="w-full rounded-xl bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="shrink-0 rounded-xl bg-gradient-to-r from-brand-sky to-brand-blue-dark px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-500/30"
-            >
-              Book Now
-            </button>
-          </form>
           <Link
-            href="/customer/discover"
+            href="/terms"
             className="mt-3 block text-center text-xs font-medium text-brand-blue"
           >
-            Don&apos;t have a code? Browse services near you →
+            View Terms &amp; Conditions →
           </Link>
         </div>
       </div>
