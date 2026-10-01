@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 
-export default function GoogleSignInButton({ label }: { label: string }) {
+export default function GoogleSignInButton({
+  label,
+  nextPath = "/dashboard",
+}: {
+  label: string;
+  /** Where `/auth/callback` sends the browser once Google sign-in completes — owners land on
+   * their dashboard by default; pass "/customer" for the customer-facing auth screens. */
+  nextPath?: string;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,7 +22,7 @@ export default function GoogleSignInButton({ label }: { label: string }) {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     });
 

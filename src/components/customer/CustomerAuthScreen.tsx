@@ -6,6 +6,7 @@ import { signInCustomer, signUpCustomer } from "@/lib/customer/customerAuth";
 import { COUNTRIES } from "@/lib/location/countries";
 import PhilippinesAddressFields from "@/components/shared/PhilippinesAddressFields";
 import CurvedBlobBackground from "@/components/ui/CurvedBlobBackground";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 const LocationPickerMap = dynamic(
   () => import("@/components/shared/LocationPickerMap"),
@@ -108,7 +109,17 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-3">
+        <div className="mt-6">
+          <GoogleSignInButton label="Continue with Google" nextPath="/customer" />
+        </div>
+
+        <div className="mt-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs font-medium text-slate-500">Or continue with email</span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3">
           {mode === "signup" && (
             <>
               <input

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Pencil, Plus, Star, Trash2 } from "lucide-react";
-import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
+import { fetchCurrentCustomer, updateCustomerFullName, type Customer } from "@/lib/customer/customerAuth";
 import {
   listCustomerAddresses,
   formatAddress,
@@ -24,6 +24,10 @@ export default function CustomerSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
+  const [nameInput, setNameInput] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const current = await fetchCurrentCustomer();
@@ -32,10 +36,31 @@ export default function CustomerSettingsPage() {
       return;
     }
     setCustomer(current);
+    setNameInput(current.fullName);
     const list = await listCustomerAddresses();
     setAddresses(list);
     setLoading(false);
   }, [router]);
+
+  async function handleSaveName() {
+    if (!customer) return;
+    const trimmed = nameInput.trim();
+    if (!trimmed) {
+      setNameError("Please enter your name.");
+      return;
+    }
+    setSavingName(true);
+    setNameError(null);
+    try {
+      await updateCustomerFullName(customer.id, trimmed);
+      setCustomer({ ...customer, fullName: trimmed });
+      setEditingName(false);
+    } catch (e) {
+      setNameError(e instanceof Error ? e.message : "Could not save your name.");
+    } finally {
+      setSavingName(false);
+    }
+  }
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -97,7 +122,50 @@ export default function CustomerSettingsPage() {
         </div>
 
         <h1 className="mt-3 text-lg font-bold text-white">Settings</h1>
-        <p className="mt-1 text-xs text-slate-400">{customer.fullName} · {customer.email}</p>
+
+        {editingName ? (
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="text"
+              autoFocus
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              className="min-w-0 flex-1 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleSaveName}
+              disabled={savingName}
+              className="shrink-0 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {savingName ? "Saving..." : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingName(false);
+                setNameInput(customer.fullName);
+                setNameError(null);
+              }}
+              disabled={savingName}
+              className="shrink-0 text-xs font-medium text-slate-400 hover:text-white"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <p className="mt-1 flex items-center gap-2 text-xs text-slate-400">
+            {customer.fullName} · {customer.email}
+            <button
+              type="button"
+              onClick={() => setEditingName(true)}
+              className="text-brand-blue hover:text-blue-400"
+            >
+              Edit name
+            </button>
+          </p>
+        )}
+        {nameError && <p className="mt-1 text-xs text-red-400">{nameError}</p>}
 
         <div className="mt-6 flex items-center justify-between">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">

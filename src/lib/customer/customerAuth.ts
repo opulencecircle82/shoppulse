@@ -154,3 +154,14 @@ export async function signInCustomer(email: string, password: string) {
 export async function signOutCustomer() {
   await supabase.auth.signOut();
 }
+
+/** Google sign-in doesn't always hand back a usable name, and a customer may just want to change
+ * it — the only way to fix it short of this, same gap owners had before Company Profile grew a
+ * "Your Name" field. */
+export async function updateCustomerFullName(customerId: string, fullName: string) {
+  const { error } = await supabase
+    .from("customers")
+    .update({ full_name: fullName })
+    .eq("id", customerId);
+  if (error) throw new Error(error.message);
+}

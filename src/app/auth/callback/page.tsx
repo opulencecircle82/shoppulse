@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 
 export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthCallbackPageContent />
+    </Suspense>
+  );
+}
+
+function AuthCallbackPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Owners land on their dashboard by default; GoogleSignInButton passes "/customer" for the
+  // customer-facing auth screens so a customer's Google sign-in doesn't land on /dashboard.
+  const next = searchParams.get("next") || "/dashboard";
   const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
@@ -16,7 +28,7 @@ export default function AuthCallbackPage() {
       (_event, session) => {
         if (session && !redirected) {
           redirected = true;
-          router.replace("/dashboard");
+          router.replace(next);
         }
       }
     );
@@ -24,7 +36,7 @@ export default function AuthCallbackPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session && !redirected) {
         redirected = true;
-        router.replace("/dashboard");
+        router.replace(next);
       }
     });
 
@@ -34,7 +46,7 @@ export default function AuthCallbackPage() {
       subscription.subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, [router]);
+  }, [router, next]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-brand-slate px-6 text-center">
@@ -47,7 +59,7 @@ export default function AuthCallbackPage() {
             Something may have gone wrong completing your Google sign-in.
           </p>
           <Link
-            href="/login"
+            href={next === "/customer" ? "/customer" : "/login"}
             className="mt-6 text-sm font-medium text-brand-blue hover:text-blue-400"
           >
             ← Back to login
