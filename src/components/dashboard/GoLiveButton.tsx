@@ -17,7 +17,7 @@ const LocationPickerMap = dynamic(() => import("@/components/shared/LocationPick
 /** Other parts of the dashboard (the Home checklist) ask the LIVE button to open a step with this event. */
 export const GO_LIVE_EVENT = "shoppulse:go-live";
 
-type Step = "hours" | "location" | "technician" | "receiving";
+type Step = "hours" | "location" | "technician" | "receiving" | "services";
 
 type ReceivingSettings = {
   bank_name: string | null;
@@ -71,10 +71,12 @@ export function hasReceivingPaymentInfo(settings: ReceivingSettings | null): boo
 /**
  * The owner's LIVE switch, in the dashboard header. Not live: a "Go LIVE" button that walks the owner
  * through whatever is missing, in order — working days and hours, the business location on the map, at
- * least one active technician, then at least one real way to receive payments (bank, PayPal or a QR
- * code) — and goes live the moment the last one is done. Both newer checks (technician, receiving) are
- * checked only on the way to going live and never retroactively take an already-live shop offline. Live:
- * a green "LIVE NOW" badge whose menu edits hours or location, or takes the business offline.
+ * least one active technician, at least one real way to receive payments (bank, PayPal or a QR code),
+ * then at least one service — and goes live the moment the last one is done. The three newer checks
+ * (technician, receiving, services) are checked only on the way to going live and never retroactively
+ * take an already-live shop offline — a shop that went live before one of these existed, or whose only
+ * service/technician/receiving detail was removed afterward, stays exactly as live as it already was.
+ * Live: a green "LIVE NOW" badge whose menu edits hours or location, or takes the business offline.
  */
 export default function GoLiveButton({
   shop,
@@ -94,16 +96,22 @@ export default function GoLiveButton({
   const [error, setError] = useState<string | null>(null);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
   const [receiving, setReceiving] = useState<ReceivingSettings | null>(null);
+  const [serviceCount, setServiceCount] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const hasSchedule = hasWorkingSchedule(shop);
   const hasLocation = hasBusinessLocation(shop);
   const hasTechnician = hasActiveTechnician(staff);
   const hasReceiving = hasReceivingPaymentInfo(receiving);
+  // Defaults to "not there yet" while the count is still loading — a shop that already has
+  // services might briefly show this gate on a very fast click, but the gate must never be
+  // bypassed just because the count hasn't come back yet.
+  const hasServices = (serviceCount ?? 0) > 0;
   const live = isShopLive(shop);
 
-  // A small self-contained read, same pattern as the Home checklist's own service count —
-  // nothing else on this page already loads business_settings.
+  // Two small self-contained reads, same pattern as the Home checklist's own service count —
+  // nothing else on this page already loads business_settings, and GetFoundChecklist's own
+  // service count lives in a sibling component with no shared state to read instead.
   useEffect(() => {
     let active = true;
     supabase
@@ -113,6 +121,20 @@ export default function GoLiveButton({
       .maybeSingle()
       .then(({ data }) => {
         if (active) setReceiving(data as ReceivingSettings | null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [shop.id]);
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("shop_services")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .then(({ count }) => {
+        if (active) setServiceCount(count ?? 0);
       });
     return () => {
       active = false;
@@ -140,7 +162,13 @@ export default function GoLiveButton({
   useEffect(() => {
     function handleOpen(event: Event) {
       const wanted = (event as CustomEvent<Step>).detail;
-      if (wanted === "hours" || wanted === "location" || wanted === "technician" || wanted === "receiving")
+      if (
+        wanted === "hours" ||
+        wanted === "location" ||
+        wanted === "technician" ||
+        wanted === "receiving" ||
+        wanted === "services"
+      )
         openStep(wanted);
     }
     window.addEventListener(GO_LIVE_EVENT, handleOpen);
@@ -168,6 +196,16 @@ export default function GoLiveButton({
     if (!hasLocation) return "location";
     if (!hasTechnician) return "technician";
     if (!hasReceiving) return "receiving";
+    if (!hasServices) return "services";
+    return null;
+  }
+
+  // What's left after hours/location are taken as already satisfied (either just saved, or
+  // already live and not being re-checked) — shared by both save handlers below.
+  function gapAfterHoursAndLocation(): Step | null {
+    if (!hasTechnician) return "technician";
+    if (!hasReceiving) return "receiving";
+    if (!hasServices) return "services";
     return null;
   }
 
@@ -177,7 +215,7 @@ export default function GoLiveButton({
       setStep(null);
       return;
     }
-    const gap = !hasLocation ? "location" : !hasTechnician ? "technician" : !hasReceiving ? "receiving" : null;
+    const gap = !hasLocation ? "location" : gapAfterHoursAndLocation();
     if (gap) {
       setStep(gap);
       onChanged();
@@ -197,12 +235,11 @@ export default function GoLiveButton({
       return;
     }
     // Saving the pin completes the setup only if everything else is already there too.
-    const willGoLive = hasSchedule && hasTechnician && hasReceiving;
+    const willGoLive = hasSchedule && !gapAfterHoursAndLocation();
     const fields = willGoLive
       ? { latitude: pin.lat, longitude: pin.lng, is_publicly_listed: true }
       : { latitude: pin.lat, longitude: pin.lng };
-    if (await update(fields))
-      setStep(!hasSchedule ? "hours" : !hasTechnician ? "technician" : !hasReceiving ? "receiving" : null);
+    if (await update(fields)) setStep(!hasSchedule ? "hours" : gapAfterHoursAndLocation());
   }
 
   function handleClick() {
@@ -223,7 +260,9 @@ export default function GoLiveButton({
         ? "Not live yet — add at least one technician to go live."
         : !hasReceiving
           ? "Not live yet — add a way to receive payments to go live."
-          : "Not live yet — tap to show your business to customers.";
+          : !hasServices
+            ? "Not live yet — add at least one service to go live."
+            : "Not live yet — tap to show your business to customers.";
 
   const stepTitle =
     step === "hours"
@@ -232,7 +271,9 @@ export default function GoLiveButton({
         ? "Pin your business on the map"
         : step === "technician"
           ? "Add at least one technician"
-          : "Add a way to receive payments";
+          : step === "receiving"
+            ? "Add a way to receive payments"
+            : "Add at least one service";
 
   const stepDescription =
     step === "hours"
@@ -243,13 +284,15 @@ export default function GoLiveButton({
         ? "Customers follow their technician on a map and see where your shop is. Tap the map or use your current location."
         : step === "technician"
           ? "Someone has to actually be dispatchable before customers can book you — add at least one technician (or yourself, if you also do the jobs) before you go live."
-          : "A customer who picks a non-cash payment method needs somewhere real to send it — add your bank account, PayPal or a QR code before you go live.";
+          : step === "receiving"
+            ? "A customer who picks a non-cash payment method needs somewhere real to send it — add your bank account, PayPal or a QR code before you go live."
+            : "Customers need something real to book — add at least one service and its price before you go live.";
 
   const locationSaveLabel = live
     ? "Save location"
     : !hasSchedule
       ? "Save & continue"
-      : hasTechnician && hasReceiving
+      : hasTechnician && hasReceiving && hasServices
         ? "Save & go LIVE"
         : "Save & continue";
 
@@ -335,7 +378,11 @@ export default function GoLiveButton({
                   shop={shop}
                   onSaved={handleHoursSaved}
                   submitLabel={
-                    live ? "Save Changes" : hasLocation && hasTechnician && hasReceiving ? "Save & go LIVE" : "Save & continue"
+                    live
+                      ? "Save Changes"
+                      : hasLocation && hasTechnician && hasReceiving && hasServices
+                        ? "Save & go LIVE"
+                        : "Save & continue"
                   }
                 />
               ) : step === "location" ? (
@@ -368,7 +415,7 @@ export default function GoLiveButton({
                 >
                   Go to Staff
                 </button>
-              ) : (
+              ) : step === "receiving" ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -378,6 +425,17 @@ export default function GoLiveButton({
                   className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
                 >
                   Go to Receiving Payments
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(null);
+                    onSelectTab("services");
+                  }}
+                  className="rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+                >
+                  Go to Services
                 </button>
               )}
             </div>
