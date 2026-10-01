@@ -271,6 +271,13 @@ function BookJobPageContent() {
             {chatError}
           </p>
         )}
+        <button
+          type="button"
+          onClick={() => router.push("/customer")}
+          className="mt-3 w-full max-w-xs text-sm font-medium text-slate-400 hover:text-white"
+        >
+          Go to My Dashboard
+        </button>
       </main>
     );
   }
