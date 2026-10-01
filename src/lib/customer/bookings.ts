@@ -420,6 +420,15 @@ export async function fetchPublicBranch(branchId: string): Promise<PublicBranch 
   return data as PublicBranch | null;
 }
 
+/** Every active branch of a shop, for deciding which one (if any) a chosen service address
+ * actually falls within range of — a direct link only ever carries one branch id (or none), but
+ * the closest match for where the customer is booking for might be a different one entirely. */
+export async function listPublicBranches(shopId: string): Promise<PublicBranch[]> {
+  const { data, error } = await supabase.rpc("list_public_branches", { p_shop_id: shopId });
+  if (error) throw error;
+  return (data ?? []) as PublicBranch[];
+}
+
 /** Publicly listed businesses within radiusKm of the customer's pin, nearest first — whether or not they have
  * added services — followed by businesses that haven't pinned a location yet but are in the customer's city
  * (or, when they have no city either, region). */

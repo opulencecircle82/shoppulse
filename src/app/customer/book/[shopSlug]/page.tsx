@@ -11,7 +11,7 @@ import {
 } from "@/lib/customer/addresses";
 import {
   fetchShopBySlug,
-  fetchPublicBranch,
+  listPublicBranches,
   submitBooking,
   checkDateAvailability,
   isShopOpenNow,
@@ -60,7 +60,9 @@ function BookJobPageContent() {
   // in place) — without this, it would bounce through /auth/callback straight to the generic
   // dashboard and lose this specific shop's booking flow entirely.
   const authNextPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-  const branchId = searchParams.get("branch");
+  // Only a starting hint now — the booking actually goes to whichever of the shop's locations
+  // (this one, another branch, or none) turns out to be nearest the address the customer picks.
+  const linkedBranchId = searchParams.get("branch");
   const promotionId = searchParams.get("promo");
   // Arrived from "Click to schedule your request for tomorrow" on a business that is closed right now.
   const scheduleMode = searchParams.get("schedule") === "1";
@@ -73,7 +75,7 @@ function BookJobPageContent() {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [shop, setShop] = useState<BookingShop | null>(null);
-  const [branch, setBranch] = useState<PublicBranch | null>(null);
+  const [allBranches, setAllBranches] = useState<PublicBranch[]>([]);
   const [services, setServices] = useState<PublicService[]>([]);
   const [notFound, setNotFound] = useState(false);
 
@@ -114,10 +116,13 @@ function BookJobPageContent() {
     setShop(shopRow);
     setCustomer(current);
     setLoading(false);
-    const branchRow = branchId ? await fetchPublicBranch(branchId).catch(() => null) : null;
-    setBranch(branchRow);
+    const branches = await listPublicBranches(shopRow.id).catch(() => []);
+    setAllBranches(branches);
     if (scheduleMode) {
-      const firstDay = nextOpenDay(toIsoDate(new Date()), branchRow?.business_days ?? shopRow.business_days);
+      // Just a starting guess at this point — the address (and so the real matching branch)
+      // isn't known yet; the linked branch, if any, is the best available hint for now.
+      const linkedBranch = linkedBranchId ? branches.find((b) => b.id === linkedBranchId) : null;
+      const firstDay = nextOpenDay(toIsoDate(new Date()), linkedBranch?.business_days ?? shopRow.business_days);
       if (firstDay) setPreferredDate(firstDay);
     }
     listPublicShopServices(shopRow.id).then(setServices).catch(() => {});
@@ -131,7 +136,7 @@ function BookJobPageContent() {
         })
         .catch(() => {});
     }
-  }, [shopSlug, scheduleMode, branchId]);
+  }, [shopSlug, scheduleMode, linkedBranchId]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -140,12 +145,43 @@ function BookJobPageContent() {
     return () => clearTimeout(id);
   }, [load]);
 
+  // Which of the shop's locations (main or any branch) actually matches the service address the
+  // customer has picked — recomputed on every render from plain state, not memoized, since the
+  // inputs (a handful of addresses/branches) are tiny. Declared here, ahead of the early returns
+  // below, because the effect right after it needs it too (Rules of Hooks).
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? null;
+  const hasAddressCoords = selectedAddress?.latitude != null && selectedAddress?.longitude != null;
+
+  function nearestLocation(lat: number, lng: number): { branchId: string | null; km: number } | null {
+    const candidates: { branchId: string | null; lat: number; lng: number }[] = [];
+    if (shop?.latitude != null && shop?.longitude != null) {
+      candidates.push({ branchId: null, lat: shop.latitude, lng: shop.longitude });
+    }
+    for (const b of allBranches) candidates.push({ branchId: b.id, lat: b.latitude, lng: b.longitude });
+
+    let best: { branchId: string | null; km: number } | null = null;
+    for (const c of candidates) {
+      const km = distanceKm({ lat, lng }, { lat: c.lat, lng: c.lng });
+      if (!best || km < best.km) best = { branchId: c.branchId, km };
+    }
+    return best && best.km <= MAX_BOOKING_DISTANCE_KM ? best : null;
+  }
+
+  const nearest = hasAddressCoords ? nearestLocation(selectedAddress!.latitude!, selectedAddress!.longitude!) : null;
+  // Only a real block once we actually have coordinates to check — a manually-typed address with
+  // no pin can't be measured, so it's let through rather than wrongly assumed unreachable.
+  const tooFarForSelectedAddress = hasAddressCoords && !nearest;
+  // Falls back to whatever the link carried when there's nothing to measure yet (no address
+  // chosen, or a manual address with no pin) — once a real match is found, that wins instead.
+  const effectiveBranchId = nearest ? nearest.branchId : linkedBranchId;
+  const effectiveBranch = effectiveBranchId ? allBranches.find((b) => b.id === effectiveBranchId) ?? null : null;
+
   useEffect(() => {
     if (!preferredDate) return;
     let active = true;
     const id = setTimeout(() => {
       setCheckingAvailability(true);
-      checkDateAvailability(shopSlug, preferredDate, branchId)
+      checkDateAvailability(shopSlug, preferredDate, effectiveBranchId)
         .then((result) => {
           if (active) setAvailability(result);
         })
@@ -157,16 +193,22 @@ function BookJobPageContent() {
       active = false;
       clearTimeout(id);
     };
-  }, [shopSlug, preferredDate, branchId]);
+  }, [shopSlug, preferredDate, effectiveBranchId]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!customer) return;
 
-    const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
     const serviceAddress = (selectedAddress && formatAddress(selectedAddress)) || manualAddress;
     if (!serviceAddress) {
       setError("Please provide your service address.");
+      return;
+    }
+
+    if (tooFarForSelectedAddress) {
+      setError(
+        `${shop?.shop_name ?? "This business"} isn't within ${MAX_BOOKING_DISTANCE_KM} km of that address — pick a closer address, or find another service near you instead.`
+      );
       return;
     }
 
@@ -194,7 +236,7 @@ function BookJobPageContent() {
         latitude: selectedAddress?.latitude ?? null,
         longitude: selectedAddress?.longitude ?? null,
         promotionId,
-        branchId,
+        branchId: effectiveBranchId,
       });
       setSubmittedWhen(
         !isEmergency && preferredDate
@@ -235,47 +277,6 @@ function BookJobPageContent() {
 
   if (!customer) {
     return <CustomerAuthScreen onSignedIn={load} nextPath={authNextPath} />;
-  }
-
-  // Prefer the branch's own pin when the link came from a specific branch card; otherwise the
-  // shop's main location. Only blocks when both points are actually known — a customer or shop
-  // with no pin yet is let through rather than wrongly assumed to be impossibly far apart.
-  const destinationLat = branch?.latitude ?? shop?.latitude ?? null;
-  const destinationLng = branch?.longitude ?? shop?.longitude ?? null;
-  const tooFar =
-    customer.latitude !== null &&
-    customer.longitude !== null &&
-    destinationLat !== null &&
-    destinationLng !== null &&
-    distanceKm(
-      { lat: customer.latitude, lng: customer.longitude },
-      { lat: destinationLat, lng: destinationLng }
-    ) > MAX_BOOKING_DISTANCE_KM;
-
-  if (tooFar) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
-        <p className="text-lg font-bold text-white">Your location is too far away</p>
-        <p className="mt-1.5 max-w-xs text-sm text-slate-400">
-          {shop?.shop_name} is more than {MAX_BOOKING_DISTANCE_KM} km from where you are, so a
-          technician likely can&apos;t reach you.
-        </p>
-        <button
-          type="button"
-          onClick={() => router.push("/customer/discover")}
-          className="mt-6 w-full max-w-xs rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
-        >
-          Find another service near you →
-        </button>
-        <button
-          type="button"
-          onClick={goBack}
-          className="mt-3 text-sm font-medium text-slate-400 hover:text-white"
-        >
-          ← Back
-        </button>
-      </main>
-    );
   }
 
   async function handleMessageOwner() {
@@ -352,7 +353,7 @@ function BookJobPageContent() {
           )}
           <div>
             <p className="text-lg font-bold text-white">{shop?.shop_name}</p>
-            <p className="text-xs text-slate-400">{branch ? branch.name : "Request a service"}</p>
+            <p className="text-xs text-slate-400">{effectiveBranch ? effectiveBranch.name : "Request a service"}</p>
           </div>
         </div>
 
@@ -446,7 +447,7 @@ function BookJobPageContent() {
                 🚨 This is an emergency
               </span>
               <span className="block text-xs text-slate-400">
-                {shop?.night_shift_enabled && !isShopOpenNow(branch ?? shop)
+                {shop?.night_shift_enabled && !isShopOpenNow(effectiveBranch ?? shop)
                   ? `Skips scheduling — ${shop.shop_name} is closed right now, but its night-shift technician is on call and will be alerted right away.`
                   : "Skips scheduling — we'll try to dispatch the nearest available technician to you right away."}
               </span>
@@ -537,12 +538,27 @@ function BookJobPageContent() {
                 </button>
               </>
             )}
+            {tooFarForSelectedAddress && (
+              <div className="mt-2 rounded-xl bg-red-500/10 p-3.5">
+                <p className="text-xs text-red-300">
+                  {shop?.shop_name} isn&apos;t within {MAX_BOOKING_DISTANCE_KM} km of this address
+                  — a technician likely can&apos;t reach you here.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/customer/discover")}
+                  className="mt-2 text-xs font-semibold text-brand-blue hover:text-blue-400"
+                >
+                  Find another service near you →
+                </button>
+              </div>
+            )}
           </div>
 
           {shop && !isEmergency && (() => {
-            const businessDays = branch?.business_days ?? shop.business_days;
-            const hoursOpen = branch?.business_hours_open ?? shop.business_hours_open;
-            const hoursClose = branch?.business_hours_close ?? shop.business_hours_close;
+            const businessDays = effectiveBranch?.business_days ?? shop.business_days;
+            const hoursOpen = effectiveBranch?.business_hours_open ?? shop.business_hours_open;
+            const hoursClose = effectiveBranch?.business_hours_close ?? shop.business_hours_close;
             return (
             <div>
               <label className="block text-xs font-medium text-slate-400">
@@ -587,7 +603,7 @@ function BookJobPageContent() {
                   hoursClose={hoursClose}
                   value={preferredTime}
                   onChange={setPreferredTime}
-                  branchId={branchId}
+                  branchId={effectiveBranchId}
                   onNextDay={(() => {
                     const next = nextOpenDay(preferredDate, businessDays);
                     return next
@@ -617,7 +633,7 @@ function BookJobPageContent() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || tooFarForSelectedAddress}
             className={`w-full rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:cursor-not-allowed disabled:opacity-60 ${
               isEmergency
                 ? "bg-gradient-to-r from-red-500 to-red-700"
