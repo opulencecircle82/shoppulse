@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState, type FormEvent } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MapPin, Plus } from "lucide-react";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
 import {
@@ -46,9 +46,14 @@ export default function BookJobPage() {
 function BookJobPageContent() {
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const goBack = useSmartBack("/customer");
   const shopSlug = params.shopSlug as string;
+  // Google sign-in is a full page redirect (unlike email/password, which just calls onSignedIn()
+  // in place) — without this, it would bounce through /auth/callback straight to the generic
+  // dashboard and lose this specific shop's booking flow entirely.
+  const authNextPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
   const branchId = searchParams.get("branch");
   const promotionId = searchParams.get("promo");
   // Arrived from "Click to schedule your request for tomorrow" on a business that is closed right now.
@@ -223,7 +228,7 @@ function BookJobPageContent() {
   }
 
   if (!customer) {
-    return <CustomerAuthScreen onSignedIn={load} />;
+    return <CustomerAuthScreen onSignedIn={load} nextPath={authNextPath} />;
   }
 
   async function handleMessageOwner() {

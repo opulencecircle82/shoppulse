@@ -13,7 +13,17 @@ const LocationPickerMap = dynamic(
   { ssr: false, loading: () => <p className="text-sm text-slate-400">Loading map...</p> }
 );
 
-export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => void }) {
+export default function CustomerAuthScreen({
+  onSignedIn,
+  nextPath = "/customer",
+}: {
+  onSignedIn: () => void;
+  /** Where Google sign-in returns to — email/password login stays on the same page via
+   * onSignedIn(), but Google is a full page redirect through /auth/callback, so it needs its
+   * own explicit destination. Defaults to the dashboard; pass the current page (path + query)
+   * when this screen is embedded mid-flow (e.g. the booking page) so it doesn't lose context. */
+  nextPath?: string;
+}) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -110,7 +120,7 @@ export default function CustomerAuthScreen({ onSignedIn }: { onSignedIn: () => v
         </div>
 
         <div className="mt-6">
-          <GoogleSignInButton label="Continue with Google" nextPath="/customer" />
+          <GoogleSignInButton label="Continue with Google" nextPath={nextPath} />
         </div>
 
         <div className="mt-6 flex items-center gap-3">
