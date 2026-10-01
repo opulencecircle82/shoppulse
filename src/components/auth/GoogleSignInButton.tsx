@@ -2,15 +2,22 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { customerSupabase } from "@/lib/supabase/customerClient";
 
 export default function GoogleSignInButton({
   label,
   nextPath = "/dashboard",
+  clientName = "owner",
 }: {
   label: string;
   /** Where `/auth/callback` sends the browser once Google sign-in completes — owners land on
    * their dashboard by default; pass "/customer" for the customer-facing auth screens. */
   nextPath?: string;
+  /** Which Supabase client (owner/staff or customer — each has its own separate auth session,
+   * see lib/supabase/customerClient.ts) actually performs the sign-in. /auth/callback needs to
+   * know this too, since only the client instance that started the flow holds the stored PKCE
+   * verifier needed to complete it — passed through as a `client` query param alongside `next`. */
+  clientName?: "owner" | "customer";
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,10 +26,11 @@ export default function GoogleSignInButton({
     setLoading(true);
     setError(null);
 
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+    const client = clientName === "customer" ? customerSupabase : supabase;
+    const { error: oauthError } = await client.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}&client=${clientName}`,
       },
     });
 

@@ -9,4 +9,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Owner/staff/technician session only — the customer-facing surfaces use their own separate
+// client (see customerClient.ts) with its own storage key, so an owner logged in here and a
+// customer logged in there coexist in the same browser without either session touching the
+// other. Explicit storageKey (rather than relying on the library's own derived default) makes
+// that separation obvious and intentional here, not an accident of two clients happening not
+// to collide.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { storageKey: "sb-shoppulse-owner-auth" },
+});

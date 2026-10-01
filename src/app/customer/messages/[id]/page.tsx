@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
-import { listCustomerConversations, type CustomerShopConversation } from "@/lib/chat/chat";
+import {
+  listCustomerConversations,
+  listConversationMessages,
+  markConversationRead,
+  sendMessage,
+  type CustomerShopConversation,
+} from "@/lib/customer/customerChat";
 import ChatThread from "@/components/chat/ChatThread";
 
 export default function CustomerConversationPage() {
@@ -58,6 +64,9 @@ export default function CustomerConversationPage() {
           title={conversation.shopName}
           initialDraft={prefill}
           onBack={() => router.push("/customer/messages")}
+          listMessages={listConversationMessages}
+          markRead={markConversationRead}
+          sendMessage={sendMessage}
         />
       </div>
     </main>

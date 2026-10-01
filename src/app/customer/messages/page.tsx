@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
-import { listCustomerConversations, type CustomerShopConversation } from "@/lib/chat/chat";
+import { listCustomerConversations, type CustomerShopConversation } from "@/lib/customer/customerChat";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
 
 function timeLabel(iso: string | null) {

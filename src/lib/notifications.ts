@@ -1,4 +1,6 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
+import { customerSupabase } from "@/lib/supabase/customerClient";
 
 export type AppNotification = {
   id: string;
@@ -47,8 +49,9 @@ export async function fetchStaffNotifications(staffId: string): Promise<AppNotif
   return (data ?? []).map(mapRow);
 }
 
+// Customer-only — always its own separate client, never the owner/staff one.
 export async function fetchCustomerNotifications(customerId: string): Promise<AppNotification[]> {
-  const { data, error } = await supabase
+  const { data, error } = await customerSupabase
     .from("notifications")
     .select(SELECT_FIELDS)
     .eq("recipient_customer_id", customerId)
@@ -59,9 +62,11 @@ export async function fetchCustomerNotifications(customerId: string): Promise<Ap
   return (data ?? []).map(mapRow);
 }
 
-export async function markAllNotificationsRead(ids: string[]) {
+/** Shared by the owner/staff/tech bell and the customer bell — defaults to the owner/staff
+ * client; pass customerSupabase explicitly from customer-facing callers. */
+export async function markAllNotificationsRead(ids: string[], client: SupabaseClient = supabase) {
   if (ids.length === 0) return;
-  await supabase
+  await client
     .from("notifications")
     .update({ read_at: new Date().toISOString() })
     .in("id", ids)

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { JobTicket } from "@/lib/supabase/types";
+import { customerSupabase } from "@/lib/supabase/customerClient";
 import { fetchCurrentCustomer, type Customer } from "@/lib/customer/customerAuth";
 import { fetchMyJobs } from "@/lib/customer/bookings";
 import { subscribeToJobTickets } from "@/lib/realtime/jobTicketChanges";
@@ -58,7 +59,7 @@ export default function CustomerAppPage() {
     const interval = setInterval(refreshQuietly, JOBS_POLL_MS);
     // Instant updates; the poll above is the safety net if the connection drops.
     const stopRealtime = customerEmail
-      ? subscribeToJobTickets(`customer-jobs-${customerEmail}`, `client_email=eq.${customerEmail}`, refreshQuietly)
+      ? subscribeToJobTickets(`customer-jobs-${customerEmail}`, `client_email=eq.${customerEmail}`, refreshQuietly, customerSupabase)
       : () => {};
     const onVisible = () => {
       if (!document.hidden) refreshQuietly();

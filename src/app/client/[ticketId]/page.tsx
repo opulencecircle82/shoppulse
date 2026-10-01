@@ -4,7 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CalendarClock, Clock, Download, MessageCircle, Star } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+// Customer-facing (also reachable anonymously via a shared link) — uses the customer's own
+// separate Supabase client, see lib/supabase/customerClient.ts.
+import { customerSupabase as supabase } from "@/lib/supabase/customerClient";
 import {
   fetchTicketStaffLocation,
   fetchTicketReview,
@@ -22,7 +24,7 @@ import PaymentDetails from "@/components/customer/PaymentDetails";
 import RequestProgress from "@/components/customer/RequestProgress";
 import TechLiveCard, { type TrackPhase } from "@/components/customer/TechLiveCard";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
-import { ensureCustomerConversation } from "@/lib/chat/chat";
+import { ensureCustomerConversation } from "@/lib/customer/customerChat";
 import { requestProgress, formatEta, minutesUntil } from "@/lib/customer/jobStages";
 import { formatJobNumber } from "@/lib/jobNumber";
 import { downloadInvoicePng } from "@/lib/invoice/renderInvoicePng";
@@ -253,7 +255,7 @@ export default function ClientTicketPage() {
   useEffect(() => {
     const interval = setInterval(refreshQuietly, TICKET_POLL_MS);
     // Instant when signed in as this job's customer; anyone else relies on the poll above.
-    const stopRealtime = subscribeToJobTickets(`client-ticket-${ticketId}`, `id=eq.${ticketId}`, refreshQuietly);
+    const stopRealtime = subscribeToJobTickets(`client-ticket-${ticketId}`, `id=eq.${ticketId}`, refreshQuietly, supabase);
     const onVisible = () => {
       if (!document.hidden) refreshQuietly();
     };

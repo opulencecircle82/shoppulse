@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 
 /**
@@ -13,16 +14,21 @@ import { supabase } from "@/lib/supabase/client";
  * poll as a safety net (a dropped connection just means the next poll catches
  * up), so this is purely about making the normal case instant.
  *
+ * `client` defaults to the owner/staff client — customer-facing callers must pass
+ * `customerSupabase` (lib/supabase/customerClient.ts) so the realtime connection
+ * authenticates as the customer, not whichever session this default client holds.
+ *
  * Returns a function that stops listening.
  */
 export function subscribeToJobTickets(
   channelName: string,
   filter: string,
-  onChange: () => void
+  onChange: () => void,
+  client: SupabaseClient = supabase
 ): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  const channel = supabase
+  const channel = client
     .channel(channelName)
     .on(
       "postgres_changes",
@@ -36,6 +42,6 @@ export function subscribeToJobTickets(
 
   return () => {
     if (timer) clearTimeout(timer);
-    supabase.removeChannel(channel);
+    client.removeChannel(channel);
   };
 }

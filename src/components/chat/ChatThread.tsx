@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, Send } from "lucide-react";
 import {
-  listConversationMessages,
-  markConversationRead,
-  sendMessage,
+  listConversationMessages as ownerListConversationMessages,
+  markConversationRead as ownerMarkConversationRead,
+  sendMessage as ownerSendMessage,
   type ChatMessage,
 } from "@/lib/chat/chat";
 
@@ -45,6 +45,9 @@ export default function ChatThread({
   initialDraft,
   onBack,
   theme = "dark",
+  listMessages = ownerListConversationMessages,
+  markRead = ownerMarkConversationRead,
+  sendMessage = ownerSendMessage,
 }: {
   conversationId: string;
   currentRole: "owner" | "staff" | "customer";
@@ -54,6 +57,12 @@ export default function ChatThread({
   onBack?: () => void;
   /** "light" on the owner dashboard; the tech and customer apps use the default "dark". */
   theme?: "dark" | "light";
+  /** Defaults to the owner/staff client's chat functions (lib/chat/chat.ts) — the customer app
+   * passes the lib/customer/customerChat.ts equivalents instead, so a customer's chat session
+   * uses their own separate Supabase client rather than silently sharing the owner/staff one. */
+  listMessages?: (conversationId: string) => Promise<ChatMessage[]>;
+  markRead?: (conversationId: string) => Promise<void>;
+  sendMessage?: (conversationId: string, body: string) => Promise<ChatMessage>;
 }) {
   const t = THEMES[theme];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -71,12 +80,12 @@ export default function ChatThread({
   }, []);
 
   const load = useCallback(async () => {
-    const rows = await listConversationMessages(conversationId);
+    const rows = await listMessages(conversationId);
     messagesRef.current = rows;
     setMessages(rows);
     setLoading(false);
-    markConversationRead(conversationId).catch(() => {});
-  }, [conversationId]);
+    markRead(conversationId).catch(() => {});
+  }, [conversationId, listMessages, markRead]);
 
   useEffect(() => {
     let active = true;
@@ -88,13 +97,13 @@ export default function ChatThread({
 
     const interval = setInterval(async () => {
       try {
-        const rows = await listConversationMessages(conversationId);
+        const rows = await listMessages(conversationId);
         if (!active) return;
         const grew = rows.length > messagesRef.current.length;
         messagesRef.current = rows;
         setMessages(rows);
         if (grew) {
-          markConversationRead(conversationId).catch(() => {});
+          markRead(conversationId).catch(() => {});
           scrollToBottom("smooth");
         }
       } catch {

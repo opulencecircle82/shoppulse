@@ -33,7 +33,7 @@ import {
 import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import AddressFormModal from "@/components/customer/AddressFormModal";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
-import { ensureCustomerConversation } from "@/lib/chat/chat";
+import { ensureCustomerConversation } from "@/lib/customer/customerChat";
 
 export default function BookJobPage() {
   return (

@@ -25,7 +25,7 @@ import {
 import { formatDistance } from "@/lib/geo/distance";
 import { stockPhotoForCategory } from "@/lib/location/categoryStockPhotos";
 import { categoryIcon } from "@/lib/location/categoryIcons";
-import { listCustomerConversations } from "@/lib/chat/chat";
+import { listCustomerConversations } from "@/lib/customer/customerChat";
 import { playMessageChime } from "@/lib/chat/chime";
 import CustomerNotificationBell from "./CustomerNotificationBell";
 import CurvedLinesBackground from "@/components/ui/CurvedLinesBackground";

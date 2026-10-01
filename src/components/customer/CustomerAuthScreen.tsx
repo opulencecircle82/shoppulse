@@ -120,7 +120,7 @@ export default function CustomerAuthScreen({
         </div>
 
         <div className="mt-6">
-          <GoogleSignInButton label="Continue with Google" nextPath={nextPath} />
+          <GoogleSignInButton label="Continue with Google" nextPath={nextPath} clientName="customer" />
         </div>
 
         <div className="mt-6 flex items-center gap-3">

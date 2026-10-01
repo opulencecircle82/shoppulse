@@ -1,4 +1,7 @@
-import { supabase } from "@/lib/supabase/client";
+// This file is customer-only — it must use the customer's own separate Supabase client
+// (its own auth storage key) so a customer session never collides with an owner/staff session
+// in the same browser. See lib/supabase/customerClient.ts.
+import { customerSupabase as supabase } from "@/lib/supabase/customerClient";
 
 export type Customer = {
   id: string;

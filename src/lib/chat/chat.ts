@@ -1,3 +1,6 @@
+// Owner/staff (and technician, which is also just a staff_members row) chat functions — the
+// owner/staff Supabase client. Customer-side equivalents live in lib/customer/customerChat.ts on
+// their own separate client, so the two sides never share a session.
 import { supabase } from "@/lib/supabase/client";
 
 export type ChatMessage = {
@@ -69,15 +72,6 @@ export async function markConversationRead(conversationId: string) {
 export async function ensureStaffConversation(staffMemberId?: string): Promise<string> {
   const { data, error } = await supabase.rpc("ensure_staff_conversation", {
     p_staff_member_id: staffMemberId ?? null,
-  });
-  if (error) throw new Error(error.message);
-  return data as string;
-}
-
-/** Opens (or creates) the signed-in customer's DM with a shop's owner. */
-export async function ensureCustomerConversation(shopSlug: string): Promise<string> {
-  const { data, error } = await supabase.rpc("ensure_customer_conversation", {
-    p_shop_slug: shopSlug,
   });
   if (error) throw new Error(error.message);
   return data as string;
@@ -256,34 +250,6 @@ export async function getShopCustomerProfile(customerId: string): Promise<ShopCu
   };
 }
 
-export type CustomerShopConversation = {
-  conversationId: string;
-  shopId: string;
-  shopName: string;
-  shopLogoUrl: string | null;
-  lastMessagePreview: string | null;
-  lastMessageAt: string | null;
-  unreadCount: number;
-};
-
-export async function listCustomerConversations(): Promise<CustomerShopConversation[]> {
-  const { data, error } = await supabase.rpc("list_customer_conversations");
-  if (error) throw error;
-  return ((data ?? []) as {
-    conversation_id: string;
-    shop_id: string;
-    shop_name: string;
-    shop_logo_url: string | null;
-    last_message_preview: string | null;
-    last_message_at: string | null;
-    unread_count: number;
-  }[]).map((row) => ({
-    conversationId: row.conversation_id,
-    shopId: row.shop_id,
-    shopName: row.shop_name,
-    shopLogoUrl: row.shop_logo_url,
-    lastMessagePreview: row.last_message_preview,
-    lastMessageAt: row.last_message_at,
-    unreadCount: Number(row.unread_count),
-  }));
-}
+// Customer-side conversation functions (ensureCustomerConversation, listCustomerConversations,
+// CustomerShopConversation) moved to lib/customer/customerChat.ts, on the customer's own
+// separate Supabase client.

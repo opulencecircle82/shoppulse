@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { customerSupabase } from "@/lib/supabase/customerClient";
 import {
   fetchCustomerNotifications,
   markAllNotificationsRead,
@@ -59,7 +60,7 @@ export default function CustomerNotificationBell({
     if (nextOpen) {
       const unreadIds = notifications.filter((n) => !n.readAt).map((n) => n.id);
       if (unreadIds.length > 0) {
-        await markAllNotificationsRead(unreadIds);
+        await markAllNotificationsRead(unreadIds, customerSupabase);
         load();
       }
     }

@@ -1,4 +1,5 @@
-import { supabase } from "@/lib/supabase/client";
+// Customer-only — its own separate Supabase client, see lib/supabase/customerClient.ts.
+import { customerSupabase as supabase } from "@/lib/supabase/customerClient";
 import { compressImage } from "@/lib/shared/imageCompress";
 import type { JobTicket } from "@/lib/supabase/types";
 

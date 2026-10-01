@@ -17,7 +17,7 @@ import {
   type PublicService,
 } from "@/lib/customer/bookings";
 import { fetchCurrentCustomer } from "@/lib/customer/customerAuth";
-import { ensureCustomerConversation } from "@/lib/chat/chat";
+import { ensureCustomerConversation } from "@/lib/customer/customerChat";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
 import ScheduleTomorrowLink from "@/components/customer/ScheduleTomorrowLink";
 
