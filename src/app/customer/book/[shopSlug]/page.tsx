@@ -34,6 +34,12 @@ import PhotoUploadField from "@/components/shared/PhotoUploadField";
 import AddressFormModal from "@/components/customer/AddressFormModal";
 import { useSmartBack } from "@/lib/hooks/useSmartBack";
 import { ensureCustomerConversation } from "@/lib/customer/customerChat";
+import { distanceKm } from "@/lib/geo/distance";
+
+// Same radius "Services Near You" uses to decide what counts as nearby — a shop reached this
+// far outside it only ever happens via a direct link (a QR code, the owner's own website), since
+// the discovery list itself already only ever shows shops inside this radius.
+const MAX_BOOKING_DISTANCE_KM = 20;
 
 export default function BookJobPage() {
   return (
@@ -229,6 +235,47 @@ function BookJobPageContent() {
 
   if (!customer) {
     return <CustomerAuthScreen onSignedIn={load} nextPath={authNextPath} />;
+  }
+
+  // Prefer the branch's own pin when the link came from a specific branch card; otherwise the
+  // shop's main location. Only blocks when both points are actually known — a customer or shop
+  // with no pin yet is let through rather than wrongly assumed to be impossibly far apart.
+  const destinationLat = branch?.latitude ?? shop?.latitude ?? null;
+  const destinationLng = branch?.longitude ?? shop?.longitude ?? null;
+  const tooFar =
+    customer.latitude !== null &&
+    customer.longitude !== null &&
+    destinationLat !== null &&
+    destinationLng !== null &&
+    distanceKm(
+      { lat: customer.latitude, lng: customer.longitude },
+      { lat: destinationLat, lng: destinationLng }
+    ) > MAX_BOOKING_DISTANCE_KM;
+
+  if (tooFar) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-brand-navy px-6 text-center">
+        <p className="text-lg font-bold text-white">Your location is too far away</p>
+        <p className="mt-1.5 max-w-xs text-sm text-slate-400">
+          {shop?.shop_name} is more than {MAX_BOOKING_DISTANCE_KM} km from where you are, so a
+          technician likely can&apos;t reach you.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push("/customer/discover")}
+          className="mt-6 w-full max-w-xs rounded-full bg-gradient-to-r from-brand-sky to-brand-blue-dark px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.35)] transition-shadow hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
+        >
+          Find another service near you →
+        </button>
+        <button
+          type="button"
+          onClick={goBack}
+          className="mt-3 text-sm font-medium text-slate-400 hover:text-white"
+        >
+          ← Back
+        </button>
+      </main>
+    );
   }
 
   async function handleMessageOwner() {
