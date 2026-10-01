@@ -51,6 +51,16 @@ function mapCustomerRow(data: {
  * then — it gets created here instead, the first time we see an
  * authenticated session with no matching customers row, which is right
  * after the customer confirms their email and logs in.
+ *
+ * Staff (owner/manager/technician) and customers share the same Supabase
+ * Auth users, so an owner's own logged-in browser session is just as
+ * "authenticated" as a real customer's — without this check, an owner
+ * who simply opened the customer-facing booking pages while signed in
+ * would get silently auto-enrolled as a customer under their own owner
+ * account, with no separate signup ever happening. Owner and client
+ * accounts are meant to be separate; a staff session is never a valid
+ * customer session here, full stop — this treats it exactly like being
+ * signed out, so the normal customer login/signup screen shows instead.
  */
 export async function fetchCurrentCustomer(): Promise<Customer | null> {
   const {
@@ -58,6 +68,13 @@ export async function fetchCurrentCustomer(): Promise<Customer | null> {
   } = await supabase.auth.getSession();
 
   if (!session?.user) return null;
+
+  const { data: staffRow } = await supabase
+    .from("staff_members")
+    .select("id")
+    .eq("auth_user_id", session.user.id)
+    .maybeSingle();
+  if (staffRow) return null;
 
   const { data } = await supabase
     .from("customers")
