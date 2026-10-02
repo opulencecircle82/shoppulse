@@ -174,8 +174,17 @@ export async function submitBooking(params: {
   });
 
   if (error) throw new Error(error.message);
+  const ticketId = data as string;
+
+  // Best-effort — the booking already succeeded regardless of whether this email goes out.
+  fetch("/api/notify-booking", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ticketId }),
+  }).catch(() => {});
+
   // The new request's id, so the confirmation screen can link straight to its status.
-  return data as string;
+  return ticketId;
 }
 
 /** Free right up until the technician taps "I'm on my way" (en_route_at
