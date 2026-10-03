@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import AccountDetailModal from "./AccountDetailModal";
+import CustomerDetailModal, { type AdminCustomerSummary } from "./CustomerDetailModal";
 
 const CURRENCIES = ["USD", "AUD", "GBP", "EUR"];
 
@@ -247,6 +248,12 @@ export default function AdminDashboardClient({
   const [seatsSavingId, setSeatsSavingId] = useState<string | null>(null);
   const [seatsError, setSeatsError] = useState<string | null>(null);
 
+  const [customers, setCustomers] = useState<AdminCustomerSummary[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(true);
+  const [customersError, setCustomersError] = useState<string | null>(null);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [viewingCustomer, setViewingCustomer] = useState<AdminCustomerSummary | null>(null);
+
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -257,6 +264,29 @@ export default function AdminDashboardClient({
   const filteredShops = shops.filter((shop) =>
     shop.shop_name.toLowerCase().includes(search.trim().toLowerCase())
   );
+
+  const filteredCustomers = customers.filter((customer) => {
+    const term = customerSearch.trim().toLowerCase();
+    if (!term) return true;
+    return (
+      customer.full_name.toLowerCase().includes(term) ||
+      customer.email.toLowerCase().includes(term)
+    );
+  });
+
+  async function loadCustomers() {
+    setCustomersLoading(true);
+    setCustomersError(null);
+    const res = await fetch("/api/admin/customers");
+    if (!res.ok) {
+      setCustomersError("Failed to load customers.");
+      setCustomersLoading(false);
+      return;
+    }
+    const body = await res.json();
+    setCustomers(body.customers ?? []);
+    setCustomersLoading(false);
+  }
 
   async function loadShops() {
     setLoading(true);
@@ -275,6 +305,7 @@ export default function AdminDashboardClient({
   useEffect(() => {
     const id = setTimeout(() => {
       loadShops();
+      loadCustomers();
     }, 0);
     return () => clearTimeout(id);
   }, []);
@@ -567,7 +598,92 @@ export default function AdminDashboardClient({
             </div>
           )}
         </div>
+
+        <div className="mt-10">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Client Records ({filteredCustomers.length})
+            </h2>
+            <input
+              type="text"
+              placeholder="Search name or email..."
+              value={customerSearch}
+              onChange={(e) => setCustomerSearch(e.target.value)}
+              className="w-full max-w-xs rounded-xl bg-brand-slate-light/50 px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm shadow-black/20 focus:ring-2 focus:ring-brand-blue focus:outline-none"
+            />
+          </div>
+
+          {customersLoading && (
+            <p className="mt-4 text-sm text-slate-500">Loading customers...</p>
+          )}
+          {customersError && (
+            <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-400">
+              {customersError}
+            </p>
+          )}
+          {!customersLoading && filteredCustomers.length === 0 && !customersError && (
+            <p className="mt-4 text-sm text-slate-500">
+              {customers.length === 0 ? "No customers yet." : "No matches found."}
+            </p>
+          )}
+
+          {!customersLoading && filteredCustomers.length > 0 && (
+            <div className="mt-4 overflow-x-auto rounded-2xl shadow-md shadow-black/20">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-brand-slate-light/40 text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">#</th>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium">Location</th>
+                    <th className="px-4 py-3 font-medium">Bookings</th>
+                    <th className="px-4 py-3 font-medium">Registered</th>
+                    <th className="px-4 py-3 text-right font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {filteredCustomers.map((customer, index) => (
+                    <tr key={customer.id} className="transition-colors hover:bg-brand-slate-light/20">
+                      <td className="px-4 py-3 text-slate-400">{index + 1}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-slate-900">{customer.full_name}</div>
+                        <div className="text-xs text-slate-400">{customer.email}</div>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {customer.phone ?? <span className="text-slate-400">Not set</span>}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {[customer.city, customer.region, customer.country].filter(Boolean).join(", ") || (
+                          <span className="text-slate-400">Not set</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">{customer.booking_count}</td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {new Date(customer.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setViewingCustomer(customer)}
+                            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:border-brand-blue hover:text-brand-blue"
+                          >
+                            View
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
+
+      {viewingCustomer && (
+        <CustomerDetailModal customer={viewingCustomer} onClose={() => setViewingCustomer(null)} />
+      )}
 
       {viewingShop && (
         <AccountDetailModal
